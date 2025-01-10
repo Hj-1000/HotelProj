@@ -38,14 +38,14 @@ public class SecurityConfig {
             auth.requestMatchers("/").permitAll(); //메인페이지
             auth.requestMatchers("/login").permitAll(); //로그인
 
-            //인증된 사용자만 접근 가능
+            //인증된 사용자만 접근 가능 - 추후 프로젝트 완성 됐을 때 주석 해제
             auth.requestMatchers("/logout").authenticated(); //로그아웃
-            auth.requestMatchers("/reservation/**").authenticated(); //호텔 예약 관련
-            auth.requestMatchers("/favorite/**").authenticated(); //호텔 즐겨찾기 관련
-            auth.requestMatchers("/user/**").authenticated(); //회원 관련(모든회원)
-            auth.requestMatchers("/admin/**").hasRole("ADMIN"); //관리자 전용
-            auth.requestMatchers("/chief/**").hasRole("CHIEF"); //호텔장 전용
-            auth.requestMatchers("/manager/**").hasRole("MANAGER"); //호텔매니저 전용
+//            auth.requestMatchers("/reservation/**").authenticated(); //호텔 예약 관련
+//            auth.requestMatchers("/favorite/**").authenticated(); //호텔 즐겨찾기 관련
+//            auth.requestMatchers("/user/**").authenticated(); //회원 관련(모든회원)
+//            auth.requestMatchers("/admin/**").hasRole("ADMIN"); //관리자 전용
+//            auth.requestMatchers("/chief/**").hasRole("CHIEF"); //호텔장 전용
+//            auth.requestMatchers("/manager/**").hasRole("MANAGER"); //호텔매니저 전용
         });
         
         //로그인 정보
