@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+<head>
+  <meta charset="UTF-8">
+  <title>호텔본사관리</title>
+</head>
+<body>
+    <div id="wrapper" layout:fragment="content">
+        <div class="container-fluid mt-4">
+            <h2 class="mb-3">호텔본사 관리</h2>
+            <!-- 검색 영역 -->
+            <div class="card p-4 mb-4">
+                <form>
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-6">
+                            <label for="호텔명" class="form-label fw-bold">호텔명</label>
+                            <input type="text" class="form-control" id="호텔명" placeholder="호텔명">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="호텔장" class="form-label fw-bold">호텔장</label>
+                            <input type="text" class="form-control" id="호텔장" placeholder="호텔장">
+                        </div>
+                    </div>
+                    <!-- 조회 버튼 -->
+                    <div class="text-center mt-4">
+                        <button type="button" class="btn btn-primary w-25" style="background-color: black">조회</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 목록 영역 -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">호텔 목록</h5>
+                    <table class="table table-bordered text-center">
+                        <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>호텔명</th>
+                            <th>호텔 아이디</th>
+                            <th>호텔장</th>
+                            <th>연락처</th>
+                            <th>지사수</th>
+                            <th>매장수</th>
+                            <th>삭제여부</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>4</td>
+                            <td><a href="#" class="text-primary text-decoration-none">NTTHotel</a></td>
+                            <td>NTTHotel</td>
+                            <td>test@aaa.aa</td>
+                            <td>070-4755-2724</td>
+                            <td>2</td>
+                            <td>4</td>
+                            <td>
+                                <button class="btn btn-success btn-sm">예</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td><a href="#" class="text-primary text-decoration-none">NAAhotel</a></td>
+                            <td>NAAhotel</td>
+                            <td>test@bbb.bb</td>
+                            <td>070-4755-2724</td>
+                            <td>3</td>
+                            <td>2</td>
+                            <td>
+                                <button class="btn btn-success btn-sm">아니오</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td><a href="#" class="text-primary text-decoration-none">NNBhotel</a></td>
+                            <td>NNBhotel</td>
+                            <td>test@ccc.cc</td>
+                            <td>010-8472-7473</td>
+                            <td>0</td>
+                            <td>4</td>
+                            <td>
+                                <button class="btn btn-success btn-sm">예</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td><a href="#" class="text-primary text-decoration-none">NAAhotel</a></td>
+                            <td>NAAhotel</td>
+                            <td>test</td>
+                            <td>031-754-9878</td>
+                            <td>5</td>
+                            <td>4</td>
+                            <td>
+                                <button class="btn btn-success btn-sm">아니오</button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <!-- 추가 버튼 -->
+                    <div class="text-end mt-3">
+                        <button class="btn btn-primary" style="background-color: black">추가</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
