@@ -27,8 +27,10 @@ public class Hotel extends BaseEntity {
     // 호텔 평점
     private Integer hotelRating;
     // 호텔 전화번호
+    @Column(length = 20)
     private String hotelPhone;
     // 호텔 이메일
+    @Column(length = 50)
     private String hotelEmail;
     // 호텔 사진
     private String hotelImg;

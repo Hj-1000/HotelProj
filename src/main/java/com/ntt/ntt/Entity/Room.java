@@ -26,7 +26,7 @@ public class Room extends BaseEntity {
     // 객실 상태(예약 가능 여부, true/false)
     private Boolean roomStatus;
     // 객실 설명
-    @Column(length = 50)
+    @Column(length = 255)
     private String roomInfo;
     // 객실 사진
     private String roomImg;

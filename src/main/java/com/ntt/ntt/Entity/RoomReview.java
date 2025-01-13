@@ -18,6 +18,7 @@ public class RoomReview extends BaseEntity {
     // 평점
     private String rating;
     // 리뷰 내용
+    @Column(length = 255)
     private String reviewText;
 
     @ManyToOne

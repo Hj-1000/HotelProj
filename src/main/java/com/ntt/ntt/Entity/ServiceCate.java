@@ -11,17 +11,14 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Service extends BaseEntity {
+public class ServiceCate extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer roomId;
-    // 룸서비스 이름(치킨, 음료, ...)
-    private String serviceName;
-    // 룸서비스 설명
-    private String serviceInfo;
-    // 룸서비스 가격
-    private Integer servicePrice;
-    // 룸서비스 사진
+    private Integer serviceCateId;
+    // 카테고리명(한식, 일식, 주류, ...)
+    @Column(length = 50)
+    private String serviceCateName;
+    // 카테고리 대표 이미지
     private String serviceImg;
 
     @ManyToOne
