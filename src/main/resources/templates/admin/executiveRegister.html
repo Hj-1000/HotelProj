@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>임원등록</title>
+</head>
+<body>
+    <div id="wrapper" layout:fragment="content">
+        <div class="container-fluid mt-4">
+            <h2 class="mb-3">임원등록</h2>
+            <div class="card p-4">
+                <h5 class="mb-3">임원 정보 등록</h5>
+                <form>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="id" class="form-label fw-bold">아이디</label>
+                            <input type="email" class="form-control" id="id" placeholder="이메일">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="name" class="form-label fw-bold">이름</label>
+                            <input type="text" class="form-control" id="name" placeholder="이름">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="password" class="form-label fw-bold">비밀번호</label>
+                            <input type="password" class="form-control" id="password" placeholder="비밀번호는 6~12자의 영문, 숫자, 기호">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="confirm-password" class="form-label fw-bold">비밀번호 확인</label>
+                            <input type="password" class="form-control" id="confirm-password" placeholder="비밀번호는 6~12자의 영문, 숫자, 기호">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="role" class="form-label fw-bold">임원권한</label>
+                            <select class="form-select" id="role">
+                                <option selected>전체관리자</option>
+                                <option value="1">호텔장</option>
+                                <option value="2">매니저</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="branch" class="form-label fw-bold">지사</label>
+                            <select class="form-select" id="branch">
+                                <option selected>선택</option>
+                                <option value="1">지사 1</option>
+                                <option value="2">지사 2</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="group" class="form-label fw-bold">호텔조직</label>
+                            <select class="form-select" id="group">
+                                <option selected>선택</option>
+                                <option value="1">조직 1</option>
+                                <option value="2">조직 2</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="store" class="form-label fw-bold">매장</label>
+                            <select class="form-select" id="store">
+                                <option selected>선택</option>
+                                <option value="1">매장 1</option>
+                                <option value="2">매장 2</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label for="contact" class="form-label fw-bold">연락처</label>
+                            <input type="text" class="form-control" id="contact" placeholder="연락처">
+                        </div>
+                    </div>
+                    <div class="text-end mt-4">
+                        <button type="submit" class="btn btn-primary me-2" style="background-color: black">등록</button>
+                        <button type="reset" class="btn btn-secondary">취소</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

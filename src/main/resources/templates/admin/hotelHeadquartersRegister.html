@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+<head>
+  <meta charset="UTF-8">
+  <title>호텔본사등록</title>
+</head>
+<body>
+    <div id="wrapper" layout:fragment="content">
+        <div class="container mt-4">
+            <h2 class="mb-4">호텔조직 관리</h2>
+            <div class="card p-4">
+                <h5 class="mb-3">총판조직 등록</h5>
+                <form>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="매장총판명" class="form-label">매장총판명</label>
+                                <input type="text" id="매장총판명" class="form-control" placeholder="매장총판명">
+                            </div>
+                            <div class="mb-3">
+                                <label for="총판장" class="form-label">총판장</label>
+                                <input type="text" id="총판장" class="form-control" placeholder="총판장">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="총판ID" class="form-label">총판ID</label>
+                                <input type="text" id="총판ID" class="form-control" placeholder="총판ID">
+                            </div>
+                            <div class="mb-3">
+                                <label for="총판연락처" class="form-label">총판연락처</label>
+                                <input type="text" id="총판연락처" class="form-control" placeholder="총판연락처">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between mt-3">
+                        <button type="button" class="btn btn-primary" style="background-color: teal;">검색</button>
+                        <div>
+                            <button type="button" class="btn btn-primary me-2" style="background-color: teal;">등록</button>
+                            <button type="button" class="btn btn-secondary">취소</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
