@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name="service")
+@Table(name="serviceMenu")
 @Getter
 @Setter
 @ToString
@@ -15,18 +15,20 @@ public class ServiceMenu extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer serviceMenuId;
-    // 룸서비스 메뉴 이름(치킨, 음료, ...)
-    @Column(length = 50)
+    // 메뉴 이름(치킨, 음료, ...)
+    @Column(length = 50, nullable = false)
     private String serviceMenuName;
     // 메뉴 설명
     @Column(length = 255)
     private String serviceMenuInfo;
     // 메뉴 상태(품절, 주문가능, ...)
-    private Integer serviceMenuStatus;
+    @Column(nullable = false)
+    private String serviceMenuStatus;
     // 메뉴 가격
+    @Column(nullable = false)
     private Integer serviceMenuPrice;
     // 메뉴 사진
-    private String serviceImg;
+    private Integer serviceMenuImg;
 
     @ManyToOne
     @JoinColumn(name = "serviceCateId")

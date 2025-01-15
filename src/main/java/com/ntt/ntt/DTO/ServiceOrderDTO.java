@@ -1,6 +1,10 @@
 package com.ntt.ntt.DTO;
 
+import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.Room;
+import com.ntt.ntt.Entity.ServiceMenu;
+import com.ntt.ntt.Entity.User;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -12,7 +16,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class ServiceOrderDTO {
 
-    private Integer serviceCartId;
+    private Integer serviceOrderId;
 
     private Integer orderCount;
 
@@ -20,10 +24,8 @@ public class ServiceOrderDTO {
 
     private Room roomId;
 
-    private Room serviceId;
+    private ServiceMenu serviceMenuId;
 
-    private LocalDateTime regDate;
-
-    private LocalDateTime modDate;
+    private User userId;
 
 }

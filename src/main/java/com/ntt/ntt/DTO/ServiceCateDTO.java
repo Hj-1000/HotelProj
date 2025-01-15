@@ -1,7 +1,6 @@
 package com.ntt.ntt.DTO;
 
-import com.ntt.ntt.Entity.Room;
-import com.ntt.ntt.Entity.User;
+import com.ntt.ntt.Entity.Hotel;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,17 +11,15 @@ import java.time.LocalDateTime;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class RoomReviewDTO {
+public class ServiceCateDTO {
 
-    private Integer reviewId;
+    private Integer serviceCateId;
 
-    private Integer rating;
+    private String serviceCateName;
 
-    private String reviewText;
+    private Integer serviceCateImg;
 
-    private Room roomId;
-
-    private User userId;
+    private Hotel hotelId;
 
     private LocalDateTime regDate;
 

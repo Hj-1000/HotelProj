@@ -14,8 +14,9 @@ import lombok.*;
 public class ServiceOrder extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer serviceCartId;
+    private Integer serviceOrderId;
     // 주문한 서비스의 수량
+    @Column(nullable = false)
     private Integer orderCount;
     // 총 금액
     private Integer totalPrice;
@@ -25,7 +26,11 @@ public class ServiceOrder extends BaseEntity {
     private Room roomId;
 
     @ManyToOne
-    @JoinColumn(name = "serviceId")
-    private Room serviceId;
+    @JoinColumn(name = "serviceMenuId")
+    private ServiceMenu serviceMenuId;
+
+    @ManyToOne
+    @JoinColumn(name = "userId")
+    private User userId;
 
 }

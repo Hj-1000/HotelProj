@@ -18,8 +18,11 @@ public class Hotel extends BaseEntity {
     // 호텔 이름
     @Column(length = 50, nullable = false)
     private String hotelName;
+    // 호텔 지역
+    @Column(length = 50)
+    private String hotelLocation;
     // 호텔 주소
-    @Column(length = 50, nullable = false)
+    @Column(length = 50)
     private String hotelAddress;
     // 호텔 설명
     @Column(length = 255)

@@ -22,8 +22,10 @@ public class Room extends BaseEntity {
     @Column(length = 50, nullable = false)
     private String roomType;
     // 객실 가격
+    @Column(nullable = false)
     private Integer roomPrice;
     // 객실 상태(예약 가능 여부, true/false)
+    @Column(nullable = false)
     private Boolean roomStatus;
     // 객실 설명
     @Column(length = 255)
