@@ -5,11 +5,11 @@
       layout:decorate="~{layouts/layout}">
 <head>
     <meta charset="UTF-8">
-    <link rel ="stylesheet" href="/static/css/style.css">
+
     <title>임원관리</title>
 </head>
 <body>
-    <div id="wrapper" layout:fragment="content">
+    <div layout:fragment="content">
         <div class="container-fluid mt-4">
             <h2 class="mb-3">임원관리</h2>
             <div class="card p-4">
@@ -128,7 +128,7 @@
                     </table>
                     <!-- 추가 버튼 -->
                     <div class="text-end">
-                        <button class="btn btn-primary" style="background-color: black">추가</button>
+                        <button class="btn btn-primary" style="background-color: black" onclick="location.href='/admin/executiveRegister' ">추가</button>
                     </div>
                 </div>
             </div>
