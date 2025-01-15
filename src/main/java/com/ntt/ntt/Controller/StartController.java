@@ -5,10 +5,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class StartController {
-    @GetMapping("/")
-    public String index(){
-        return "index";
-    }
 
     @GetMapping("/admin/executive")
     public String a(){
@@ -28,5 +24,10 @@ public class StartController {
     @GetMapping("/admin/hotelHeadquartersRegister")
     public String d(){
         return "admin/hotelHeadquartersRegister";
+    }
+
+    @GetMapping("/roomList")
+    public String e(){
+        return "roomList";
     }
 }

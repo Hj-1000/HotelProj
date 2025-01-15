@@ -1,0 +1,104 @@
+/* 룸 리스트 */
+
+.room-card {
+    border: 1px solid #ccc;
+    margin-bottom: 3rem;
+}
+
+.room-image {
+    width: 100%;
+    height: 100%;
+    background-color: #ccc;
+}
+
+.room-location {
+    width: 20%;
+    background-color: #333;
+    color: #fff;
+    padding: 0.25rem;
+    text-align: center;
+}
+
+.room-details {
+    padding: 1rem 0;
+}
+
+.room-text {
+    padding:1rem;
+}
+
+.room-price {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin: 0.5rem 0;
+}
+
+
+.room-actions .btn {
+    width: 48%;
+}
+
+.room-buttons {
+    width: 55%;
+}
+
+.more-btn-container {
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.room-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+}
+
+.room-price {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin: 0;
+    flex-grow: 1; /* 가격 영역을 확장하여 간격 유지 */
+}
+
+.room-buttons {
+    display: flex;
+    justify-content: right;
+    gap: 0.5rem;
+}
+
+.room-actions .room-buttons .btn-heart {
+    border-radius: 0;
+    padding: 0.5rem;
+    font-size: 1.1rem;
+    width: 20%;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.room-actions .room-buttons .btn-heart:hover {
+    background-color : #ffffff;
+    color: red;
+}
+
+.btn-book {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+}
+
+/* 룸 배너 */
+.room-bnr {
+    position: relative;
+    height: 27rem;
+    margin: 0;
+    padding: 0;
+}
+
+.room-bnr img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+
