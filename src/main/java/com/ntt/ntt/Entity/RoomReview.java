@@ -27,7 +27,7 @@ public class RoomReview extends BaseEntity {
     private Room roomId;
 
     @ManyToOne
-    @JoinColumn(name = "userId")
-    private User userId;
+    @JoinColumn(name = "usersId")
+    private Users usersId;
 
 }

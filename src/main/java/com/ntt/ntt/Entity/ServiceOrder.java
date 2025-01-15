@@ -30,7 +30,7 @@ public class ServiceOrder extends BaseEntity {
     private ServiceMenu serviceMenuId;
 
     @ManyToOne
-    @JoinColumn(name = "userId")
-    private User userId;
+    @JoinColumn(name = "usersId")
+    private Users usersId;
 
 }

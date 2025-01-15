@@ -5,17 +5,17 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name="user")
+@Table(name="users")
 @Getter
 @Setter
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class User {
+public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer userId;
+    private Integer usersId;
     // 사용자 이름
     @Column(length = 20, nullable = false)
     private String userName;
