@@ -1,6 +1,7 @@
 package com.ntt.ntt.DTO;
 
 import com.ntt.ntt.Entity.Hotel;
+import com.ntt.ntt.Entity.ServiceCate;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,18 +14,22 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class ServiceMenuDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer serviceMenuId;
 
     private String serviceMenuName;
 
     private String serviceMenuInfo;
 
-    private Integer serviceMenuStatus;
+    private String serviceMenuStatus;
 
     private Integer serviceMenuPrice;
 
-    private String serviceImg;
+    private Integer serviceMenuImg;
+
+    private ServiceCate serviceCateId;
+
+    private LocalDateTime regDate;
+
+    private LocalDateTime modDate;
 
 }

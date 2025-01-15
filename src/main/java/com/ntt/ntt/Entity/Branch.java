@@ -16,10 +16,10 @@ public class Branch extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer branchId;
-    // 지사 이름
+    // 지사명
     @Column(length = 50, nullable = false)
     private String branchName;
-    // 지사장
+    // 지사장 이름
     @Column(length = 20)
     private String branchManager;
 

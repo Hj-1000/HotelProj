@@ -19,6 +19,8 @@ public class HotelDTO {
 
     private String hotelName;
 
+    private String hotelLocation;
+
     private String hotelAddress;
 
     private String hotelInfo;

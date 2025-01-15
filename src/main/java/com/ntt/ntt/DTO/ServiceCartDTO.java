@@ -1,7 +1,9 @@
 package com.ntt.ntt.DTO;
 
 import com.ntt.ntt.Entity.Hotel;
-import com.ntt.ntt.Entity.Room;
+import com.ntt.ntt.Entity.ServiceMenu;
+import com.ntt.ntt.Entity.ServiceOrder;
+import com.ntt.ntt.Entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,14 +18,12 @@ public class ServiceCartDTO {
 
     private Integer serviceCartId;
 
-    private Integer count;
+    private Integer cartCount;
 
-    private Room roomId;
+    private ServiceOrder serviceOrderId;
 
-    private Room serviceId;
+    private User userId;
 
-    private LocalDateTime regDate;
-
-    private LocalDateTime modDate;
+    private ServiceMenu serviceMenuId;
 
 }

@@ -16,14 +16,19 @@ public class ServiceCart extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer serviceCartId;
     // 장바구니에 넣은 서비스의 수량
-    private Integer count;
+    @Column(nullable = false)
+    private Integer cartCount;
 
     @ManyToOne
-    @JoinColumn(name = "roomId")
-    private Room roomId;
+    @JoinColumn(name = "serviceOrderId")
+    private ServiceOrder serviceOrderId;
 
     @ManyToOne
-    @JoinColumn(name = "serviceId")
-    private Room serviceId;
+    @JoinColumn(name = "userId")
+    private User userId;
+
+    @ManyToOne
+    @JoinColumn(name = "serviceMenuId")
+    private ServiceMenu serviceMenuId;
 
 }

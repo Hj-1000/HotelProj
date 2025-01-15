@@ -16,13 +16,15 @@ public class Reservation extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer reservationId;
     // 체크인 날짜
+    @Column(nullable = false)
     private String checkInDate;
     // 체크아웃 날짜
+    @Column(nullable = false)
     private String checkOutDate;
     // 총 예약 금액
     private Integer totalPrice;
     // 예약 상태
-    @Column(length = 50)
+    @Column(length = 50, nullable = false)
     private String reservationStatus;
 
     @ManyToOne
