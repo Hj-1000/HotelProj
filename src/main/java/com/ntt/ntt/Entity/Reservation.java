@@ -22,6 +22,7 @@ public class Reservation extends BaseEntity {
     // 총 예약 금액
     private Integer totalPrice;
     // 예약 상태
+    @Column(length = 50)
     private String reservationStatus;
 
     @ManyToOne
