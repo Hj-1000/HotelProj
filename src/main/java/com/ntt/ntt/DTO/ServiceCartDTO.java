@@ -1,13 +1,9 @@
 package com.ntt.ntt.DTO;
 
-import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.ServiceMenu;
 import com.ntt.ntt.Entity.ServiceOrder;
-import com.ntt.ntt.Entity.User;
-import jakarta.persistence.*;
+import com.ntt.ntt.Entity.Users;
 import lombok.*;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -22,7 +18,7 @@ public class ServiceCartDTO {
 
     private ServiceOrder serviceOrderId;
 
-    private User userId;
+    private Users usersId;
 
     private ServiceMenu serviceMenuId;
 

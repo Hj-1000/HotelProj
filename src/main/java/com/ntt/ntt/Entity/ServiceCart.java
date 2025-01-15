@@ -24,8 +24,8 @@ public class ServiceCart extends BaseEntity {
     private ServiceOrder serviceOrderId;
 
     @ManyToOne
-    @JoinColumn(name = "userId")
-    private User userId;
+    @JoinColumn(name = "usersId")
+    private Users usersId;
 
     @ManyToOne
     @JoinColumn(name = "serviceMenuId")
