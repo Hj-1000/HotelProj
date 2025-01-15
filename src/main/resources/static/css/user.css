@@ -1,0 +1,116 @@
+/* 유저페이지 공용 스타일 */
+
+/* 헤더 */
+header {
+    padding: 0 5rem !important;
+}
+
+/* 로고 */
+
+.logo {}
+
+.logo .navbar-brand {
+    display: block;
+    width: 120px;
+    height: 120px;
+}
+
+.logo .navbar-brand img {
+    width: 100%;
+    height: 100%;
+}
+
+/* 네비바 */
+.nav-link {
+    color:#000 !important;
+}
+
+/* 배너 */
+.carousel-inner {
+    height: 40rem; /* 배너 높이 설정 */
+}
+
+.carousel-item {
+    height: 100%;
+    background-size: cover; /* 이미지가 잘리지 않고 꽉 채우기 */
+    background-position: center; /* 중앙 정렬 */
+    background-repeat: no-repeat; /* 이미지 반복 방지 */
+}
+
+.bnr_wrapper img {
+    height: 100%;
+    object-fit: cover;
+}
+
+
+/* 더보기 */
+
+.more-container {
+    position: relative;
+}
+
+.more-container .btn-outline-primary {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.more-container h2 {
+    text-align: center;
+    margin: 0;
+    width: 100%;
+}
+
+/* 룸 추천 */
+
+/* 이미지 컨테이너 스타일 */
+.image-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.image-container img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    transition: all 0.3s linear;
+}
+
+.image-container:hover img {
+    transform: scale(1.1);
+}
+
+/* 오버레이 스타일 */
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* 반투명 검은색 배경 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.image-container:hover .overlay {
+    opacity: 1;
+}
+
+/* 자세히 보기 링크 스타일 */
+.details-link {
+    color: #fff;
+    font-size: 1.2rem;
+    text-decoration: none;
+    border: 2px solid #fff;
+    padding: 10px 20px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.details-link:hover {
+    background-color: #fff;
+    color: #000;
+}
