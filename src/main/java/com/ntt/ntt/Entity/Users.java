@@ -28,7 +28,6 @@ public class Users {
     // 사용자 전화번호
     @Column(length = 20)
     private String userPhone;
-
     @Enumerated(EnumType.STRING)
     private Role role;
 
