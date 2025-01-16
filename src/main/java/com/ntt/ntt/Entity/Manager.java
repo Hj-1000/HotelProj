@@ -32,9 +32,9 @@ public class Manager extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @ManyToOne
-    @JoinColumn(name = "branchId")
-    private Branch branchId;
+    @OneToOne
+    @JoinColumn(name = "companyId")
+    private Company companyId;
 
     @ManyToOne
     @JoinColumn(name = "chiefId")

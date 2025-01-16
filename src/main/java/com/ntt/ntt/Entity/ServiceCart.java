@@ -19,16 +19,13 @@ public class ServiceCart extends BaseEntity {
     @Column(nullable = false)
     private Integer cartCount;
 
-    @ManyToOne
-    @JoinColumn(name = "serviceOrderId")
-    private ServiceOrder serviceOrderId;
-
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "usersId")
     private Users usersId;
 
-    @ManyToOne
-    @JoinColumn(name = "serviceMenuId")
-    private ServiceMenu serviceMenuId;
+    // 카트아이템으로 수정하기
+//    @OneToMany
+//    @JoinColumn(name = "serviceMenuId")
+//    private ServiceMenu serviceMenuId;
 
 }

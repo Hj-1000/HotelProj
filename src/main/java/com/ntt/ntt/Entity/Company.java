@@ -1,27 +1,26 @@
 package com.ntt.ntt.Entity;
 
-import com.ntt.ntt.Constant.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name="branch")
+@Table(name="company")
 @Getter
 @Setter
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Branch extends BaseEntity {
+public class Company extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer branchId;
+    private Integer companyId;
     // 지사명
     @Column(length = 50, nullable = false)
-    private String branchName;
+    private String companyName;
     // 지사장 이름
     @Column(length = 20)
-    private String branchManager;
+    private String companyManager;
 
     @ManyToOne
     @JoinColumn(name = "chiefId")
