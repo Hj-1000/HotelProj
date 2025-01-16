@@ -1,11 +1,10 @@
 package com.ntt.ntt.Entity;
 
-import com.ntt.ntt.Constant.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name="admin")
+@Table(name="branch")
 @Getter
 @Setter
 @ToString
