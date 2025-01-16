@@ -30,4 +30,5 @@ public class RoomReview extends BaseEntity {
     @JoinColumn(name = "usersId")
     private Users usersId;
 
+
 }
