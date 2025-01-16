@@ -17,7 +17,7 @@ public class ServiceCateDTO {
 
     private String serviceCateName;
 
-    private Integer serviceCateImg;
+    private String serviceCateImg;
 
     private Hotel hotelId;
 

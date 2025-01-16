@@ -44,6 +44,6 @@ public class Hotel extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "managerId")
-    private Manager managerId;
+    private Member memberId;
 
 }

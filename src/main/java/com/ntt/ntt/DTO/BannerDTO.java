@@ -1,7 +1,8 @@
 package com.ntt.ntt.DTO;
 
 import com.ntt.ntt.Entity.Member;
-import com.ntt.ntt.Entity.Room;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -11,21 +12,17 @@ import java.time.LocalDateTime;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReservationDTO {
+public class BannerDTO {
 
-    private Integer reservationId;
+    private Integer bannerId;
 
-    private String checkInDate;
+    private String bannerTitle;
 
-    private String checkOutDate;
+    private Boolean bannerStatus;
 
-    private Integer totalPrice;
-
-    private String reservationStatus;
+    private Integer bannerRank;
 
     private Member memberId;
-
-    private Room roomId;
 
     private LocalDateTime regDate;
 

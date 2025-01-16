@@ -19,7 +19,7 @@ public class ServiceCate extends BaseEntity {
     @Column(length = 50, nullable = false)
     private String serviceCateName;
     // 카테고리 대표 이미지
-    private Integer serviceCateImg;
+    private String serviceCateImg;
 
     @ManyToOne
     @JoinColumn(name = "hotelId")

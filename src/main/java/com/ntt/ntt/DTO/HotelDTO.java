@@ -1,9 +1,6 @@
 package com.ntt.ntt.DTO;
 
-import com.ntt.ntt.Entity.Chief;
-import com.ntt.ntt.Entity.Manager;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import com.ntt.ntt.Entity.Member;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -37,7 +34,7 @@ public class HotelDTO {
 
     private String hotelCheckOut;
 
-    private Manager managerId;
+    private Member memberId;
 
     private LocalDateTime regDate;
 
