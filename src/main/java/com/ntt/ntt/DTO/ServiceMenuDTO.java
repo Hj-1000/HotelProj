@@ -1,6 +1,8 @@
 package com.ntt.ntt.DTO;
 
+import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.ServiceCate;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -22,7 +24,7 @@ public class ServiceMenuDTO {
 
     private Integer serviceMenuPrice;
 
-    private String serviceMenuImg;
+    private Integer serviceMenuImg;
 
     private ServiceCate serviceCateId;
 

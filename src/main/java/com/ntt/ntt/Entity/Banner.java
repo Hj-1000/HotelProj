@@ -4,20 +4,25 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name="serviceCart")
+@Table(name="banner")
 @Getter
 @Setter
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ServiceCart extends BaseEntity {
+public class Banner extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer serviceCartId;
-    // 장바구니에 넣은 서비스의 수량
+    private Integer bannerId;
+    // 배너 제목
+    private String bannerTitle;
+    // 배너 상태
+    private Boolean bannerStatus;
+    // 배너 순위
+    private Integer bannerRank;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "memberId")
     private Member memberId;
 

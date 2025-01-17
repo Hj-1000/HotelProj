@@ -30,8 +30,6 @@ public class Room extends BaseEntity {
     // 객실 설명
     @Column(length = 255)
     private String roomInfo;
-    // 객실 사진
-    private String roomImg;
 
     @ManyToOne
     @JoinColumn(name = "hotelId")
