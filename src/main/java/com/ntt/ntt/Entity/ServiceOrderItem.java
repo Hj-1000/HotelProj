@@ -23,10 +23,10 @@ public class ServiceOrderItem extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "serviceMenuId")
-    private ServiceMenu serviceMenuId;
+    private ServiceMenu serviceMenu;
 
     @ManyToOne
     @JoinColumn(name = "serviceOrderId")
-    private ServiceOrder serviceOrderId;
+    private ServiceOrder serviceOrder;
 
 }

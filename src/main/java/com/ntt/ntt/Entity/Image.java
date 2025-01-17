@@ -26,26 +26,26 @@ public class Image extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hotelId")
-    private Hotel hotelId;
+    private Hotel hotel;
 
     @ManyToOne
     @JoinColumn(name = "roomId")
-    private Room roomId;
+    private Room room;
 
     @ManyToOne
     @JoinColumn(name = "serviceCateId")
-    private ServiceCate serviceCateId;
+    private ServiceCate serviceCate;
 
     @ManyToOne
     @JoinColumn(name = "serviceMenuId")
-    private ServiceMenu serviceMenuId;
+    private ServiceMenu serviceMenu;
 
     @ManyToOne
     @JoinColumn(name = "noticeId")
-    private Notice noticeId;
+    private Notice notice;
 
     @ManyToOne
     @JoinColumn(name = "bannerId")
-    private Banner bannerId;
+    private Banner banner;
 
 }

@@ -26,10 +26,13 @@ public class Banner extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "companyId")
-    private Company companyId;
+    private Company company;
 
-    @OneToMany(mappedBy = "bannerId", cascade = CascadeType.ALL,
+    @OneToMany(mappedBy = "banner", cascade = CascadeType.ALL,
             orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Image> bannerImageList;
 
+    public Banner(Integer bannerId) {
+       this.bannerId = bannerId;
+    }
 }

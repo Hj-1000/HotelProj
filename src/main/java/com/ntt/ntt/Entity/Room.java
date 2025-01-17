@@ -37,8 +37,11 @@ public class Room extends BaseEntity {
     @JoinColumn(name = "hotelId")
     private Hotel hotelId;
 
-    @OneToMany(mappedBy = "roomId", cascade = CascadeType.ALL,
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL,
             orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Image> roomImageList;
 
+    public Room(Integer roomId) {
+        this.roomId = roomId;
+    }
 }
