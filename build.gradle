@@ -41,6 +41,9 @@ dependencies {
     //modelmapper
     implementation 'org.modelmapper:modelmapper:3.2.1'
 
+    //API 명세서 생성
+    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2"
+
     //레이아웃
     implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
 

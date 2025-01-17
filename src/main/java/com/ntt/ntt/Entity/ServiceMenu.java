@@ -28,7 +28,7 @@ public class ServiceMenu extends BaseEntity {
     @Column(nullable = false)
     private Integer serviceMenuPrice;
     // 메뉴 사진
-    private Integer serviceMenuImg;
+    private String serviceMenuImg;
 
     @ManyToOne
     @JoinColumn(name = "serviceCateId")

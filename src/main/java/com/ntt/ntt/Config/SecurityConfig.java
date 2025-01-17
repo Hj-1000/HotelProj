@@ -1,6 +1,5 @@
 package com.ntt.ntt.Config;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,7 +12,6 @@ import org.springframework.security.web.SecurityFilterChain;
 //2. 보안권한 설정, 암호화, 로그인, 로그아웃, csrf
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
     //비밀번호를 암호화처리
     @Bean
