@@ -3,6 +3,8 @@ package com.ntt.ntt.Entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Table(name="serviceMenu")
 @Getter
@@ -31,5 +33,9 @@ public class ServiceMenu extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "serviceCateId")
     private ServiceCate serviceCateId;
+
+    @OneToMany(mappedBy = "serviceMenuId", cascade = CascadeType.ALL,
+            orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Image> serviceMenuImageList;
 
 }

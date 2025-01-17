@@ -3,6 +3,8 @@ package com.ntt.ntt.Entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Table(name="banner")
 @Getter
@@ -23,7 +25,11 @@ public class Banner extends BaseEntity {
     private Integer bannerRank;
 
     @ManyToOne
-    @JoinColumn(name = "memberId")
-    private Member memberId;
+    @JoinColumn(name = "companyId")
+    private Company companyId;
+
+    @OneToMany(mappedBy = "bannerId", cascade = CascadeType.ALL,
+            orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Image> bannerImageList;
 
 }

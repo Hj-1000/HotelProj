@@ -3,6 +3,8 @@ package com.ntt.ntt.Entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Table(name="hotel")
 @Getter
@@ -43,5 +45,9 @@ public class Hotel extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "managerId")
     private Member memberId;
+
+    @OneToMany(mappedBy = "hotelId", cascade = CascadeType.ALL,
+            orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Image> hotelImageList;
 
 }

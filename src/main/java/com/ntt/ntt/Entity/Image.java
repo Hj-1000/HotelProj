@@ -7,7 +7,7 @@ import lombok.*;
 @Table(name="image")
 @Getter
 @Setter
-@ToString
+@ToString(exclude = "hotel")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -24,7 +24,7 @@ public class Image extends BaseEntity {
     // 대표이미지 여부
     private String imageMain;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hotelId")
     private Hotel hotelId;
 
@@ -46,6 +46,6 @@ public class Image extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "bannerId")
-    private Banner baannerId;
+    private Banner bannerId;
 
 }
