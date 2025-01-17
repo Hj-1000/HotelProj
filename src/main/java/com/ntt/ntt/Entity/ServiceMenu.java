@@ -34,8 +34,11 @@ public class ServiceMenu extends BaseEntity {
     @JoinColumn(name = "serviceCateId")
     private ServiceCate serviceCateId;
 
-    @OneToMany(mappedBy = "serviceMenuId", cascade = CascadeType.ALL,
+    @OneToMany(mappedBy = "serviceMenu", cascade = CascadeType.ALL,
             orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Image> serviceMenuImageList;
 
+    public ServiceMenu(Integer serviceMenuId) {
+        this.serviceMenuId = serviceMenuId;
+    }
 }

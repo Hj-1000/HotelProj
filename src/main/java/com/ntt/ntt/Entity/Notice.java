@@ -24,7 +24,11 @@ public class Notice extends BaseEntity {
     @Column(length = 255, nullable = false)
     private String noticeContent;
 
-    @OneToMany(mappedBy = "noticeId", cascade = CascadeType.ALL,
+    @OneToMany(mappedBy = "notice", cascade = CascadeType.ALL,
             orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Image> noticeImageList;
+
+    public Notice(Integer noticeId) {
+        this.noticeId = noticeId;
+    }
 }

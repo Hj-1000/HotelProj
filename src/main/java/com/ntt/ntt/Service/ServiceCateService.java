@@ -1,9 +1,15 @@
 package com.ntt.ntt.Service;
 
+import com.ntt.ntt.DTO.ServiceCateDTO;
+import com.ntt.ntt.Entity.ServiceCate;
+import com.ntt.ntt.Repository.ServiceCateRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @Service
@@ -11,36 +17,40 @@ import org.springframework.stereotype.Service;
 @Transactional
 @Log4j2
 public class ServiceCateService{
-//    @Value("c:/roomServiceCategory/") //이미지가 저장될 위치
-//    private String imgLocation;
-//    private final ServiceCateRepository serviceCateRepository;
-//    private final ModelMapper modelMapper;
-//    private final FileUpload fileUpload;
-//    //서비스 카테고리 등록
-//    /*--------------------------------
-//    함수명 : void insert(ServiceCateDTO seviceCateDTO, MultipartFile multipartFile)
-//    인수 : 조회할 메뉴 카테고리 번호
-//    출력 : 없음, 저장한 레코드 전달
-//    설명 : 전달받은 데이터를 데이터베이스에 저장
-//    --------------------------------*/
-//    public void register(ServiceCateDTO serviceCateDTO, MultipartFile multipartFile){
-//        //1. 변환
-//        ServiceCate serviceCate =
-//                modelMapper.map(serviceCateDTO, ServiceCate.class);
-//        //2. 이미지 파일 저장
+    @Value("c:/roomServiceCategory/") //이미지가 저장될 위치
+    private String imgLocation;
+    private final ServiceCateRepository serviceCateRepository;
+    private final ModelMapper modelMapper;
+
+    // 이미지 등록할 ImageService 의존성 추가
+    private final ImageService imageService;
+    //서비스 카테고리 등록
+    /*--------------------------------
+    함수명 : void insert(ServiceCateDTO seviceCateDTO, MultipartFile multipartFile)
+    인수 : 조회할 메뉴 카테고리 번호
+    출력 : 없음, 저장한 레코드 전달
+    설명 : 전달받은 데이터를 데이터베이스에 저장
+    --------------------------------*/
+    public void register(ServiceCateDTO serviceCateDTO, MultipartFile multipartFile){
+        //1. 변환
+        ServiceCate serviceCate =
+                modelMapper.map(serviceCateDTO, ServiceCate.class);
+        //2. 이미지 파일 저장
+        imageService.registerServiceCateImage(serviceCate.getServiceCateId(), multipartFile);
 //        String newImageName = fileUpload.FileUpload(imgLocation, multipartFile);
 //        serviceCate.setServiceCateImg(newImageName);
-//
-//        serviceCateRepository.save(serviceCate);
-//
-//    }
-//    //서비스 카테고리 목록
-//    /*--------------------------------
-//    함수명 : Page<ServiceCateDTO> list(Pageable page)
-//    인수 : 조회할 페이지 정보
-//    출력 : 해당 데이터들(list)과 page 정보를 전달
-//    설명 : 요청한 페이지번호에 해당하는 데이터를 조회해서 전달
-//    --------------------------------*/
+        log.info("잘 들어 왔나요?" + serviceCate);
+        log.info("ServiceCate object after mapping: {}", serviceCate);
+        serviceCateRepository.save(serviceCate);
+
+    }
+    //서비스 카테고리 목록
+    /*--------------------------------
+    함수명 : Page<ServiceCateDTO> list(Pageable page)
+    인수 : 조회할 페이지 정보
+    출력 : 해당 데이터들(list)과 page 정보를 전달
+    설명 : 요청한 페이지번호에 해당하는 데이터를 조회해서 전달
+    --------------------------------*/
 //    public Page<ServiceCateDTO> list(Pageable page){
 //        //1. 페이지정보를 재가공
 //        int currentPage = page.getPageNumber()-1;

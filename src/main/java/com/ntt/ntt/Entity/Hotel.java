@@ -44,10 +44,13 @@ public class Hotel extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "managerId")
-    private Member memberId;
+    private Member member;
 
-    @OneToMany(mappedBy = "hotelId", cascade = CascadeType.ALL,
+    @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL,
             orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Image> hotelImageList;
 
+    public Hotel(Integer hotelId) {
+        this.hotelId = hotelId;
+    }
 }

@@ -20,10 +20,10 @@ public class ServiceCartItem extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "serviceCartId")
-    private ServiceCart serviceCartId;
+    private ServiceCart serviceCart;
 
     @ManyToOne
     @JoinColumn(name = "serviceMenuId")
-    private ServiceMenu serviceMenuId;
+    private ServiceMenu serviceMenu;
 
 }

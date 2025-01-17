@@ -24,6 +24,6 @@ public class Company extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "memberId")
-    private Member memberId;
+    private Member member;
 
 }
