@@ -1,7 +1,6 @@
 package com.ntt.ntt.DTO;
 
 import com.ntt.ntt.Entity.Hotel;
-import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
