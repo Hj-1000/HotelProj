@@ -5,6 +5,7 @@ import com.ntt.ntt.DTO.MemberDTO;
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,6 +20,7 @@ import java.util.Optional;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Log4j2
 public class MemberSevice implements UserDetailsService {
 
     private final MemberRepository memberRepository;
@@ -30,15 +32,15 @@ public class MemberSevice implements UserDetailsService {
         // 로그인시 입력한 이메일이 존재하는지 조회
         Optional<Member> member = memberRepository.findByMemberEmail(email);
 
-        // 입력한 이메일이 존재하면 로그인 성공
+        // 입력한 이메일이 존재하면 로그인
         if (member.isPresent()) {
-
+            log.info("입력한 이메일이 존재합니다.");
             return User.withUsername(member.get().getMemberEmail())
-                    .password(member.get().getMemberPassword())
+                    .password(member.get().getMemberPassword()) // 암호화된 비밀번호 반환
                     .roles(member.get().getRole().name())
                     .build();
         } else { // 입력한 이메일이 존재하지 않으면 로그인 실패
-            throw new UsernameNotFoundException(email + "오류!");
+            throw new UsernameNotFoundException(email + " 오류!");
         }
     }
 
@@ -83,7 +85,7 @@ public class MemberSevice implements UserDetailsService {
         member.setMemberName(memberDTO.getMemberName());
         member.setMemberPhone(memberDTO.getMemberPhone());
         member.setMemberPassword(password);
-        member.setRole(Role.USER);
+        member.setRole(memberDTO.getRole());
         memberRepository.save(member);
 
     }
