@@ -13,6 +13,12 @@ public class MemberController {
 
     private final MemberSevice memberSevice;
 
+    // 회원가입 유형 선택 페이지
+    @GetMapping("/selectrole")
+    public String selectrole() {
+        return "selectrole";
+    }
+
     // 일반 유저 회원가입
     @GetMapping("/register")
     public String registerForm() {
@@ -24,5 +30,24 @@ public class MemberController {
         memberSevice.saveUser(memberDTO);
 
         return "redirect:/login";
+    }
+
+    // 관리자 회원가입
+    @GetMapping("/adminregister")
+    public String adminregisterForm() {
+        return "adminregister";
+    }
+
+    @PostMapping("/adminregister")
+    public String adminregisterProc(MemberDTO memberDTO) {
+        memberSevice.saveManager(memberDTO);
+
+        return "redirect:/login";
+    }
+
+    // 로그인
+    @GetMapping("/login")
+    public String login() {
+        return "login";
     }
 }

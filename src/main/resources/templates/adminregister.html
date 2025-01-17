@@ -14,9 +14,9 @@
     <div th:replace="~{fragments/header::header}"></div>
     <!--본문-->
     <div layout:fragment="content">
-        <form action="/register" method="post" onsubmit="return test();">
+        <form action="/adminregister" method="post" onsubmit="return test();">
             <div class="mb-3 mt-3">
-                <label for="memberName" class="form-label">이름 :</label>
+                <label for="memberName" class="form-label">관리자이름 :</label>
                 <input type="text" class="form-control" id="memberName" name="memberName">
             </div>
             <div class="mb-3">
@@ -35,6 +35,18 @@
                 <label for="memberPhone" class="form-label">전화번호 :</label>
                 <input type="text" class="form-control" id="memberPhone" name="memberPhone">
             </div>
+            <div class="mb-3">
+                <label for="code" class="form-label">인증코드 :</label>
+                <input type="text" class="form-control" id="code" name="code">
+            </div>
+            <div class="mb-3">
+                <label for="role" class="form-label">권한 :</label>
+                <select id="role" name="role">
+                    <option value="ADMIN">어드민</option>
+                    <option value="CHIEF">호텔장</option>
+                    <option value="MANAGER">매니저</option>
+                </select>
+            </div>
             <button type="submit" class="btn btn-primary">회원가입</button>
         </form>
 
@@ -42,8 +54,14 @@
 
         <script type="text/javascript">
             function test() {
+                var p0 = document.getElementById('code').value;
                 var p1 = document.getElementById('memberPassword').value;
                 var p2 = document.getElementById('memberPasswordCheck').value;
+
+                if(p0 != '980425') {
+                    alert('인증코드가 일치하지 않습니다.');
+                    return false;
+                }
 
                 if(p1.length < 6) {
                     alert('비밀번호는 6글자 이상이어야 합니다.');
