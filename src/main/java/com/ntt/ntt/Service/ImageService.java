@@ -3,6 +3,7 @@ package com.ntt.ntt.Service;
 import com.ntt.ntt.Entity.*;
 import com.ntt.ntt.Repository.ImageRepository;
 import com.ntt.ntt.Util.FileUpload;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 @Log4j2
 public class ImageService {
