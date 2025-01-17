@@ -14,11 +14,11 @@ import lombok.*;
 public class ServiceCart extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer serviceCartId;
+    private Integer serviceCart;
     // 장바구니에 넣은 서비스의 수량
 
     @OneToOne
-    @JoinColumn(name = "memberId")
-    private Member memberId;
+    @JoinColumn(name = "member")
+    private Member member;
 
 }

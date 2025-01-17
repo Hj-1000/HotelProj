@@ -25,8 +25,11 @@ public class ServiceCate extends BaseEntity {
     @JoinColumn(name = "hotelId")
     private Hotel hotelId;
 
-    @OneToMany(mappedBy = "serviceCateId", cascade = CascadeType.ALL,
+    @OneToMany(mappedBy = "serviceCate", cascade = CascadeType.PERSIST,
             orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Image> serviceCateImageList;
 
+    public ServiceCate(Integer serviceCateId) {
+        this.serviceCateId = serviceCateId;
+    }
 }

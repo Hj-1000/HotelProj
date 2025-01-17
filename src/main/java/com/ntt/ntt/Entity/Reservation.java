@@ -29,10 +29,10 @@ public class Reservation extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "memberId")
-    private Member memberId;
+    private Member member;
 
     @ManyToOne
     @JoinColumn(name = "roomId")
-    private Room roomId;
+    private Room room;
 
 }

@@ -21,6 +21,6 @@ public class Reply extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "qnaId")
-    private Qna qnaId;
+    private Qna qna;
 
 }
