@@ -22,8 +22,6 @@ public class NoticeDTO {
 
     private String noticeContent;
 
-    private String noticeImg;
-
     private LocalDateTime regDate;
 
     private LocalDateTime modDate;

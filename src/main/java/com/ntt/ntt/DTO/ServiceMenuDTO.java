@@ -24,8 +24,6 @@ public class ServiceMenuDTO {
 
     private Integer serviceMenuPrice;
 
-    private Integer serviceMenuImg;
-
     private ServiceCate serviceCateId;
 
     private LocalDateTime regDate;

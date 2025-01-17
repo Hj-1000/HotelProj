@@ -1,7 +1,7 @@
 package com.ntt.ntt.DTO;
 
+import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Entity.Room;
-import com.ntt.ntt.Entity.Users;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -21,7 +21,7 @@ public class RoomReviewDTO {
 
     private Room roomId;
 
-    private Users usersId;
+    private Member memberId;
 
     private LocalDateTime regDate;
 

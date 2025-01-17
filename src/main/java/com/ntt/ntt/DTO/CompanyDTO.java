@@ -1,6 +1,6 @@
 package com.ntt.ntt.DTO;
 
-import com.ntt.ntt.Entity.Chief;
+import com.ntt.ntt.Entity.Member;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -18,7 +18,7 @@ public class CompanyDTO {
 
     private String companyManager;
 
-    private Chief chiefId;
+    private Member memberId;
 
     private LocalDateTime regDate;
 

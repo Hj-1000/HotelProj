@@ -28,8 +28,8 @@ public class Reservation extends BaseEntity {
     private String reservationStatus;
 
     @ManyToOne
-    @JoinColumn(name = "usersId")
-    private Users usersId;
+    @JoinColumn(name = "memberId")
+    private Member memberId;
 
     @ManyToOne
     @JoinColumn(name = "roomId")

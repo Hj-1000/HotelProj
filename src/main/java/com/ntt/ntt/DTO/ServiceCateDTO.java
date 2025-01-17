@@ -17,8 +17,6 @@ public class ServiceCateDTO {
 
     private String serviceCateName;
 
-    private Integer serviceCateImg;
-
     private Hotel hotelId;
 
     private LocalDateTime regDate;

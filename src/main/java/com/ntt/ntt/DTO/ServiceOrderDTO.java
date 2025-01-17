@@ -1,8 +1,7 @@
 package com.ntt.ntt.DTO;
 
+import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Entity.Room;
-import com.ntt.ntt.Entity.ServiceMenu;
-import com.ntt.ntt.Entity.Users;
 import lombok.*;
 
 @Getter
@@ -14,14 +13,10 @@ public class ServiceOrderDTO {
 
     private Integer serviceOrderId;
 
-    private Integer orderCount;
+    private String serviceOrderStatus;
 
-    private Integer totalPrice;
+    private Member memberId;
 
     private Room roomId;
-
-    private ServiceMenu serviceMenuId;
-
-    private Users usersId;
 
 }
