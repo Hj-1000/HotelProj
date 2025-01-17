@@ -28,8 +28,6 @@ public class HotelDTO {
 
     private String hotelEmail;
 
-    private String hotelImg;
-
     private String hotelCheckIn;
 
     private String hotelCheckOut;

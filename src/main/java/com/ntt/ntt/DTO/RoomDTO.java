@@ -24,8 +24,6 @@ public class RoomDTO {
 
     private String roomInfo;
 
-    private String roomImg;
-
     private Hotel hotelId;
 
     private LocalDateTime regDate;

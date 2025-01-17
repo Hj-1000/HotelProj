@@ -18,7 +18,11 @@ public class ImageDTO {
 
     private String imageName;
 
+    private String imageOriginalName;
+
     private String imagePath;
+
+    private String imageMain;
 
     private Hotel hotelId;
 

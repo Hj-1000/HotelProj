@@ -17,8 +17,12 @@ public class Image extends BaseEntity {
     private Integer imageId;
     // 이미지 파일명
     private String imageName;
+    // 원본 이미지명
+    private String imageOriginalName;
     // 이미지 경로
     private String imagePath;
+    // 대표이미지 여부
+    private String imageMain;
 
     @ManyToOne
     @JoinColumn(name = "hotelId")

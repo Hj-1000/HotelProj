@@ -35,8 +35,6 @@ public class Hotel extends BaseEntity {
     // 호텔 이메일
     @Column(length = 50)
     private String hotelEmail;
-    // 호텔 사진
-    private String hotelImg;
     // 체크인 시간
     private String hotelCheckIn;
     // 체크아웃 시간

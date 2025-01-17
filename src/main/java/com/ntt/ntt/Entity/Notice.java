@@ -21,6 +21,4 @@ public class Notice extends BaseEntity {
     // 공지사항 내용
     @Column(length = 255, nullable = false)
     private String noticeContent;
-    // 공지사항 이미지
-    private String noticeImg;
 }

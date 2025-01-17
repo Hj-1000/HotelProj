@@ -19,13 +19,13 @@ public class Member extends BaseEntity {
     //  이름
     @Column(length = 20, nullable = false)
     private String memberName;
-    // 어드민 이메일(고유값)
+    // 사용자 이메일(고유값)
     @Column(length = 50, unique = true, nullable = false)
     private String memberEmail;
-    // 어드민 비밀번호
+    // 사용자 비밀번호
     @Column(length = 20, nullable = false)
     private String memberPassword;
-    // 어드민 전화번호
+    // 사용자 전화번호
     @Column(length = 20)
     private String memberPhone;
     // 권한
