@@ -3,6 +3,8 @@ package com.ntt.ntt.Entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Table(name="notice")
 @Getter
@@ -21,4 +23,8 @@ public class Notice extends BaseEntity {
     // 공지사항 내용
     @Column(length = 255, nullable = false)
     private String noticeContent;
+
+    @OneToMany(mappedBy = "noticeId", cascade = CascadeType.ALL,
+            orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Image> noticeImageList;
 }

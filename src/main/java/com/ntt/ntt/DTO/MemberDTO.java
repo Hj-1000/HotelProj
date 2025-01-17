@@ -27,7 +27,7 @@ public class MemberDTO {
     private String memberEmail;
 
     @NotBlank
-    @Size(min = 6, max = 20, message = "비밀번호는 6~20글자 사이로 입력해주세요.")
+    @Size(message = "비밀번호는 6~20글자 사이로 입력해주세요.")
     private String memberPassword;
 
     private String memberPhone;

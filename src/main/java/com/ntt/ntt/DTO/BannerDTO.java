@@ -1,5 +1,6 @@
 package com.ntt.ntt.DTO;
 
+import com.ntt.ntt.Entity.Company;
 import com.ntt.ntt.Entity.Member;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -22,7 +23,7 @@ public class BannerDTO {
 
     private Integer bannerRank;
 
-    private Member memberId;
+    private Company companyId;
 
     private LocalDateTime regDate;
 
