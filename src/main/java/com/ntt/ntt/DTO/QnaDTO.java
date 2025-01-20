@@ -1,9 +1,6 @@
 package com.ntt.ntt.DTO;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -17,8 +14,10 @@ public class QnaDTO {
 
     private Integer qnaId;
 
+    @NotEmpty(message = "제목은 비어 있을 수 없습니다.")
     private String qnaTitle;
 
+    @NotEmpty(message = "내용은 비어 있을 수 없습니다.")
     private String qnaContent;
 
     private LocalDateTime regDate;

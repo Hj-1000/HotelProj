@@ -23,4 +23,7 @@ public class Reply extends BaseEntity {
     @JoinColumn(name = "qnaId")
     private Qna qna;
 
+    @ManyToOne
+    @JoinColumn(name = "memberId")
+    private Member member;
 }

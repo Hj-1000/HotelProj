@@ -22,4 +22,7 @@ public class Qna extends BaseEntity {
     @Column(length = 255, nullable = false)
     private String qnaContent;
 
+    @ManyToOne
+    @JoinColumn(name = "memberId")
+    private Member member;
 }
