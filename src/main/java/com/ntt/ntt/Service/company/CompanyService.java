@@ -1,9 +1,13 @@
 package com.ntt.ntt.Service.company;
 
 import com.ntt.ntt.DTO.CompanyDTO;
+import com.ntt.ntt.DTO.ImageDTO;
 import com.ntt.ntt.Entity.Company;
+import com.ntt.ntt.Entity.Image;
+import com.ntt.ntt.Repository.ImageRepository;
 import com.ntt.ntt.Repository.company.CompanyRepository;
 import com.ntt.ntt.Service.ImageService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
@@ -16,8 +20,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +31,7 @@ import java.util.Optional;
 @Log4j2
 public class CompanyService {
 
+    private final ImageRepository imageRepository;
     private final CompanyRepository companyRepository;
     private final ModelMapper modelMapper;
 
@@ -47,6 +54,8 @@ public class CompanyService {
         // 2. imageFiles를 ImageService를 통해 저장
         imageService.registerCompanyImage(company.getCompanyId(), imageFiles);
     }
+
+
 
     //목록
     public Page<CompanyDTO> list(Pageable page) {
@@ -82,9 +91,19 @@ public class CompanyService {
             throw new IllegalStateException("ModelMapper가 초기화되지 않았습니다.");
         }
 
-        //companyId를 통해 글 불러오기
+        // companyId를 통해 회사 정보 불러오기
         Optional<Company> company = companyRepository.findById(companyId);
         CompanyDTO companyDTO = modelMapper.map(company, CompanyDTO.class);
+
+        List<ImageDTO> imgDTOList = imageRepository.findByCompany_CompanyId(companyDTO.getCompanyId())
+                .stream().map(imagefile -> {
+                    // 여기서 이미지 경로를 상대 경로로 변환
+                    imagefile.setImagePath(imagefile.getImagePath().replace("c:/data/", ""));
+                    return modelMapper.map(imagefile, ImageDTO.class);
+                })
+                .collect(Collectors.toList());
+
+        companyDTO.setCompanyImgDTOList(imgDTOList);
 
         return companyDTO;
 

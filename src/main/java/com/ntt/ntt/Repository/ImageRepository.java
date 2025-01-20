@@ -8,6 +8,10 @@ import java.util.List;
 
 @Repository
 public interface ImageRepository extends JpaRepository<Image, Integer> {
+
+    public List<Image> findByCompany_CompanyId(Integer companyId);
+    public Image findByCompany_CompanyIdAndImageMain(Integer companyId, String val);
+
     public List<Image> findByHotel_HotelId(Integer hotelId);
     public Image findByHotel_HotelIdAndImageMain(Integer hotelId, String val);
 

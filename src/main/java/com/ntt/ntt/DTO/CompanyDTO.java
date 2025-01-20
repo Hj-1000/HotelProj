@@ -4,7 +4,10 @@ import com.ntt.ntt.Entity.Member;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+@Builder
 @Getter
 @Setter
 @ToString
@@ -23,5 +26,8 @@ public class CompanyDTO {
     private LocalDateTime regDate;
 
     private LocalDateTime modDate;
+
+    @Builder.Default
+    private List<ImageDTO> companyImgDTOList = new ArrayList<>();
 
 }

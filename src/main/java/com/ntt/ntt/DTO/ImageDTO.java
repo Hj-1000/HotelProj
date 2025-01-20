@@ -24,6 +24,8 @@ public class ImageDTO {
 
     private String imageMain;
 
+    private Company companyId;
+
     private Hotel hotelId;
 
     private Room roomId;
