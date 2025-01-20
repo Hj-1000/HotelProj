@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Controller
 @Log4j2
 @RequiredArgsConstructor
@@ -34,7 +36,7 @@ public class ServiceCateController {
 
     @Operation(summary = "등록창", description = "데이터 등록후 목록으로 이동한다.")
     @PostMapping("/register")
-    public String registerProc(ServiceCateDTO serviceCateDTO, @RequestParam("imageFile") MultipartFile imageFile) {
+    public String registerProc(ServiceCateDTO serviceCateDTO, @RequestParam("imageFile") List<MultipartFile> imageFile) {
         log.info("post에서 등록할 serviceCateDTO" + serviceCateDTO);
         serviceCateService.register(serviceCateDTO, imageFile);
         return "redirect:/roomservice/list";
