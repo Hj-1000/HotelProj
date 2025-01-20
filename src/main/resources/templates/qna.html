@@ -116,6 +116,12 @@
             color: #555; /* 내용 색상 */
         }
 
+        .question-item .user-info {
+            font-size: 0.9em;
+            color: #888;
+            margin-top: 5px;
+        }
+
         /* 페이징 처리 버튼 스타일 */
         .pagination {
             display: flex;
@@ -147,6 +153,7 @@
             <option value="">-- 검색선택 --</option>
             <option value="title">제목</option>
             <option value="content">내용</option>
+            <option value="author">작성자</option> <!-- 작성자 검색 항목 추가 -->
         </select>
         <input type="text" id="searchInput" placeholder="검색어를 입력하세요">
         <button onclick="searchQuestions()">검색</button>
@@ -178,6 +185,12 @@
     let questionsPerPage = 5;
     let questions = [];
 
+    // 로그인된 회원 정보 가져오기
+    const currentMember = { // 회원 정보를 예시로 하드코딩한 것
+        name: "홍길동",
+        email: "hong@domain.com"
+    };
+
     // 질문 목록을 화면에 표시하고 페이징 처리
     function displayQuestions(filteredQuestions = null) {
         const questionList = document.getElementById('questionList');
@@ -196,7 +209,13 @@
             const question = dataToShow[i];
             const questionItem = document.createElement('li');
             questionItem.classList.add('question-item');
-            questionItem.innerHTML = `<h3>${question.title}</h3><p>${question.content}</p>`;
+            questionItem.innerHTML = `
+                <h3>${question.title}</h3>
+                <p>${question.content}</p>
+                <div class="user-info">
+                    <strong>${question.userName}</strong> (${question.userEmail})
+                </div>
+            `;
             questionList.appendChild(questionItem);
         }
 
@@ -226,7 +245,9 @@
         questions.push({
             id: questionId,
             title: questionTitle,
-            content: questionContent
+            content: questionContent,
+            userName: currentMember.name,  // 회원 이름 추가
+            userEmail: currentMember.email  // 회원 이메일 추가
         });
 
         document.getElementById('questionTitle').value = ''; // 제목 입력 필드 초기화
@@ -249,6 +270,8 @@
                 return question.title.toLowerCase().includes(keyword);
             } else if (category === 'content') {
                 return question.content.toLowerCase().includes(keyword);
+            } else if (category === 'author') { // 작성자 검색
+                return question.userName.toLowerCase().includes(keyword);
             }
             return false;
         });
