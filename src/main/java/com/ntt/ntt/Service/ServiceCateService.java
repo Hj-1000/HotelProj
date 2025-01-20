@@ -10,6 +10,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +30,7 @@ public class ServiceCateService{
     출력 : 없음, 저장한 레코드 전달
     설명 : 전달받은 데이터를 데이터베이스에 저장
     --------------------------------*/
-    public void register(ServiceCateDTO serviceCateDTO, MultipartFile multipartFile){
+    public void register(ServiceCateDTO serviceCateDTO, List<MultipartFile> multipartFile){
         //1. 변환
         ServiceCate serviceCate =
                 modelMapper.map(serviceCateDTO, ServiceCate.class);

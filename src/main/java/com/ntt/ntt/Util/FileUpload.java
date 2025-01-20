@@ -5,6 +5,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 //파일 업로드에 관련된 메소드를 담은 클래스
@@ -13,54 +15,70 @@ import java.util.UUID;
 // UUID : 파일이름을 난수로 생성
 @Component
 public class FileUpload {
+
     /*---------------------------------------------------------------------
-    함수명 : String FileUpload(String imgLocation, MultipartFile imageFile)
-    인수 : 저장될 위치, 이미지파일
-    출력 : 저장 후 생성된 새로운 파일명
-    설명 : 이미지파일을 새로운 이름으로 지정된 폴더에 저장하고 새로운 이름을 전달
+    함수명 : String FileUpload(String imgLocation, List<MultipartFile> imageFile)
+    인수 : 저장될 위치, 이미지 파일 리스트
+    출력 : 저장 후 생성된 새로운 파일명 리스트
+    설명 : 이미지 파일을 새로운 이름으로 지정된 폴더에 저장하고 새로운 이름을 전달
     ---------------------------------------------------------------------*/
-    public String FileUpload(String imgLocation, MultipartFile imageFile){
-        // 이미지파일에 파일명을 읽어온다. sample.jpg
-        String originalFilename = imageFile.getOriginalFilename();
-        // 확장자만 분리 .jpg
-        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-        UUID uuid = UUID.randomUUID(); // 난수로 이름을 생성, 432-erw3342-4324
-        String filename = uuid.toString() + extension; // 새로운 이름에 확장자 결합, 432-erw3342-4324.jpg
-        //c:/movie/432-erw3342-4324.jpg
-        String path = imgLocation + filename; // 최종 저장될 위치와 파일명
-        System.out.println(path);
-        // 외부작업은 반드시 try~catch로 예외처리
-        try {   // 정상적인 작업
-            File folder = new File(imgLocation); // 작업할 파일 지정
-            if (!folder.exists()){
-                boolean result = folder.mkdir();    // 지정된 위치에 폴더를 생성, /movie/
+    public List<String> FileUpload(String imgLocation, List<MultipartFile> imageFile) {
+        List<String> filenames = new ArrayList<>();
+
+        // 이미지 파일 리스트를 반복하면서 각 파일을 처리
+        for (MultipartFile file : imageFile) {
+            // 이미지 파일의 원래 파일명
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null || originalFilename.isEmpty()) {
+                continue; // 파일명이 없으면 넘어감
             }
-            byte[] fileData = imageFile.getBytes() ;    // sample.jpg 파일을 바이트 단위로 읽어서 저장
-            // c:/movie/432-erw3342-4324.jpg 파일을 쓰기파일로 열기
-            FileOutputStream fos = new FileOutputStream(path);
-            fos.write(fileData); // 해당파일에 이미지데이터를 저장
-            fos.close();        // 완료 후 파일 닫기
-        }catch (Exception e){ // 모든 오류 중 하나라도 발생 하면
-            return null; // 실패시 파일명 없이 되돌아 간다.
+
+            // 확장자 분리
+            String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            UUID uuid = UUID.randomUUID(); // 난수 생성
+            String filename = uuid.toString() + extension; // 새로운 파일명 생성
+            String path = imgLocation + filename; // 최종 저장 경로
+
+            // 파일 저장
+            try {
+                File folder = new File(imgLocation);
+                if (!folder.exists()) {
+                    folder.mkdir(); // 폴더가 없다면 생성
+                }
+
+                // 파일을 바이트 배열로 읽어서 저장
+                byte[] fileData = file.getBytes();
+                FileOutputStream fos = new FileOutputStream(path);
+                fos.write(fileData);
+                fos.close(); // 파일 저장 완료
+
+                filenames.add(filename); // 파일명 리스트에 추가
+            } catch (Exception e) {
+                // 예외 발생 시 null 대신 빈 문자열을 반환
+                filenames.add(null);
+            }
         }
-        return filename; // 성공시 저장된 파일명을 전달
+
+        return filenames; // 파일명 리스트 반환
     }
-     /*---------------------------------------------------------------------
-    함수명 : String FileUpload(String imgLocation, String imageFileName)
-    인수 : 저장될 위치, 이미지파일
-    출력 : 저장 후 생성된 새로운 파일명
-    설명 : 이미지파일을 새로운 이름으로 지정된 폴더에 저장하고 새로운 이름을 전달
+
+    /*---------------------------------------------------------------------
+    함수명 : void FileDelete(String imgLocation, String imageFileName)
+    인수 : 저장될 위치, 이미지 파일명
+    출력 : 없음
+    설명 : 지정된 파일을 삭제
     ---------------------------------------------------------------------*/
     public void FileDelete(String imgLocation, String imageFileName) {
-        //imgLocation = (c:/movie) imageFileName(432-erw3342-4324.jpg)
-        String deleteFileName = imgLocation+imageFileName;
+        // 파일 경로 생성
+        String deleteFileName = imgLocation + imageFileName;
 
         try {
-            File deleteFile = new File(deleteFileName); // 삭제할 파일
-            if (deleteFile.exists()){
-                deleteFile.delete();
+            File deleteFile = new File(deleteFileName);
+            if (deleteFile.exists()) {
+                deleteFile.delete(); // 파일 삭제
             }
-        }catch (Exception e){
+        } catch (Exception e) {
+            // 예외가 발생해도 처리하지 않음
             return;
         }
     }
