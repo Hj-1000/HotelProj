@@ -95,6 +95,8 @@ public class CompanyService {
         Optional<Company> company = companyRepository.findById(companyId);
         CompanyDTO companyDTO = modelMapper.map(company, CompanyDTO.class);
 
+        //이미지 경로에서 c:/data/ 제거 코드 -> (파일명.파일확장자 만 빼오기 위해)
+        //추후 더 간단하게 합쳐서 하나하나 입력할 필요 없이 다같이 사용 가능하도록 ImgService에 추가 할 예정
         List<ImageDTO> imgDTOList = imageRepository.findByCompany_CompanyId(companyDTO.getCompanyId())
                 .stream().map(imagefile -> {
                     // 여기서 이미지 경로를 상대 경로로 변환
