@@ -14,7 +14,7 @@
     <div th:replace="~{fragments/header::header}"></div>
     <!--본문-->
     <div layout:fragment="content">
-        <form action="/adminregister" method="post" onsubmit="return test();">
+        <form action="/admin/register" method="post" onsubmit="return test();">
             <div class="mb-3 mt-3">
                 <label for="memberName" class="form-label">관리자이름 :</label>
                 <input type="text" class="form-control" id="memberName" name="memberName">
@@ -37,7 +37,7 @@
             </div>
             <div class="mb-3">
                 <label for="code" class="form-label">인증코드 :</label>
-                <input type="text" class="form-control" id="code" name="code">
+                <input type="text" class="form-control" id="code" name="code" placeholder="인증코드는 980425">
             </div>
             <div class="mb-3">
                 <label for="role" class="form-label">권한 :</label>
@@ -72,8 +72,8 @@
                     alert("비밀번호가 일치하지 않습니다.");
                     return false;
                 } else{
-                    alert("비밀번호가 일치합니다");
                     return true;
+                    alert("회원가입에 성공했습니다.");
                 }
             }
         </script>

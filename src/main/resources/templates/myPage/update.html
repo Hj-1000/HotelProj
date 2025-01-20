@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+>
+<head>
+    <meta charset="UTF-8">
+    <title>NTT호텔</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" th:href="@{/css/user.css}">
+</head>
+<body>
+<div th:replace="~{fragments/header::header}"></div>
+<!--본문-->
+<div layout:fragment="content">
+    <form th:action="@{/myPage/update}" method="post" onsubmit="return test();" th:object="${memberDTO}">
+        <div class="mb-3 mt-3">
+            <label for="memberName" class="form-label">이름 :</label>
+            <input type="text" class="form-control" id="memberName" name="memberName" th:value="*{memberName}">
+        </div>
+        <div class="mb-3">
+            <label for="memberEmail" class="form-label">이메일 : *이메일은 변경할 수 없습니다.</label>
+            <input type="email" class="form-control" id="memberEmail" name="memberEmail" th:value="*{memberEmail}" readonly>
+        </div>
+        <div class="mb-3">
+            <label for="currentPassword" class="form-label">현재 비밀번호 :</label>
+            <input type="password" class="form-control" id="currentPassword" name="currentPassword">
+        </div>
+        <div class="mb-3">
+            <label for="memberPassword" class="form-label">새 비밀번호 :</label>
+            <input type="password" class="form-control" id="memberPassword" name="newPassword">
+        </div>
+        <div class="mb-3">
+            <label for="memberPasswordCheck" class="form-label">새 비밀번호 확인 :</label>
+            <input type="password" class="form-control" id="memberPasswordCheck" name="newPasswordCheck">
+        </div>
+        <!-- 오류 메시지 출력 -->
+        <div th:if="${errorMessage}" class="alert alert-danger">
+            <span th:text="${errorMessage}"></span>
+        </div>
+        <button type="submit" class="btn btn-primary">회원정보 수정</button>
+    </form>
+    <form th:action="@{/delete}" method="post" onsubmit="return confirm('정말로 탈퇴하시겠습니까?');">
+        <button type="submit" class="btn btn-danger">회원탈퇴</button>
+    </form>
+
+
+
+    <script type="text/javascript">
+        function test() {
+            var p1 = document.getElementById('memberPassword').value;
+            var p2 = document.getElementById('memberPasswordCheck').value;
+
+            if(p1.length < 6) {
+                alert('비밀번호는 6글자 이상이어야 합니다.');
+                return false;
+            }
+
+            if(p1 != p2) {
+                alert("비밀번호가 일치하지 않습니다.");
+                return false;
+            } else{
+                return true;
+                alert("회원정보가 수정되었습니다.");
+            }
+
+        }
+    </script>
+
+
+
+</div>
+<div th:replace="~{fragments/footer::footer}"></div>
+</body>
+</html>
