@@ -6,6 +6,7 @@ import lombok.*;
 import org.modelmapper.ModelMapper;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class ServiceCateDTO {
 
     private Integer serviceCateId;
@@ -26,17 +28,21 @@ public class ServiceCateDTO {
 
     private LocalDateTime modDate;
 
-    private List<ImageDTO> imageDTOList;
+    @Builder.Default
+    private List<ImageDTO> serviceCateImageDTOList = new ArrayList<>();
 
-    public ServiceCateDTO setImageDTOList(List<Image> imageList) {
-        ModelMapper modelMapper = new ModelMapper();
 
-        List<ImageDTO> imageDTOS =
-                imageList.stream().map(image -> modelMapper.map(image, ImageDTO.class)).collect(Collectors.toList());
+//    public ServiceCateDTO setImageDTOList(List<Image> imageList) {
+//        ModelMapper modelMapper = new ModelMapper();
+//
+//        List<ImageDTO> imageDTOS =
+//                imageList.stream().map(image -> modelMapper.map(image, ImageDTO.class)).collect(Collectors.toList());
+//
+//        this.imageDTOList = imageDTOS;
+//
+//        return this;
 
-        this.imageDTOList = imageDTOS;
+//    }
 
-        return this;
 
-    }
 }
