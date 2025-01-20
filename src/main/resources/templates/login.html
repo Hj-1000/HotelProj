@@ -24,6 +24,9 @@
                 <input type="password" class="form-control" id="password" name="password">
             </div>
             <button type="submit" class="btn btn-primary">로그인</button>
+            <!-- 회원가입 유형 선택 페이지로 이동 -->
+            <button type="button" class="btn btn-primary" onclick="location.href='/selectrole'">회원가입</button>
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">취소</button>
         </form>
     </div>
     <div th:replace="~{fragments/footer::footer}"></div>
