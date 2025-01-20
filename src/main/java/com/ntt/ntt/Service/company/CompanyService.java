@@ -3,6 +3,7 @@ package com.ntt.ntt.Service.company;
 import com.ntt.ntt.DTO.CompanyDTO;
 import com.ntt.ntt.Entity.Company;
 import com.ntt.ntt.Repository.company.CompanyRepository;
+import com.ntt.ntt.Service.ImageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
@@ -13,7 +14,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -25,8 +28,11 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
     private final ModelMapper modelMapper;
 
+    @Autowired
+    private final ImageService imageService;
+
     //등록
-    public void register(CompanyDTO companyDTO) {
+    public void register(CompanyDTO companyDTO, List<MultipartFile> imageFiles) {
 
         // modelMapper가 null이 아닌지 확인
         if (modelMapper == null) {
@@ -34,14 +40,19 @@ public class CompanyService {
         }
 
         Company company = modelMapper.map(companyDTO, Company.class);
+
+        // 1. Company 먼저 저장
         companyRepository.save(company);
+
+        // 2. imageFiles를 ImageService를 통해 저장
+        imageService.registerCompanyImage(company.getCompanyId(), imageFiles);
     }
 
     //목록
     public Page<CompanyDTO> list(Pageable page) {
 
         //1. 페이지정보를 재가공
-        int currentPage = page.getPageNumber()-1;
+        int currentPage = page.getPageNumber() - 1;
         int pageSize = 10;
         Pageable pageable = PageRequest.of(
                 currentPage, pageSize,
@@ -59,7 +70,6 @@ public class CompanyService {
         );
 
         return companyDTOS;
-
     }
 
 
