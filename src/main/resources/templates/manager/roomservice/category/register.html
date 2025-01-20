@@ -18,7 +18,7 @@
                 <div class="card-body">
                     <h2>카테고리 등록</h2>
                     <!--Controller에 multipart 선언 시 전송에서 multipart 지원-->
-                    <form th:action="@{register}" method="post" enctype="multipart/form-data">
+                    <form th:action="@{/roomService/register}" method="post" enctype="multipart/form-data">
                         <table class="table">
                             <!--DTO를 참고해서-->
                             <tbody>

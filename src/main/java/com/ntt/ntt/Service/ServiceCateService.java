@@ -7,7 +7,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,8 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Transactional
 @Log4j2
 public class ServiceCateService{
-    @Value("c:/roomServiceCategory/") //이미지가 저장될 위치
-    private String imgLocation;
     private final ServiceCateRepository serviceCateRepository;
     private final ModelMapper modelMapper;
 
@@ -35,13 +32,17 @@ public class ServiceCateService{
         //1. 변환
         ServiceCate serviceCate =
                 modelMapper.map(serviceCateDTO, ServiceCate.class);
-        //2. 이미지 파일 저장
-        imageService.registerServiceCateImage(serviceCate.getServiceCateId(), multipartFile);
-//        String newImageName = fileUpload.FileUpload(imgLocation, multipartFile);
-//        serviceCate.setServiceCateImg(newImageName);
+        //2. ServiceCate 엔티티를 먼저 저장
+        serviceCate = serviceCateRepository.save(serviceCate);
+        log.info("저장된 ServiceCate: {}", serviceCate);
+        //3. 저장된 serviceCateId를 사용하여 이미지 저장
+        if (multipartFile != null && !multipartFile.isEmpty()) {
+            imageService.registerServiceCateImage(serviceCate.getServiceCateId(), multipartFile);
+        }
         log.info("잘 들어 왔나요?" + serviceCate);
         log.info("ServiceCate object after mapping: {}", serviceCate);
-        serviceCateRepository.save(serviceCate);
+
+//        log.info("저장된 serviceCate" + serviceCate);
 
     }
     //서비스 카테고리 목록
