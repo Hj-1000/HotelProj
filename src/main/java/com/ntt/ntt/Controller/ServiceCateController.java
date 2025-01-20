@@ -35,6 +35,7 @@ public class ServiceCateController {
     @Operation(summary = "등록창", description = "데이터 등록후 목록으로 이동한다.")
     @PostMapping("/register")
     public String registerProc(ServiceCateDTO serviceCateDTO, @RequestParam("imageFile") MultipartFile imageFile) {
+        log.info("post에서 등록할 serviceCateDTO" + serviceCateDTO);
         serviceCateService.register(serviceCateDTO, imageFile);
         return "redirect:/roomservice/list";
     }
