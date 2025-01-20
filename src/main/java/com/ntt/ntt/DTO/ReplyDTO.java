@@ -1,10 +1,7 @@
 package com.ntt.ntt.DTO;
 
 import com.ntt.ntt.Entity.Qna;
-import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -19,7 +16,5 @@ public class ReplyDTO {
 
     private Qna qnaId;
 
-    private LocalDateTime regDate;
-
-    private LocalDateTime modDate;
+    // regDate와 modDate는 엔티티에서 자동으로 관리되므로 제거함
 }

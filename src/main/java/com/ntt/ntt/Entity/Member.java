@@ -4,6 +4,8 @@ import com.ntt.ntt.Constant.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Table(name="member")
 @Getter
@@ -31,5 +33,11 @@ public class Member extends BaseEntity {
     // 권한
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToMany
+    private List<Qna> qnas;
+
+    @OneToMany
+    private List<Reply> replies;
 
 }
