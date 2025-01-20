@@ -17,7 +17,7 @@
     <form th:action="@{/myPage/update}" method="post" onsubmit="return test();" th:object="${memberDTO}">
         <div class="mb-3 mt-3">
             <label for="memberName" class="form-label">이름 :</label>
-            <input type="text" class="form-control" id="memberName" name="memberName" th:value="*{memberName}">
+            <input type="text" class="form-control" id="memberName" name="memberName" th:value="*{memberName}" required>
         </div>
         <div class="mb-3">
             <label for="memberEmail" class="form-label">이메일 : *이메일은 변경할 수 없습니다.</label>
@@ -25,7 +25,7 @@
         </div>
         <div class="mb-3">
             <label for="currentPassword" class="form-label">현재 비밀번호 :</label>
-            <input type="password" class="form-control" id="currentPassword" name="currentPassword">
+            <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
         </div>
         <div class="mb-3">
             <label for="memberPassword" class="form-label">새 비밀번호 :</label>
@@ -34,6 +34,10 @@
         <div class="mb-3">
             <label for="memberPasswordCheck" class="form-label">새 비밀번호 확인 :</label>
             <input type="password" class="form-control" id="memberPasswordCheck" name="newPasswordCheck">
+        </div>
+        <!-- 성공 메시지 출력 -->
+        <div th:if="${successMessage}" class="alert alert-success">
+            <span th:text="${successMessage}"></span>
         </div>
         <!-- 오류 메시지 출력 -->
         <div th:if="${errorMessage}" class="alert alert-danger">
@@ -48,23 +52,43 @@
 
 
     <script type="text/javascript">
-        function test() {
-            var p1 = document.getElementById('memberPassword').value;
-            var p2 = document.getElementById('memberPasswordCheck').value;
 
-            if(p1.length < 6) {
-                alert('비밀번호는 6글자 이상이어야 합니다.');
+        function confirm() {
+            var currentPassword = document.getElementById('currentPassword').value;
+            if (!currentPassword) {
+                alert("현재 비밀번호를 입력하세요.");
                 return false;
             }
 
-            if(p1 != p2) {
-                alert("비밀번호가 일치하지 않습니다.");
-                return false;
-            } else{
+            function test() {
+                var currentPassword = document.getElementById('currentPassword').value;
+                var newPassword = document.getElementById('memberPassword').value;
+                var newPasswordCheck = document.getElementById('memberPasswordCheck').value;
+
+                // 현재 비밀번호 입력이 필수
+                if (!currentPassword) {
+                    alert("현재 비밀번호를 입력하세요.");
+                    return false;
+                }
+
+                // 새 비밀번호 입력란이 비어 있으면 비밀번호 변경을 하지 않음
+                if (newPassword.length === 0 && newPasswordCheck.length === 0) {
+                    return true; // 새 비밀번호가 없으면 현재 비밀번호 유지
+                }
+
+                // 새 비밀번호 유효성 검사
+                if (newPassword.length < 6) {
+                    alert('비밀번호는 6글자 이상이어야 합니다.');
+                    return false;
+                }
+
+                if (newPassword !== newPasswordCheck) {
+                    alert("새 비밀번호가 일치하지 않습니다.");
+                    return false;
+                }
+
                 return true;
-                alert("회원정보가 수정되었습니다.");
             }
-
         }
     </script>
 

@@ -15,7 +15,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -141,5 +143,14 @@ public class MemberService implements UserDetailsService {
 
         memberRepository.delete(member); // 회원 삭제
         log.info("회원 탈퇴 성공: {}", memberEmail);
+    }
+
+    // 전체 회원 조회
+    public List<MemberDTO> getAllMembers() {
+        List<Member> members = memberRepository.findAll(); // 모든 회원을 조회
+        System.out.println("전체 회원 수: " + members.size()); // 디버깅용 로그
+        return members.stream()
+                .map(member -> modelMapper.map(member, MemberDTO.class))
+                .collect(Collectors.toList());
     }
 }

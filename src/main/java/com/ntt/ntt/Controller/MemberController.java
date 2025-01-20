@@ -9,7 +9,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequiredArgsConstructor
@@ -67,13 +69,14 @@ public class MemberController {
 
     // 회원정보 수정 처리
     @PostMapping("/myPage/update")
-    public String updateProc(MemberDTO memberDTO, Model model) {
+    public String updateMember(@ModelAttribute MemberDTO memberDTO, RedirectAttributes redirectAttributes) {
         try {
             memberService.update(memberDTO);
-            return "redirect:/myPage/update"; // 수정 후 다시 해당 페이지로 리다이렉트
-        } catch (IllegalArgumentException e) {
-            model.addAttribute("errorMessage", e.getMessage()); // 오류 메시지 전달
-            return "myPage/update"; // 오류 발생 시 수정 페이지로 돌아가기
+            redirectAttributes.addFlashAttribute("successMessage", "회원정보 수정 성공");
+            return "redirect:/myPage/update"; // 성공 후 마이페이지로 이동
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "회원정보 수정 중 오류가 발생했습니다.");
+            return "redirect:/myPage/update";
         }
     }
 
