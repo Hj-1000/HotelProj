@@ -20,10 +20,14 @@
             <div class="row g-3 align-items-center">
                 <h3><a th:text="${companyDTO.companyName}">NTT hotel</a></h3>
                 <p>본사 관리자명 : <span th:text="${companyDTO.companyManager}">마동석</span></p>
+                <div th:each="img : ${companyDTO.companyImgDTOList}">
+                    <!-- 이미지 경로(path) -->
+                    <img th:src="@{'/upload/' + ${img.imagePath}}" alt="Company Image" width="300px"/>
+                </div>
             </div>
         </div>
 
-        <!-- 추가 버튼 -->
+        <!-- 버튼 -->
         <div class="text-end mt-3">
             <button class="btn btn-primary" style="background-color: black" onclick="location.href='/company/list' ">목록</button>
             <a class="btn btn-primary" th:href="@{/company/modify(companyId=${companyDTO.companyId})}">수정</a>

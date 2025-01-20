@@ -13,11 +13,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry){
-
-        // 만약에 /upload/** 호출이 오면 file://c:/data 로 연결
+        // file://c:/data/ 경로에서 file:/// 경로로 시작해야 하고, 실제 파일이 있는 폴더를 읽어올 수 있게 설정
+        String filePath = uploadPath.replace("file://", "");
         registry.addResourceHandler("/upload/**")
-                .addResourceLocations(uploadPath);
-
+                .addResourceLocations("file:///" + filePath);  // file:// 로 시작하는 경로로 설정
     }
 
 }
