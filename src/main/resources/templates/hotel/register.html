@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+야호 호텔 등록 페이지!!
+<form action="/hotel/register" method="post" enctype="multipart/form-data">
+    <div class="mb-3 mt-3">
+        <label for="hotelName" class="form-label">호텔명:</label>
+        <input type="text" class="form-control" id="hotelName" name="hotelName">
+    </div>
+    <div class="mb-3">
+        <label for="hotelLocation" class="form-label">호텔지역:</label>
+        <input type="text" class="form-control" id="hotelLocation" name="hotelLocation">
+    </div>
+    <div class="mb-3 mt-3">
+        <label for="hotelAddress" class="form-label">호텔주소:</label>
+        <input type="text" class="form-control" id="hotelAddress" name="hotelAddress">
+    </div>
+    <div class="mb-3">
+        <label for="hotelInfo" class="form-label">호텔상세:</label>
+        <textarea class="form-control" id="hotelInfo" name="hotelInfo"></textarea>
+    </div>
+    <div class="mb-3">
+        <label for="hotelPhone" class="form-label">호텔전화:</label>
+        <input type="text" class="form-control" id="hotelPhone" name="hotelPhone">
+    </div>
+    <div class="mb-3 mt-3">
+        <label for="hotelEmail" class="form-label">호텔이메일:</label>
+        <input type="email" class="form-control" id="hotelEmail" name="hotelEmail">
+    </div>
+    <div class="mb-3 mt-3">
+        <label for="hotelCheckIn" class="form-label">호텔체크인:</label>
+        <input type="text" class="form-control" id="hotelCheckIn" name="hotelCheckIn">
+    </div>
+    <div class="mb-3">
+        <label for="hotelCheckOut" class="form-label">호텔체크아웃:</label>
+        <input type="text" class="form-control" id="hotelCheckOut" name="hotelCheckOut">
+    </div>
+    <div class="mb-3">
+        <label for="hotelImg" class="form-label">호텔이미지:</label>
+        <input type="file" class="form-control" id="hotelImg" name="hotelImg">
+    </div>
+
+
+
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+</body>
+</html>
