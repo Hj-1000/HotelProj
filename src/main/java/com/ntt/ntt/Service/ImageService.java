@@ -24,6 +24,33 @@ public class ImageService {
     @Value("${dataUploadPath}")
     private String IMG_LOCATION;
 
+    // 본사 이미지 등록
+    public List<String> registerCompanyImage(Integer companyId, List<MultipartFile> imageFiles) {
+        // 파일 업로드 처리
+        List<String> filenames = fileUpload.FileUpload(IMG_LOCATION, imageFiles);
+        if (filenames == null || filenames.contains(null)) {
+            throw new RuntimeException("파일 업로드 실패");
+        }
+
+        try {
+            for (int i = 0; i < filenames.size(); i++) {
+                String filename = filenames.get(i);
+                if (filename != null) {
+                    Image image = new Image();
+                    image.setCompany(new Company(companyId));
+                    image.setImageName(filename);
+                    image.setImageOriginalName(imageFiles.get(i).getOriginalFilename());
+                    image.setImagePath(IMG_LOCATION + filename);
+                    imageRepository.save(image); // DB 저장
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("이미지 데이터 저장 실패: " + e.getMessage(), e);
+        }
+
+        return filenames; // 저장된 파일명 리스트 반환
+    }
+
     // 호텔 이미지 등록
     public List<String> registerHotelImage(Integer hotelId, List<MultipartFile> imageFiles) {
         // 파일 업로드 처리
@@ -185,6 +212,7 @@ public class ImageService {
 
         return filenames; // 저장된 파일명 리스트 반환
     }
+
 
     // 이미지 수정
     public String updateImage(Integer imageId, List<MultipartFile> newImageFile) {

@@ -25,6 +25,10 @@ public class Image extends BaseEntity {
     private String imageMain;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "companyId")
+    private Company company;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hotelId")
     private Hotel hotel;
 

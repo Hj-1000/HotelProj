@@ -1,6 +1,8 @@
 package com.ntt.ntt.Controller.company;
 
 import com.ntt.ntt.DTO.CompanyDTO;
+import com.ntt.ntt.Entity.Image;
+import com.ntt.ntt.Service.ImageService;
 import com.ntt.ntt.Service.company.CompanyService;
 import com.ntt.ntt.Util.PaginationUtil;
 import lombok.AllArgsConstructor;
@@ -16,6 +18,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.*;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -25,8 +29,9 @@ import java.util.Map;
 public class CompanyController {
 
     private final CompanyService companyService;
-
     private final PaginationUtil paginationUtil;
+
+    private final ImageService imageService;
 
     //등록폼
     @GetMapping("/register")
@@ -35,9 +40,11 @@ public class CompanyController {
     }
     //등록처리
     @PostMapping("/register")
-    public String registerProc(@ModelAttribute CompanyDTO companyDTO) {
+    public String registerProc(@ModelAttribute CompanyDTO companyDTO, List<MultipartFile> imageFiles) {
         log.info("본사 등록 진입");
-        companyService.register(companyDTO);
+
+        companyService.register(companyDTO, imageFiles);
+
         return "redirect:/company/list";
     }
 

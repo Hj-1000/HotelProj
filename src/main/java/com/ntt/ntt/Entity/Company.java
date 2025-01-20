@@ -3,6 +3,8 @@ package com.ntt.ntt.Entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Table(name="company")
 @Getter
@@ -25,5 +27,13 @@ public class Company extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "memberId")
     private Member member;
+
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL,
+            orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Image> companyImageList;
+
+    public Company(Integer companyId) {
+        this.companyId = companyId;
+    }
 
 }

@@ -101,13 +101,16 @@
                         <tr th:each="data:${companyDTOS}">
                             <td th:text="${data.companyId}">1</td>
                             <td >
-                                <a th:href="@{/company/read(companyId=${data.companyId})}" th:text="${data.companyName}">NTT호텔</a>
+                                <a th:href="@{/company/read(companyId=${data.companyId})}" style="text-decoration: none" th:text="${data.companyName}">NTT호텔</a>
                             </td>
                             <td th:text="${data.companyManager}">우리</td>
                             <!--나중에 지사수, 매장수 업데이트할거임~!-->
                             <td >2</td>
                             <td >2</td>
-                            <td><span class="badge bg-primary">아니오</span></td>
+                            <td>
+                                <!--삭제 버튼 누르면 해당 본사 삭제됨-->
+                                <a th:href="@{/company/delete(companyId=${data.companyId})}" style="text-decoration: none" class="badge bg-danger delBtn">삭제</a>
+                            </td>
                         </tr>
                     </th:block>
                     </tbody>
