@@ -25,10 +25,11 @@ public class ServiceCate extends BaseEntity {
     @JoinColumn(name = "hotelId")
     private Hotel hotelId;
 
-    @OneToMany(mappedBy = "serviceCate", cascade = CascadeType.PERSIST,
+    @OneToMany(mappedBy = "serviceCate", cascade = CascadeType.ALL,
             orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Image> serviceCateImageList;
 
+    //이미지 서비스 사용할 때 필요한 부모 생성자 매서드
     public ServiceCate(Integer serviceCateId) {
         this.serviceCateId = serviceCateId;
     }

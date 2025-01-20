@@ -20,7 +20,7 @@ public class ImageService {
 
     private final ImageRepository imageRepository;
     private final FileUpload fileUpload;
-    @Value("c://data")
+    @Value("${dataUploadPath}")
     private String IMG_LOCATION;
 //    private static final String IMG_LOCATION = "c:/ntt/images/"; // 이미지 저장 경로
 
