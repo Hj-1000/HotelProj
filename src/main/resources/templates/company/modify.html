@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>NTT호텔 - 본사수정</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" th:href="@{/css/user.css}">
+</head>
+<body>
+<div id="wrapper" layout:fragment="content">
+    <div class="container-fluid mt-4">
+        <h2 class="mb-3">호텔본사 수정</h2>
+        <!-- 폼 -->
+        <div class="card p-4 mb-4">
+            <div class="row g-3 align-items-center">
+                <form action="/company/modify" method="post" enctype="multipart/form-data" th:object="${companyDTO}">
+                    <input type="hidden" class="form-control" id="companyId" name="companyId" th:field="*{companyId}">
+
+                    <div class="mb-3 mt-3">
+                        <label for="companyName" class="form-label">본사명:</label>
+                        <input type="text" class="form-control" id="companyName" name="companyName" th:field="*{companyName}">
+                    </div>
+                    <div class="mb-3 mt-3">
+                        <!--나중에 자동으로 서비스에서 등록되도록 바꿀 것-->
+                        <label for="companyManager" class="form-label">본사관리자명:</label>
+                        <input type="text" class="form-control" id="companyManager" name="companyManager" th:field="*{companyManager}">
+                    </div>
+                    <div style="text-align: right">
+                        <button type="submit" class="btn btn-primary">등록</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+</body>
+</html>
