@@ -4,7 +4,10 @@ import com.ntt.ntt.Entity.Member;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+@Builder
 @Getter
 @Setter
 @ToString
@@ -37,5 +40,8 @@ public class HotelDTO {
     private LocalDateTime regDate;
 
     private LocalDateTime modDate;
+
+    @Builder.Default
+    private List<ImageDTO> hotelImgDTOList = new ArrayList<>();
 
 }

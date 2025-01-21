@@ -29,8 +29,6 @@ public class CompanyController {
     private final CompanyService companyService;
     private final PaginationUtil paginationUtil;
 
-    private final ImageService imageService;
-
     //등록폼
     @GetMapping("/register")
     public String registerForm() {
