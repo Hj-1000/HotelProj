@@ -66,9 +66,9 @@ public class CompanyService {
 
 
     //목록
-    public Page<CompanyDTO> list(Pageable page) {
+    public Page<CompanyDTO> list(Pageable page, String keyword, String searchType) {
 
-        //1. 페이지정보를 재가공
+        // 1. 페이지 정보 재가공
         int currentPage = page.getPageNumber() - 1;
         int pageSize = 10;
         Pageable pageable = PageRequest.of(
@@ -76,15 +76,32 @@ public class CompanyService {
                 Sort.by(Sort.Direction.DESC, "companyId")
         );
 
-        //2. 조회
-        Page<Company> companies = companyRepository.findAll(pageable);
-        //검색 findByCompanyName, findByCompanyManager =>if문으로 분류따라 조회
-        //검색 findByCompanyNameOrCompanyManager=>검색어가 둘 중 하나라도 포함되면 조회
+        // 2. 검색타입에 따른 회사 조회
+        Page<Company> companies;
 
-        //3. 변환
-        Page<CompanyDTO> companyDTOS = companies.map(
-                entity -> modelMapper.map(entity, CompanyDTO.class)
-        );
+        if (keyword != null && !keyword.isEmpty()) {
+            String keywordLike = "%" + keyword + "%";  // LIKE 조건을 위한 검색어 처리
+
+            if ("name".equals(searchType)) {
+                // 회사명에 검색어 포함된 경우 찾기
+                companies = companyRepository.findByCompanyNameLike(keywordLike, pageable);
+            } else if ("manager".equals(searchType)) {
+                // 관리자명에 검색어 포함된 경우 찾기
+                companies = companyRepository.findByCompanyManagerLike(keywordLike, pageable);
+            } else if ("both".equals(searchType)) {
+                // 회사명 또는 관리자명에 검색어 포함된 경우 찾기
+                companies = companyRepository.findByCompanyNameLikeOrCompanyManagerLike(keywordLike, keywordLike, pageable);
+            } else {
+                // 기본적으로 이름과 관리자로 모두 검색
+                companies = companyRepository.findByCompanyNameLikeOrCompanyManagerLike(keywordLike, keywordLike, pageable);
+            }
+        } else {
+            // 검색어가 없으면 모든 회사 리스트를 조회
+            companies = companyRepository.findAll(pageable);
+        }
+
+        // 3. Company -> CompanyDTO 변환
+        Page<CompanyDTO> companyDTOS = companies.map(entity -> modelMapper.map(entity, CompanyDTO.class));
 
         return companyDTOS;
     }
