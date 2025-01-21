@@ -7,11 +7,13 @@ import com.ntt.ntt.Entity.Image;
 import com.ntt.ntt.Repository.ImageRepository;
 import com.ntt.ntt.Repository.company.CompanyRepository;
 import com.ntt.ntt.Service.ImageService;
+import com.ntt.ntt.Util.FileUpload;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,12 +33,18 @@ import java.util.stream.Collectors;
 @Log4j2
 public class CompanyService {
 
+    //동적으로 경로를 설정하는 경우
+    @Value("${file://c:/data/}")
+    private String IMG_LOCATION;
+
     private final ImageRepository imageRepository;
     private final CompanyRepository companyRepository;
     private final ModelMapper modelMapper;
 
     @Autowired
     private final ImageService imageService;
+    @Autowired
+    private FileUpload fileUpload;
 
     //등록
     public void register(CompanyDTO companyDTO, List<MultipartFile> imageFiles) {
@@ -111,24 +119,99 @@ public class CompanyService {
 
     }
 
-    //수정
-    public void update(CompanyDTO companyDTO) {
-        //해당 데이터의 id로 조회
-        Optional<Company> company = companyRepository.findById(companyDTO.getCompanyId());
-        if (company.isPresent()) { //존재하면 수정
-            //변환
-            Company company1 = modelMapper.map(companyDTO, Company.class);
-            //저장
-            companyRepository.save(company1);
+//    //기존 이미지 없을 때 버전
+//    //수정
+//    public void update(CompanyDTO companyDTO) {
+//        //해당 데이터의 id로 조회
+//        Optional<Company> company = companyRepository.findById(companyDTO.getCompanyId());
+//        if (company.isPresent()) { //존재하면 수정
+//            //변환
+//            Company company1 = modelMapper.map(companyDTO, Company.class);
+//            //저장
+//            companyRepository.save(company1);
+//        }
+//    }
+//
+//
+//    //삭제
+//    public void delete(Integer companyId) {
+//        companyRepository.deleteById(companyId);
+//    }
+
+    // 회사 정보 수정 (이미지 수정 포함)
+    @Transactional
+    public void update(CompanyDTO companyDTO, List<MultipartFile> newImageFiles) {
+        // 회사 조회 및 수정
+        Optional<Company> companyOpt = companyRepository.findById(companyDTO.getCompanyId());
+        if (companyOpt.isPresent()) {
+            Company company = companyOpt.get();
+            company.setCompanyName(companyDTO.getCompanyName());
+            companyRepository.save(company);  // 회사 이름 저장
+
+            // 이미지 수정 처리
+            if (newImageFiles != null && !newImageFiles.isEmpty()) {
+                // 회사에 이미지를 여러 개 다룰 경우, 기존 이미지 삭제 및 새 이미지 업로드
+                List<Image> existingImages = company.getCompanyImageList();  // 회사에 연결된 이미지들 가져오기
+
+                // 기존 이미지 삭제 처리
+                for (Image existingImage : existingImages) {
+                    fileUpload.FileDelete(IMG_LOCATION, existingImage.getImageName());
+                    imageRepository.delete(existingImage);  // 기존 이미지 삭제
+                }
+
+                // 회사의 이미지 리스트에서 삭제된 이미지를 제거
+                company.getCompanyImageList().clear();  // 이미지를 모두 제거
+
+                // 새 이미지들 업로드 처리
+                List<String> newFilenames = fileUpload.FileUpload(IMG_LOCATION, newImageFiles);
+                if (newFilenames == null || newFilenames.isEmpty()) {
+                    throw new RuntimeException("파일 업로드 실패");
+                }
+
+                // 업로드된 새 이미지들 저장
+                for (int i = 0; i < newFilenames.size(); i++) {
+                    Image newImage = new Image();
+                    newImage.setImageName(newFilenames.get(i));
+                    newImage.setImageOriginalName(newImageFiles.get(i).getOriginalFilename());
+                    newImage.setImagePath(IMG_LOCATION + newFilenames.get(i));
+
+                    // 이미지와 회사 관계 설정
+                    newImage.setCompany(company);  // 이미지와 회사 연결
+
+                    // 이미지 저장
+                    imageRepository.save(newImage);
+
+                    // 회사와 이미지 연결 (회사 정보에 이미지 추가)
+                    company.getCompanyImageList().add(newImage);  // 이미지를 회사의 이미지 리스트에 추가
+                }
+
+                // 회사 정보 저장 (이미지와의 관계 업데이트)
+                companyRepository.save(company);  // 회사 정보와 연결된 이미지를 저장
+            }
+        } else {
+            throw new RuntimeException("본사를 찾을 수 없습니다.");
         }
     }
-
-
-    //삭제
+    // 회사 삭제
+    @Transactional
     public void delete(Integer companyId) {
-        companyRepository.deleteById(companyId);
-    }
+        Optional<Company> companyOpt = companyRepository.findById(companyId);
+        if (companyOpt.isPresent()) {
+            Company company = companyOpt.get();
 
+            // 회사에 연결된 이미지 삭제
+            List<Image> imagesToDelete = company.getCompanyImageList();
+            for (Image image : imagesToDelete) {
+                // 이미지 서비스에서 물리적 파일 삭제 + DB에서 삭제
+                imageService.deleteImage(image.getImageId());
+            }
+
+            // 회사 삭제
+            companyRepository.delete(company);
+        } else {
+            throw new RuntimeException("회사를 찾을 수 없습니다.");
+        }
+    }
 
 
 }

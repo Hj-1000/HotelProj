@@ -24,6 +24,9 @@
                 </div>
                 <h3><a th:text="${companyDTO.companyName}">NTT hotel</a></h3>
                 <p>본사 관리자명 : <span th:text="${companyDTO.companyManager}">마동석</span></p>
+<!--                <p>지사 수 : <span th:text="${companyDTO.companyManager}">마동석</span></p>-->
+<!--                <p>매장 수 : <span th:text="${companyDTO.companyManager}">마동석</span></p>-->
+                <p>가입일 : <span>[[${#temporals.format(companyDTO.regDate, 'yyyy년 MM월 dd일')}]]</span></p>
             </div>
         </div>
 
