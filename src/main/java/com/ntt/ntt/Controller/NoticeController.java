@@ -68,4 +68,20 @@ public class NoticeController {
         noticeService.delete(noticeId);
         return "redirect:/notice/list";
     }
+    @GetMapping("/notice/userlist")
+    public String userlistForm(Model model){
+        List<NoticeDTO> noticeDTOList = noticeService.list();
+        model.addAttribute("noticeDTOList", noticeDTOList);
+        return "notice/userlist";
+    }
+    @GetMapping("/notice/userread")
+    public String userreadForm(@RequestParam Integer noticeId, Model model) {
+        NoticeDTO noticeDTO = noticeService.read(noticeId);
+        model.addAttribute("notice", noticeDTO);
+        return "notice/userread";
+    }
 }
+
+
+
+
