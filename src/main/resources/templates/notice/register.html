@@ -1,5 +1,8 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
 <head>
   <meta charset="UTF-8">
   <title>Title</title>
@@ -14,7 +17,8 @@
   </style>
 </head>
 <body>
-<div th:replace="~{fragments/header::header}"></div>
+<div layout:fragment="content">
+<!--<div th:replace="~{fragments/header::header}"></div>-->
 <div id="container" class="container">
   <div id="row" class="row">
     <div class="col-3"></div>
@@ -50,6 +54,6 @@
     <div class="col-3"></div>
   </div><!--row끝-->
 </div><!--container끝-->
-<div th:replace="~{fragments/footer::footer}"></div>
+<!--<div th:replace="~{fragments/footer::footer}"></div>-->
 </body>
 </html>

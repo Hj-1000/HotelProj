@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>객실 수정</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <h1 class="text-center mb-5">객실 수정</h1>
+        <!-- Room Update Form -->
+        <form th:action="@{/manager/room/update/{roomId}(roomId=${room.roomId})}"
+              th:object="${room}" method="post" class="needs-validation" novalidate>
+            <!-- 객실 이름 -->
+            <div class="mb-3">
+                <label for="roomName" class="form-label">객실 이름</label>
+                <input type="text" class="form-control" id="roomName" th:field="*{roomName}" placeholder="객실 이름을 입력하세요" required>
+                <div class="invalid-feedback">
+                    객실 이름을 입력해야 합니다.
+                </div>
+            </div>
+
+            <!-- 객실 타입 -->
+            <div class="mb-3">
+                <label for="roomType" class="form-label">객실 타입</label>
+                <select class="form-select" id="roomType" th:field="*{roomType}" required>
+                    <option value="" disabled>객실 타입을 선택하세요</option>
+                    <option value="Single">Single Room</option>
+                    <option value="Double">Double Room</option>
+                    <option value="Suite">Suite Room</option>
+                </select>
+                <div class="invalid-feedback">
+                    객실 타입을 선택해야 합니다.
+                </div>
+            </div>
+
+            <!-- 객실 가격 -->
+            <div class="mb-3">
+                <label for="roomPrice" class="form-label">객실 가격 (KRW)</label>
+                <input type="number" class="form-control" id="roomPrice" th:field="*{roomPrice}" placeholder="가격을 입력하세요" required>
+                <div class="invalid-feedback">
+                    가격을 입력해야 합니다.
+                </div>
+            </div>
+
+            <!-- 객실 상태 -->
+            <div class="mb-3">
+                <label class="form-label">객실 상태</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" id="statusAvailable" th:field="*{roomStatus}" value="true">
+                    <label class="form-check-label" for="statusAvailable">예약 가능</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" id="statusUnavailable" th:field="*{roomStatus}" value="false">
+                    <label class="form-check-label" for="statusUnavailable">예약 불가</label>
+                </div>
+            </div>
+
+            <!-- 객실 설명 -->
+            <div class="mb-3">
+                <label for="roomInfo" class="form-label">객실 설명</label>
+                <textarea class="form-control" id="roomInfo" th:field="*{roomInfo}" placeholder="객실 설명을 입력하세요" rows="3"></textarea>
+            </div>
+
+            <!-- 객실 이미지 나중에 주석풀기-->
+            <!--<div class="mb-3">
+                <label for="roomImg" class="form-label">객실 이미지 URL</label>
+                <input type="text" class="form-control" id="roomImg" th:field="*{roomImg}" placeholder="이미지 URL을 입력하세요">
+            </div>-->
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary">수정</button>
+        </form>
+    </div>
+</div>
+<script>
+    (() => {
+        'use strict';
+        const forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
+</body>
+</html>

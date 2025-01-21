@@ -13,9 +13,16 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@SequenceGenerator(
+        name = "notice_seq",
+        sequenceName = "notice_seq",
+        initialValue = 1,
+        allocationSize = 1
+)
 public class Notice extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "notice_seq")
+//            IDENTITY)
     private Integer noticeId;
     // 공지사항 제목
     @Column(length = 50, nullable = false)
