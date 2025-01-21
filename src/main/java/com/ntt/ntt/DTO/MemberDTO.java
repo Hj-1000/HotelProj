@@ -33,6 +33,8 @@ public class MemberDTO {
 
     private String memberPhone;
 
+    private String memberStatus;
+
     private Role role;
 
     private LocalDateTime regDate;

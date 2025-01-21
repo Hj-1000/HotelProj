@@ -24,6 +24,8 @@
                 <a th:if="${#authentication.name == 'anonymousUser'}" href="/login" id="btn-add" class="nav-link login-link" data-bs-toggle="modal" data-bs-target="#addModal">로그인</a>
                 <a th:unless="${#authentication.name == 'anonymousUser'}" href="/logout" class="nav-link login-link">로그아웃</a>
                 <a th:unless="${#authentication.name == 'anonymousUser'}" href="/myPage/update" class="nav-link">마이페이지</a>
+                <!-- 어드민 권한이 있을 경우에만 표시 -->
+                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/admin/memberList" class="nav-link text-danger">관리자페이지</a>
             </nav>
         </div>
     </header>

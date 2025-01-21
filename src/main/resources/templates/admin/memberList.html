@@ -5,8 +5,8 @@
       layout:decorate="~{layouts/layout}">
 <head>
     <meta charset="UTF-8">
-
     <title>전체회원관리</title>
+
 </head>
 <body>
 <div layout:fragment="content">
@@ -14,61 +14,68 @@
         <h2 class="mb-3">전체회원관리</h2>
 
         <div class="card p-4">
-            <form>
+            <form th:action="@{/admin/memberList}" method="get">
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="매장유저권한" class="form-label">권한</label>
-                            <select class="form-select" id="매장유저권한">
-                                <option selected>선택</option>
-                                <option value="1">호텔장</option>
-                                <option value="2">매니저</option>
-                                <option value="3">사용자</option>
+                            <select class="form-select" id="매장유저권한" name="role">
+                                <option selected>전체</option>
+                                <option value="ADMIN">ADMIN</option>
+                                <option value="CHIEF">CHIEF</option>
+                                <option value="MANAGER">MANAGER</option>
+                                <option value="USER">USER</option>
                             </select>
                         </div>
                         <div class="mb-3">
                             <label for="아이디" class="form-label">아이디</label>
-                            <input type="email" class="form-control" id="아이디" placeholder="이메일">
+                            <input type="email" class="form-control" id="아이디" name="email" placeholder="이메일">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">상태</label>
-                            <div class="d-flex flex-wrap gap-3">
-                                <div class="form-check form-check-card px-0">
-                                    <input class="form-check-input visually-hidden " type="radio" name="상태" id="상태전체" value="전체" checked>
-                                    <label class="form-check-label btn btn-outline-primary px-4 py-2" for="상태전체">
-                                        전체
-                                    </label>
-                                </div>
-                                <div class="form-check form-check-card">
-                                    <input class="form-check-input visually-hidden" type="radio" name="상태" id="상태활성" value="활성">
-                                    <label class="form-check-label btn btn-outline-success px-4 py-2" for="상태활성">
-                                        활성
-                                    </label>
-                                </div>
-                                <div class="form-check form-check-card">
-                                    <input class="form-check-input visually-hidden" type="radio" name="상태" id="상태비활성" value="비활성">
-                                    <label class="form-check-label btn btn-outline-danger px-4 py-2" for="상태비활성">
-                                        비활성
-                                    </label>
+                            <label class="form-label">가입일</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-group" style="flex: 1;">
+                                    <input type="date" class="form-control" id="시작일" name="startDate">
+                                </div> ~
+                                <div class="form-group" style="flex: 1;">
+                                    <input type="date" class="form-control" id="종료일" name="endDate">
                                 </div>
                             </div>
                         </div>
+
                     </div>
 
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="이름" class="form-label">이름</label>
-                            <input type="text" class="form-control" id="이름" placeholder="이름">
+                            <input type="text" class="form-control" id="이름" name="name" placeholder="이름">
                         </div>
                         <div class="mb-3">
                             <label for="연락처" class="form-label">연락처</label>
-                            <input type="text" class="form-control" id="연락처" placeholder="연락처">
+                            <input type="text" class="form-control" id="연락처" name="phone" placeholder="연락처">
                         </div>
-
+                        <div class="mb-3">
+                            <label class="form-label">상태</label>
+                            <div class="d-flex flex-wrap gap-3">
+                                <div class="form-check form-check-card px-0" style="margin-left: 30px; margin-top: 7px">
+                                    <input class="form-check-input" type="radio" name="status" id="상태전체" value="전체" checked>
+                                    <label class="form-check-label" for="상태전체">전체</label>
+                                </div>
+                                <div class="form-check form-check-card" style="margin-top: 7px">
+                                    <input class="form-check-input" type="radio" name="status" id="상태활성" value="활성">
+                                    <label class="form-check-label" for="상태활성">활성</label>
+                                </div>
+                                <div class="form-check form-check-card" style="margin-top: 7px">
+                                    <input class="form-check-input" type="radio" name="status" id="상태비활성" value="비활성">
+                                    <label class="form-check-label" for="상태비활성">비활성</label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="text-center mt-3">
-                    <button type="button" class="btn btn-primary" style="background-color: black">조회</button>
+                    <!-- 버튼 type을 submit으로 변경 -->
+                    <button type="submit" class="btn btn-primary" style="background-color: black">조회</button>
                 </div>
             </form>
         </div>
@@ -86,31 +93,59 @@
                         <th>연락처</th>
                         <th>가입일</th>
                         <th>상태</th>
+                        <th>수정</th>
                     </tr>
                     </thead>
                     <tbody>
                     <th:block th:each="memberDTO : ${memberDTOList}">
                         <tr>
                             <td th:text="${memberDTO.memberId}">1</td>
-                            <td th:text="${memberDTO.role}">매니저</td>
+                            <td>
+                                <form th:action="@{/admin/update}" method="post">
+                                    <input type="hidden" th:value="${memberDTO.memberId}" name="memberId" />
+                                    <select class="form-select" name="role">
+                                        <option th:each="role : ${roles}"
+                                                th:value="${role}"
+                                                th:text="${role}"
+                                                th:selected="${memberDTO.role == role}"></option>
+                                    </select>
+                            </td>
                             <td th:text="${memberDTO.memberEmail}">test2@ggg.com</td>
                             <td th:text="${memberDTO.memberName}">신짱구</td>
                             <td th:text="${memberDTO.memberPhone}">010-2345-6789</td>
-                            <td th:text="${memberDTO.regDate}">2023-01-01</td>
+                            <td th:text="${#temporals.format(memberDTO.regDate, 'yyyy-MM-dd HH:mm:ss')}">2023-01-01</td>
                             <td>
-
+                                <select class="form-select" name="memberStatus">
+                                    <option value="활성" th:selected="${memberDTO.memberStatus == '활성'}">활성</option>
+                                    <option value="비활성" th:selected="${memberDTO.memberStatus == '비활성'}">비활성</option>
+                                </select>
                             </td>
+                            <td>
+                                <button type="submit" class="btn btn-primary">수정</button>
+                            </td>
+                            </form>
                         </tr>
                     </th:block>
                     </tbody>
                 </table>
 
-
-
-                <!-- 추가 버튼 -->
-                <div class="text-end">
-                    <button class="btn btn-primary" style="background-color: black" onclick="location.href='/admin/executiveRegister' ">추가</button>
+                <!-- 회원정보 수정 성공시 메시지 -->
+                <div id="successMessage" th:if="${successMessage}" class="alert alert-success" role="alert">
+                    <span th:text="${successMessage}"></span>
                 </div>
+
+                <script>
+                    // 회원정보 수정 성공시 메시지가 뜨면 일정시간 이후에 메시지를 삭제(숨기기) 해주는 기능 추가
+                    window.onload = function() {
+                        var successMessage = document.getElementById('successMessage');
+                        if (successMessage) {
+                            setTimeout(function() {
+                                successMessage.style.display = 'none';
+                            }, 5000);  // 5초 후에 숨기기
+                        }
+                    };
+                </script>
+
             </div>
         </div>
     </div>

@@ -49,7 +49,8 @@
                     <li class="nav-item">
                         <a href="#" class="nav-link text-white dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#admin-member-menu" aria-expanded="false"><i class="fa-regular fa-snowflake"></i> 회원관리</a>
                         <ul class="collapse list-unstyled ps-3" id="admin-member-menu">
-                            <li><a href="/admin/memberList" class="nav-link text-white">전체회원관리</a></li>
+                            <!-- 전체회원관리 페이지는 어드민으로 로그인했을때만 보이도록 수정 -->
+                            <li><a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/admin/memberList" class="nav-link text-white">전체회원관리</a></li>
                             <li><a href="/admin/executive" class="nav-link text-white">임원관리</a></li>
                             <li><a href="/admin/hotelHeadquarters" class="nav-link text-white">호텔본사관리</a></li>
                         </ul>

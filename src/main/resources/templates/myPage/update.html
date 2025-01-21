@@ -35,6 +35,10 @@
             <label for="memberPasswordCheck" class="form-label">새 비밀번호 확인 :</label>
             <input type="password" class="form-control" id="memberPasswordCheck" name="newPasswordCheck">
         </div>
+        <div class="mb-3">
+            <label for="memberPhone" class="form-label">연락처 :</label>
+            <input type="text" class="form-control" id="memberPhone" name="memberPhone" th:value="*{memberPhone}">
+        </div>
         <!-- 성공 메시지 출력 -->
         <div th:if="${successMessage}" class="alert alert-success">
             <span th:text="${successMessage}"></span>
@@ -43,11 +47,13 @@
         <div th:if="${errorMessage}" class="alert alert-danger">
             <span th:text="${errorMessage}"></span>
         </div>
+        <div class="d-flex gap-2">
         <button type="submit" class="btn btn-primary">회원정보 수정</button>
     </form>
     <form th:action="@{/delete}" method="post" onsubmit="return confirm('정말로 탈퇴하시겠습니까?');">
         <button type="submit" class="btn btn-danger">회원탈퇴</button>
     </form>
+</div>
 
 
 
