@@ -22,7 +22,9 @@ public class Qna extends BaseEntity {
     @Column(length = 255, nullable = false)
     private String qnaContent;
 
+
     @ManyToOne
-    @JoinColumn(name = "memberId")
+    @JoinColumn(name = "member")  // 외래 키 컬럼명이 memberId일 때
     private Member member;
+
 }
