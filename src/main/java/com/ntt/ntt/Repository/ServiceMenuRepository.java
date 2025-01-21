@@ -1,9 +1,9 @@
 package com.ntt.ntt.Repository;
 
-import com.ntt.ntt.Entity.ServiceCate;
+import com.ntt.ntt.Entity.ServiceMenu;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ServiceCateRepository extends JpaRepository<ServiceCate, Integer> {
+public interface ServiceMenuRepository extends JpaRepository<ServiceMenu, Integer> {
 }
