@@ -2,13 +2,16 @@ package com.ntt.ntt.Service;
 
 import com.ntt.ntt.DTO.ImageDTO;
 import com.ntt.ntt.DTO.ServiceCateDTO;
+import com.ntt.ntt.Entity.Image;
 import com.ntt.ntt.Entity.ServiceCate;
 import com.ntt.ntt.Repository.ImageRepository;
 import com.ntt.ntt.Repository.ServiceCateRepository;
+import com.ntt.ntt.Util.FileUpload;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -35,6 +39,11 @@ public class ServiceCateService{
 
     // 이미지 등록할 ImageService 의존성 추가
     private final ImageService imageService;
+    private final FileUpload fileUpload;
+
+    @Value("${dataUploadPath}")
+    private String IMG_LOCATION;
+
     //서비스 카테고리 등록
     /*--------------------------------
     함수명 : void insert(ServiceCateDTO seviceCateDTO, MultipartFile multipartFile)
@@ -57,7 +66,7 @@ public class ServiceCateService{
         log.info("컨트롤러에서 들어온 이미지 정보" + multipartFile);
         log.info("ServiceCate object after mapping: {}", serviceCate);
 
-//        log.info("저장된 serviceCate" + serviceCate);
+
 
     }
     //서비스 카테고리 목록
@@ -123,65 +132,93 @@ public class ServiceCateService{
     }
 
 
-//    //서비스 카테로고리 수정
-//    /*--------------------------------
-//    함수명 : void update(ServiceCateDTO serviceCateDTO, MultipartFile multipartFile)
-//    인수 : 조회할 메뉴 카테고리 번호
-//    출력 : 없음, 저장한 레코드 전달
-//    설명 : 전달받은 데이터를 데이터베이스에 저장
-//    --------------------------------*/
-//    public void update(ServiceCateDTO serviceCateDTO, MultipartFile multipartFile) {
-//        //1. 변환
-//        ServiceCate serviceCate = modelMapper.map(serviceCateDTO, ServiceCate.class);
-//        //2. 이미지 파일 저장
-//        if (!multipartFile.isEmpty()){
-//            //3. 기존에 존재하는 이미지 파일이 있는지 확인 후 삭제
-//            if (serviceCate.getServiceCateImg() != null) {
-//                fileUpload.FileDelete(imgLocation, serviceCate.getServiceCateImg());
-//            }
-//            //4. 새로운 이미지 파일을 저장
-//            String newImageName = fileUpload.FileUpload(imgLocation, multipartFile);
-//            serviceCate.setServiceCateImg(newImageName);
-//        }
-//        serviceCateRepository.save(serviceCate);
-//    }
-//
-//    public ServiceCate updateCheck(ServiceCateDTO serviceCateDTO, MultipartFile multipartFile) {
-//        //1. 변환
-//        ServiceCate serviceCate = modelMapper.map(serviceCateDTO, ServiceCate.class);
-//        //2. 이미지 파일 저장
-//        if (!multipartFile.isEmpty()){
-//            //3. 기존에 존재하는 이미지 파일이 있는지 확인 후 삭제
-//            if (serviceCate.getServiceCateImg() != null) {
-//                fileUpload.FileDelete(imgLocation, serviceCate.getServiceCateImg());
-//            }
-//            //4. 새로운 이미지 파일을 저장
-//            String newImageName = fileUpload.FileUpload(imgLocation, multipartFile);
-//            serviceCate.setServiceCateImg(newImageName);
-//        }
-//        return serviceCateRepository.save(serviceCate);
-//    }
-//
-//    //서비스 카테로고리 삭제
-//    /*--------------------------------
-//    함수명 : void delete(Integer serviceCateId)
-//    인수 : 조회할 메뉴 카테고리 번호
-//    출력 : 없음, 저장한 레코드 전달
-//    설명 : 전달받은 데이터를 데이터베이스에 저장
-//    --------------------------------*/
-//    public void delete(Integer serviceCateId) {
-//        serviceCateRepository.deleteById(serviceCateId);
-//    }
-//
-//    // 결과값을 불리언으로 만들어서 제시
-//    public boolean deleteCheck(Integer serviceCateId) {
-//        serviceCateRepository.deleteById(serviceCateId);
-//        Optional<ServiceCate> read = serviceCateRepository.findById(serviceCateId);
-//        if (read.isPresent()) {
-//            return false; //삭제 실패
-//        } else {
-//            return true; //삭제 성공
-//        }
-//    }
+    //서비스 카테로고리 수정
+    /*--------------------------------
+    함수명 : void update(ServiceCateDTO serviceCateDTO, MultipartFile multipartFile)
+    인수 : 조회할 메뉴 카테고리 번호
+    출력 : 없음, 저장한 레코드 전달
+    설명 : 전달받은 데이터를 데이터베이스에 저장
+    --------------------------------*/
+    // 수정 메서드 최종 수정
+    public void update(ServiceCateDTO serviceCateDTO, List<MultipartFile> multipartFile) {
+        // 기존에 등록된 데이터 pk값으로 찾기
+        Optional<ServiceCate> serviceCateOpt = serviceCateRepository.findById(serviceCateDTO.getServiceCateId());
+
+        if (serviceCateOpt.isPresent()) {
+            ServiceCate serviceCate = serviceCateOpt.get();
+            // ServiceCate 정보 업데이트
+            serviceCate.setServiceCateName(serviceCateDTO.getServiceCateName());
+            serviceCateRepository.save(serviceCate); // 카테고리 정보 업데이트
+
+            // 기존 이미지들 삭제 및 새 이미지 등록 (있다면)
+            if (multipartFile != null && !multipartFile.isEmpty()) {
+                // 기존 이미지들을 삭제하고 새 이미지를 업로드
+                List<Image> existingImages = serviceCate.getServiceCateImageList();
+                // 기존 이미지를 삭제
+                for (Image existingImage : existingImages) {
+                    log.info(existingImage.getImageId());
+                    imageRepository.delete(existingImage);
+
+                    log.info("기존이미지를 잘 삭제했나?");
+                    log.info(existingImage);
+                }
+                //회사의 이미지 리스트에서 삭제된 이미지 제거
+                serviceCate.getServiceCateImageList().clear(); // 이미지 모두 제거
+
+                // 새 이미지들 업로드 처리
+                List<String> newFilenames = fileUpload.FileUpload(IMG_LOCATION, multipartFile);
+                if (newFilenames == null || newFilenames.isEmpty()) {
+                    throw new RuntimeException("파일 업로드 실패");
+                }
+
+                // 업로드된 새 이미지들 저장
+                for (int i = 0; i < newFilenames.size(); i++) {
+                    Image newImage = new Image();
+                    newImage.setImageName(newFilenames.get(i));
+                    newImage.setImageOriginalName(multipartFile.get(i).getOriginalFilename());
+                    newImage.setImagePath(IMG_LOCATION + newFilenames.get(i));
+
+                    // 이미지와 회사 관계 설정
+                    newImage.setServiceCate(serviceCate);  // 이미지와 회사 연결
+
+                    // 이미지 저장
+                    imageRepository.save(newImage);
+
+                    // 회사와 이미지 연결 (회사 정보에 이미지 추가)
+                    serviceCate.getServiceCateImageList().add(newImage);  // 이미지를 회사의 이미지 리스트에 추가
+                }
+
+                // 새 이미지 등록
+                serviceCateRepository.save(serviceCate);
+            }
+
+            log.info("서비스 카테고리 및 이미지가 수정되었습니다.");
+        } else {
+            throw new RuntimeException("서비스 카테고리를 찾을 수 없습니다.");
+        }
+    }
+
+
+    //서비스 카테로고리 삭제
+    /*--------------------------------
+    함수명 : void delete(Integer serviceCateId)
+    인수 : 조회할 메뉴 카테고리 번호
+    출력 : 없음, 저장한 레코드 전달
+    설명 : 전달받은 데이터를 데이터베이스에 저장
+    --------------------------------*/
+    public void delete(Integer serviceCateId) {
+        serviceCateRepository.deleteById(serviceCateId);
+    }
+
+    // 결과값을 불리언으로 만들어서 제시
+    public boolean deleteCheck(Integer serviceCateId) {
+        serviceCateRepository.deleteById(serviceCateId);
+        Optional<ServiceCate> read = serviceCateRepository.findById(serviceCateId);
+        if (read.isPresent()) {
+            return false; //삭제 실패
+        } else {
+            return true; //삭제 성공
+        }
+    }
 }
 

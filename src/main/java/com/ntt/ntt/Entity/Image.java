@@ -7,7 +7,7 @@ import lombok.*;
 @Table(name="image")
 @Getter
 @Setter
-@ToString(exclude = "hotel")
+@ToString(exclude = {"company", "hotel", "room", "serviceCate", "serviceMenu", "notice", "banner"})
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -51,5 +51,7 @@ public class Image extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "bannerId")
     private Banner banner;
+
+
 
 }
