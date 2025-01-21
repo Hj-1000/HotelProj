@@ -16,41 +16,41 @@
     <div layout:fragment="content">
         <form action="/admin/register" method="post" onsubmit="return test();">
             <div class="mb-3 mt-3">
-                <label for="memberName" class="form-label">관리자이름 :</label>
-                <input type="text" class="form-control" id="memberName" name="memberName">
+                <label for="memberName" class="form-label">*관리자이름 :</label>
+                <input type="text" class="form-control" id="memberName" name="memberName" required>
             </div>
             <div class="mb-3">
-                <label for="memberEmail" class="form-label">이메일 :</label>
-                <input type="email" class="form-control" id="memberEmail" name="memberEmail">
+                <label for="memberEmail" class="form-label">*이메일 :</label>
+                <input type="email" class="form-control" id="memberEmail" name="memberEmail" required>
             </div>
             <div class="mb-3">
-                <label for="memberPassword" class="form-label">비밀번호 :</label>
-                <input type="password" class="form-control" id="memberPassword" name="memberPassword">
+                <label for="memberPassword" class="form-label">*비밀번호 :</label>
+                <input type="password" class="form-control" id="memberPassword" name="memberPassword" required>
             </div>
             <div class="mb-3">
-                <label for="memberPasswordCheck" class="form-label">비밀번호 확인 :</label>
-                <input type="password" class="form-control" id="memberPasswordCheck" name="memberPasswordCheck">
+                <label for="memberPasswordCheck" class="form-label">*비밀번호 확인 :</label>
+                <input type="password" class="form-control" id="memberPasswordCheck" name="memberPasswordCheck" required>
             </div>
             <div class="mb-3">
                 <label for="memberPhone" class="form-label">전화번호 :</label>
                 <input type="text" class="form-control" id="memberPhone" name="memberPhone">
             </div>
             <div class="mb-3">
-                <label for="code" class="form-label">인증코드 :</label>
-                <input type="text" class="form-control" id="code" name="code" placeholder="인증코드는 980425">
+                <label for="code" class="form-label">*인증코드 :</label>
+                <input type="text" class="form-control" id="code" name="code" placeholder="인증코드는 980425" required>
             </div>
             <div class="mb-3">
-                <label for="role" class="form-label">권한 :</label>
+                <label for="role" class="form-label">*권한 :</label>
                 <select id="role" name="role">
                     <option value="ADMIN">어드민</option>
                     <option value="CHIEF">호텔장</option>
                     <option value="MANAGER">매니저</option>
                 </select>
             </div>
+            <p>* 표시는 필수 입력 항목입니다.</p>
             <button type="submit" class="btn btn-primary">회원가입</button>
+            <button type="button" class="btn btn-danger" onclick="location.href='/'">취소</button>
         </form>
-
-
 
         <script type="text/javascript">
             function test() {
@@ -73,12 +73,9 @@
                     return false;
                 } else{
                     return true;
-                    alert("회원가입에 성공했습니다.");
                 }
             }
         </script>
-
-
 
     </div>
     <div th:replace="~{fragments/footer::footer}"></div>

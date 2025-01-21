@@ -30,6 +30,8 @@ public class Member extends BaseEntity {
     // 사용자 전화번호
     @Column(length = 20)
     private String memberPhone;
+    // 사용자 상태 (활성/비활성)
+    private String memberStatus;
     // 권한
     @Enumerated(EnumType.STRING)
     private Role role;
