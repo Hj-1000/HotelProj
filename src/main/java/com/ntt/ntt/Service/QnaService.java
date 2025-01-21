@@ -1,26 +1,22 @@
 package com.ntt.ntt.Service;
 
 import com.ntt.ntt.DTO.QnaDTO;
-import com.ntt.ntt.Entity.Qna;
 import com.ntt.ntt.Entity.Member;
-import com.ntt.ntt.Repository.QnaRepository;
+import com.ntt.ntt.Entity.Qna;
 import com.ntt.ntt.Repository.MemberRepository;
+import com.ntt.ntt.Repository.QnaRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
+@Transactional
 public class QnaService {
-
-    /*  필요기능 : 글쓰기 글목록 글조회 글수정 글삭제 페이징처리
-     생성 : register
-     조회 : read
-     수정 : update
-     삭제 : delete
-     */
 
     private final QnaRepository qnaRepository;
     private final MemberRepository memberRepository;
@@ -31,58 +27,58 @@ public class QnaService {
         this.memberRepository = memberRepository;
     }
 
-    // 전체 Qna 리스트 조회 (페이징 처리 포함)
-    public Page<Qna> readAllQna(Pageable pageable) {
-        return qnaRepository.findAll(pageable);
+    // 모든 Qna 질문을 가져올 때 Member 정보도 포함해서 반환
+    public List<QnaDTO> readAllQna() {
+        List<Qna> qnaList = qnaRepository.findAll();  // 모든 Qna 엔티티 가져오기
+        List<QnaDTO> qnaDTOList = new ArrayList<>();
+
+        for (Qna qna : qnaList) {
+            QnaDTO qnaDTO = new QnaDTO();
+            qnaDTO.setQnaTitle(qna.getQnaTitle());
+            qnaDTO.setQnaContent(qna.getQnaContent());
+            qnaDTO.setRegDate(qna.getRegDate());
+
+            // Member 정보 추가 (작성자 이름 등)
+            Member member = qna.getMember();  // Qna에 연관된 Member 가져오기
+            qnaDTO.setMemberName(member.getMemberName());  // MemberDTO의 memberName을 설정
+
+            qnaDTOList.add(qnaDTO);
+        }
+        return qnaDTOList;
     }
 
-    // 제목으로 Qna 조회
-    public Page<Qna> readTitle(String keyword, Pageable pageable) {
-        return qnaRepository.findByQnaTitleContaining(keyword, pageable);
-    }
-
-    // 내용으로 Qna 조회
-    public Page<Qna> readContent(String keyword, Pageable pageable) {
-        return qnaRepository.findByQnaContentContaining(keyword, pageable);
-    }
-
-    // Qna 생성
-    public Qna registerQna(QnaDTO qnaDTO) {
+    // Qna 질문 등록
+    public void registerQna(QnaDTO qnaDTO, Member member) {
         Qna qna = new Qna();
         qna.setQnaTitle(qnaDTO.getQnaTitle());
         qna.setQnaContent(qnaDTO.getQnaContent());
-        return qnaRepository.save(qna);
-    }
+        qna.setMember(member);
 
-    // Qna 단일 조회 (ID로 조회)
-    public Qna readQna(Integer id) {
-        return qnaRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Qna 를 찾을수 없습니다."));
+        // 날짜 설정 (등록 날짜 설정)
+        qna.setRegDate(LocalDateTime.now());
+        qna.setModDate(LocalDateTime.now());  // 처음 등록할 때는 수정일도 동일하게 설정
+
+        qnaRepository.save(qna);
     }
 
     // Qna 수정
     public Qna updateQna(Integer id, QnaDTO qnaDTO) {
         Qna qna = qnaRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Qna 를 찾을수 없습니다."));
+                .orElseThrow(() -> new EntityNotFoundException("Qna 를 찾을 수 없습니다."));
 
         qna.setQnaTitle(qnaDTO.getQnaTitle());
         qna.setQnaContent(qnaDTO.getQnaContent());
+
+        // 수정일자 업데이트
+        qna.setModDate(LocalDateTime.now());
         return qnaRepository.save(qna);
     }
 
     // Qna 삭제
     public void deleteQna(Integer id) {
         Qna qna = qnaRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Qna 를 찾을수 없습니다"));
+                .orElseThrow(() -> new EntityNotFoundException("Qna 를 찾을 수 없습니다"));
 
         qnaRepository.delete(qna);
     }
-
-    // 특정 회원에 속한 Qna 리스트 조회
-    public Page<Qna> getMemberQnas(Integer memberId, Pageable pageable) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new EntityNotFoundException("Member를 찾을 수 없습니다"));
-
-        return qnaRepository.findByMember(member, pageable); // Member에 속한 Qna 리스트를 조회
-    }
-
 }

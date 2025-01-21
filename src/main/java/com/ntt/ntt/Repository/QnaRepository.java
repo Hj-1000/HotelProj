@@ -7,11 +7,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface QnaRepository extends JpaRepository<Qna, Integer> {
+    // Member와 관련된 질문을 찾는 메소드
     Page<Qna> findByMember(Member member, Pageable pageable);
 
-    // 제목으로 Qna 검색
+    // 제목으로 질문을 찾는 메소드
     Page<Qna> findByQnaTitleContaining(String keyword, Pageable pageable);
 
-    // 내용으로 Qna 검색
+    // 내용으로 질문을 찾는 메소드
     Page<Qna> findByQnaContentContaining(String keyword, Pageable pageable);
 }

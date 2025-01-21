@@ -34,10 +34,10 @@ public class Member extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToMany
+    @OneToMany(mappedBy = "member")  // 이 부분에서 mappedBy를 사용하여 양방향 관계를 관리
     private List<Qna> qnas;
 
-    @OneToMany
+    @OneToMany(mappedBy = "member")  // 이 부분은 Reply와 관련된 부분
     private List<Reply> replies;
 
 }
