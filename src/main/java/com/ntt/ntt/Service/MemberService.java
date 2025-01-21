@@ -55,7 +55,7 @@ public class MemberService implements UserDetailsService {
     }
 
     // 일반 유저 회원가입
-    public void saveUser(MemberDTO memberDTO){
+    public void saveUser(MemberDTO memberDTO) {
         // 회원가입시 입력한 이메일이 존재하는지 조회
         Optional<Member> read = memberRepository.findByMemberEmail(memberDTO.getMemberEmail());
 
@@ -176,10 +176,10 @@ public class MemberService implements UserDetailsService {
     }
 
     // 회원 검색기능
-    public List<MemberDTO> getFilteredMembers(String role, String email, String status, String name, String phone, String startDate, String endDate) {
-        List<Member> members = memberRepository.findAll(); // 기본적으로 모든 회원 조회
+    public List<MemberDTO> getFilteredMembers(String role, String email, String status,
+                                              String name, String phone, String startDate, String endDate) {
+        List<Member> members = memberRepository.findAll();
 
-        // 필터링 로직 추가
         if (role != null && !role.isEmpty()) {
             members = members.stream()
                     .filter(member -> member.getRole().name().equals(role))
@@ -206,7 +206,6 @@ public class MemberService implements UserDetailsService {
                     .collect(Collectors.toList());
         }
 
-        // 가입일 범위 필터링
         if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             LocalDate start = LocalDate.parse(startDate, formatter);

@@ -128,6 +128,29 @@
                     </th:block>
                     </tbody>
                 </table>
+                <div class="pagination d-flex justify-content-center">
+                    <ul class="pagination">
+                        <!-- 이전 버튼 -->
+                        <li th:classappend="${pageNumber == 0} ? 'disabled'" class="page-item">
+                            <a class="page-link" th:href="@{/admin/memberList(page=${pageNumber - 1}, size=${size}, role=${param.role}, email=${param.email}, status=${param.status}, name=${param.name}, phone=${param.phone}, startDate=${param.startDate}, endDate=${param.endDate})}">이전</a>
+                        </li>
+
+                        <!-- 페이지 번호 버튼 -->
+                        <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                            th:classappend="${i == pageNumber} ? 'active'"
+                            class="page-item">
+                            <a class="page-link"
+                               th:href="@{/admin/memberList(page=${i}, size=${size}, role=${param.role}, email=${param.email}, status=${param.status}, name=${param.name}, phone=${param.phone}, startDate=${param.startDate}, endDate=${param.endDate})}"
+                               th:text="${i + 1}">
+                            </a>
+                        </li>
+
+                        <!-- 다음 버튼 -->
+                        <li th:classappend="${pageNumber + 1 == totalPages} ? 'disabled'" class="page-item">
+                            <a class="page-link" th:href="@{/admin/memberList(page=${pageNumber + 1}, size=${size}, role=${param.role}, email=${param.email}, status=${param.status}, name=${param.name}, phone=${param.phone}, startDate=${param.startDate}, endDate=${param.endDate})}">다음</a>
+                        </li>
+                    </ul>
+                </div>
 
                 <!-- 회원정보 수정 성공시 메시지 -->
                 <div id="successMessage" th:if="${successMessage}" class="alert alert-success" role="alert">
@@ -142,6 +165,32 @@
                             setTimeout(function() {
                                 successMessage.style.display = 'none';
                             }, 5000);  // 5초 후에 숨기기
+                        }
+                    };
+                </script>
+
+                <script>
+                    // 회원검색후 권한과 상태를 선택했던대로 유지시켜주는 기능
+                    window.onload = function() {
+                        // URL에서 쿼리 파라미터 가져오기
+                        var urlParams = new URLSearchParams(window.location.search);
+
+                        // 상태에 맞는 라디오 버튼 선택
+                        var status = urlParams.get('status');
+                        if (status) {
+                            document.querySelector("input[name='status'][value='" + status + "']").checked = true;
+                        }
+
+                        // 'role' 쿼리 파라미터 값 가져오기
+                        var role = urlParams.get('role');
+                        if (role) {
+                            var selectElement = document.getElementById('매장유저권한');
+                            for (var i = 0; i < selectElement.options.length; i++) {
+                                if (selectElement.options[i].value === role) {
+                                    selectElement.selectedIndex = i;
+                                    break;
+                                }
+                            }
                         }
                     };
                 </script>
