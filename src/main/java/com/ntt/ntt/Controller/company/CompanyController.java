@@ -87,8 +87,8 @@ public class CompanyController {
     }
     //수정처리
     @PostMapping("/modify")
-    public String modifyService(CompanyDTO companyDTO) {
-        companyService.update(companyDTO);
+    public String modifyService(CompanyDTO companyDTO, List<MultipartFile> newImageFiles) {
+        companyService.update(companyDTO, newImageFiles);
         return "redirect:/company/list";
     }
 
