@@ -52,20 +52,23 @@
         <h2 class="mb-3">호텔 본사 관리</h2>
         <!-- 검색 영역 -->
         <div class="card p-4 mb-4">
-            <form>
+            <form action="/company/list" method="get">
                 <div class="row g-3 align-items-center">
+                    <h5 class="card-title">본사 찾기</h5>
                     <div class="col-md-6">
-                        <label for="호텔명" class="form-label fw-bold">호텔명</label>
-                        <input type="text" class="form-control" id="호텔명" placeholder="호텔명">
+                        <select name="searchType" class="form-select">
+                            <option value="name" th:selected="${searchType == 'name'}">회사명</option>
+                            <option value="manager" th:selected="${searchType == 'manager'}">관리자명</option>
+                            <option value="both" th:selected="${searchType == 'both'}">회사명 + 관리자명</option>
+                        </select>
                     </div>
                     <div class="col-md-6">
-                        <label for="호텔장" class="form-label fw-bold">호텔장</label>
-                        <input type="text" class="form-control" id="호텔장" placeholder="호텔장">
+                        <input type="text" name="keyword" class="form-control" placeholder="검색어를 입력하세요">
                     </div>
                 </div>
                 <!-- 조회 버튼 -->
                 <div class="text-center mt-4">
-                    <button type="button" class="btn btn-primary w-25" style="background-color: black">조회</button>
+                    <button type="submit" class="btn btn-primary w-25" style="background-color: black">조회</button>
                 </div>
             </form>
         </div>
@@ -92,14 +95,6 @@
                     </thead>
                     <tbody>
 
-                    <tr>
-                        <th:block th:if="${#lists.isEmpty(companyDTOS)}"><!--받아온 값이 없으면-->
-                            <div>
-                                <p>등록된 본사가 없습니다.</p>
-                            </div>
-                        </th:block>
-                    </tr>
-
                     <th:block th:unless="${#lists.isEmpty(companyDTOS)}"><!--값이 없으면이 아니면(있으면)-->
                         <tr th:each="data:${companyDTOS}">
                             <td th:text="${data.companyId}">1</td>
@@ -118,6 +113,12 @@
                     </th:block>
                     </tbody>
                 </table>
+
+                <th:block th:if="${#lists.isEmpty(companyDTOS)}"><!--받아온 값이 없으면-->
+                    <div style="text-align: center">
+                        <p>등록된 본사가 없습니다.</p>
+                    </div>
+                </th:block>
 
 
                 <!-- 추가 버튼 -->

@@ -4,12 +4,15 @@ import com.ntt.ntt.Entity.ServiceCate;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class ServiceMenuDTO {
 
     private Integer serviceMenuId;
@@ -28,4 +31,6 @@ public class ServiceMenuDTO {
 
     private LocalDateTime modDate;
 
+    @Builder.Default
+    private List<ImageDTO> serviceMenuImageDTOList = new ArrayList<>();
 }

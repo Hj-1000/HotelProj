@@ -5,7 +5,7 @@
       layout:decorate="~{layouts/layout}">
 <head>
     <meta charset="UTF-8">
-    <title>NTT호텔 - 본사 등록</title>
+    <title>NTT호텔 - 본사 수정</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -40,50 +40,46 @@
                 });
             }
         }
-
-
-
     </script>
 
 </head>
 <body>
 <div id="wrapper" layout:fragment="content">
-
     <div class="container-fluid mt-4">
-
-        <h2 class="mb-3">본사 등록</h2>
-
+        <h2 class="mb-3">본사 수정</h2>
         <!-- 폼 -->
         <div class="card p-4 mb-4">
             <div class="row g-3 align-items-center">
-                <form action="/hotel/register" method="post" enctype="multipart/form-data">
+                <form action="/hotel/modify" method="post" enctype="multipart/form-data" th:object="${hotelDTO}">
+                    <input type="hidden" class="form-control hotelId" id="hotelId" name="hotelId" th:field="*{hotelId}">
+
                     <div class="mb-3 mt-3">
                         <label for="hotelName" class="form-label">호텔명:</label>
-                        <input type="text" class="form-control" id="hotelName" name="hotelName">
+                        <input type="text" class="form-control" id="hotelName" name="hotelName" th:field="*{hotelName}">
                     </div>
                     <div class="mb-3">
                         <label for="hotelLocation" class="form-label">호텔지역:</label>
-                        <input type="text" class="form-control" id="hotelLocation" name="hotelLocation">
+                        <input type="text" class="form-control" id="hotelLocation" name="hotelLocation" th:field="*{hotelLocation}">
                     </div>
                     <div class="mb-3 mt-3">
                         <label for="hotelAddress" class="form-label">호텔주소:</label>
-                        <input type="text" class="form-control" id="hotelAddress" name="hotelAddress">
+                        <input type="text" class="form-control" id="hotelAddress" name="hotelAddress" th:field="*{hotelAddress}">
                     </div>
                     <div class="mb-3">
                         <label for="hotelInfo" class="form-label">호텔상세:</label>
-                        <textarea class="form-control" id="hotelInfo" name="hotelInfo"></textarea>
+                        <textarea class="form-control" id="hotelInfo" name="hotelInfo" th:field="*{hotelInfo}"></textarea>
                     </div>
                     <div class="mb-3">
                         <label for="hotelPhone" class="form-label">호텔전화:</label>
-                        <input type="text" class="form-control" id="hotelPhone" name="hotelPhone">
+                        <input type="text" class="form-control" id="hotelPhone" name="hotelPhone" th:field="*{hotelPhone}">
                     </div>
                     <div class="mb-3 mt-3">
                         <label for="hotelEmail" class="form-label">호텔이메일:</label>
-                        <input type="email" class="form-control" id="hotelEmail" name="hotelEmail">
+                        <input type="email" class="form-control" id="hotelEmail" name="hotelEmail" th:field="*{hotelEmail}">
                     </div>
                     <div class="mb-3 mt-3">
                         <label for="hotelCheckIn" class="form-label">호텔 체크인:</label>
-                        <select id="hotelCheckIn" name="hotelCheckIn" class="form-select">
+                        <select id="hotelCheckIn" name="hotelCheckIn" class="form-select" th:field="*{hotelCheckIn}">
                             <option value="00">00:00</option>
                             <option value="01">01:00</option>
                             <option value="02">02:00</option>
@@ -112,7 +108,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="hotelCheckOut" class="form-label">호텔 체크아웃:</label>
-                        <select id="hotelCheckOut" name="hotelCheckOut" class="form-select">
+                        <select id="hotelCheckOut" name="hotelCheckOut" class="form-select" th:field="*{hotelCheckOut}">
                             <option value="00">00:00</option>
                             <option value="01">01:00</option>
                             <option value="02">02:00</option>
@@ -139,11 +135,18 @@
                             <option value="23">23:00</option>
                         </select>
                     </div>
+                    <!-- 기존 이미지 표시 -->
+                    <div th:each="img : ${hotelDTO.hotelImgDTOList}">
+                        <label>기존 이미지:</label>
+                        <img th:src="@{'/upload/' + ${img.imagePath}}" alt="old" width="100">
+                        <img src="${img.imagePath}" alt="Company Image" width="100">
+                    </div>
+
                     <!-- 새 이미지 업로드 및 미리보기 -->
                     <div>
-                        <label for="newImageFiles">지사이미지:</label>
-                        <input type="file" id="newImageFiles" name="imageFiles" multiple onchange="previewImage(event)">
-                        <small>이미지를 선택해 주세요.</small>
+                        <label for="newImageFiles">새 이미지:</label>
+                        <input type="file" id="newImageFiles" name="newImageFiles" multiple onchange="previewImage(event)">
+                        <small>이미지를 선택해 주세요. (기존 이미지는 삭제됩니다.)</small>
                     </div>
 
                     <!-- 미리보기 이미지 표시 -->
@@ -154,10 +157,11 @@
                     <div style="text-align: right">
                         <button type="submit" class="btn btn-primary">등록</button>
                     </div>
-
                 </form>
+
             </div>
         </div>
+
 
     </div>
 </div>

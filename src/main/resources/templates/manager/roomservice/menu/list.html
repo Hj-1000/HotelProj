@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/layout}">
 <head>
     <meta charset="UTF-8">
-    <title>NTT호텔 - 서비스 카테고리 관리</title>
+    <title>NTT호텔 - 서비스 메뉴 관리</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -64,8 +64,8 @@
             <form>
                 <div class="row g-3 align-items-center">
                     <div class="col-md-6">
-                        <label for="카테고리 이름" class="form-label fw-bold">카테고리 이름</label>
-                        <input type="text" class="form-control" id="카테고리 이름" placeholder="카테고리 이름">
+                        <label for="searchCategoryName" class="form-label fw-bold">카테고리 이름</label>
+                        <input type="text" class="form-control" id="searchCategoryName" placeholder="카테고리 이름">
                     </div>
                 </div>
                 <!-- 조회 버튼 -->
@@ -78,28 +78,37 @@
         <!-- 목록 영역 -->
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">서비스 카테고리 목록</h5>
+                <h5 class="card-title">서비스 메뉴 목록</h5>
                 <table class="table table-bordered text-center">
                     <thead>
                     <tr>
                         <th>No</th>
-                        <th>카테고리 이름</th>
+                        <th>메뉴 이름</th>
+                        <th>메뉴 설명</th>
+                        <th>메뉴 상태</th>
+                        <th>메뉴 가격</th>
                         <th>삭제여부</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <th:block th:if="${#lists.isEmpty(serviceCateDTOS)}">
-                        <tr><td colspan="3">등록된 서비스 카테고리가 없습니다.</td></tr>
+                    <th:block th:if="${#lists.isEmpty(serviceMenuDTOS)}">
+                        <tr><td colspan="7">등록된 서비스 메뉴가 없습니다.</td></tr>
                     </th:block>
 
-                    <th:block th:unless="${#lists.isEmpty(serviceCateDTOS)}">
-                        <tr th:each="data : ${serviceCateDTOS}">
-                            <td th:text="${data.serviceCateId}">1</td>
+                    <th:block th:unless="${#lists.isEmpty(serviceMenuDTOS)}">
+                        <tr th:each="data : ${serviceMenuDTOS}">
+                            <td th:text="${data.serviceMenuId}">1</td>
                             <td>
-                                <a th:href="@{/roomService/category/read(serviceCateId=${data.serviceCateId})}" style="text-decoration: none" th:text="${data.serviceCateName}">NTT호텔</a>
+                                <a th:href="@{/roomService/menu/read(serviceMenuId=${data.serviceMenuId})}" style="text-decoration: none" th:text="${data.serviceCateName}">NTT호텔</a>
+                            </td>
+                            <td th:text="${data.serviceMenuInfo}">설명</td>
+                            <td th:text="${data.serviceMenuStatus}">상태</td>
+                            <td th:text="${data.serviceMenuPrice}">가격</td>
+                            <td>
+                                <span class="badge bg-${data.isDeleted ? 'danger' : 'success'}" th:text="${data.isDeleted ? '삭제됨' : '활성'}"></span>
                             </td>
                             <td>
-                                <a th:href="@{/roomService/category/delete(serviceCateId=${data.serviceCateId})}" class="badge bg-danger delBtn">삭제</a>
+                                <a th:href="@{/roomService/menu/delete(serviceMenuId=${data.serviceMenuId})}" class="badge bg-danger delBtn">삭제</a>
                             </td>
                         </tr>
                     </th:block>
@@ -111,7 +120,7 @@
 
                 <!-- 추가 버튼 -->
                 <div class="text-end mt-3">
-                    <button class="btn btn-primary" style="background-color: black" onclick="location.href='/roomService/category/register'">등록</button>
+                    <button class="btn btn-primary" style="background-color: black" onclick="location.href='/roomService/menu/register'">등록</button>
                     <button type="button" class="btn btn-primary modalBtn">간편 등록</button>
                 </div>
             </div>
@@ -128,17 +137,17 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
-                <form action="/roomService/category/register" method="post" enctype="multipart/form-data">
+                <form action="/roomService/menu/register" method="post" enctype="multipart/form-data">
                     <!-- Modal body -->
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="serviceCateName" class="form-label">본사명:</label>
+                            <label for="serviceCateName" class="form-label">메뉴 이름:</label>
                             <input type="text" class="form-control" id="serviceCateName" name="serviceCateName" minlength="2" required>
                         </div>
 
                         <!-- 새 이미지 업로드 및 미리보기 -->
                         <div>
-                            <label for="newImageFiles">본사이미지:</label>
+                            <label for="newImageFiles">메뉴이미지:</label>
                             <input type="file" id="newImageFiles" name="imageFile" accept="image/*">
                             <br><small>이미지를 선택해 주세요.</small>
                         </div>

@@ -23,11 +23,15 @@ public class ServiceCate extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "hotelId")
-    private Hotel hotelId;
+    private Hotel hotel;
 
     @OneToMany(mappedBy = "serviceCate", cascade = CascadeType.ALL,
             orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Image> serviceCateImageList;
+
+    @OneToMany(mappedBy = "serviceCate", cascade = CascadeType.ALL,
+            orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<ServiceMenu> serviceMenuList;
 
     //이미지 서비스 사용할 때 필요한 부모 생성자 매서드
     public ServiceCate(Integer serviceCateId) {
