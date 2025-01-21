@@ -1,6 +1,5 @@
 package com.ntt.ntt.Controller;
 
-import com.ntt.ntt.DTO.ImageDTO;
 import com.ntt.ntt.DTO.ServiceCateDTO;
 import com.ntt.ntt.Service.ServiceCateService;
 import com.ntt.ntt.Util.PaginationUtil;
@@ -56,6 +55,12 @@ public class ServiceCateController {
         Map<String, Integer> pageInfo = paginationUtil.pagination(serviceCateDTOS);
         model.addAttribute("serviceCateDTOS", serviceCateDTOS);
         model.addAllAttributes(pageInfo);
+
+        //만약 글이 10개 이하라면, 페이지 2는 표시되지 않도록 수정
+        if (serviceCateDTOS.getTotalPages() <= 1) {
+            pageInfo.put("startPage", 1);
+            pageInfo.put("endPage", 1);
+        }
 
         return "/manager/roomservice/category/list";
     }
