@@ -50,22 +50,93 @@
         <!-- 폼 -->
         <div class="card p-4 mb-4">
             <div class="row g-3 align-items-center">
-                <form action="/company/modify" method="post" enctype="multipart/form-data" th:object="${companyDTO}">
-                    <input type="hidden" class="form-control companyId" id="companyId" name="companyId" th:field="*{companyId}">
+                <form action="/hotel/modify" method="post" enctype="multipart/form-data" th:object="${hotelDTO}">
+                    <input type="hidden" class="form-control hotelId" id="hotelId" name="hotelId" th:field="*{hotelId}">
 
                     <div class="mb-3 mt-3">
-                        <label for="companyName" class="form-label">본사명:</label>
-                        <input type="text" class="form-control" id="companyName" name="companyName" th:field="*{companyName}">
+                        <label for="hotelName" class="form-label">호텔명:</label>
+                        <input type="text" class="form-control" id="hotelName" name="hotelName" th:field="*{hotelName}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="hotelLocation" class="form-label">호텔지역:</label>
+                        <input type="text" class="form-control" id="hotelLocation" name="hotelLocation" th:field="*{hotelLocation}">
                     </div>
                     <div class="mb-3 mt-3">
-                        <!--나중에 자동으로 서비스에서 등록되도록 바꿀 것-->
-                        <label for="companyManager" class="form-label">본사관리자명:</label>
-                        <input type="text" class="form-control" id="companyManager" name="companyManager" th:field="*{companyManager}">
+                        <label for="hotelAddress" class="form-label">호텔주소:</label>
+                        <input type="text" class="form-control" id="hotelAddress" name="hotelAddress" th:field="*{hotelAddress}">
                     </div>
-
-                    <!--2025-01-20 아래에 이미지 원래 올려져있던거 띄우고 삭제, 수정 버튼 추가하기-->
+                    <div class="mb-3">
+                        <label for="hotelInfo" class="form-label">호텔상세:</label>
+                        <textarea class="form-control" id="hotelInfo" name="hotelInfo" th:field="*{hotelInfo}"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="hotelPhone" class="form-label">호텔전화:</label>
+                        <input type="text" class="form-control" id="hotelPhone" name="hotelPhone" th:field="*{hotelPhone}">
+                    </div>
+                    <div class="mb-3 mt-3">
+                        <label for="hotelEmail" class="form-label">호텔이메일:</label>
+                        <input type="email" class="form-control" id="hotelEmail" name="hotelEmail" th:field="*{hotelEmail}">
+                    </div>
+                    <div class="mb-3 mt-3">
+                        <label for="hotelCheckIn" class="form-label">호텔 체크인:</label>
+                        <select id="hotelCheckIn" name="hotelCheckIn" class="form-select" th:field="*{hotelCheckIn}">
+                            <option value="00">00:00</option>
+                            <option value="01">01:00</option>
+                            <option value="02">02:00</option>
+                            <option value="03">03:00</option>
+                            <option value="04">04:00</option>
+                            <option value="05">05:00</option>
+                            <option value="06">06:00</option>
+                            <option value="07">07:00</option>
+                            <option value="08">08:00</option>
+                            <option value="09">09:00</option>
+                            <option value="10">10:00</option>
+                            <option value="11">11:00</option>
+                            <option value="12">12:00</option>
+                            <option value="13">13:00</option>
+                            <option value="14">14:00</option>
+                            <option value="15">15:00</option>
+                            <option value="16">16:00</option>
+                            <option value="17">17:00</option>
+                            <option value="18">18:00</option>
+                            <option value="19">19:00</option>
+                            <option value="20">20:00</option>
+                            <option value="21">21:00</option>
+                            <option value="22">22:00</option>
+                            <option value="23">23:00</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="hotelCheckOut" class="form-label">호텔 체크아웃:</label>
+                        <select id="hotelCheckOut" name="hotelCheckOut" class="form-select" th:field="*{hotelCheckOut}">
+                            <option value="00">00:00</option>
+                            <option value="01">01:00</option>
+                            <option value="02">02:00</option>
+                            <option value="03">03:00</option>
+                            <option value="04">04:00</option>
+                            <option value="05">05:00</option>
+                            <option value="06">06:00</option>
+                            <option value="07">07:00</option>
+                            <option value="08">08:00</option>
+                            <option value="09">09:00</option>
+                            <option value="10">10:00</option>
+                            <option value="11">11:00</option>
+                            <option value="12">12:00</option>
+                            <option value="13">13:00</option>
+                            <option value="14">14:00</option>
+                            <option value="15">15:00</option>
+                            <option value="16">16:00</option>
+                            <option value="17">17:00</option>
+                            <option value="18">18:00</option>
+                            <option value="19">19:00</option>
+                            <option value="20">20:00</option>
+                            <option value="21">21:00</option>
+                            <option value="22">22:00</option>
+                            <option value="23">23:00</option>
+                        </select>
+                    </div>
                     <!-- 기존 이미지 표시 -->
-                    <div th:each="img : ${companyDTO.companyImgDTOList}">
+                    <div th:each="img : ${hotelDTO.hotelImgDTOList}">
                         <label>기존 이미지:</label>
                         <img th:src="@{'/upload/' + ${img.imagePath}}" alt="old" width="100">
                         <img src="${img.imagePath}" alt="Company Image" width="100">

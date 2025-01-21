@@ -181,9 +181,9 @@ public class CompanyService {
 
                 // 새 이미지들 업로드 처리
                 List<String> newFilenames = fileUpload.FileUpload(IMG_LOCATION, newImageFiles);
-                if (newFilenames == null || newFilenames.isEmpty()) {
-                    throw new RuntimeException("파일 업로드 실패");
-                }
+//                if (newFilenames == null || newFilenames.isEmpty()) {
+//                    throw new RuntimeException("파일 업로드 실패");
+//                } -> 오류남 이거 있으면 사진 안 올렸을 때 오류남
 
                 // 업로드된 새 이미지들 저장
                 for (int i = 0; i < newFilenames.size(); i++) {

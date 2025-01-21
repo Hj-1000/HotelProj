@@ -1,12 +1,9 @@
 package com.ntt.ntt.Service.hotel;
 
-import com.ntt.ntt.DTO.CompanyDTO;
-import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.ImageDTO;
-import com.ntt.ntt.Entity.Company;
 import com.ntt.ntt.Entity.Hotel;
-import com.ntt.ntt.Entity.Hotel;
+import com.ntt.ntt.Entity.Image;
 import com.ntt.ntt.Repository.ImageRepository;
 import com.ntt.ntt.Repository.hotel.HotelRepository;
 import com.ntt.ntt.Service.ImageService;
@@ -78,7 +75,7 @@ public class HotelService {
         );
 
         // 2. 검색타입에 따른 회사 조회
-        Page<Hotel> hotels;
+        Page<Hotel> hotels = null;
 
         if (keyword != null && !keyword.isEmpty()) {
             String keywordLike = "%" + keyword + "%";  // LIKE 조건을 위한 검색어 처리
@@ -137,9 +134,84 @@ public class HotelService {
 
     }
 
-    //수정
+    // 회사 정보 수정 (이미지 수정 포함)
+    @Transactional
+    public void update(HotelDTO hotelDTO, List<MultipartFile> newImageFiles) {
+        // 회사 조회 및 수정
+        Optional<Hotel> hotelOpt = hotelRepository.findById(hotelDTO.getHotelId());
+        if (hotelOpt.isPresent()) {
+            Hotel hotel = hotelOpt.get();
+            hotel.setHotelName(hotelDTO.getHotelName());
+            hotel.setHotelLocation(hotelDTO.getHotelLocation());
+            hotel.setHotelAddress(hotelDTO.getHotelAddress());
+            hotel.setHotelEmail(hotelDTO.getHotelEmail());
+            hotel.setHotelPhone(hotelDTO.getHotelPhone());
+            hotel.setHotelInfo(hotelDTO.getHotelInfo());
+            hotel.setHotelCheckIn(hotelDTO.getHotelCheckIn());
+            hotel.setHotelCheckOut(hotelDTO.getHotelCheckOut());
+            hotelRepository.save(hotel);  // 회사 이름 저장
 
-    //삭제
+            // 이미지 수정 처리
+            if (newImageFiles != null && !newImageFiles.isEmpty()) {
+                // 회사에 이미지를 여러 개 다룰 경우, 기존 이미지 삭제 및 새 이미지 업로드
+                List<Image> existingImages = hotel.getHotelImageList();  // 회사에 연결된 이미지들 가져오기
+
+                // 기존 이미지 삭제 처리
+                for (Image existingImage : existingImages) {
+                    fileUpload.FileDelete(IMG_LOCATION, existingImage.getImageName());
+                    imageRepository.delete(existingImage);  // 기존 이미지 삭제
+                }
+
+                // 회사의 이미지 리스트에서 삭제된 이미지를 제거
+                hotel.getHotelImageList().clear();  // 이미지를 모두 제거
+
+                // 새 이미지들 업로드 처리
+                List<String> newFilenames = fileUpload.FileUpload(IMG_LOCATION, newImageFiles);
+
+                // 업로드된 새 이미지들 저장
+                for (int i = 0; i < newFilenames.size(); i++) {
+                    Image newImage = new Image();
+                    newImage.setImageName(newFilenames.get(i));
+                    newImage.setImageOriginalName(newImageFiles.get(i).getOriginalFilename());
+                    newImage.setImagePath(IMG_LOCATION + newFilenames.get(i));
+
+                    // 이미지와 회사 관계 설정
+                    newImage.setHotel(hotel);  // 이미지와 회사 연결
+
+                    // 이미지 저장
+                    imageRepository.save(newImage);
+
+                    // 회사와 이미지 연결 (회사 정보에 이미지 추가)
+                    hotel.getHotelImageList().add(newImage);  // 이미지를 회사의 이미지 리스트에 추가
+                }
+
+                // 회사 정보 저장 (이미지와의 관계 업데이트)
+                hotelRepository.save(hotel);  // 회사 정보와 연결된 이미지를 저장
+            }
+        } else {
+            throw new RuntimeException("본사를 찾을 수 없습니다.");
+        }
+    }
+    // 회사 삭제
+    @Transactional
+    public void delete(Integer hotelId) {
+        Optional<Hotel> hotelOpt = hotelRepository.findById(hotelId);
+        if (hotelOpt.isPresent()) {
+            Hotel hotel = hotelOpt.get();
+
+            // 회사에 연결된 이미지 삭제
+            List<Image> imagesToDelete = hotel.getHotelImageList();
+            for (Image image : imagesToDelete) {
+                // 이미지 서비스에서 물리적 파일 삭제 + DB에서 삭제
+                imageService.deleteImage(image.getImageId());
+            }
+
+            // 회사 삭제
+            hotelRepository.delete(hotel);
+        } else {
+            throw new RuntimeException("회사를 찾을 수 없습니다.");
+        }
+    }
 
 
 }

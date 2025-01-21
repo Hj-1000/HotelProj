@@ -95,6 +95,26 @@ public class HotelController {
     }
 
 
+    //수정폼
+    @GetMapping("/modify")
+    public String modifyServiceHTML(Integer hotelId, Model model) {
+        HotelDTO hotelDTO = hotelService.read(hotelId);
+        model.addAttribute("hotelDTO", hotelDTO);
+        return "/hotel/modify";
+    }
+    //수정처리
+    @PostMapping("/modify")
+    public String modifyService(HotelDTO hotelDTO, List<MultipartFile> newImageFiles) {
+        hotelService.update(hotelDTO, newImageFiles);
+        return "redirect:/hotel/list";
+    }
+
+    //삭제
+    @GetMapping("/delete")
+    public String delete(Integer hotelId) {
+        hotelService.delete(hotelId);
+        return "redirect:/hotel/list";
+    }
 
 
 }
