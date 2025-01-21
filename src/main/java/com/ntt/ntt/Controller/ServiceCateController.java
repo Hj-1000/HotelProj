@@ -1,5 +1,6 @@
 package com.ntt.ntt.Controller;
 
+import com.ntt.ntt.DTO.ImageDTO;
 import com.ntt.ntt.DTO.ServiceCateDTO;
 import com.ntt.ntt.Service.ServiceCateService;
 import com.ntt.ntt.Util.PaginationUtil;
@@ -39,7 +40,7 @@ public class ServiceCateController {
         return "/manager/roomservice/category/register";
     }
 
-    @Operation(summary = "등록창", description = "데이터 등록후 목록으로 이동한다.")
+    @Operation(summary = "등록창", description = "데이터 등록 후 목록페이지로 이동한다.")
     @PostMapping("/register")
     public String registerProc(ServiceCateDTO serviceCateDTO, @RequestParam("imageFile") List<MultipartFile> imageFile) {
         log.info("post에서 등록할 serviceCateDTO" + serviceCateDTO);
@@ -47,7 +48,7 @@ public class ServiceCateController {
         return "redirect:/roomService/list";
     }
 
-    @Operation(summary = "전체조회", description = "전체목록을 조회한다.")
+    @Operation(summary = "전체목록", description = "전체목록을 조회한다.")
     @GetMapping("/list")
     public String listSearch(@PageableDefault(page=1) Pageable page, Model model) {
         Page<ServiceCateDTO> serviceCateDTOS =
@@ -62,18 +63,42 @@ public class ServiceCateController {
     @Operation(summary = "개별조회", description = "해당번호의 데이터를 조회한다.")
     @GetMapping("/read")
     public String read(Integer serviceCateId, Model model) {
-//        try {
-//
-//        } catch (EntityNotFoundException e) {
-//            model.addAttribute("error", "해당 카테고리를 찾을 수 없습니다");
-//            return "/manager/roomservice/category/list";
-//        } catch (Exception e) {
-//            model.addAttribute("error", "서버 오류가 발생했습니다.");
-//            return "/manager/roomservice/category/list";
-//        }
+        try {
+            ServiceCateDTO serviceCateDTO =
+                    serviceCateService.read(serviceCateId);
+            model.addAttribute("serviceCateDTO", serviceCateDTO);
+            return "/manager/roomservice/category/read";
+        } catch (EntityNotFoundException e) {
+            model.addAttribute("error", "해당 카테고리를 찾을 수 없습니다");
+            return "/manager/roomservice/category/list";
+        } catch (Exception e) {
+            model.addAttribute("error", "서버 오류가 발생했습니다.");
+            return "/manager/roomservice/category/list";
+        }
+    }
+    @Operation(summary = "수정폼", description = "해당 데이터를 조회 후 수정폼페이지로 이동한다.")
+    @GetMapping("/update")
+    public String updateForm(Integer serviceCateId, Model model) {
         ServiceCateDTO serviceCateDTO =
                 serviceCateService.read(serviceCateId);
-        model.addAttribute("serviceCateDTO", serviceCateDTO);
-        return "/manager/roomservice/category/read";
+        model.addAttribute("serviceCateDTO",serviceCateDTO);
+
+
+        return "/manager/roomservice/category/update";
+    }
+
+    @Operation(summary = "수정창", description = "수정할 내용을 데이터베이스에 저장 후 목록페이지로 이동한다.")
+    @PostMapping("/update")
+    public String updateProc(ServiceCateDTO serviceCateDTO, @RequestParam("imageFile") List<MultipartFile> imageFile) {
+        serviceCateService.update(serviceCateDTO, imageFile);
+        return "redirect:/roomService/read?serviceCateId="+ serviceCateDTO.getServiceCateId();
+    }
+
+    @Operation(summary = "삭제처리", description = "해당 데이터를 삭제 후 목록페이지로 이동한다.")
+    @GetMapping("/delete")
+    public String deleteForm(Integer serviceCateId) {
+
+        serviceCateService.delete(serviceCateId);
+        return "redirect:/roomService/list";
     }
 }
