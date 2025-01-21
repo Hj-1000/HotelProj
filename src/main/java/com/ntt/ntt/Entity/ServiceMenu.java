@@ -9,7 +9,7 @@ import java.util.List;
 @Table(name="serviceMenu")
 @Getter
 @Setter
-@ToString
+@ToString(exclude = "serviceCate")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -32,7 +32,7 @@ public class ServiceMenu extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "serviceCateId")
-    private ServiceCate serviceCateId;
+    private ServiceCate serviceCate;
 
     @OneToMany(mappedBy = "serviceMenu", cascade = CascadeType.ALL,
             orphanRemoval = true, fetch = FetchType.LAZY)
