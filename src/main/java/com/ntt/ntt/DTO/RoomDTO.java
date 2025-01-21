@@ -30,4 +30,8 @@ public class RoomDTO {
 
     private LocalDateTime modDate;
 
+    // 추가 필드 포맷된 가격
+    private String formattedRoomPrice;
+
+
 }
