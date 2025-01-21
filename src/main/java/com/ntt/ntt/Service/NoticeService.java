@@ -24,6 +24,7 @@ public class NoticeService {
         Notice notice = modelMapper.map(noticeDTO, Notice.class);
         noticeRepository.save(notice);
     }
+
     public void update(NoticeDTO noticeDTO) {
 
         Optional<Notice> notice = noticeRepository.findById(noticeDTO.getNoticeId());
