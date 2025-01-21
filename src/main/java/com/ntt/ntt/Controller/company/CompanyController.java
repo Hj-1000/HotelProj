@@ -48,11 +48,18 @@ public class CompanyController {
 
     //목록
     @GetMapping("/list")
-    public String list(@PageableDefault(page=1)Pageable page, Model model) {
+    public String list(@PageableDefault(page = 1) Pageable page, Model model) {
         Page<CompanyDTO> companyDTOS = companyService.list(page);
         Map<String, Integer> pageInfo = paginationUtil.pagination(companyDTOS);
+
+        // 만약 글이 10개 이하라면, 페이지 2는 표시되지 않도록 수정
+        if (companyDTOS.getTotalPages() <= 1) {
+            pageInfo.put("startPage", 1);
+            pageInfo.put("endPage", 1);
+        }
+
         model.addAttribute("companyDTOS", companyDTOS);
-        model.addAttribute(pageInfo);
+        model.addAttribute("pageInfo", pageInfo);
         return "/company/list";
     }
 
