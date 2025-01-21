@@ -25,37 +25,29 @@ public class StartController {
                                 @RequestParam(required = false) String status,
                                 @RequestParam(required = false) String name,
                                 @RequestParam(required = false) String phone,
-                                @RequestParam(required = false) String startDate,  // 추가된 부분
-                                @RequestParam(required = false) String endDate,    // 추가된 부분
+                                @RequestParam(required = false) String startDate,
+                                @RequestParam(required = false) String endDate,
+                                @RequestParam(defaultValue = "0") int page,  // 추가됨
+                                @RequestParam(defaultValue = "10") int size, // 추가됨
                                 Model model) {
         try {
-            // "전체" 상태에 대한 예외 처리 (필터링하지 않음)
-            if ("전체".equals(role)) {
-                role = null;
-            }
-        } catch (Exception e) {
-            model.addAttribute("error", "회원 목록을 가져오는 중 오류가 발생했습니다.");
-            e.printStackTrace();
-        }
+            if ("전체".equals(role)) role = null;
+            if ("전체".equals(status)) status = null;
 
-        try {
-            // "전체" 상태에 대한 예외 처리 (필터링하지 않음)
-            if ("전체".equals(status)) {
-                status = null;
-            }
+            // 필터링된 회원 리스트 가져오기
+            List<MemberDTO> filteredMembers = memberService.getFilteredMembers(role, email, status, name, phone, startDate, endDate);
 
-            // startDate와 endDate를 서비스 메서드에 전달하여 필터링을 적용
-            List<MemberDTO> memberDTOList = memberService.getFilteredMembers(role, email, status, name, phone, startDate, endDate);
+            // 페이징 처리
+            int startIdx = page * size;
+            int endIdx = Math.min(startIdx + size, filteredMembers.size());
+            List<MemberDTO> pagedMembers = filteredMembers.subList(startIdx, endIdx);
 
-            // 결과 없으면 메시지 전달
-            if (memberDTOList.isEmpty()) {
-                model.addAttribute("message", "검색 조건에 맞는 회원이 없습니다.");
-            } else {
-                model.addAttribute("memberDTOList", memberDTOList);
-            }
-
-            // Role enum 전달
+            model.addAttribute("memberDTOList", pagedMembers);
             model.addAttribute("roles", Role.values());
+            model.addAttribute("pageNumber", page);
+            model.addAttribute("totalPages", (int) Math.ceil((double) filteredMembers.size() / size));
+            model.addAttribute("size", size);
+
         } catch (Exception e) {
             model.addAttribute("error", "회원 목록을 가져오는 중 오류가 발생했습니다.");
             e.printStackTrace();

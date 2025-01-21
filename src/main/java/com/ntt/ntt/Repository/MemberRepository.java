@@ -10,8 +10,6 @@ public interface MemberRepository extends JpaRepository<Member, Integer> {
 
     Optional<Member> findByMemberEmail (String email);
 
-
-
     void deleteByMemberEmail(String memberEmail);
 
     // 모든 회원을 조회하는 메서드
