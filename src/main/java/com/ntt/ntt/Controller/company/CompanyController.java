@@ -46,10 +46,16 @@ public class CompanyController {
         return "redirect:/company/list";
     }
 
-    //목록
     @GetMapping("/list")
-    public String list(@PageableDefault(page = 1) Pageable page, Model model) {
-        Page<CompanyDTO> companyDTOS = companyService.list(page);
+    public String list(@RequestParam(required = false) String keyword,
+                       @RequestParam(required = false) String searchType,
+                       @PageableDefault(page = 1) Pageable page,
+                       Model model) {
+
+        // 검색 기능을 포함한 서비스 호출
+        Page<CompanyDTO> companyDTOS = companyService.list(page, keyword, searchType);
+
+        // 페이지 정보 계산
         Map<String, Integer> pageInfo = paginationUtil.pagination(companyDTOS);
 
         // 만약 글이 10개 이하라면, 페이지 2는 표시되지 않도록 수정
@@ -58,8 +64,14 @@ public class CompanyController {
             pageInfo.put("endPage", 1);
         }
 
+        // 모델에 데이터 추가
         model.addAttribute("companyDTOS", companyDTOS);
         model.addAttribute("pageInfo", pageInfo);
+
+        // 검색어와 검색 타입을 폼에 전달할 수 있도록 추가
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("searchType", searchType);
+
         return "/company/list";
     }
 
