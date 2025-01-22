@@ -5,6 +5,7 @@ import com.ntt.ntt.DTO.ImageDTO;
 import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.Image;
 import com.ntt.ntt.Repository.ImageRepository;
+import com.ntt.ntt.Repository.company.CompanyRepository;
 import com.ntt.ntt.Repository.hotel.HotelRepository;
 import com.ntt.ntt.Service.ImageService;
 import com.ntt.ntt.Util.FileUpload;
@@ -34,6 +35,8 @@ public class HotelService {
 
     private final ImageRepository imageRepository;
 
+    private final CompanyRepository companyRepository;
+
     private final ModelMapper modelMapper;
 
     @Autowired
@@ -55,6 +58,8 @@ public class HotelService {
 
         Hotel hotel = modelMapper.map(hotelDTO, Hotel.class);
 
+//        hotel.setCompany(companyRepository.findById(hotelDTO.getHotelId()).orElseThrow());
+
         // 1. Hotel 먼저 저장
         hotelRepository.save(hotel);
 
@@ -63,7 +68,70 @@ public class HotelService {
     }
 
 
-    //목록
+    //본사관리자용목록
+    public Page<HotelDTO> listByCompany(Pageable page, String keyword, Integer keyword1, String searchType, Integer companyId) {
+
+        // 1. 페이지 정보 재가공
+        int currentPage = page.getPageNumber() - 1;
+        int pageSize = 10;
+        Pageable pageable = PageRequest.of(
+                currentPage, pageSize,
+                Sort.by(Sort.Direction.DESC, "hotelId")
+        );
+
+        // 2. 검색타입에 따른 호텔 조회
+        Page<Hotel> hotels = null;
+
+        // companyId가 있을 경우 해당 회사의 호텔만 조회
+        if (companyId != null) {
+            // companyId가 있으면 회사에 속한 호텔만 조회
+            if (keyword != null && !keyword.isEmpty()) {
+                String keywordLike = "%" + keyword + "%";  // LIKE 조건을 위한 검색어 처리
+
+                if ("name".equals(searchType)) {
+                    // 호텔명 검색
+                    hotels = hotelRepository.findByCompany_CompanyIdAndHotelNameLike(companyId, keywordLike, pageable);
+                } else if ("location".equals(searchType)) {
+                    // 지역 검색
+                    hotels = hotelRepository.findByCompany_CompanyIdAndHotelLocationLike(companyId, keywordLike, pageable);
+                } else if ("address".equals(searchType)) {
+                    // 주소 검색
+                    hotels = hotelRepository.findByCompany_CompanyIdAndHotelAddressLike(companyId, keywordLike, pageable);
+                } else if ("rating".equals(searchType)) {
+                    // 별점 검색
+                    hotels = hotelRepository.findByCompany_CompanyIdAndHotelRating(companyId, keyword1, pageable);
+                }
+            } else {
+                // 검색어가 없으면 해당 companyId에 속한 모든 호텔 조회
+                hotels = hotelRepository.findByCompany_CompanyId(companyId, pageable);
+            }
+        } else {
+            // companyId가 없으면 모든 호텔 조회
+            if (keyword != null && !keyword.isEmpty()) {
+                String keywordLike = "%" + keyword + "%";  // LIKE 조건을 위한 검색어 처리
+
+                if ("name".equals(searchType)) {
+                    hotels = hotelRepository.findByHotelNameLike(keywordLike, pageable);
+                } else if ("location".equals(searchType)) {
+                    hotels = hotelRepository.findByHotelLocationLike(keywordLike, pageable);
+                } else if ("address".equals(searchType)) {
+                    hotels = hotelRepository.findByHotelAddressLike(keywordLike, pageable);
+                } else if ("rating".equals(searchType)) {
+                    hotels = hotelRepository.findByHotelRating(keyword1, pageable);
+                }
+            } else {
+                // 검색어가 없으면 모든 호텔 리스트를 조회
+                hotels = hotelRepository.findAll(pageable);
+            }
+        }
+
+        // 3. Hotel -> HotelDTO 변환
+        Page<HotelDTO> hotelDTOS = hotels.map(entity -> modelMapper.map(entity, HotelDTO.class));
+
+        return hotelDTOS;
+    }
+
+    //일반회원용 목록 -> 없어도 될듯?
     public Page<HotelDTO> list(Pageable page, String keyword, Integer keyword1, String searchType) {
 
         // 1. 페이지 정보 재가공
@@ -134,10 +202,10 @@ public class HotelService {
 
     }
 
-    // 회사 정보 수정 (이미지 수정 포함)
+    // 정보 수정 (이미지 수정 포함)
     @Transactional
     public void update(HotelDTO hotelDTO, List<MultipartFile> newImageFiles) {
-        // 회사 조회 및 수정
+        // 조회 및 수정
         Optional<Hotel> hotelOpt = hotelRepository.findById(hotelDTO.getHotelId());
         if (hotelOpt.isPresent()) {
             Hotel hotel = hotelOpt.get();
@@ -149,12 +217,12 @@ public class HotelService {
             hotel.setHotelInfo(hotelDTO.getHotelInfo());
             hotel.setHotelCheckIn(hotelDTO.getHotelCheckIn());
             hotel.setHotelCheckOut(hotelDTO.getHotelCheckOut());
-            hotelRepository.save(hotel);  // 회사 이름 저장
+            hotelRepository.save(hotel);  // 이름 저장
 
             // 이미지 수정 처리
             if (newImageFiles != null && !newImageFiles.isEmpty()) {
-                // 회사에 이미지를 여러 개 다룰 경우, 기존 이미지 삭제 및 새 이미지 업로드
-                List<Image> existingImages = hotel.getHotelImageList();  // 회사에 연결된 이미지들 가져오기
+                // 이미지를 여러 개 다룰 경우, 기존 이미지 삭제 및 새 이미지 업로드
+                List<Image> existingImages = hotel.getHotelImageList();  // 연결된 이미지들 가져오기
 
                 // 기존 이미지 삭제 처리
                 for (Image existingImage : existingImages) {
@@ -162,7 +230,7 @@ public class HotelService {
                     imageRepository.delete(existingImage);  // 기존 이미지 삭제
                 }
 
-                // 회사의 이미지 리스트에서 삭제된 이미지를 제거
+                // 이미지 리스트에서 삭제된 이미지를 제거
                 hotel.getHotelImageList().clear();  // 이미지를 모두 제거
 
                 // 새 이미지들 업로드 처리
@@ -181,35 +249,35 @@ public class HotelService {
                     // 이미지 저장
                     imageRepository.save(newImage);
 
-                    // 회사와 이미지 연결 (회사 정보에 이미지 추가)
+                    // 이미지 연결 (회사 정보에 이미지 추가)
                     hotel.getHotelImageList().add(newImage);  // 이미지를 회사의 이미지 리스트에 추가
                 }
 
-                // 회사 정보 저장 (이미지와의 관계 업데이트)
-                hotelRepository.save(hotel);  // 회사 정보와 연결된 이미지를 저장
+                // 정보 저장 (이미지와의 관계 업데이트)
+                hotelRepository.save(hotel);  // 호텔 정보와 연결된 이미지를 저장
             }
         } else {
-            throw new RuntimeException("본사를 찾을 수 없습니다.");
+            throw new RuntimeException("호텔을 찾을 수 없습니다.");
         }
     }
-    // 회사 삭제
+    // 삭제
     @Transactional
     public void delete(Integer hotelId) {
         Optional<Hotel> hotelOpt = hotelRepository.findById(hotelId);
         if (hotelOpt.isPresent()) {
             Hotel hotel = hotelOpt.get();
 
-            // 회사에 연결된 이미지 삭제
+            // 연결된 이미지 삭제
             List<Image> imagesToDelete = hotel.getHotelImageList();
             for (Image image : imagesToDelete) {
                 // 이미지 서비스에서 물리적 파일 삭제 + DB에서 삭제
                 imageService.deleteImage(image.getImageId());
             }
 
-            // 회사 삭제
+            // 삭제
             hotelRepository.delete(hotel);
         } else {
-            throw new RuntimeException("회사를 찾을 수 없습니다.");
+            throw new RuntimeException("호텔을 찾을 수 없습니다.");
         }
     }
 

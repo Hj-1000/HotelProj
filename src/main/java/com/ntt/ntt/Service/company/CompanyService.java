@@ -6,6 +6,7 @@ import com.ntt.ntt.Entity.Company;
 import com.ntt.ntt.Entity.Image;
 import com.ntt.ntt.Repository.ImageRepository;
 import com.ntt.ntt.Repository.company.CompanyRepository;
+import com.ntt.ntt.Repository.hotel.HotelRepository;
 import com.ntt.ntt.Service.ImageService;
 import com.ntt.ntt.Util.FileUpload;
 import jakarta.persistence.EntityNotFoundException;
@@ -39,6 +40,7 @@ public class CompanyService {
 
     private final ImageRepository imageRepository;
     private final CompanyRepository companyRepository;
+    private final HotelRepository hotelRepository;
     private final ModelMapper modelMapper;
 
     @Autowired
@@ -100,11 +102,20 @@ public class CompanyService {
             companies = companyRepository.findAll(pageable);
         }
 
-        // 3. Company -> CompanyDTO 변환
-        Page<CompanyDTO> companyDTOS = companies.map(entity -> modelMapper.map(entity, CompanyDTO.class));
+        // 3. Company -> CompanyDTO 변환 후 hotelCount 설정
+        Page<CompanyDTO> companyDTOS = companies.map(entity -> {
+            CompanyDTO companyDTO = modelMapper.map(entity, CompanyDTO.class);
+
+            // 호텔 수를 구하기 위해 HotelRepository를 사용하여 해당 회사에 속한 호텔 수를 카운트
+            int hotelCount = hotelRepository.countByCompany_CompanyId(companyDTO.getCompanyId());
+            companyDTO.setHotelCount(hotelCount);
+
+            return companyDTO;
+        });
 
         return companyDTOS;
     }
+
 
 
     //개별보기
@@ -135,25 +146,6 @@ public class CompanyService {
         return companyDTO;
 
     }
-
-//    //기존 이미지 없을 때 버전
-//    //수정
-//    public void update(CompanyDTO companyDTO) {
-//        //해당 데이터의 id로 조회
-//        Optional<Company> company = companyRepository.findById(companyDTO.getCompanyId());
-//        if (company.isPresent()) { //존재하면 수정
-//            //변환
-//            Company company1 = modelMapper.map(companyDTO, Company.class);
-//            //저장
-//            companyRepository.save(company1);
-//        }
-//    }
-//
-//
-//    //삭제
-//    public void delete(Integer companyId) {
-//        companyRepository.deleteById(companyId);
-//    }
 
     // 회사 정보 수정 (이미지 수정 포함)
     @Transactional
@@ -230,5 +222,23 @@ public class CompanyService {
         }
     }
 
+    //    //기존 이미지 없을 때 버전
+//    //수정
+//    public void update(CompanyDTO companyDTO) {
+//        //해당 데이터의 id로 조회
+//        Optional<Company> company = companyRepository.findById(companyDTO.getCompanyId());
+//        if (company.isPresent()) { //존재하면 수정
+//            //변환
+//            Company company1 = modelMapper.map(companyDTO, Company.class);
+//            //저장
+//            companyRepository.save(company1);
+//        }
+//    }
+//
+//
+//    //삭제
+//    public void delete(Integer companyId) {
+//        companyRepository.deleteById(companyId);
+//    }
 
 }

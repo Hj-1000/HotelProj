@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Builder
+@Builder //2025-01-21 추가
 @Getter
 @Setter
 @ToString
@@ -28,6 +28,8 @@ public class CompanyDTO {
     private LocalDateTime modDate;
 
     @Builder.Default
-    private List<ImageDTO> companyImgDTOList = new ArrayList<>();
+    private List<ImageDTO> companyImgDTOList = new ArrayList<>(); //이미지 2025-01-21추가
+
+    private Integer hotelCount; //지사 수 2025-01-22 추가
 
 }
