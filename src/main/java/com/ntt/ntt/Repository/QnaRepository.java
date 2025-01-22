@@ -14,4 +14,7 @@ public interface QnaRepository extends JpaRepository<Qna, Integer> {
     // 제목, 내용, 작성자 이름에서 검색
     Page<Qna> findByQnaTitleContainingOrQnaContentContainingOrMemberMemberNameContaining(
             String titleKeyword, String contentKeyword, String memberNameKeyword, Pageable pageable);
+
+    // 회원탈퇴시 해당 회원이 작성한 QnA 삭제하기 위해 추가
+    void deleteByMember(Member member);
 }
