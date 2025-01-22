@@ -15,4 +15,7 @@ public interface QnaRepository extends JpaRepository<Qna, Integer> {
 
     // 내용으로 질문을 찾는 메소드
     Page<Qna> findByQnaContentContaining(String keyword, Pageable pageable);
+
+    // 회원탈퇴시 해당 회원이 작성한 QnA 삭제하기 위해 추가
+    void deleteByMember(Member member);
 }

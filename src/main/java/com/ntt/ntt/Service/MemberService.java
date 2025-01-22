@@ -4,6 +4,7 @@ import com.ntt.ntt.Constant.Role;
 import com.ntt.ntt.DTO.MemberDTO;
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Repository.MemberRepository;
+import com.ntt.ntt.Repository.QnaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
@@ -30,6 +31,7 @@ public class MemberService implements UserDetailsService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
+    private final QnaRepository qnaRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -152,13 +154,22 @@ public class MemberService implements UserDetailsService {
         return modelMapper.map(user.get(), MemberDTO.class);
     }
 
-    // 회원탈퇴
-    public void delete(String memberEmail) {
+    @Transactional
+    public void delete(String memberEmail, String currentPassword) {
+        // 회원 존재 여부 확인
         Member member = memberRepository.findByMemberEmail(memberEmail)
                 .orElseThrow(() -> new IllegalArgumentException("해당 이메일의 회원을 찾을 수 없습니다."));
 
+        // 현재 비밀번호 확인
+        if (!passwordEncoder.matches(currentPassword, member.getMemberPassword())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
+        // 회원이 작성한 QNA 데이터를 먼저 삭제 또는 해제
+        qnaRepository.deleteByMember(member); // QNA 데이터 삭제
+
+        // 비밀번호 일치하면 회원 삭제
         memberRepository.delete(member);
-        log.info("회원 탈퇴 성공: ", memberEmail);
     }
 
     // 전체 회원 조회 및 검색기능
