@@ -12,7 +12,9 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -29,62 +31,80 @@ public class RoomController {
     public String registerRoomForm(Model model) {
         //빈 RoomDTO 전달
         model.addAttribute("room", new RoomDTO());
-        
+
         //register.htm로 이동
         return "manager/room/register";
     }
-    
+
     // Room 등록
     @PostMapping("/register")
-    public String registerRoomProc(@ModelAttribute RoomDTO roomDTO) {
+    public String registerRoomProc(@ModelAttribute RoomDTO roomDTO, @RequestParam("imageFile") List<MultipartFile> imageFile) {
         //Room 등록
-        roomService.registerRoom(roomDTO);
+        roomService.registerRoom(roomDTO, imageFile);
 
         //등록후 list 페이지로 이동하기
         return "redirect:/manager/room/list";
-}
+    }
 
     // 2. 모든 객실 조회
     @GetMapping("/list")
-    public String AllRoomsForm(@PageableDefault(size = 5, page = 0) Pageable pageable, Model model) {
-        // Room 데이터를 페이지네이션으로 가져오기
-        Page<RoomDTO> roomDTOS = roomService.a(pageable);
+    public String AllRoomsForm(
+            @PageableDefault(size = 5, page = 0) Pageable pageable,
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "category", required = false) String category,
+            Model model) {
 
+        // 유효성 검사: 상태(category가 roomStatus일 경우)
+        if ("roomStatus".equals(category)) {
+            if (!"Available".equalsIgnoreCase(keyword) && !"Unavailable".equalsIgnoreCase(keyword)) {
+                log.warn("Invalid room status keyword: {}", keyword);
+                model.addAttribute("errorMessage", "Invalid room status. Please use 'Available' or 'Unavailable'.");
+                return "manager/room/list"; // 에러 메시지를 추가한 리스트 페이지로 리다이렉트
+            }
+        }
 
-        // 왜 안나와
-        log.info("RoomDTOs Content: {}", roomDTOS.getContent());
-        log.info("Total Elements: {}", roomDTOS.getTotalElements());
-        log.info("Total Pages: {}", roomDTOS.getTotalPages());
+        // 검색 조건과 페이징 정보를 이용하여 데이터 가져오기
+        Page<RoomDTO> roomDTOS = roomService.searchRooms(keyword, category, pageable);
 
-        // 페이지네이션 정보를 생성
+        // 로그로 이미지 확인
+        for (RoomDTO room : roomDTOS) {
+            if (room.getRoomImageDTOList() != null && !room.getRoomImageDTOList().isEmpty()) {
+                log.info("Room ID: {} - 이미지 개수: {}", room.getRoomId(), room.getRoomImageDTOList().size());
+            } else {
+                log.info("Room ID: {} - 이미지 없음", room.getRoomId());
+            }
+        }
+
+        // 페이지네이션 정보 생성
         Map<String, Integer> pageInfo = PaginationUtil.pagination(roomDTOS);
-
-        // Thymeleaf에서 1부터 시작하도록 currentPage 조정
-        pageInfo.put("currentPage", pageable.getPageNumber() + 1); // 0부터 시작하는 번호를 1로 조정
-        pageInfo.put("prevPage", Math.max(1, pageable.getPageNumber())); // 이전 페이지
-        pageInfo.put("nextPage", Math.min(roomDTOS.getTotalPages(), pageable.getPageNumber() + 2)); // 다음 페이지
-
 
         // 모델에 데이터 추가
         model.addAttribute("list", roomDTOS); // 페이징된 RoomDTO 리스트
-        model.addAllAttributes(pageInfo); // 페이지 정보 (startPage, endPage, prevPage 등)
+        model.addAttribute("keyword", keyword); // 검색 키워드 전달
+        model.addAttribute("category", category); // 검색 카테고리 전달
+        model.addAllAttributes(pageInfo); // 페이지 정보 추가
 
-        // 가격 포맷팅 추가
+        // 가격 포맷팅
         for (RoomDTO room : roomDTOS) {
             String formattedPrice = String.format("%,d", room.getRoomPrice());
-            room.setFormattedRoomPrice(formattedPrice); // RoomDTO에 추가된 필드 사용
+            room.setFormattedRoomPrice(formattedPrice);
         }
 
-        return "manager/room/list"; // 페이지 이동
+        return "manager/room/list";
     }
 
     // 특정 룸 조회
     @GetMapping("/{roomId}")
     public String getRoomDetailsForm(@PathVariable Integer roomId, Model model) {
+        log.info("Fetching details for roomId: {}", roomId);
+
         RoomDTO room = roomService.readRoom(roomId);
+        log.info("Fetched RoomDTO: {}", room);
+
         String formattedPrice = String.format("%,d KRW", room.getRoomPrice());
         model.addAttribute("room", room);
         model.addAttribute("formattedPrice", formattedPrice);
+
         return "manager/room/read";
     }
 
@@ -102,9 +122,13 @@ public class RoomController {
 
     // Room 수정
     @PostMapping("/update/{roomId}")
-    public String updateRoomProc(@PathVariable Integer roomId, @ModelAttribute RoomDTO roomDTO) {
+    public String updateRoomProc(@PathVariable Integer roomId,
+                                 @ModelAttribute RoomDTO roomDTO,
+                                 @RequestParam("imageFile") List<MultipartFile> imageFile) {
+
+        log.info("Updating Room with ID: {}", roomId);
         //Room 수정
-        roomService.updateRoom(roomId, roomDTO);
+        roomService.updateRoom(roomId, roomDTO, imageFile);
         // 수정 후 list 페이지로 이동
         return "redirect:/manager/room/list";
     }

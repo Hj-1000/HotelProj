@@ -4,12 +4,15 @@ import com.ntt.ntt.Entity.Hotel;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class RoomDTO {
 
     private Integer roomId;
@@ -29,6 +32,9 @@ public class RoomDTO {
     private LocalDateTime regDate;
 
     private LocalDateTime modDate;
+
+    @Builder.Default
+    private List<ImageDTO> roomImageDTOList = new ArrayList<>();
 
     // 추가 필드 포맷된 가격
     private String formattedRoomPrice;
