@@ -98,4 +98,6 @@ public class MemberController {
         session.invalidate(); // 회원 탈퇴 후 세션 삭제
         return "redirect:/"; // 메인 페이지로 리디렉션
     }
+
+
 }
