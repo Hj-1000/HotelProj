@@ -39,7 +39,7 @@ public class HotelController {
 
         hotelService.register(hotelDTO, imageFiles);
 
-        return "redirect:/hotel/list";
+        return "redirect:/hotel/listByCompany";
     }
 
 //    @GetMapping("/list")
@@ -73,7 +73,7 @@ public class HotelController {
 //    }
 
     //호텔본사관리자 전용
-    @GetMapping("/list")
+    @GetMapping("/listByCompany")
     public String listByCompany(@RequestParam(required = false) Integer companyId,
                                 @RequestParam(required = false) String keyword,
                                 @RequestParam(required = false) String searchType,

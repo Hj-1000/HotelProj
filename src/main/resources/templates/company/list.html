@@ -13,32 +13,79 @@
 
         $(document).ready(function () {
 
-            console.log("간편등록 모달 진입!")
-
             var moBtn = $(".modalBtn")
             var modal = $("#myModal")
 
-            var title
-
             moBtn.off().on("click", function () {
-
-                console.log("모달 진입")
-
                 //모달 열기
                 modal.modal("show")
 
                 $('.modal-title').text("간편 등록하기")
 
-
                 $("#saveChanges").show()
                 modal.find("input").show();
-            })
+            }) //modBtn 끝
 
             $(".submitBtn").off().on("click", function () {
-                alert("글 작성이 완료되었습니다.")
-            })
+                alert("글 작성이 완료되었습니다.");
+            }) //submitBtn 끝
+
+
+            // $(".delBtn").off.on("click" , function (e) {
+            //
+            //     e.preventDefault()
+            //     if (confirm("정말 해당 본사를 삭제하시겠습니까??") == true) {    //확인
+            //
+            //         let a = $(this).find('span:eq(0)')  //jquery
+            //         console.log(a)
+            //         deleteCompany(a);
+            //
+            //     } else {}
+            //
+            // }) //delBtn 끝
 
         })
+
+
+        // 삭제버튼을 눌렀을때 진행하는
+        // function deleteCompany(obj){
+        //
+        //     var companyId = [[${companyId}]]    //아이템의 아이디를 가져온다.
+        //     let url = "/company/remove/" + companyId
+        //     let url1 = "/company/list"
+        //
+        //     console.log(companyId)
+        //
+        //     // alert(url);
+        //
+        //     $.ajax({
+        //         url :url,
+        //         type : "get" ,
+        //         dataType : "json",
+        //         success : function (result) {
+        //
+        //             location.href='/company/list';
+        //         },
+        //         error : function (result, status, error) {
+        //
+        //             if(result.status == '401'){
+        //                 // alert(result.responseText+'로그인 후 이용해주세요');
+        //                 alert('로그인 후 이용해주세요');
+        //                 location.href = '/user/login';
+        //             }else if(result.status == '200') {
+        //                 alert(result.responseText + " 글을 삭제 완료 했습니다")
+        //                 location.href='/company/list';
+        //             }else {
+        //                 /*여긴 또 잘 지워짐 ㅇㅅㅇ*/
+        //                 // alert("글을 삭제 완료 했습니다")
+        //                 alert("확인요망 : " + result.responseText )
+        //                 alert("확인요망 : " + result.status )
+        //                 location.href=url1;
+        //             }
+        //         }
+        //     })
+        //     //삭제버튼은 버튼자체의 태그를 갖는다.
+        // }
 
     </script>
 
@@ -84,11 +131,11 @@
                     <thead>
                     <tr>
                         <th style="width: 10%">No</th>
-                        <th style="width: 38%">본사명</th>
+                        <th style="width: 30%">본사명</th>
                         <th style="width: 20%">관리자명</th>
                         <th style="width: 10%">지사수</th>
                         <th style="width: 10%">매장수</th>
-                        <th style="width: 12%">삭제여부</th>
+                        <th style="width: 8%">삭제</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -157,7 +204,7 @@
         </div>
     </div>
 
-    <!--모달 - 안됨-->
+    <!--모달-->
     <div class="modal" id="myModal">
         <div class="modal-dialog">
             <div class="modal-content">
