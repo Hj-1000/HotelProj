@@ -37,7 +37,7 @@
           <thead>
           <tr>
             <th style="width: 10%">번호</th>
-            <th style="width: 30%">제목</th>
+            <th style="width: 40%">제목</th>
             <th style="width: 20%">작성일</th>
             <th style="width: 20%">수정일</th>
             <th style="width: 10%">작업</th>
@@ -48,7 +48,7 @@
           <!--model.addAttribute("변수명",).DTO(변수명)-->
           <!--boardDTOList, id;subject; content; author; regdate; modDate;-->
           <tr th:each="data:${noticeDTOList}"><!--더미값으로 채우기(가장 긴값)-->
-            <td th:text="${data.noticeId}">99999</td>
+            <td th:text="${data.noticeId}">0</td>
             <td>
               <a th:href="@{/notice/read(noticeId=${data.noticeId})}" th:text="${data.noticeTitle}">
                 sample
@@ -64,7 +64,7 @@
           </tr>
           </tbody>
         </table>
-        <a th:href="@{/notice/register}" class="btn btn-primary">등록</a>
+          <a th:href="@{/notice/register}"> <button class="btn btn-primary">등록</button></a>
       </div><!--listColumn-->
       <div class="col-1"></div><!--우측여백-->
       </div>
