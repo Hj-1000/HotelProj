@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <title>NTT호텔 - 본사 상세 페이지</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" th:href="@{/css/user.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 
     <script th:inline="javascript">
 
@@ -71,15 +71,15 @@
                 <p>본사 담당자 : <span th:text="${companyDTO.companyManager}">마동석</span></p>
                 <p>등록일 : <span>[[${#temporals.format(companyDTO.regDate, 'yyyy년 MM월 dd일')}]]</span></p>
             </div>
-        </div>
 
-        <!-- 버튼 -->
-        <div class="text-end mt-3">
-            <button type="button" class="btn btn-dark modalBtn">지사 등록</button>
-            <a class="btn btn-primary" th:href="@{/hotel/listByCompany(companyId=${companyDTO.companyId})}">지사 관리</a>
-            <button class="btn btn-primary" style="background-color: black" onclick="location.href='/company/list' ">목록</button>
-            <a class="btn btn-primary" th:href="@{/company/modify(companyId=${companyDTO.companyId})}">수정</a>
-            <a class="btn btn-danger" th:href="@{/company/delete(companyId=${companyDTO.companyId})}">삭제</a>
+            <!-- 버튼 -->
+            <div class="text-end mt-3">
+                <a class="btn btn-primary" th:href="@{/company/modify(companyId=${companyDTO.companyId})}">수정</a>
+                <button type="button" class="btn btn-success modalBtn">지사 등록</button>
+                <a class="btn btn-dark" th:href="@{/hotel/listByCompany(companyId=${companyDTO.companyId})}">지사 관리</a>
+                <button class="btn btn-light" onclick="location.href='/company/list' ">목록</button>
+            </div>
+
         </div>
 
     </div>

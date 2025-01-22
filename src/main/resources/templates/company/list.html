@@ -6,12 +6,20 @@
 <head>
     <meta charset="UTF-8">
     <title>NTT호텔 - 본사관리</title>
-    <link rel="stylesheet" th:href="@{/css/user.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script th:inline="javascript">
 
         $(document).ready(function () {
+
+            // 세션에서 message 값을 가져옴
+            var message = [[${message}]];
+
+            // message가 null이 아니면 알림창을 띄우고 세션에서 삭제
+            if (message !== null && message !== '') {
+                alert(message);
+            }
 
             var moBtn = $(".modalBtn")
             var modal = $("#myModal")

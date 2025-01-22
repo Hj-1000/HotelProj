@@ -4,8 +4,10 @@ import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.Service.hotel.HotelService;
 import com.ntt.ntt.Util.PaginationUtil;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.hibernate.annotations.NotFoundAction;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Map;
@@ -33,14 +36,26 @@ public class HotelController {
         return "/hotel/register";
     }
     //등록처리
+    // 등록처리
+    // 등록처리
     @PostMapping("/register")
-    public String registerProc(@ModelAttribute HotelDTO hotelDTO, List<MultipartFile> imageFiles) {
+    public String registerProc(@ModelAttribute HotelDTO hotelDTO, List<MultipartFile> imageFiles, RedirectAttributes redirectAttributes) {
         log.info("본사 등록 진입");
 
+        // 지사 등록 서비스 호출
         hotelService.register(hotelDTO, imageFiles);
 
-        return "redirect:/hotel/listByCompany";
+        // 등록된 지사의 companyId 가져오기
+        Integer companyId = hotelDTO.getCompanyId().getCompanyId();  // hotelDTO에 companyId가 포함되어 있다고 가정
+
+        // 성공 메시지와 함께 companyId도 전달
+        redirectAttributes.addFlashAttribute("message", "지사 등록이 완료되었습니다.");
+        redirectAttributes.addFlashAttribute("companyId", companyId); // companyId 전달
+
+        return "redirect:/hotel/listByCompany?companyId=" + companyId;  // companyId를 쿼리 파라미터로 전달
     }
+
+
 
 //    @GetMapping("/list")
 //    public String list(@RequestParam(required = false) String keyword,
@@ -81,8 +96,14 @@ public class HotelController {
                                 @PageableDefault(page = 1) Pageable page,
                                 Model model) {
 
-        // 검색 기능을 포함한 서비스 호출
-        Page<HotelDTO> hotelDTOS = hotelService.listByCompany(page, keyword, keyword1, searchType, companyId);
+        // companyId가 존재하는 경우 해당 회사의 지사들만 조회
+        Page<HotelDTO> hotelDTOS;
+
+        if (companyId != null) {
+            hotelDTOS = hotelService.listByCompany(page, keyword, keyword1, searchType, companyId);
+        } else {
+            hotelDTOS = hotelService.listByCompany(page, keyword, keyword1, searchType, companyId); // 기본적으로 모든 지사 조회
+        }
 
         // 페이지 정보 계산
         Map<String, Integer> pageInfo = PaginationUtil.pagination(hotelDTOS);
@@ -101,29 +122,28 @@ public class HotelController {
         model.addAttribute("keyword", keyword);
         model.addAttribute("searchType", searchType);
 
+        // companyId를 쿼리 파라미터로 다시 전달
+        model.addAttribute("companyId", companyId);
+
         return "/hotel/listByCompany";
     }
 
 
     //읽기
     @GetMapping("/read")
-    public String read(@RequestParam Integer hotelId, Model model) {
+    public String read(@RequestParam Integer hotelId, Model model, RedirectAttributes redirectAttributes) {
         try {
-            // 서비스에서 hotelDTO 객체를 받아옴
             HotelDTO hotelDTO = hotelService.read(hotelId);
-
-            // hotelDTO를 모델에 추가
             model.addAttribute("hotelDTO", hotelDTO);
-
-            // "read" 뷰로 이동
             return "/hotel/read";
 
-        } catch (EntityNotFoundException e) {
-            model.addAttribute("error", "해당 회사 정보를 찾을 수 없습니다.");
-            return "/hotel/list";  // 회사 정보가 없을 경우 목록으로 이동
+        } catch (NullPointerException e) {
+            // Flash Attribute로 메시지를 전달
+            redirectAttributes.addFlashAttribute("message", "해당 지사가 없습니다!");
+            return "redirect:/hotel/listByCompany"; // 목록 페이지로 리다이렉트
         } catch (Exception e) {
-            model.addAttribute("error", "서버 오류가 발생했습니다.");
-            return "/hotel/list";  // 기타 예외 처리
+            redirectAttributes.addFlashAttribute("message", "서버 오류가 있습니다!");
+            return "redirect:/hotel/listByCompany"; // 목록 페이지로 리다이렉트
         }
     }
 
@@ -132,21 +152,22 @@ public class HotelController {
     @GetMapping("/modify")
     public String modifyServiceHTML(Integer hotelId, Model model) {
         HotelDTO hotelDTO = hotelService.read(hotelId);
-        model.addAttribute("hotelDTO", hotelDTO);
         return "/hotel/modify";
     }
     //수정처리
     @PostMapping("/modify")
-    public String modifyService(HotelDTO hotelDTO, List<MultipartFile> newImageFiles) {
+    public String modifyService(HotelDTO hotelDTO, List<MultipartFile> newImageFiles, RedirectAttributes redirectAttributes) {
         hotelService.update(hotelDTO, newImageFiles);
-        return "redirect:/hotel/list";
+        redirectAttributes.addFlashAttribute("message", "지사 수정이 완료되었습니다.");
+        return "redirect:/hotel/listByCompany";
     }
 
     //삭제
     @GetMapping("/delete")
-    public String delete(Integer hotelId) {
+    public String delete(Integer hotelId, RedirectAttributes redirectAttributes) {
         hotelService.delete(hotelId);
-        return "redirect:/hotel/list";
+        redirectAttributes.addFlashAttribute("message", "해당 지사 삭제가 완료되었습니다.");
+        return "redirect:/hotel/listByCompany";
     }
 
 

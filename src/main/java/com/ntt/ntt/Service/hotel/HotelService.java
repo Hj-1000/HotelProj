@@ -88,6 +88,7 @@ public class HotelService {
             if (keyword != null && !keyword.isEmpty()) {
                 String keywordLike = "%" + keyword + "%";  // LIKE 조건을 위한 검색어 처리
 
+                // 검색 타입에 따라 조건을 추가
                 if ("name".equals(searchType)) {
                     // 호텔명 검색
                     hotels = hotelRepository.findByCompany_CompanyIdAndHotelNameLike(companyId, keywordLike, pageable);
@@ -110,6 +111,7 @@ public class HotelService {
             if (keyword != null && !keyword.isEmpty()) {
                 String keywordLike = "%" + keyword + "%";  // LIKE 조건을 위한 검색어 처리
 
+                // 검색 타입에 따라 조건을 추가
                 if ("name".equals(searchType)) {
                     hotels = hotelRepository.findByHotelNameLike(keywordLike, pageable);
                 } else if ("location".equals(searchType)) {
