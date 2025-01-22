@@ -63,15 +63,13 @@
 
                 <!--등록한 사진이 없을 때-->
                 <th:block th:unless="${companyDTO.companyImgDTOList.size() != 0}">
-                    <div th:each="img : ${companyDTO.companyImgDTOList}">
-                        <!-- 이미지 경로(path) -->
-                        <img src="/img/default_img.jpg" alt="hotel Image" width="300px"/>
-                    </div>
+                    <!-- 이미지 경로(path) -->
+                    <img src="/img/default_img.jpg" alt="noImage" style="width: 300px"/>
                 </th:block>
 
                 <h3><a th:text="${companyDTO.companyName}">NTT hotel</a></h3>
-                <p>본사 관리자명 : <span th:text="${companyDTO.companyManager}">마동석</span></p>
-                <p>가입일 : <span>[[${#temporals.format(companyDTO.regDate, 'yyyy년 MM월 dd일')}]]</span></p>
+                <p>본사 담당자 : <span th:text="${companyDTO.companyManager}">마동석</span></p>
+                <p>등록일 : <span>[[${#temporals.format(companyDTO.regDate, 'yyyy년 MM월 dd일')}]]</span></p>
             </div>
         </div>
 
