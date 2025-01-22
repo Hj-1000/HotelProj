@@ -154,28 +154,30 @@ public class CompanyService {
         Optional<Company> companyOpt = companyRepository.findById(companyDTO.getCompanyId());
         if (companyOpt.isPresent()) {
             Company company = companyOpt.get();
+
+            // 회사 정보 수정 (회사 이름 수정)
             company.setCompanyName(companyDTO.getCompanyName());
+            company.setCompanyManager(companyDTO.getCompanyManager());
+
+            // 회사 정보 저장 (이 부분에서 회사 이름이 저장됨)
             companyRepository.save(company);  // 회사 이름 저장
 
             // 이미지 수정 처리
             if (newImageFiles != null && !newImageFiles.isEmpty()) {
-                // 회사에 이미지를 여러 개 다룰 경우, 기존 이미지 삭제 및 새 이미지 업로드
+                // 새 이미지가 있을 경우, 기존 이미지 삭제 및 새 이미지 업로드
                 List<Image> existingImages = company.getCompanyImageList();  // 회사에 연결된 이미지들 가져오기
 
                 // 기존 이미지 삭제 처리
                 for (Image existingImage : existingImages) {
-                    fileUpload.FileDelete(IMG_LOCATION, existingImage.getImageName());
-                    imageRepository.delete(existingImage);  // 기존 이미지 삭제
+                    fileUpload.FileDelete(IMG_LOCATION, existingImage.getImageName());  // 파일 삭제
+                    imageRepository.delete(existingImage);  // 이미지 엔티티 삭제
                 }
 
                 // 회사의 이미지 리스트에서 삭제된 이미지를 제거
-                company.getCompanyImageList().clear();  // 이미지를 모두 제거
+                company.getCompanyImageList().clear();  // 기존 이미지 리스트 비우기
 
                 // 새 이미지들 업로드 처리
                 List<String> newFilenames = fileUpload.FileUpload(IMG_LOCATION, newImageFiles);
-//                if (newFilenames == null || newFilenames.isEmpty()) {
-//                    throw new RuntimeException("파일 업로드 실패");
-//                } -> 오류남 이거 있으면 사진 안 올렸을 때 오류남
 
                 // 업로드된 새 이미지들 저장
                 for (int i = 0; i < newFilenames.size(); i++) {
@@ -193,14 +195,21 @@ public class CompanyService {
                     // 회사와 이미지 연결 (회사 정보에 이미지 추가)
                     company.getCompanyImageList().add(newImage);  // 이미지를 회사의 이미지 리스트에 추가
                 }
-
-                // 회사 정보 저장 (이미지와의 관계 업데이트)
-                companyRepository.save(company);  // 회사 정보와 연결된 이미지를 저장
             }
+            else {
+                // 새 이미지가 없으면 기존 이미지 유지
+                // 이미지를 지우지 않고 그냥 유지하면 됩니다.
+            }
+
+            // 회사 정보 저장 (이미지와의 관계가 없더라도 회사 정보만 수정 후 저장)
+            companyRepository.save(company);  // 회사 정보 저장
         } else {
             throw new RuntimeException("본사를 찾을 수 없습니다.");
         }
     }
+
+
+
     // 회사 삭제
     @Transactional
     public void delete(Integer companyId) {
