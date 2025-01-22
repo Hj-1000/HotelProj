@@ -55,7 +55,7 @@
                     <h5 class="card-title">지사 찾기</h5>
                     <div class="col-md-6">
                         <select name="searchType" class="form-select">
-                            <option value="name" th:selected="${searchType == 'name'}">호텔이름</option>
+                            <option value="name" th:selected="${searchType == 'name'}">지사명</option>
                             <option value="location" th:selected="${searchType == 'location'}">지역</option>
                             <option value="address" th:selected="${searchType == 'address'}">주소</option>
                             <option value="rating" th:selected="${searchType == 'rating'}">별점</option>
@@ -85,8 +85,9 @@
                     <thead>
                     <tr>
                         <th style="width: 5%">No</th>
-                        <th style="width: 20%">지사명</th>
-                        <th style="width: 25%">주소</th>
+                        <th style="width: 10%">본사명</th>
+                        <th style="width: 15%">지사명</th>
+                        <th style="width: 20%">주소</th>
                         <th style="width: 10%">전화번호</th>
                         <th style="width: 10%">이메일</th>
                         <th style="width: 8%">체크인</th>
@@ -100,6 +101,7 @@
                     <th:block th:unless="${#lists.isEmpty(hotelDTOS)}"><!--값이 없으면이 아니면(있으면)-->
                         <tr th:each="data:${hotelDTOS}">
                             <td th:text="${data.hotelId}">호텔번호</td>
+                            <td th:text="${data.companyName}">본사명</td>
                             <td>
                                 <a th:href="@{/hotel/read(hotelId=${data.hotelId})}" style="text-decoration: none" th:text="${data.hotelName}">지사명</a>
                             </td>
@@ -132,6 +134,7 @@
                 <!-- 추가 버튼 -->
                 <div class="text-end mt-3">
                     <button class="btn btn-primary" style="background-color: black" onclick="location.href='/hotel/register' ">등록</button>
+                    <button class="btn btn-primary" onclick="location.href='/company/list' ">본사관리페이지로</button>
                     <button type="button" class="btn btn-primary modalBtn">간편 등록</button>
                 </div>
 

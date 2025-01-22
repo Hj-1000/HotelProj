@@ -29,7 +29,7 @@ public class QnaDTO {
     private LocalDateTime modDate;
 
     // QnaDTO에서 Qna로 변환하는 메서드 예시
-    public QnaDTO convertToDTO(Qna qna) {
+    public QnaDTO dtoToEntity(Qna qna) {
         QnaDTO qnaDTO = new QnaDTO();
         qnaDTO.setQnaId(qna.getQnaId());
         qnaDTO.setQnaTitle(qna.getQnaTitle());

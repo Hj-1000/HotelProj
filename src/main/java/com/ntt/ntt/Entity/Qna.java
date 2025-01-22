@@ -23,7 +23,7 @@ public class Qna extends BaseEntity {
     private String qnaContent;
 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "member")  // 외래 키 컬럼명이 memberId일 때
     private Member member;
 

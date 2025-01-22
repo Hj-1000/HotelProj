@@ -39,21 +39,53 @@ public class HotelController {
 
         hotelService.register(hotelDTO, imageFiles);
 
-        return "redirect:/hotel/list";
+        return "redirect:/hotel/listByCompany";
     }
 
-    @GetMapping("/list")
-    public String list(@RequestParam(required = false) String keyword,
-                       @RequestParam(required = false) Integer keyword1,
-                       @RequestParam(required = false) String searchType,
-                       @PageableDefault(page = 1) Pageable page,
-                       Model model) {
+//    @GetMapping("/list")
+//    public String list(@RequestParam(required = false) String keyword,
+//                       @RequestParam(required = false) Integer keyword1,
+//                       @RequestParam(required = false) String searchType,
+//                       @PageableDefault(page = 1) Pageable page,
+//                       Model model) {
+//
+//        // 검색 기능을 포함한 서비스 호출
+//        Page<HotelDTO> hotelDTOS = hotelService.list(page, keyword, keyword1, searchType);
+//
+//        // 페이지 정보 계산
+//        Map<String, Integer> pageInfo = paginationUtil.pagination(hotelDTOS);
+//
+//        // 만약 글이 10개 이하라면, 페이지 2는 표시되지 않도록 수정
+//        if (hotelDTOS.getTotalPages() <= 1) {
+//            pageInfo.put("startPage", 1);
+//            pageInfo.put("endPage", 1);
+//        }
+//
+//        // 모델에 데이터 추가
+//        model.addAttribute("hotelDTOS", hotelDTOS);
+//        model.addAttribute("pageInfo", pageInfo);
+//
+//        // 검색어와 검색 타입을 폼에 전달할 수 있도록 추가
+//        model.addAttribute("keyword", keyword);
+//        model.addAttribute("searchType", searchType);
+//
+//        return "/hotel/list";
+//    }
+
+    //호텔본사관리자 전용
+    @GetMapping("/listByCompany")
+    public String listByCompany(@RequestParam(required = false) Integer companyId,
+                                @RequestParam(required = false) String keyword,
+                                @RequestParam(required = false) String searchType,
+                                @RequestParam(required = false) Integer keyword1,  // 별점 검색용
+                                @PageableDefault(page = 1) Pageable page,
+                                Model model) {
 
         // 검색 기능을 포함한 서비스 호출
-        Page<HotelDTO> hotelDTOS = hotelService.list(page, keyword, keyword1, searchType);
+        Page<HotelDTO> hotelDTOS = hotelService.listByCompany(page, keyword, keyword1, searchType, companyId);
 
         // 페이지 정보 계산
-        Map<String, Integer> pageInfo = paginationUtil.pagination(hotelDTOS);
+        Map<String, Integer> pageInfo = PaginationUtil.pagination(hotelDTOS);
 
         // 만약 글이 10개 이하라면, 페이지 2는 표시되지 않도록 수정
         if (hotelDTOS.getTotalPages() <= 1) {
@@ -69,8 +101,9 @@ public class HotelController {
         model.addAttribute("keyword", keyword);
         model.addAttribute("searchType", searchType);
 
-        return "/hotel/list";
+        return "/hotel/listByCompany";
     }
+
 
     //읽기
     @GetMapping("/read")

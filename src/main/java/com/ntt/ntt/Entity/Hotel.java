@@ -53,4 +53,11 @@ public class Hotel extends BaseEntity {
     public Hotel(Integer hotelId) {
         this.hotelId = hotelId;
     }
+
+    //회사와 연결
+    //2025-01-22 추가
+    @ManyToOne
+    @JoinColumn(name = "companyId")
+    private Company company;
+
 }
