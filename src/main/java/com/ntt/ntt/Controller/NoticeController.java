@@ -1,5 +1,6 @@
 package com.ntt.ntt.Controller;
 
+import com.ntt.ntt.DTO.ImageDTO;
 import com.ntt.ntt.DTO.NoticeDTO;
 import com.ntt.ntt.Entity.Notice;
 import com.ntt.ntt.Service.NoticeService;
@@ -11,7 +12,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -36,31 +39,33 @@ public class NoticeController {
 
     @GetMapping("/notice/register")
     public String registerForm(Model model){
+        model.addAttribute("noticeDTO", new NoticeDTO());
         return "notice/register";
     }
 
     @PostMapping("/notice/register")
-    public String registerProc(@ModelAttribute NoticeDTO noticeDTO){
+    public String registerProc(NoticeDTO noticeDTO, @RequestParam("multipartFile") List<MultipartFile> multipartFile){
 
-        noticeService.register(noticeDTO);
+        noticeService.register(noticeDTO, multipartFile);
         return "redirect:/notice/list";
     }
 
     @GetMapping("/notice/read")
     public String readForm(@RequestParam Integer noticeId, Model model){
         NoticeDTO noticeDTO = noticeService.read(noticeId);
-        model.addAttribute("notice", noticeDTO);
+
+        model.addAttribute("noticeDTO", noticeDTO);
         return "notice/read";
     }
     @GetMapping("/notice/update")
     public String updateForm(@RequestParam Integer noticeId, Model model){
         NoticeDTO noticeDTO = noticeService.read(noticeId);
-        model.addAttribute("notice", noticeDTO);
+        model.addAttribute("noticeDTO", noticeDTO);
         return "notice/update";
     }
     @PostMapping("/notice/update")
-    public String updateProc(@ModelAttribute NoticeDTO noticeDTO){
-        noticeService.update(noticeDTO);
+    public String updateProc(@ModelAttribute NoticeDTO noticeDTO,@RequestParam("multipartFile") List<MultipartFile> multipartFile){
+        noticeService.update(noticeDTO, multipartFile);
         return "redirect:/notice/list";
     }
     @GetMapping("/notice/delete")
@@ -77,7 +82,7 @@ public class NoticeController {
     @GetMapping("/notice/userread")
     public String userreadForm(@RequestParam Integer noticeId, Model model) {
         NoticeDTO noticeDTO = noticeService.read(noticeId);
-        model.addAttribute("notice", noticeDTO);
+        model.addAttribute("noticeDTO", noticeDTO);
         return "notice/userread";
     }
 }

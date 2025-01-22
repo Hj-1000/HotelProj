@@ -23,7 +23,7 @@
   <div id="row" class="row">
     <div class="col-3"></div>
     <div class="col-6">
-      <form th:action="@{/notice/register}" method="post">
+      <form th:action="@{/notice/register}" method="post" enctype="multipart/form-data">
         <!--디자인-->
         <div class="card">
 
@@ -35,24 +35,29 @@
           </div>
           <div class="card-body">
             <!--작업시 기본키가 필요없으면 숨겨서 처리-->
-            <input type="hidden" name="noticeId" th:value="${notice.noticeId}">
+            <input type="hidden" name="noticeId" th:value="${noticeDTO.noticeId}">
             <!--기본키를 화면에 출력할 때는 반드시 수정불가능 상태로 지정-->
             <div class="mb-3 mt-3">
               <label for="noticeId" class="form-label">번호:</label>
-              <input type="text" class="form-control" id="noticeId" name="noticeId" th:value="${notice.noticeId} " readonly>
+              <input type="text" class="form-control" id="noticeId" name="noticeId" th:value="${noticeDTO.noticeId} " readonly>
             </div>
             <!--board로 전달-->
             <div class="mb-3 mt-3"><!--게시글제목-->
               <label for="noticeTitle" class="form-label">제목:</label>
-              <input type="text" class="form-control" id="noticeTitle" name="noticeTitle" th:value="${notice.noticeTitle}" placeholder="제목을 입력하세요">
+              <input type="text" class="form-control" id="noticeTitle" name="noticeTitle" th:value="${noticeDTO.noticeTitle}" placeholder="제목을 입력하세요">
             </div>
             <div class="mb-3 mt-3">
               <label for="noticeContent" class="form-label">내용:</label>
-              <textarea type="text" class="form-control" id="noticeContent" name="noticeContent" placeholder="내용을 입력하세요" th:text="${notice.noticeContent}"></textarea>
+              <textarea type="text" class="form-control" id="noticeContent" name="noticeContent" placeholder="내용을 입력하세요" th:text="${noticeDTO.noticeContent}"></textarea>
             </div>
+            <div th:each="img : ${noticeDTO.noticeImageDTOList}"><!--그림파일이 존재하면-->
+              <img th:src="@{'/upload/' + ${img.imagePath}}" width="300px" height="200px">
+            </div>
+            <input type="file" name="multipartFile">
           </div>
           <div class="card-footer">
-            <button type="submit" class="btn btn-primary">등록</button>
+
+              <button type="submit" class="btn btn-primary" >등록</button>
             <button type="button" class="btn btn-danger"
                     th:onclick="|location.href='@{/notice/list}'|">취소</button>
             <!--@{주소}, 문자열+주소 |문자열@{주소}|-->
