@@ -76,19 +76,37 @@ public class ServiceCateService{
     출력 : 해당 데이터들(list)과 page 정보를 전달
     설명 : 요청한 페이지번호에 해당하는 데이터를 조회해서 전달
     --------------------------------*/
-    public Page<ServiceCateDTO> list(Pageable page){
-        //1. 페이지정보를 재가공
-        int currentPage = page.getPageNumber()-1;
+    public Page<ServiceCateDTO> list(Pageable page, String keyword, String searchType) {
+        // 1. 페이지정보를 재가공
+        int currentPage = page.getPageNumber() - 1; // 0-based index
         int pageSize = 10;
         Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.DESC, "serviceCateId"));
 
-        //2. 조회
-        Page<ServiceCate> serviceCatePage = serviceCateRepository.findAll(pageable);
+        // 2. 조회
+        Page<ServiceCate> serviceCatePage;
 
-        //3. 변환
-        Page<ServiceCateDTO> serviceCateDTOS = serviceCatePage.map(entity ->modelMapper.map(entity, ServiceCateDTO.class));
+        if (keyword != null && !keyword.isEmpty()) {
+            // 검색어가 있을 경우
+            String keywordLike = "%" + keyword + "%";
+            if ("name".equals(searchType)) {
+                // 카테고리명에 검색어 포함된 경우 찾기
+                serviceCatePage = serviceCateRepository.findByServiceCateNameLike(keywordLike, pageable);
+            } else {
+                // 다른 검색 조건이 있을 경우 처리
+                // 예시: 'searchType'에 따른 추가적인 로직 구현 가능
+                serviceCatePage = serviceCateRepository.findAll(pageable); // 예시: 모든 항목 조회
+            }
+        } else {
+            // 검색어가 없을 경우 모든 카테고리 조회
+            serviceCatePage = serviceCateRepository.findAll(pageable);
+        }
+
+        // 3. 변환
+        Page<ServiceCateDTO> serviceCateDTOS = serviceCatePage.map(entity -> modelMapper.map(entity, ServiceCateDTO.class));
+
         return serviceCateDTOS;
     }
+
 
     //서비스 카테고리 상세보기
 /*--------------------------------

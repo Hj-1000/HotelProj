@@ -26,7 +26,7 @@ import java.util.Map;
 @Log4j2
 @RequiredArgsConstructor
 @RequestMapping("/roomService/menu") //url roomService아래에
-@Tag(name = "serviceMenuController", description = "룸서비스 카테고리 정보")
+@Tag(name = "serviceMenuController", description = "룸서비스 메뉴 정보")
 public class ServiceMenuController {
     private final ServiceMenuService serviceMenuService;
     private final PaginationUtil paginationUtil;
@@ -41,10 +41,10 @@ public class ServiceMenuController {
 
     @Operation(summary = "등록창", description = "데이터 등록 후 목록페이지로 이동한다.")
     @PostMapping("/register")
-    public String registerProc(ServiceMenuDTO serviceMenuDTO, @RequestParam("imageFile") List<MultipartFile> imageFile) {
+    public String registerProc(ServiceMenuDTO serviceMenuDTO, @RequestParam("imageFiles") List<MultipartFile> imageFiles) {
         log.info("post에서 등록할 serviceMenuDTO" + serviceMenuDTO);
-        serviceMenuService.register(serviceMenuDTO, imageFile);
-        return "redirect:/roomService/list";
+        serviceMenuService.register(serviceMenuDTO, imageFiles);
+        return "redirect:/roomService/menu/list";
     }
 
     @Operation(summary = "전체목록", description = "전체목록을 조회한다.")
@@ -94,9 +94,9 @@ public class ServiceMenuController {
 
     @Operation(summary = "수정창", description = "수정할 내용을 데이터베이스에 저장 후 목록페이지로 이동한다.")
     @PostMapping("/update")
-    public String updateProc(ServiceMenuDTO serviceMenuDTO, @RequestParam("imageFile") List<MultipartFile> imageFile) {
-        serviceMenuService.update(serviceMenuDTO, imageFile);
-        return "redirect:/roomService/read?serviceMenuId="+ serviceMenuDTO.getServiceMenuId();
+    public String updateProc(ServiceMenuDTO serviceMenuDTO, @RequestParam("imageFiles") List<MultipartFile> imageFiles) {
+        serviceMenuService.update(serviceMenuDTO, imageFiles);
+        return "redirect:/roomService/menu/read?serviceMenuId="+ serviceMenuDTO.getServiceMenuId();
     }
 
     @Operation(summary = "삭제처리", description = "해당 데이터를 삭제 후 목록페이지로 이동한다.")
@@ -104,6 +104,6 @@ public class ServiceMenuController {
     public String deleteForm(Integer serviceMenuId) {
 
         serviceMenuService.delete(serviceMenuId);
-        return "redirect:/roomService/list";
+        return "redirect:/roomService/menu/list";
     }
 }

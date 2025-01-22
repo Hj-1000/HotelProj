@@ -16,9 +16,9 @@
 
             <div class="card p-4 mb-4">
                 <div class="row g-3 align-items-center">
-                    <h3><a th:text="${serviceCateDTO.serviceCateName}">한식</a></h3>
+                    <h3><a th:text="${serviceMenuDTO.serviceMenuName}">한식</a></h3>
                     <div>
-                        <div th:each="img : ${serviceCateDTO.serviceCateImageDTOList}">
+                        <div th:each="img : ${serviceMenuDTO.serviceMenuImageDTOList}">
                             <!-- 이미지가 있는 경우만 출력 -->
                             <img th:src="@{'/upload/' + ${img.imagePath}}" alt="Category Image" width="300px">
                         </div>
@@ -29,9 +29,9 @@
 
             <!-- 추가 버튼 -->
             <div class="text-end mt-3">
-                <button class="btn btn-primary" style="background-color: black" onclick="location.href='/roomService/list' ">목록</button>
-                <a class="btn btn-primary" th:href="@{/roomService/update(serviceCateId=${serviceCateDTO.serviceCateId})}">수정</a>
-                <a class="btn btn-danger" th:href="@{/roomService/delete(serviceCateId=${serviceCateDTO.serviceCateId})}">삭제</a>
+                <button class="btn btn-primary" style="background-color: black" onclick="location.href='/roomService/menu/list' ">목록</button>
+                <a class="btn btn-primary" th:href="@{/roomService/menu/update(serviceMenuId=${serviceMenuDTO.serviceMenuId})}">수정</a>
+                <a class="btn btn-danger" th:href="@{/roomService/menu/delete(serviceCateId=${serviceMenuDTO.serviceMenuId})}">삭제</a>
             </div>
 
         </div>
