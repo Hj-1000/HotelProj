@@ -31,7 +31,7 @@ public class NoticeService {
     private final NoticeRepository noticeRepository;
     private final ModelMapper modelMapper;
 
-    // 이미지 등록할 ImageService 의존성 추가
+    // 이미지 등록할 ImageService 의존성
     private final ImageService imageService;
     private final FileUpload fileUpload;
 
