@@ -21,6 +21,18 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         //UserDetails을 사용자가 오버라이딩 변경을 하면 해당정보를 전달
         UserDetails user = (UserDetails) authentication.getPrincipal();
 
-        response.sendRedirect("/"); //시작페이지로 이동
+        String role = authentication.getAuthorities().toArray()[0].toString(); // 첫 번째 권한 값 가져오기
+
+        if (role.equals("ROLE_ADMIN")) {
+            response.sendRedirect("/admin/memberList"); // ADMIN 권한 사용자가 로그인시 전체회원관리 페이지로 리다이렉트
+        } else if (role.equals("ROLE_CHIEF")) {
+            response.sendRedirect("/admin/executive"); // CHIEF 권한 사용자가 로그인시 임원관리 페이지로 리다이렉트
+        } else if (role.equals("ROLE_MANAGER")) {
+            response.sendRedirect("/"); // MANAGER 권한 사용자가 로그인시 객실관리 페이지로 리다이렉트
+        } else if (role.equals("ROLE_USER")) {
+            response.sendRedirect("/"); // USER 권한 사용자가 로그인시 메인페이지로 리다이렉트
+        } else {
+            response.sendRedirect("/login?error"); // 기본 로그인 페이지로 리다이렉트 (혹은 에러 페이지)
+        }
     }
 }

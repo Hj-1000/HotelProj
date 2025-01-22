@@ -42,9 +42,8 @@ public class MemberService implements UserDetailsService {
 
             // 회원의 상태가 '비활성'인 경우 로그인 차단
             if ("비활성".equals(memberEntity.getMemberStatus())) {
-                throw new UsernameNotFoundException("이메일이 비활성화된 계정입니다: " + email);
+                throw new UsernameNotFoundException("이 이메일은 비활성화된 계정입니다.");
             }
-            log.info("입력한 이메일이 존재합니다.");
             return User.withUsername(member.get().getMemberEmail())
                     .password(member.get().getMemberPassword()) // 암호화된 비밀번호 반환
                     .roles(member.get().getRole().name())
@@ -59,13 +58,9 @@ public class MemberService implements UserDetailsService {
         // 회원가입시 입력한 이메일이 존재하는지 조회
         Optional<Member> read = memberRepository.findByMemberEmail(memberDTO.getMemberEmail());
 
-        // 입력한 이메일이 존재하면 회원가입 실패
+        // 입력한 이메일이 이미 존재하면 회원가입 실패
         if (read.isPresent()) {
             throw new IllegalStateException("이미 가입된 회원입니다");
-        }
-
-        if (memberDTO.getMemberPassword() == null) {
-            throw new IllegalArgumentException("비밀번호가 null입니다.");
         }
 
         // 입력한 이메일이 존재하지 않으면 회원가입 성공
@@ -73,11 +68,10 @@ public class MemberService implements UserDetailsService {
         Member member = modelMapper.map(memberDTO, Member.class);
         member.setMemberName(memberDTO.getMemberName());
         member.setMemberPhone(memberDTO.getMemberPhone());
-        member.setMemberPassword(password); // 암호화한 비밀번호 저장
+        member.setMemberPassword(password); // 암호화된 비밀번호 저장
         member.setMemberStatus("활성"); // 회원가입시 memberStatus 는 기본적으로 '활성' 상태로 가입
-        member.setRole(Role.USER);
+        member.setRole(Role.USER); // 일반회원은 회원가입시 USER 권한으로 가입
         memberRepository.save(member);
-
     }
 
     // 관리자 회원가입
@@ -85,7 +79,7 @@ public class MemberService implements UserDetailsService {
         // 회원가입시 입력한 이메일이 존재하는지 조회
         Optional<Member> read = memberRepository.findByMemberEmail(memberDTO.getMemberEmail());
 
-        // 입력한 이메일이 존재하면 회원가입 실패
+        // 입력한 이메일이 이미 존재하면 회원가입 실패
         if (read.isPresent()) {
             throw new IllegalStateException("이미 가입된 회원입니다");
         }
@@ -95,15 +89,15 @@ public class MemberService implements UserDetailsService {
         Member member = modelMapper.map(memberDTO, Member.class);
         member.setMemberName(memberDTO.getMemberName());
         member.setMemberPhone(memberDTO.getMemberPhone());
-        member.setMemberStatus("활성");
         member.setMemberPassword(password);
-        member.setRole(memberDTO.getRole());
+        member.setMemberStatus("활성");
+        member.setRole(memberDTO.getRole()); // 관리자는 회원가입시 선택한 권한으로 가입
         memberRepository.save(member);
-
     }
 
     // 회원정보 수정
     public Member update(MemberDTO memberDTO) {
+        // 현재 로그인한 사용자 이메일로 조회
         Optional<Member> optionalUser = memberRepository.findByMemberEmail(memberDTO.getMemberEmail());
 
         if (optionalUser.isPresent()) {
@@ -114,7 +108,7 @@ public class MemberService implements UserDetailsService {
                 throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
             }
 
-            // 새 비밀번호 확인 및 업데이트
+            // 새 비밀번호 확인
             if (memberDTO.getNewPassword() != null && !memberDTO.getNewPassword().isEmpty()) {
                 if (memberDTO.getNewPassword().length() < 6) {
                     throw new IllegalArgumentException("새 비밀번호는 6글자 이상이어야 합니다.");
@@ -122,10 +116,11 @@ public class MemberService implements UserDetailsService {
                 if (!memberDTO.getNewPassword().equals(memberDTO.getNewPasswordCheck())) {
                     throw new IllegalArgumentException("새 비밀번호가 일치하지 않습니다.");
                 }
-                member.setMemberPassword(passwordEncoder.encode(memberDTO.getNewPassword())); // 새 비밀번호로 업데이트
+                // 새 비밀번호로 업데이트
+                member.setMemberPassword(passwordEncoder.encode(memberDTO.getNewPassword()));
             }
 
-            // 다른 정보 업데이트
+            // 이름, 전화번호도 업데이트
             member.setMemberName(memberDTO.getMemberName());
             member.setMemberPhone(memberDTO.getMemberPhone());
 
@@ -146,7 +141,7 @@ public class MemberService implements UserDetailsService {
         return memberRepository.save(member);
     }
 
-    // 회원정보 조회
+    // 회원정보 개별조회
     public MemberDTO read(String memberEmail) {
         Optional<Member> user = memberRepository.findByMemberEmail(memberEmail);
 
@@ -162,20 +157,11 @@ public class MemberService implements UserDetailsService {
         Member member = memberRepository.findByMemberEmail(memberEmail)
                 .orElseThrow(() -> new IllegalArgumentException("해당 이메일의 회원을 찾을 수 없습니다."));
 
-        memberRepository.delete(member); // 회원 삭제
-        log.info("회원 탈퇴 성공: {}", memberEmail);
+        memberRepository.delete(member);
+        log.info("회원 탈퇴 성공: ", memberEmail);
     }
 
-    // 전체 회원 조회
-    public List<MemberDTO> getAllMembers() {
-        List<Member> members = memberRepository.findAll(); // 모든 회원을 조회
-        System.out.println("전체 회원 수: " + members.size()); // 디버깅용 로그
-        return members.stream()
-                .map(member -> modelMapper.map(member, MemberDTO.class))
-                .collect(Collectors.toList());
-    }
-
-    // 회원 검색기능
+    // 전체 회원 조회 및 검색기능
     public List<MemberDTO> getFilteredMembers(String role, String email, String status,
                                               String name, String phone, String startDate, String endDate) {
         List<Member> members = memberRepository.findAll();
