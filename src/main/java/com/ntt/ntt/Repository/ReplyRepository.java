@@ -12,7 +12,6 @@ import java.util.List;
 @Repository
 
 public interface ReplyRepository extends JpaRepository<Reply, Integer> {
-    // 변수 이름을 qna 라 설정               qna에 qna아이디
-    @Query("SELECT r FROM Reply r WHERE r.qna.qnaId = :qnaId")
-    List<Reply> findByqnaId(Qna qna);
+    // 특정 질문에 대한 댓글을 찾는 메소드
+    List<Reply> findByQna(Qna qna);
 }
