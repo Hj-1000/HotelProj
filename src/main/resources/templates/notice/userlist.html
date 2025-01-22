@@ -25,13 +25,13 @@
 
 </head>
 <body>
-<!--<div th:replace="~{fragments/header::header}"></div>-->
-<div layout:fragment="content">
+<div th:replace="~{fragments/header::header}"></div>
+<!--<div layout:fragment="content">-->
     <div id="container" class="container"><!--브라우저 사용 범위-->
         <div id="row" class="row">
             <div class="col-1"></div><!--좌측여백-->
             <div id="listColumn" class="col-10"><!--작업디자인(표)-->
-                <h2 class="h2">NOTICE</h2>
+                <h2 class="h2">공 지 사 항</h2>
                 <table class="table">
                     <thead>
                     <tr>
@@ -47,7 +47,7 @@
                     <!--model.addAttribute("변수명",).DTO(변수명)-->
                     <!--boardDTOList, id;subject; content; author; regdate; modDate;-->
                     <tr th:each="data:${noticeDTOList}"><!--더미값으로 채우기(가장 긴값)-->
-                        <td th:text="${data.noticeId}">99999</td>
+                        <td th:text="${data.noticeId}">0</td>
                         <td>
                             <a th:href="@{/notice/userread(noticeId=${data.noticeId})}" th:text="${data.noticeTitle}">
                                 sample
