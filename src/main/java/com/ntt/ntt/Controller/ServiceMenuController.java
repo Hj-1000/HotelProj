@@ -1,5 +1,6 @@
 package com.ntt.ntt.Controller;
 
+import com.ntt.ntt.DTO.ServiceCateDTO;
 import com.ntt.ntt.DTO.ServiceMenuDTO;
 import com.ntt.ntt.Service.ServiceCateService;
 import com.ntt.ntt.Service.ServiceMenuService;
@@ -38,6 +39,8 @@ public class ServiceMenuController {
     @GetMapping("/register")
     public String registerForm(Model model){
         //검증처리가 필요하면 빈 MenuDTO를 생성해서 전달한다.
+        List<ServiceCateDTO> serviceCateDTOS = serviceCateService.getAllServiceCate();
+        model.addAttribute("serviceCateDTOS", serviceCateDTOS);
         model.addAttribute("serviceMenuDTO", new ServiceMenuDTO());
         return "/manager/roomservice/menu/register";
     }
@@ -51,6 +54,8 @@ public class ServiceMenuController {
         redirectAttributes.addFlashAttribute("message", "메뉴 등록이 완료되었습니다.");
         return "redirect:/roomService/menu/list";
     }
+
+
 
     @Operation(summary = "전체목록", description = "전체목록을 조회한다.")
     @GetMapping("/list")

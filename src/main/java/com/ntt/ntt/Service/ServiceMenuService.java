@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 public class ServiceMenuService {
 
     private final ImageRepository imageRepository;
-    private final ServiceCateRepository serviceCateRepository;
     private final ServiceMenuRepository serviceMenuRepository;
     private final ModelMapper modelMapper;
 
