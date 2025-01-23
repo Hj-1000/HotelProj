@@ -88,8 +88,4 @@ public class StartController {
         return "admin/hotelHeadquartersRegister";
     }
 
-    @GetMapping("/roomList")
-    public String e(){
-        return "roomList";
-    }
 }

@@ -6,76 +6,162 @@
 <head>
     <meta charset="UTF-8">
     <title>객실 목록</title>
+    <style>
+        .room-image {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        table {
+            table-layout: fixed;
+            word-wrap: break-word;
+        }
+
+        .table-dark {
+            text-align: center;
+        }
+
+        td, th {
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        img {
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* 버튼을 세로 정렬 */
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: .5rem;
+        }
+    </style>
 </head>
 <body>
-    <div layout:fragment="content">
-        <div class="container py-5">
-            <h1 class="text-center mb-5">객실 목록</h1>
+<div layout:fragment="content">
+    <div class="container py-4">
+        <h1 class="text-center mb-5">객실 목록</h1>
 
-            <!-- 객실 목록 테이블 -->
-            <table class="table table-bordered table-hover">
-                <thead class="table-dark">
-                <tr>
-                    <th scope="col">객실 ID</th>
-                    <th scope="col">객실 이름</th>
-                    <th scope="col">객실 타입</th>
-                    <th scope="col">가격</th>
-                    <th scope="col">상태</th>
-                    <th scope="col">기능</th>
-                </tr>
-                </thead>
-                <tbody>
+        <!-- 에러 메시지 -->
+        <div th:if="${errorMessage}" class="alert alert-danger text-center">
+            <span th:text="${errorMessage}"></span>
+        </div>
 
-                <tr th:each="room : ${list.content}">
-                    <td th:text="${room.roomId}"></td>
-                    <td th:text="${room.roomName}"></td>
-                    <td th:text="${room.roomType}"></td>
-                    <td th:text="${room.formattedRoomPrice} + ' KRW'"></td>
-                    <td>
-                        <span th:if="${room.roomStatus != null and room.roomStatus}" class="badge bg-success">Available</span>
-                        <span th:if="${room.roomStatus == null or !room.roomStatus}" class="badge bg-danger">Unavailable</span>
-                    </td>
-                    <td>
+        <!-- 객실 목록 테이블 -->
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+            <tr>
+                <th scope="col">이미지</th>
+                <th scope="col">객실 ID</th>
+                <th scope="col">객실 이름</th>
+                <th scope="col">객실 타입</th>
+                <th scope="col">가격</th>
+                <th scope="col">상태</th>
+                <th scope="col">예약 기간</th>
+                <th scope="col">숙박 기간</th>
+                <th scope="col">기능</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="room : ${list.content}">
+                <!-- 이미지 -->
+                <td class="align-middle text-center">
+                    <img th:if="${room.roomImageDTOList != null and !room.roomImageDTOList.isEmpty()}"
+                         th:src="@{'/upload/' + ${room.roomImageDTOList[0].imagePath}}"
+                         alt="Room Image"
+                         class="room-image">
+                    <span th:if="${room.roomImageDTOList == null or room.roomImageDTOList.isEmpty()}">이미지 없음</span>
+                </td>
+
+                <!-- 나머지 -->
+                <td class="align-middle text-center" th:text="${room.roomId}"></td>
+                <td class="align-middle text-center" th:text="${room.roomName}"></td>
+                <td class="align-middle text-center" th:text="${room.roomType}"></td>
+                <td class="align-middle text-center" th:text="${room.formattedRoomPrice} + ' KRW'"></td>
+                <td class="align-middle text-center">
+                    <span th:if="${room.roomStatus != null and room.roomStatus}" class="badge bg-success">Available</span>
+                    <span th:if="${room.roomStatus == null or !room.roomStatus}" class="badge bg-danger">Unavailable</span>
+                </td>
+                <td class="align-middle text-center" th:text="${room.reservationStart} + ' ~ ' + ${room.reservationEnd}">예약 기간 없음</td>
+                <td class="align-middle text-center" th:text="${room.stayStart} + ' ~ ' + ${room.stayEnd}">숙박 기간 없음</td>
+                <td class="align-middle text-center">
+                    <div class="button-group">
                         <a th:href="@{/manager/room/{roomId}(roomId=${room.roomId})}" class="btn btn-info btn-sm">보기</a>
                         <a th:href="@{/manager/room/update/{roomId}(roomId=${room.roomId})}" class="btn btn-warning btn-sm">수정</a>
                         <a th:href="@{/manager/room/delete/{roomId}(roomId=${room.roomId})}"
                            onclick="return confirm('진짜로 삭제할꺼야?')"
                            class="btn btn-danger btn-sm">삭제</a>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="mt-3 d-flex justify-content-center">
-            <ul class="pagination">
-                <!-- 처음 페이지 -->
-                <li class="page-item" th:if="${currentPage > 1}">
-                    <a class="page-link" th:href="@{/manager/room/list(page=0)}">처음</a> <!-- Spring Data JPA에서 첫 페이지는 0 -->
-                </li>
-
-                <!-- 이전 페이지 -->
-                <li class="page-item" th:if="${currentPage > 1}">
-                    <a class="page-link" th:href="@{/manager/room/list(page=${currentPage - 2})}">이전</a>
-                </li>
-
-                <!-- 페이지 번호 -->
-                <span th:each="page : ${#numbers.sequence(startPage, endPage)}">
-                    <li class="page-item" th:classappend="${currentPage == page} ? 'active'">
-                        <a class="page-link" th:href="@{/manager/room/list(page=${page - 1})}" th:text="${page}"></a>
-                    </li>
-                </span>
-
-                <!-- 다음 페이지 -->
-                <li class="page-item" th:if="${currentPage < lastPage}">
-                    <a class="page-link" th:href="@{/manager/room/list(page=${currentPage})}">다음</a>
-                </li>
-
-                <!-- 마지막 페이지 -->
-                <li class="page-item" th:if="${currentPage < lastPage}">
-                    <a class="page-link" th:href="@{/manager/room/list(page=${lastPage - 1})}">마지막</a>
-                </li>
-            </ul>
-        </div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
     </div>
+
+    <!-- 검색 바 -->
+    <div class="search-bar text-center mb-4">
+        <form id="searchForm" th:action="@{/manager/room/list}" method="get">
+            <select name="category" id="category">
+                <option value="">-- 검색선택 --</option>
+                <option value="roomName" th:selected="${category == 'roomName'}">객실 이름</option>
+                <option value="roomType" th:selected="${category == 'roomType'}">객실 타입</option>
+                <option value="roomStatus" th:selected="${category == 'roomStatus'}">상태</option>
+            </select>
+            <input type="text" name="keyword" placeholder="검색어를 입력하세요" th:value="${keyword}">
+            <button type="submit">검색</button>
+        </form>
+    </div>
+
+    <!-- 페이지네이션 -->
+    <div class="mt-3 d-flex justify-content-center">
+        <ul class="pagination">
+            <!-- 처음 페이지 -->
+            <li class="page-item" th:if="${currentPage > 1}">
+                <a class="page-link" th:href="@{/manager/room/list(page=0, keyword=${keyword}, category=${category})}">처음</a>
+            </li>
+
+            <!-- 이전 페이지 -->
+            <li class="page-item" th:if="${currentPage > 1}">
+                <a class="page-link" th:href="@{/manager/room/list(page=${currentPage - 2}, keyword=${keyword}, category=${category})}">이전</a>
+            </li>
+
+            <!-- 페이지 번호 -->
+            <span th:each="page : ${#numbers.sequence(startPage, endPage)}">
+                <li class="page-item" th:classappend="${currentPage == page} ? 'active'">
+                    <a class="page-link" th:href="@{/manager/room/list(page=${page - 1}, keyword=${keyword}, category=${category})}" th:text="${page}"></a>
+                </li>
+            </span>
+
+            <!-- 다음 페이지 -->
+            <li class="page-item" th:if="${currentPage < lastPage}">
+                <a class="page-link" th:href="@{/manager/room/list(page=${currentPage}, keyword=${keyword}, category=${category})}">다음</a>
+            </li>
+
+            <!-- 마지막 페이지 -->
+            <li class="page-item" th:if="${currentPage < lastPage}">
+                <a class="page-link" th:href="@{/manager/room/list(page=${lastPage - 1}, keyword=${keyword}, category=${category})}">마지막</a>
+            </li>
+        </ul>
+    </div>
+</div>
+<script>
+    document.querySelector('form').addEventListener('submit', function(event) {
+        const category = document.querySelector('select[name="category"]').value;
+        const keyword = document.querySelector('input[name="keyword"]').value.trim();
+
+        console.log("Category:", category);
+        console.log("Keyword:", keyword);
+
+        if (category === "roomStatus" && keyword !== "Available" && keyword !== "Unavailable") {
+            alert("유효하지 않은 텍스트입니다. 'Available' or 'Unavailable' 입력해주세요.");
+            event.preventDefault();
+        }
+    });
+</script>
 </body>
 </html>
