@@ -69,7 +69,7 @@ public class NoticeController {
         return "redirect:/notice/list";
     }
     @GetMapping("/notice/delete")
-    public String deleteForm(@RequestParam Integer noticeId){
+    public String deleteForm(@RequestParam Integer noticeId, List<MultipartFile> multipartFile){
         noticeService.delete(noticeId);
         return "redirect:/notice/list";
     }
