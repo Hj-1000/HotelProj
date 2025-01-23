@@ -54,11 +54,19 @@ public class CompanyController {
         // 페이지 정보 계산
         Map<String, Integer> pageInfo = paginationUtil.pagination(companyDTOS);
 
-        // 만약 글이 10개 이하라면, 페이지 2는 표시되지 않도록 수정
-        if (companyDTOS.getTotalPages() <= 1) {
-            pageInfo.put("startPage", 1);
-            pageInfo.put("endPage", 1);
-        }
+        // 전체 페이지 수
+        int totalPages = companyDTOS.getTotalPages();
+
+        // 현재 페이지 번호
+        int currentPage = pageInfo.get("currentPage");
+
+        // 시작 페이지와 끝 페이지 계산 (현재 페이지를 기준으로 최대 10페이지까지)
+        int startPage = Math.max(1, currentPage - 4); // 10개씩 끊어서 시작 페이지 계산
+        int endPage = Math.min(startPage + 9, totalPages); // 최대 10페이지까지, 전체 페이지 수를 넘지 않도록
+
+        // 페이지 정보 업데이트
+        pageInfo.put("startPage", startPage);
+        pageInfo.put("endPage", endPage);
 
         // 모델에 데이터 추가
         model.addAttribute("companyDTOS", companyDTOS);
@@ -70,6 +78,7 @@ public class CompanyController {
 
         return "/company/list";
     }
+
 
     //읽기
     @GetMapping("/read")

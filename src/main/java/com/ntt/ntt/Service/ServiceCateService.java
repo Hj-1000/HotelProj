@@ -4,8 +4,10 @@ import com.ntt.ntt.DTO.ImageDTO;
 import com.ntt.ntt.DTO.ServiceCateDTO;
 import com.ntt.ntt.Entity.Image;
 import com.ntt.ntt.Entity.ServiceCate;
+import com.ntt.ntt.Entity.ServiceMenu;
 import com.ntt.ntt.Repository.ImageRepository;
 import com.ntt.ntt.Repository.ServiceCateRepository;
+import com.ntt.ntt.Repository.ServiceMenuRepository;
 import com.ntt.ntt.Util.FileUpload;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +37,7 @@ public class ServiceCateService{
 
     private final ImageRepository imageRepository;
     private final ServiceCateRepository serviceCateRepository;
+    private final ServiceMenuRepository serviceMenuRepository;
     private final ModelMapper modelMapper;
 
     // 이미지 등록할 ImageService 의존성 추가
@@ -241,16 +244,20 @@ public class ServiceCateService{
     --------------------------------*/
     public void delete(Integer serviceCateId) {
         Optional<ServiceCate> read = serviceCateRepository.findById(serviceCateId);
+
+
         if (read.isPresent()) {
             ServiceCate serviceCate = read.get();
 
             // 카테고리와 연결된 이미지 삭제
             List<Image> imagesDeleteAll = serviceCate.getServiceCateImageList();
+
             for (Image image : imagesDeleteAll) {
                 //이미지를 물리적 파일 삭제 + DB에서도 삭제
                 imageService.deleteImage(image.getImageId());
             }
             //위 과정을 모두 진행했다면 카테고리를 삭제
+//            serviceMenuRepository.delete(serviceMenu);
             serviceCateRepository.delete(serviceCate);
         } else {
             throw new RuntimeException("카테고리를 찾을 수 없습니다");

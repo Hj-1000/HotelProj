@@ -39,7 +39,7 @@
 }
 
 .room-buttons {
-    width: 55%;
+    width: 50%;
 }
 
 .more-btn-container {
@@ -64,7 +64,6 @@
 .room-buttons {
     display: flex;
     justify-content: right;
-    gap: 0.5rem;
 }
 
 .room-actions .room-buttons .btn-heart {
@@ -83,7 +82,7 @@
 }
 
 .btn-book {
-    padding: 0.5rem 1rem;
+    padding: 0.5rem;
     font-size: 1rem;
 }
 

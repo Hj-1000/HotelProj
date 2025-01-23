@@ -1,7 +1,9 @@
 package com.ntt.ntt.Service.hotel;
 
+import com.ntt.ntt.DTO.CompanyDTO;
 import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.ImageDTO;
+import com.ntt.ntt.Entity.Company;
 import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.Image;
 import com.ntt.ntt.Repository.ImageRepository;
@@ -48,6 +50,17 @@ public class HotelService {
     private final HotelRepository hotelRepository;
 
 
+    //호텔 본사 불러오는
+    public List<CompanyDTO> getAllCompany() {
+        List<Company> companies = companyRepository.findAll();
+
+        List<CompanyDTO> companyDTOS = companies.stream()
+                .map(a -> new CompanyDTO(a.getCompanyId(), a.getCompanyName())).collect(Collectors.toList());
+
+        return companyDTOS;
+    }
+
+
     //등록
     public void register(HotelDTO hotelDTO, List<MultipartFile> imageFiles) {
 
@@ -59,6 +72,8 @@ public class HotelService {
         Hotel hotel = modelMapper.map(hotelDTO, Hotel.class);
 
 //        hotel.setCompany(companyRepository.findById(hotelDTO.getHotelId()).orElseThrow());
+
+
 
         // 1. Hotel 먼저 저장
         hotelRepository.save(hotel);
@@ -133,42 +148,39 @@ public class HotelService {
         return hotelDTOS;
     }
 
-    //일반회원용 목록 -> 없어도 될듯?
-    public Page<HotelDTO> list(Pageable page, String keyword, Integer keyword1, String searchType) {
+    //일반회원 목록
+    public Page<HotelDTO> list(Pageable page, String keyword, String searchType, boolean exactMatch) {
 
-        // 1. 페이지 정보 재가공
         int currentPage = page.getPageNumber() - 1;
         int pageSize = 10;
-        Pageable pageable = PageRequest.of(
-                currentPage, pageSize,
-                Sort.by(Sort.Direction.DESC, "hotelId")
-        );
+        Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.DESC, "hotelId"));
 
-        // 2. 검색타입에 따른 회사 조회
         Page<Hotel> hotels = null;
 
         if (keyword != null && !keyword.isEmpty()) {
-            String keywordLike = "%" + keyword + "%";  // LIKE 조건을 위한 검색어 처리
-
             if ("name".equals(searchType)) {
-                // 호텔명이 포함 된 경우
-                hotels = hotelRepository.findByHotelNameLike(keywordLike, pageable);
+                // 호텔명이 포함된 경우
+                hotels = hotelRepository.findByHotelNameLike("%" + keyword + "%", pageable);
             } else if ("location".equals(searchType)) {
-                // 지역이 포함 된 경우
-                hotels = hotelRepository.findByHotelLocationLike(keywordLike, pageable);
+                // location일 경우 정확히 일치하는 값만 찾음
+                if (exactMatch) {
+                    hotels = hotelRepository.findByHotelLocationEquals(keyword, pageable);
+                } else {
+                    hotels = hotelRepository.findByHotelLocationLike("%" + keyword + "%", pageable);
+                }
             } else if ("address".equals(searchType)) {
-                // 주소가 포함 된 경우
-                hotels = hotelRepository.findByHotelAddressLike(keywordLike, pageable);
-            } else if ("rating".equals(searchType)){
+                // 주소가 포함된 경우
+                hotels = hotelRepository.findByHotelAddressLike("%" + keyword + "%", pageable);
+            } else if ("rating".equals(searchType)) {
                 // 별점 검색
-                hotels = hotelRepository.findByHotelRating(keyword1, pageable);
+                hotels = hotelRepository.findByHotelRating(Integer.parseInt(keyword), pageable);
             }
         } else {
-            // 검색어가 없으면 모든 회사 리스트를 조회
+            // 검색어가 없으면 모든 호텔 리스트 조회
             hotels = hotelRepository.findAll(pageable);
         }
 
-        // 3. Hotel -> HotelDTO 변환
+        // Hotel -> HotelDTO 변환
         Page<HotelDTO> hotelDTOS = hotels.map(entity -> modelMapper.map(entity, HotelDTO.class));
 
         return hotelDTOS;

@@ -59,7 +59,7 @@ public class ServiceMenuController {
 
     @Operation(summary = "전체목록", description = "전체목록을 조회한다.")
     @GetMapping("/list")
-    public String listSearch(@RequestParam(required = false) Integer serviceCateId,
+    public String list(@RequestParam(required = false) Integer serviceCateId,
                              @RequestParam(required = false) String keyword,
                              @RequestParam(required = false) String searchType,
                              @PageableDefault(page=1) Pageable page,
@@ -80,6 +80,8 @@ public class ServiceMenuController {
             pageInfo.put("startPage", 1);
             pageInfo.put("endPage", 1);
         }
+        List<ServiceCateDTO> serviceCateDTOS = serviceCateService.getAllServiceCate();
+        model.addAttribute("serviceCateDTOS", serviceCateDTOS);
         model.addAttribute("serviceMenuDTOS", serviceMenuDTOS);
         model.addAttribute("pageInfo",pageInfo);
         model.addAttribute("keyword", keyword);
