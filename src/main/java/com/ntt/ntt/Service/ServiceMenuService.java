@@ -3,8 +3,10 @@ package com.ntt.ntt.Service;
 import com.ntt.ntt.DTO.ImageDTO;
 import com.ntt.ntt.DTO.ServiceMenuDTO;
 import com.ntt.ntt.Entity.Image;
+import com.ntt.ntt.Entity.ServiceCate;
 import com.ntt.ntt.Entity.ServiceMenu;
 import com.ntt.ntt.Repository.ImageRepository;
+import com.ntt.ntt.Repository.ServiceCateRepository;
 import com.ntt.ntt.Repository.ServiceMenuRepository;
 import com.ntt.ntt.Util.FileUpload;
 import jakarta.persistence.EntityNotFoundException;
@@ -32,6 +34,7 @@ import java.util.stream.Collectors;
 public class ServiceMenuService {
 
     private final ImageRepository imageRepository;
+    private final ServiceCateRepository serviceCateRepository;
     private final ServiceMenuRepository serviceMenuRepository;
     private final ModelMapper modelMapper;
 
@@ -42,10 +45,10 @@ public class ServiceMenuService {
     @Value("${dataUploadPath}")
     private String IMG_LOCATION;
 
-    //서비스 카테고리 등록
+    //서비스 메뉴 등록
     /*--------------------------------
     함수명 : void insert(serviceMenuDTO seviceCateDTO, MultipartFile multipartFile)
-    인수 : 조회할 메뉴 카테고리 번호
+    인수 : 조회할 메뉴 메뉴 번호
     출력 : 없음, 저장한 레코드 전달
     설명 : 전달받은 데이터를 데이터베이스에 저장
     --------------------------------*/
@@ -67,7 +70,7 @@ public class ServiceMenuService {
 
 
     }
-    //서비스 카테고리 목록
+    //서비스 메뉴 목록
     /*--------------------------------
     함수명 : Page<serviceMenuDTO> list(Pageable page)
     인수 : 조회할 페이지 정보
@@ -82,7 +85,7 @@ public class ServiceMenuService {
 
         //2. 조회
         Page<ServiceMenu> serviceMenu = null;
-        // serviceCateId가 있으면 카테고리에 속한 메뉴만 조회
+        // serviceCateId가 있으면 메뉴에 속한 메뉴만 조회
         if (serviceCateId != null) {
             if (keyword != null && !keyword.isEmpty()) {
                 String keywordLike = "%" + keyword + "%"; // Like 조건을 위한 검색어 처리
@@ -105,7 +108,7 @@ public class ServiceMenuService {
                 if ("name".equals(searchType)) {
                     serviceMenu = serviceMenuRepository.findByServiceMenuNameLike(keywordLike, pageable);
                 } else if ("status".equals(searchType)) {
-                    serviceMenu = serviceMenuRepository.findByServiceMenuStatus(keywordLike, pageable);
+                    serviceMenu = serviceMenuRepository.findByServiceMenuStatusLike(keywordLike, pageable);
                 }
             } else {
                 // 검색어가 없으면 모든 호텔 리스트를 조회
@@ -121,13 +124,14 @@ public class ServiceMenuService {
         Page<ServiceMenuDTO> serviceMenuDTOS = serviceMenu.map(entity ->modelMapper.map(entity, ServiceMenuDTO.class));
         return serviceMenuDTOS;
     }
-
-    //서비스 카테고리 상세보기
+    
+    
+    //서비스 메뉴 상세보기
 /*--------------------------------
     함수명 : serviceMenuDTO(Integer serviceMenuId)
     인수 : 조회할 메뉴 id 번호
     출력 : 조회할 데이터
-    설명 : 해당 서비스 카테고리의 데이터를 조회해서 전달
+    설명 : 해당 서비스 메뉴의 데이터를 조회해서 전달
     --------------------------------*/
 
     @Transactional(readOnly = true)
@@ -142,7 +146,7 @@ public class ServiceMenuService {
                 serviceMenuRepository.findById(serviceMenuId)
                         .orElseThrow(EntityNotFoundException::new);
 
-        // 서비스 카테고리 DTO로 변환
+        // 서비스 메뉴 DTO로 변환
         ServiceMenuDTO serviceMenuDTO = modelMapper.map(serviceMenu, ServiceMenuDTO.class);
 
         List<ImageDTO> imageDTOList = imageRepository.findByServiceMenu_ServiceMenuId(serviceMenuDTO.getServiceMenuId())
@@ -167,7 +171,7 @@ public class ServiceMenuService {
     //서비스 카테로고리 수정
     /*--------------------------------
     함수명 : void update(serviceMenuDTO serviceMenuDTO, MultipartFile multipartFile)
-    인수 : 조회할 메뉴 카테고리 번호
+    인수 : 조회할 메뉴 메뉴 번호
     출력 : 없음, 저장한 레코드 전달
     설명 : 전달받은 데이터를 데이터베이스에 저장
     --------------------------------*/
@@ -180,7 +184,7 @@ public class ServiceMenuService {
             ServiceMenu serviceMenu = serviceMenuOpt.get();
             // serviceMenu 정보 업데이트
             serviceMenu.setServiceMenuName(serviceMenuDTO.getServiceMenuName());
-            serviceMenuRepository.save(serviceMenu); // 카테고리 정보 업데이트
+            serviceMenuRepository.save(serviceMenu); // 메뉴 정보 업데이트
 
             // 기존 이미지들 삭제 및 새 이미지 등록 (있다면)
             if (multipartFile != null && !multipartFile.isEmpty()) {
@@ -224,9 +228,9 @@ public class ServiceMenuService {
                 serviceMenuRepository.save(serviceMenu);
             }
 
-            log.info("서비스 카테고리 및 이미지가 수정되었습니다.");
+            log.info("서비스 메뉴 및 이미지가 수정되었습니다.");
         } else {
-            throw new RuntimeException("서비스 카테고리를 찾을 수 없습니다.");
+            throw new RuntimeException("서비스 메뉴를 찾을 수 없습니다.");
         }
     }
 
@@ -234,12 +238,26 @@ public class ServiceMenuService {
     //서비스 카테로고리 삭제
     /*--------------------------------
     함수명 : void delete(Integer serviceMenuId)
-    인수 : 조회할 메뉴 카테고리 번호
+    인수 : 조회할 메뉴 메뉴 번호
     출력 : 없음, 저장한 레코드 전달
     설명 : 전달받은 데이터를 데이터베이스에 저장
     --------------------------------*/
     public void delete(Integer serviceMenuId) {
-        serviceMenuRepository.deleteById(serviceMenuId);
+                Optional<ServiceMenu> read = serviceMenuRepository.findById(serviceMenuId);
+        if (read.isPresent()) {
+            ServiceMenu serviceMenu = read.get();
+
+            // 메뉴와 연결된 이미지 삭제
+            List<Image> imagesDeleteAll = serviceMenu.getServiceMenuImageList();
+            for (Image image : imagesDeleteAll) {
+                //이미지를 물리적 파일 삭제 + DB에서도 삭제
+                imageService.deleteImage(image.getImageId());
+            }
+            //위 과정을 모두 진행했다면 메뉴를 삭제
+            serviceMenuRepository.delete(serviceMenu);
+        } else {
+            throw new RuntimeException("메뉴를 찾을 수 없습니다");
+        }
     }
 
     // 결과값을 불리언으로 만들어서 제시

@@ -5,9 +5,40 @@
       layout:decorate="~{layouts/layout}">
 <head>
     <meta charset="UTF-8">
-    <title>NTT호텔 - 서비스 메뉴 수정</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title>NTT호텔 - 메뉴 수정</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <script th:inline="javascript">
+
+        // 이미지 미리보기 함수
+        function previewImage(event) {
+
+            console.log("수정 진입")
+
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            previewContainer.innerHTML = '';  // 기존 미리보기 이미지 제거
+
+            const files = event.target.files;
+
+            if (files.length > 0) {
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = 'Image Preview';
+                        img.style.maxWidth = '200px';  // 미리보기 이미지 크기 조정
+                        img.style.marginTop = '10px';
+                        previewContainer.appendChild(img);
+                    }
+
+                    reader.readAsDataURL(file);  // 이미지 파일을 읽어서 미리보기
+                });
+            }
+        }
+    </script>
 </head>
 <body>
 <div id="wrapper" layout:fragment="content">
@@ -35,7 +66,7 @@
                                         <!-- 최소 2글자 이상 입력하도록 validation 추가 -->
                                         <input type="text" class="form-control" style="width: 300px"
                                                placeholder="카테고리를 입력하세요."
-                                               name="serviceCateName" th:field="*{serviceMenuName}"
+                                               name="serviceMenuName" th:field="*{serviceMenuName}"
                                                minlength="2" required
                                                title="최소 2글자 이상 작성해주세요.">
                                     </td>
@@ -78,7 +109,7 @@
                                     <td style="width: 85%">
                                         <!-- 이미지 파일 업로드 -->
                                         <input type="file" class="form-control" style="width: 300px"
-                                               name="imageFile">
+                                               name="imageFiles">
                                     </td>
                                 </tr>
                                 </tbody>

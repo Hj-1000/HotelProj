@@ -225,7 +225,22 @@ public class ServiceCateService{
     설명 : 전달받은 데이터를 데이터베이스에 저장
     --------------------------------*/
     public void delete(Integer serviceCateId) {
-        serviceCateRepository.deleteById(serviceCateId);
+        Optional<ServiceCate> read = serviceCateRepository.findById(serviceCateId);
+        if (read.isPresent()) {
+            ServiceCate serviceCate = read.get();
+
+            // 카테고리와 연결된 이미지 삭제
+            List<Image> imagesDeleteAll = serviceCate.getServiceCateImageList();
+            for (Image image : imagesDeleteAll) {
+                //이미지를 물리적 파일 삭제 + DB에서도 삭제
+                imageService.deleteImage(image.getImageId());
+            }
+            //위 과정을 모두 진행했다면 카테고리를 삭제
+            serviceCateRepository.delete(serviceCate);
+        } else {
+            throw new RuntimeException("카테고리를 찾을 수 없습니다");
+        }
+
     }
 
     // 결과값을 불리언으로 만들어서 제시

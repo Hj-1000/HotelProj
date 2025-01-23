@@ -13,7 +13,15 @@
 
         $(document).ready(function () {
 
-            var moBtn = $(".modalBtn")
+            // 세션에서 message를 가져온다
+            var message = [[${message}]]
+
+            //message가 null이 아니라면 알림창을 띄우고 세션에서 삭제한다.
+            if (message != null && message != '') {
+                alert(message)
+            }
+
+            var moBtn = $(".modalBtn");
             var modal = $("#myModal")
 
             moBtn.off().on("click", function () {

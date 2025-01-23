@@ -1,6 +1,7 @@
 package com.ntt.ntt.Controller;
 
 import com.ntt.ntt.DTO.ServiceMenuDTO;
+import com.ntt.ntt.Service.ServiceCateService;
 import com.ntt.ntt.Service.ServiceMenuService;
 import com.ntt.ntt.Util.PaginationUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Map;
@@ -29,6 +31,7 @@ import java.util.Map;
 @Tag(name = "serviceMenuController", description = "룸서비스 메뉴 정보")
 public class ServiceMenuController {
     private final ServiceMenuService serviceMenuService;
+    private final ServiceCateService serviceCateService;
     private final PaginationUtil paginationUtil;
 
     @Operation(summary = "등록폼", description = "등록폼 페이지로 이동한다.")
@@ -41,9 +44,11 @@ public class ServiceMenuController {
 
     @Operation(summary = "등록창", description = "데이터 등록 후 목록페이지로 이동한다.")
     @PostMapping("/register")
-    public String registerProc(ServiceMenuDTO serviceMenuDTO, @RequestParam("imageFiles") List<MultipartFile> imageFiles) {
+    public String registerProc(ServiceMenuDTO serviceMenuDTO, @RequestParam("imageFiles") List<MultipartFile> imageFiles,
+                               RedirectAttributes redirectAttributes) {
         log.info("post에서 등록할 serviceMenuDTO" + serviceMenuDTO);
         serviceMenuService.register(serviceMenuDTO, imageFiles);
+        redirectAttributes.addFlashAttribute("message", "메뉴 등록이 완료되었습니다.");
         return "redirect:/roomService/menu/list";
     }
 
@@ -71,7 +76,7 @@ public class ServiceMenuController {
             pageInfo.put("endPage", 1);
         }
         model.addAttribute("serviceMenuDTOS", serviceMenuDTOS);
-        model.addAttribute(pageInfo);
+        model.addAttribute("pageInfo",pageInfo);
         model.addAttribute("keyword", keyword);
         model.addAttribute("searchType",searchType);
         model.addAttribute("serviceCateId", serviceCateId);
@@ -108,16 +113,19 @@ public class ServiceMenuController {
 
     @Operation(summary = "수정창", description = "수정할 내용을 데이터베이스에 저장 후 목록페이지로 이동한다.")
     @PostMapping("/update")
-    public String updateProc(ServiceMenuDTO serviceMenuDTO, @RequestParam("imageFiles") List<MultipartFile> imageFiles) {
+    public String updateProc(ServiceMenuDTO serviceMenuDTO, @RequestParam("imageFiles") List<MultipartFile> imageFiles,
+                             RedirectAttributes redirectAttributes) {
         serviceMenuService.update(serviceMenuDTO, imageFiles);
+        redirectAttributes.addFlashAttribute("message", "메뉴 수정이 완료되었습니다.");
         return "redirect:/roomService/menu/read?serviceMenuId="+ serviceMenuDTO.getServiceMenuId();
     }
 
     @Operation(summary = "삭제처리", description = "해당 데이터를 삭제 후 목록페이지로 이동한다.")
     @GetMapping("/delete")
-    public String deleteForm(Integer serviceMenuId) {
+    public String deleteForm(Integer serviceMenuId, RedirectAttributes redirectAttributes) {
 
         serviceMenuService.delete(serviceMenuId);
+        redirectAttributes.addFlashAttribute("message", "메뉴 삭제가 완료되었습니다.");
         return "redirect:/roomService/menu/list";
     }
 }

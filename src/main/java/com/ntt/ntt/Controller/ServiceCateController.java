@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Map;
@@ -41,9 +42,12 @@ public class ServiceCateController {
 
     @Operation(summary = "등록창", description = "데이터 등록 후 목록페이지로 이동한다.")
     @PostMapping("/register")
-    public String registerProc(ServiceCateDTO serviceCateDTO, @RequestParam("imageFiles") List<MultipartFile> imageFiles) {
+    public String registerProc(ServiceCateDTO serviceCateDTO,
+                               @RequestParam("imageFiles") List<MultipartFile> imageFiles,
+                               RedirectAttributes redirectAttributes) {
         log.info("post에서 등록할 serviceCateDTO" + serviceCateDTO);
         serviceCateService.register(serviceCateDTO, imageFiles);
+        redirectAttributes.addFlashAttribute("message", "카테고리 등록이 완료되었습니다.");
         return "redirect:/roomService/category/list";
     }
 
@@ -102,16 +106,20 @@ public class ServiceCateController {
 
     @Operation(summary = "수정창", description = "수정할 내용을 데이터베이스에 저장 후 목록페이지로 이동한다.")
     @PostMapping("/update")
-    public String updateProc(ServiceCateDTO serviceCateDTO, @RequestParam("imageFiles") List<MultipartFile> imageFiles) {
+    public String updateProc(ServiceCateDTO serviceCateDTO, @RequestParam("imageFiles") List<MultipartFile> imageFiles,
+                             RedirectAttributes redirectAttributes) {
         serviceCateService.update(serviceCateDTO, imageFiles);
+        redirectAttributes.addFlashAttribute("message", "카테고리 수정이 완료되었습니다.");
         return "redirect:/roomService/category/read?serviceCateId="+ serviceCateDTO.getServiceCateId();
     }
 
     @Operation(summary = "삭제처리", description = "해당 데이터를 삭제 후 목록페이지로 이동한다.")
     @GetMapping("/delete")
-    public String deleteForm(Integer serviceCateId) {
+    public String deleteForm(Integer serviceCateId, RedirectAttributes redirectAttributes) {
 
         serviceCateService.delete(serviceCateId);
+        redirectAttributes.addFlashAttribute("message", "카테고리 삭제가 완료되었습니다.");
+
         return "redirect:/roomService/category/list";
     }
 }
