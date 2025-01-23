@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -72,20 +73,31 @@ public class MemberController {
     public String updateMember(@ModelAttribute MemberDTO memberDTO, RedirectAttributes redirectAttributes) {
         try {
             memberService.update(memberDTO);
-            redirectAttributes.addFlashAttribute("successMessage", "회원정보 수정 성공");
+            redirectAttributes.addFlashAttribute("successMessage", "회원정보 수정에 성공하였습니다.");
             return "redirect:/myPage/update"; // 성공 후 마이페이지로 이동
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "회원정보 수정 중 오류가 발생했습니다.");
+            redirectAttributes.addFlashAttribute("errorMessage", "현재 비밀번호가 일치하지 않습니다.");
             return "redirect:/myPage/update";
         }
     }
 
     // 회원탈퇴
     @PostMapping("/delete")
-    public String deleteForm(@AuthenticationPrincipal UserDetails userDetails, HttpSession session) {
+    public String deleteForm(@AuthenticationPrincipal UserDetails userDetails, HttpSession session,
+                             @RequestParam String currentPassword, RedirectAttributes redirectAttributes) {
         String memberEmail = userDetails.getUsername();
-        memberService.delete(memberEmail);
+
+        try {
+            memberService.delete(memberEmail, currentPassword); // 비밀번호를 함께 전달
+        } catch (IllegalArgumentException e) {
+            // 비밀번호 불일치 시 처리
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/myPage/update"; // 비밀번호 불일치 시 마이페이지로 이동
+        }
+
         session.invalidate(); // 회원 탈퇴 후 세션 삭제
-        return "redirect:/";
+        return "redirect:/"; // 메인 페이지로 리디렉션
     }
+
+
 }

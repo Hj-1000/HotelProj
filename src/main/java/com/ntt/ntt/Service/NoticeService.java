@@ -1,6 +1,7 @@
 package com.ntt.ntt.Service;
 
 import com.ntt.ntt.DTO.ImageDTO;
+import com.ntt.ntt.Entity.Image;
 import com.ntt.ntt.Repository.ImageRepository;
 import com.ntt.ntt.Util.FileUpload;
 import jakarta.transaction.Transactional;
@@ -15,6 +16,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.web.multipart.MultipartFile;
 
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -60,9 +65,6 @@ public class NoticeService {
         }
 
     }
-    public void delete(Integer noticeId) {
-        noticeRepository.deleteById(noticeId);
-    }
     public List<NoticeDTO> list() {
         List<Notice> noticeList = noticeRepository.findAll();
         List<NoticeDTO> noticeDTOList = Arrays.asList(modelMapper.map(noticeList, NoticeDTO[].class));
@@ -83,6 +85,77 @@ public class NoticeService {
 
         return noticeDTO;
     }
+
+    public void delete(Integer noticeId) {
+        Optional<Notice> noticeOpt = noticeRepository.findById(noticeId);
+        if (noticeOpt.isPresent()) {
+            Notice notice = noticeOpt.get();
+
+            List<Image> imagesToDelete = notice.getNoticeImageList();
+            for (Image image : imagesToDelete) {
+
+                imageService.deleteImage(image.getImageId());
+            }
+            noticeRepository.delete(notice);
+        }else{
+            throw new RuntimeException("공지사항이 없습니다");
+        }
+    }
+//    public void delete(Integer noticeId, List<MultipartFile> multipartFile) {
+//        noticeRepository.deleteById(noticeId);
+//        //파일삭제 추가
+//        if (multipartFile != null && !multipartFile.isEmpty()) {
+//            for (MultipartFile file : multipartFile) {
+//                try {
+//                    Path path = Paths.get(IMG_LOCATION + file.getOriginalFilename());
+//
+//                    Files.deleteIfExists(path);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//    }
+//public void delete(Integer noticeId, List<MultipartFile> multipartFile) {
+//    // Notice 엔터티 조회
+//    Notice notice = noticeRepository.findById(noticeId)
+//            .orElseThrow(() -> new RuntimeException("Notice not found"));
+//
+//    // 파일 삭제
+//    if (notice.getNoticeImageList() != null && !notice.getNoticeImageList().isEmpty()) {
+//        for (Image image : notice.getNoticeImageList()) {
+//            try {
+//                // 경로 생성 및 파일 존재 여부 확인
+//                Path path = Paths.get(IMG_LOCATION, image.getImageName());
+//                System.out.println("Deleting file: " + path.toString());
+//                if (Files.exists(path)) {
+//                    Files.delete(path);
+//                } else {
+//                    System.out.println("File does not exist: " + path.toString());
+//                }
+//            } catch (IOException e) {
+//                System.err.println("Failed to delete file: " + image.getImageName());
+//                e.printStackTrace();
+//            }
+//        }
+//    }
+//
+//    // Notice 삭제 (cascade 설정으로 연관된 이미지도 삭제)
+//    noticeRepository.delete(notice);
+//}
+
+//        for (MultipartFile multipartFile : multipartFile) {
+//            Path filePath = Paths.get(IMG_LOCATION + multipartFile.getOriginalFilename());
+//            try {
+//                multipartFile.delete(MultipartFile.class);
+//            }catch (Exception e){
+//                e.printStackTrace();
+//            }
+//        }
+
+
+
+
 //    이미지 등록
 //    public void saveImage(Integer imageId, List<MultipartFile> multipartFiles) throws IOException{
 //
