@@ -22,7 +22,7 @@
                 <a href="/qna" class="nav-link">Q&A</a>
                 <!-- 로그인 여부에 따라 버튼 표시 -->
                 <a th:if="${#authentication.name == 'anonymousUser'}" href="/login" id="btn-add" class="nav-link login-link" data-bs-toggle="modal" data-bs-target="#addModal">로그인</a>
-                <a th:unless="${#authentication.name == 'anonymousUser'}" href="/logout" class="nav-link login-link">로그아웃</a>
+                <a th:unless="${#authentication.name == 'anonymousUser'}" href="/" class="nav-link login-link">로그아웃</a>
                 <a th:unless="${#authentication.name == 'anonymousUser'}" href="/myPage/update" class="nav-link">마이페이지</a>
                 <!-- 어드민 권한이 있을 경우에만 표시 -->
                 <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/admin/memberList" class="nav-link text-danger">관리자페이지</a>
@@ -51,7 +51,7 @@
                             </div>
                             <button type="submit" class="btn btn-primary">로그인</button>
                             <button type="button" class="btn btn-secondary" onclick="location.href='/selectrole'">회원가입</button>
-                            <button type="button" class="btn btn-secondary" onclick="location.href='/findPassword'">비밀번호 찾기</button>
+                            <button type="button" class="btn btn-secondary" onclick="location.href='/user/findPassword'">비밀번호 찾기</button>
                             <button type="button" class="btn btn-danger" data-bs-dismiss="modal">취소</button>
                         </form>
                 </div>
