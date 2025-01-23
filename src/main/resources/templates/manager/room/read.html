@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>객실 세부사항</title>
+
+    <style>
+        .room-details-container {
+            position: relative;
+            display: flex;
+            align-items: stretch;
+            border: 1px solid #ddd; /* 외곽 전체 선 */
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .image-section {
+            flex: 1;
+            text-align: center;
+            border-right: 1px solid #ddd; /* 이미지와 세부사항 사이의 선 */
+        }
+
+        .room-image {
+            width: 100%;
+            height: auto;
+            max-height: 400px;
+            object-fit: cover;
+        }
+
+        .list-unstyled {
+            margin-bottom: 0;
+        }
+
+        .details-section {
+            flex: 2;
+            padding: 20px;
+        }
+
+        .details-section h4 {
+            font-size: 1.8rem; /* 텍스트 크기 키움 */
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .details-section p {
+            font-size: 1.2rem; /* 텍스트 크기 키움 */
+            margin-bottom: 5rem;
+            line-height: 1.8;
+        }
+
+        .action-buttons {
+            position: absolute;
+            display: flex;
+            gap: 10px;
+            right: 1rem;
+            bottom: 1rem;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-4">
+        <h2 class="text-center mb-4">객실 세부사항</h2>
+        <div class="room-details-container">
+            <!-- 이미지 영역 -->
+            <div class="image-section">
+                <h4 class="py-3">객실 이미지</h4>
+                <ul class="list-unstyled">
+                    <li th:each="image : ${room.roomImageDTOList}">
+                        <img class="room-image" th:src="@{'/upload/' + ${image.imagePath}}" alt="이미지" />
+                    </li>
+                </ul>
+                <p class="text-muted" th:if="${room.roomImageDTOList == null || room.roomImageDTOList.isEmpty()}">
+                    등록된 이미지가 없습니다.
+                </p>
+            </div>
+
+            <!-- 상세 정보 영역 -->
+            <div class="details-section">
+                <h4 th:text="${room.roomName}">Room Name</h4>
+                <p>
+                    <strong>객실 타입:</strong> <span th:text="${room.roomType}">Type</span><br>
+                    <strong>객실 가격:</strong> <span th:text="${formattedPrice}">Price</span><br>
+                    <strong>객실 상태:</strong> <span th:text="${room.roomStatus ? 'Available' : 'Unavailable'}">Status</span><br>
+                    <strong>객실 설명:</strong> <span th:text="${room.roomInfo}">Description</span><br>
+                    <strong>예약 기간:</strong> <span th:text="${room.reservationStart}"></span> ~ <span th:text="${room.reservationEnd}"></span><br>
+                    <strong>숙박 기간:</strong> <span th:text="${room.stayStart}"></span> ~ <span th:text="${room.stayEnd}"></span><br>
+                </p>
+            </div>
+
+            <!-- 수정 및 목록으로 돌아가기 버튼 -->
+            <div class="action-buttons">
+                <a th:href="@{/manager/room/update/{roomId}(roomId=${room.roomId})}" class="btn btn-primary">수정</a>
+                <a th:href="@{/manager/room/list}" class="btn btn-secondary">목록</a>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+</body>
+</html>

@@ -3,6 +3,7 @@ package com.ntt.ntt.Service;
 
 import com.ntt.ntt.DTO.ImageDTO;
 import com.ntt.ntt.DTO.RoomDTO;
+import com.ntt.ntt.Entity.Image;
 import com.ntt.ntt.Entity.Room;
 import com.ntt.ntt.Repository.ImageRepository;
 import com.ntt.ntt.Repository.RoomRepository;
@@ -21,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,7 +35,6 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final ModelMapper modelMapper;
 
-    //이미지 등록할 RoomImgService 나중에 의존성추가하기
 
     // 이미지 등록할 ImageService 의존성 추가
     private final ImageService imageService;
@@ -41,6 +42,67 @@ public class RoomService {
 
     @Value("${dataUploadPath}")
     private String IMG_LOCATION;
+
+
+    // 추천 방 목록 가져오기
+
+    public List<RoomDTO> listRecommendedRooms() {
+        Pageable pageable = PageRequest.of(0, 4, Sort.by(Sort.Direction.DESC, "roomId"));
+        Page<Room> roomsPage = roomRepository.findByRoomStatus(true, pageable);
+
+        log.info("Rooms fetched from repository: {}", roomsPage.getContent());
+
+        List<RoomDTO> roomDTOs = roomsPage.stream()
+                .map(room -> {
+                    RoomDTO roomDTO = modelMapper.map(room, RoomDTO.class);
+
+                    // Room 가격 포맷팅 추가
+                    String formattedPrice = String.format("%,d", room.getRoomPrice());
+                    roomDTO.setFormattedRoomPrice(formattedPrice);
+
+                    List<ImageDTO> imagesDTOList = imageRepository.findByRoom_RoomId(room.getRoomId())
+                            .stream()
+                            .map(image -> {
+                                image.setImagePath(image.getImagePath().replace("c:/data/", ""));
+                                return modelMapper.map(image, ImageDTO.class);
+                            })
+                            .collect(Collectors.toList());
+                    roomDTO.setRoomImageDTOList(imagesDTOList);
+                    return roomDTO;
+                })
+                .collect(Collectors.toList());
+
+        log.info("Recommended RoomDTOs: {}", roomDTOs);
+        return roomDTOs;
+    }
+
+
+    public List<RoomDTO> roomList() {
+        // 모든 Room 데이터를 조회
+        List<Room> rooms = roomRepository.findAll();
+
+        // Room -> RoomDTO로 변환
+        return rooms.stream().map(room -> {
+            RoomDTO roomDTO = modelMapper.map(room, RoomDTO.class);
+
+            // 이미지 경로 변환 및 추가
+            List<ImageDTO> imageDTOList = imageRepository.findByRoom_RoomId(room.getRoomId())
+                    .stream()
+                    .map(image -> {
+                        image.setImagePath(image.getImagePath().replace("c:/data/", ""));
+                        return modelMapper.map(image, ImageDTO.class);
+                    })
+                    .collect(Collectors.toList());
+
+            roomDTO.setRoomImageDTOList(imageDTOList);
+
+            // 가격 포맷팅 추가
+            roomDTO.setFormattedRoomPrice(String.format("%,d KRW", room.getRoomPrice()));
+            return roomDTO;
+        }).collect(Collectors.toList());
+    }
+
+
 
     // 1. 삽입 register
     public Integer registerRoom(RoomDTO roomDTO, List<MultipartFile> multipartFile) {
@@ -54,12 +116,10 @@ public class RoomService {
         if (multipartFile != null && !multipartFile.isEmpty()) {
             imageService.registerRoomImage(room.getRoomId(), multipartFile);
         }
-        log.info("잘 들어 왔나요?" + room);
-        log.info("컨트롤러에서 들어온 이미지 정보" + multipartFile);
-        log.info("RoomId object after mapping: {}", room);
 
         return saveRoom.getRoomId();
     }
+
     // 2. 읽기 read
     @Transactional(readOnly = true)
     public RoomDTO readRoom(Integer roomId) {
@@ -115,6 +175,10 @@ public class RoomService {
         room.setRoomPrice(roomDTO.getRoomPrice());
         room.setRoomStatus(roomDTO.getRoomStatus());
         room.setRoomInfo(roomDTO.getRoomInfo());
+        room.setReservationStart(roomDTO.getReservationStart());
+        room.setReservationEnd(roomDTO.getReservationEnd());
+        room.setStayStart(roomDTO.getStayStart());
+        room.setStayEnd(roomDTO.getStayEnd());
 
         // 기존 이미지를 삭제
         if (imageFile != null && !imageFile.isEmpty()) {
@@ -144,12 +208,21 @@ public class RoomService {
 
     // 삭제 delete
     public void deleteRoom(Integer roomId) {
-        // Room 존재 여부 확인
-        if (!roomRepository.existsById(roomId)) {
-            throw new IllegalArgumentException("Room not found with id: " + roomId);
+        Optional<Room> roomOptional = roomRepository.findById(roomId);
+        if (roomOptional.isPresent()) {
+            Room room = roomOptional.get();
+
+            // 룸 연결된 이미지 삭제
+            List<Image> imagesToDelete = room.getRoomImageList();
+            for (Image image : imagesToDelete) {
+                // 이미지 서비스에서 물리적 파일 삭제 + DB에서 삭제
+                imageService.deleteImage(image.getImageId());
+            }
+
+            roomRepository.deleteById(roomId);
+        } else {
+            throw new RuntimeException("회사를 찾을 수 없습니다.");
         }
-        // 삭제
-        roomRepository.deleteById(roomId);
     }
 
     // 페이지 네이션

@@ -19,13 +19,26 @@
             word-wrap: break-word;
         }
 
+        .table-dark {
+            text-align: center;
+        }
+
         td, th {
             vertical-align: middle;
+            text-align: center;
         }
 
         img {
             display: block;
             margin: 0 auto;
+        }
+
+        /* 버튼을 세로 정렬 */
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: .5rem;
         }
     </style>
 </head>
@@ -49,6 +62,8 @@
                 <th scope="col">객실 타입</th>
                 <th scope="col">가격</th>
                 <th scope="col">상태</th>
+                <th scope="col">예약 기간</th>
+                <th scope="col">숙박 기간</th>
                 <th scope="col">기능</th>
             </tr>
             </thead>
@@ -59,25 +74,29 @@
                     <img th:if="${room.roomImageDTOList != null and !room.roomImageDTOList.isEmpty()}"
                          th:src="@{'/upload/' + ${room.roomImageDTOList[0].imagePath}}"
                          alt="Room Image"
-                         style="width: 120px; height: auto; border-radius: 8px;">
+                         class="room-image">
                     <span th:if="${room.roomImageDTOList == null or room.roomImageDTOList.isEmpty()}">이미지 없음</span>
                 </td>
 
                 <!-- 나머지 -->
                 <td class="align-middle text-center" th:text="${room.roomId}"></td>
-                <td class="align-middle" th:text="${room.roomName}"></td>
+                <td class="align-middle text-center" th:text="${room.roomName}"></td>
                 <td class="align-middle text-center" th:text="${room.roomType}"></td>
                 <td class="align-middle text-center" th:text="${room.formattedRoomPrice} + ' KRW'"></td>
                 <td class="align-middle text-center">
                     <span th:if="${room.roomStatus != null and room.roomStatus}" class="badge bg-success">Available</span>
                     <span th:if="${room.roomStatus == null or !room.roomStatus}" class="badge bg-danger">Unavailable</span>
                 </td>
+                <td class="align-middle text-center" th:text="${room.reservationStart} + ' ~ ' + ${room.reservationEnd}">예약 기간 없음</td>
+                <td class="align-middle text-center" th:text="${room.stayStart} + ' ~ ' + ${room.stayEnd}">숙박 기간 없음</td>
                 <td class="align-middle text-center">
-                    <a th:href="@{/manager/room/{roomId}(roomId=${room.roomId})}" class="btn btn-info btn-sm">보기</a>
-                    <a th:href="@{/manager/room/update/{roomId}(roomId=${room.roomId})}" class="btn btn-warning btn-sm">수정</a>
-                    <a th:href="@{/manager/room/delete/{roomId}(roomId=${room.roomId})}"
-                       onclick="return confirm('진짜로 삭제할꺼야?')"
-                       class="btn btn-danger btn-sm">삭제</a>
+                    <div class="button-group">
+                        <a th:href="@{/manager/room/{roomId}(roomId=${room.roomId})}" class="btn btn-info btn-sm">보기</a>
+                        <a th:href="@{/manager/room/update/{roomId}(roomId=${room.roomId})}" class="btn btn-warning btn-sm">수정</a>
+                        <a th:href="@{/manager/room/delete/{roomId}(roomId=${room.roomId})}"
+                           onclick="return confirm('진짜로 삭제할꺼야?')"
+                           class="btn btn-danger btn-sm">삭제</a>
+                    </div>
                 </td>
             </tr>
             </tbody>
@@ -139,7 +158,7 @@
         console.log("Keyword:", keyword);
 
         if (category === "roomStatus" && keyword !== "Available" && keyword !== "Unavailable") {
-            alert("유효하지 않은 상태 값입니다. 'Available' 또는 'Unavailable'을 입력하세요.");
+            alert("유효하지 않은 텍스트입니다. 'Available' or 'Unavailable' 입력해주세요.");
             event.preventDefault();
         }
     });

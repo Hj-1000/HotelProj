@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/manager/room")
 @RequiredArgsConstructor
 @Log4j2
 public class RoomController {
@@ -26,19 +25,51 @@ public class RoomController {
     private final RoomService roomService;
 
 
+    // 유저 페이지 전달
+
+    @GetMapping("/")
+    public String mainPageForm(Model model) {
+        // 추천 방 목록 가져오기
+        List<RoomDTO> recommendedRooms = roomService.listRecommendedRooms();
+
+        // 로그로 확인
+        log.info("Recommended rooms sent to index page: {}", recommendedRooms);
+
+        // 모델에 추천 방 데이터를 추가
+        model.addAttribute("recommendedRooms", recommendedRooms);
+
+        return "index"; // index.html 반환
+    }
+
+
+    @GetMapping("/roomList")
+    public String roomListPageForm(Model model) {
+        // 모든 방 데이터를 가져옵니다.
+        List<RoomDTO> roomList = roomService.roomList();
+
+        // 방 데이터를 모델에 추가
+        model.addAttribute("roomList", roomList);
+
+        return "roomList"; // roomList.html로 이동
+    }
+
     // 1. Room 등록 페이지로 이동
-    @GetMapping("/register")
+    @GetMapping("/manager/room/register")
     public String registerRoomForm(Model model) {
         //빈 RoomDTO 전달
         model.addAttribute("room", new RoomDTO());
+
 
         //register.htm로 이동
         return "manager/room/register";
     }
 
     // Room 등록
-    @PostMapping("/register")
+    @PostMapping("/manager/room/register")
     public String registerRoomProc(@ModelAttribute RoomDTO roomDTO, @RequestParam("imageFile") List<MultipartFile> imageFile) {
+
+        log.info("Room registration data: {}", roomDTO); // 확인 로그 추가
+
         //Room 등록
         roomService.registerRoom(roomDTO, imageFile);
 
@@ -47,8 +78,8 @@ public class RoomController {
     }
 
     // 2. 모든 객실 조회
-    @GetMapping("/list")
-    public String AllRoomsForm(
+    @GetMapping("/manager/room/list")
+    public String list(
             @PageableDefault(size = 5, page = 0) Pageable pageable,
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "category", required = false) String category,
@@ -58,7 +89,7 @@ public class RoomController {
         if ("roomStatus".equals(category)) {
             if (!"Available".equalsIgnoreCase(keyword) && !"Unavailable".equalsIgnoreCase(keyword)) {
                 log.warn("Invalid room status keyword: {}", keyword);
-                model.addAttribute("errorMessage", "Invalid room status. Please use 'Available' or 'Unavailable'.");
+                model.addAttribute("errorMessage", "유효하지 않은 텍스트입니다. 'Available' or 'Unavailable' 입력해주세요.");
                 return "manager/room/list"; // 에러 메시지를 추가한 리스트 페이지로 리다이렉트
             }
         }
@@ -86,15 +117,17 @@ public class RoomController {
 
         // 가격 포맷팅
         for (RoomDTO room : roomDTOS) {
-            String formattedPrice = String.format("%,d", room.getRoomPrice());
-            room.setFormattedRoomPrice(formattedPrice);
+            if (room.getFormattedRoomPrice() == null) {
+                String formattedPrice = String.format("%,d", room.getRoomPrice());
+                room.setFormattedRoomPrice(formattedPrice);
+            }
         }
 
         return "manager/room/list";
     }
 
     // 특정 룸 조회
-    @GetMapping("/{roomId}")
+    @GetMapping("/manager/room/{roomId}")
     public String getRoomDetailsForm(@PathVariable Integer roomId, Model model) {
         log.info("Fetching details for roomId: {}", roomId);
 
@@ -109,7 +142,7 @@ public class RoomController {
     }
 
     // 3. Room 수정 페이지로 이동
-    @GetMapping("/update/{roomId}")
+    @GetMapping("/manager/room/update/{roomId}")
     public String updateRoomForm(@PathVariable Integer roomId, Model model) {
         // 수정할 Room 데이터 가져오기
         RoomDTO room = roomService.readRoom(roomId);
@@ -121,7 +154,7 @@ public class RoomController {
     }
 
     // Room 수정
-    @PostMapping("/update/{roomId}")
+    @PostMapping("/manager/room/update/{roomId}")
     public String updateRoomProc(@PathVariable Integer roomId,
                                  @ModelAttribute RoomDTO roomDTO,
                                  @RequestParam("imageFile") List<MultipartFile> imageFile) {
@@ -135,7 +168,7 @@ public class RoomController {
 
 
     // 4. Room 삭제
-    @GetMapping("/delete/{roomId}")
+    @GetMapping("/manager/room/delete/{roomId}")
     public String deleteRoomForm(@PathVariable Integer roomId) {
         // Room 삭제
         roomService.deleteRoom(roomId);

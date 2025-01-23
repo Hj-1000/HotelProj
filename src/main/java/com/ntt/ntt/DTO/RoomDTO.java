@@ -39,5 +39,13 @@ public class RoomDTO {
     // 추가 필드 포맷된 가격
     private String formattedRoomPrice;
 
+    // 예약 시작일
+    private String reservationStart;
+    // 예약 종료일
+    private String reservationEnd;
+    // 숙박 시작일
+    private String stayStart;
+    // 숙박 종료일
+    private String stayEnd;
 
 }

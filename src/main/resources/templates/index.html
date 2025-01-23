@@ -53,67 +53,56 @@
     <!-- 추천 룸 섹션 -->
     <section class="py-5">
         <div class="container">
-            <div class="more-container mb-5">
-                <h2>Recommended Room</h2>
-                <a href="/roomList" class="btn btn-outline-primary">More</a>
+            <!-- 섹션 제목과 More 버튼 배치 -->
+            <div class="d-flex justify-content-between align-items-center mb-5">
+                <h2 class="text-center flex-grow-1">추천 객실</h2>
+                <a href="/roomList" class="btn btn-outline-primary ms-auto">More</a>
             </div>
-            <div class="row">
-                <div class="col-md-3">
+
+            <!-- 추천 방이 있을 경우 -->
+            <div th:if="${recommendedRooms != null and !#lists.isEmpty(recommendedRooms)}" class="row">
+                <div class="col-md-3" th:each="room : ${recommendedRooms}">
                     <div class="card image-hover-container">
                         <div class="image-container">
-                            <img src="/img/main_room_recommendation_01.jpg" class="card-img-top" alt="Room Image">
-                            <div class="overlay">
-                                <a href="#" class="details-link">예약하기</a>
+                            <!-- 이미지 -->
+                            <img th:if="${!#lists.isEmpty(room.roomImageDTOList)}"
+                                 th:src="@{'/upload/' + ${room.roomImageDTOList[0].imagePath}}"
+                                 class="card-img-top"
+                                 th:alt="${room.roomName}" />
+                            <!-- 이미지가 없을 경우 기본 이미지 -->
+                            <img th:if="${#lists.isEmpty(room.roomImageDTOList)}"
+                                 src="/img/default_img.jpg"
+                                 class="card-img-top"
+                                 alt="Default Room Image" />
+                            <!-- Hover 시 나타나는 예약 버튼 -->
+                            <div class="hover-overlay">
+                                <a href="#" class="btn btn-hover">예약하기</a>
                             </div>
                         </div>
                         <div class="card-body text-left">
-                            <p>방 이름 - 지역</p>
-                            <p>300,000 KRW ~ </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card image-hover-container">
-                        <div class="image-container">
-                            <img src="/img/main_room_recommendation_02.jpg" class="card-img-top" alt="Room Image">
-                            <div class="overlay">
-                                <a href="#" class="details-link">예약하기</a>
+                            <!-- 상태 버튼 -->
+                            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                                <span th:text="(${room.roomStatus} ? '예약 가능' : '예약 불가')"
+                                      class="badge"
+                                      th:classappend="${room.roomStatus} ? 'bg-success text-white' : 'bg-danger text-white'">
+                                </span>
+                                <!-- 객실 타입 버튼 -->
+                                <span th:text="${room.roomType}"
+                                      class="badge bg-dark text-white">
+                                </span>
                             </div>
-                        </div>
-                        <div class="card-body text-left">
-                            <p>방 이름 - 지역</p>
-                            <p>300,000 KRW ~ </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card image-hover-container">
-                        <div class="image-container">
-                            <img src="/img/main_room_recommendation_03.jpg" class="card-img-top" alt="Room Image">
-                            <div class="overlay">
-                                <a href="#" class="details-link">예약하기</a>
-                            </div>
-                        </div>
-                        <div class="card-body text-left">
-                            <p>방 이름 - 지역</p>
-                            <p>300,000 KRW ~</p>
+                            <h5 th:text="${room.roomName}" class="card-title">객실 이름</h5>
+                            <p th:text="'예약 기간: ' + ${room.reservationStart} + ' ~ ' + ${room.reservationEnd}" class="card-text">예약 기간</p>
+                            <p th:text="'숙박 기간: ' + ${room.stayStart} + ' ~ ' + ${room.stayEnd}" class="card-text">숙박 기간</p>
+                            <p th:text="${room.formattedRoomPrice} + ' ' + 'KRW'" class="card-text money"> 0 KRW</p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card image-hover-container">
-                        <div class="image-container">
-                            <img src="/img/main_room_recommendation_04.jpg" class="card-img-top" alt="Room Image">
-                            <div class="overlay">
-                                <a href="#" class="details-link">예약하기</a>
-                            </div>
-                        </div>
-                        <div class="card-body text-left">
-                            <p>방 이름 - 지역</p>
-                            <p>300,000 KRW ~</p>
-                        </div>
-                    </div>
-                </div>
+            </div>
+
+            <!-- 추천 방이 없을 경우 -->
+            <div th:if="${recommendedRooms == null or #lists.isEmpty(recommendedRooms)}" class="text-center mt-4">
+                <p class="text-muted">추천 방 목록이 없습니다.</p>
             </div>
         </div>
     </section>

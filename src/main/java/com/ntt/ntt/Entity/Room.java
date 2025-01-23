@@ -33,6 +33,22 @@ public class Room extends BaseEntity {
     @Column(length = 255)
     private String roomInfo;
 
+    // 예약 시작일
+    @Column(nullable = true)
+    private String reservationStart;
+
+    // 예약 종료일
+    @Column(nullable = true)
+    private String reservationEnd;
+
+    // 숙박 시작일
+    @Column(nullable = true)
+    private String stayStart;
+
+    // 숙박 종료일
+    @Column(nullable = true)
+    private String stayEnd;
+
     @ManyToOne
     @JoinColumn(name = "hotelId")
     private Hotel hotelId;
