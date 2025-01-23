@@ -34,10 +34,14 @@ public class QnaService {
         this.memberRepository = memberRepository;
     }
 
+
+
+
+
     // findById 메서드 추가
-    public Qna findById(Integer id) {
-        return qnaRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Qna not found with id: " + id));
+    public Qna findById(Integer qnaID) {
+        return qnaRepository.findById(qnaID)
+                .orElseThrow(() -> new EntityNotFoundException("Qna not found with id: " + qnaID));
     }
 
     public Page<Qna> getQnaPage(Integer page, String keyword) {
