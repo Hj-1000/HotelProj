@@ -92,8 +92,9 @@ public class ServiceMenuService {
                 if ("name".equals(searchType)) {
                     //메뉴이름 검색
                     serviceMenu = serviceMenuRepository.findByServiceCate_ServiceCateIdAndServiceMenuNameLike(serviceCateId, keywordLike, pageable);
+                } else if ("cateName". equals(searchType)) {
+                    serviceMenu = serviceMenuRepository.findByServiceMenuIdAndServiceCate_ServiceCateName(serviceCateId, keywordLike, pageable);
                 }
-
             } else {
                 //검색어가 없으면 해당 serviceCateId에 속한 모든 호텔 조회
                 serviceMenu = serviceMenuRepository.findByServiceCate_ServiceCateId(serviceCateId, pageable);

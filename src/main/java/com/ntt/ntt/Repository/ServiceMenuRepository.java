@@ -2,6 +2,7 @@ package com.ntt.ntt.Repository;
 
 import com.ntt.ntt.Entity.Image;
 import com.ntt.ntt.Entity.ServiceMenu;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,6 +25,6 @@ public interface ServiceMenuRepository extends JpaRepository<ServiceMenu, Intege
     //특정 카테고리에 속한 메뉴 조회(이름 포함)
     public Page<ServiceMenu> findByServiceCate_ServiceCateIdAndServiceMenuNameLike(Integer serviceCateId,String keyword, Pageable pageable);
 
-    //지정된 카테고리 불러오는 메서드
-    public List<ServiceMenu> findByServiceCate_ServiceCateId(Integer serviceCateId);
+    public Page<ServiceMenu> findByServiceMenuIdAndServiceCate_ServiceCateName(Integer serviceCateId,String keyword, Pageable pageable);
+
 }
