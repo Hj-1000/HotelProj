@@ -71,7 +71,7 @@
         .then(expiryTime => {
             if (expiryTime > 0) {
                 var currentTime = new Date().getTime();
-                var timeLeft = Math.max(0, Math.floor((expiryTime - currentTime) / 1000));  // 남은 시간 계산
+                var timeLeft = Math.max(0, Math.floor((expiryTime - currentTime) / 1000));  // 인증 코드 만료까지 남은 시간 계산
 
                 if (timeLeft > 0) {
                     // 타이머 시작
@@ -89,7 +89,7 @@
                         }
                     }, 1000);
                 } else {
-                    expiredMessage.style.display = 'block'; // 즉시 만료된 경우
+                    expiredMessage.style.display = 'block';
                 }
             }
         })
@@ -99,10 +99,10 @@
 
     // 인증 코드 재전송 함수
     function resendCode() {
-        resendCodeButton.disabled = true; // 버튼 비활성화
+        resendCodeButton.disabled = true; // 코드 재전송 버튼 중복 클릭 방지를 위해 한번 클릭하면 비활성화
         resendCodeButton.textContent = "재전송 중..."; // 로딩 메시지 표시
 
-        fetch('/user/resendCode', {
+        fetch('/user/resendCode', { // PasswordResetController 의 인증 코드 재전송 메서드 실행
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }
         })
@@ -120,10 +120,11 @@
                 alert("오류가 발생했습니다. 다시 시도해주세요.");
             })
             .finally(() => {
-                resendCodeButton.disabled = false; // 버튼 다시 활성화
+                resendCodeButton.disabled = false; // 인증 코드 재전송 버튼 다시 활성화
                 resendCodeButton.textContent = "인증 코드 재전송"; // 원래 텍스트로 복구
             });
     }
+
 </script>
 </body>
 </html>
