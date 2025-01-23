@@ -1,127 +1,157 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/layout}">
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
 <head>
     <meta charset="UTF-8">
-    <title>NTT호텔 - 서비스 카테고리 관리</title>
+    <title>NTT호텔 - 카테고리관리</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <script>
+    <script th:inline="javascript">
+
         $(document).ready(function () {
-            var moBtn = $(".modalBtn");
-            var modal = $("#myModal");
 
-            // 간편 등록 버튼 클릭 시
-            moBtn.on("click", function () {
-                console.log("모달 열기");
-                modal.modal("show");
-                $('.modal-title').text("간편 등록하기");
-                $("#saveChanges").show();
-                modal.find("input").show();
-            });
+            // 세션에서 message를 가져온다
+            var message = [[${message}]]
 
-            // 이미지 미리보기
-            $("#newImageFiles").change(function(event) {
-                previewImage(event);
-            });
-        });
-
-        // 이미지 미리보기 함수
-        function previewImage(event) {
-            var files = event.target.files;
-            var imagePreviewContainer = $("#imagePreviewContainer");
-            imagePreviewContainer.empty(); // 기존 미리보기 내용 지우기
-
-            // 파일이 선택되었을 경우 처리
-            for (var i = 0; i < files.length; i++) {
-                var file = files[i];
-                var reader = new FileReader();
-
-                reader.onload = function(e) {
-                    var img = $("<img>").attr("src", e.target.result).attr("width", "100px").addClass("img-thumbnail");
-                    imagePreviewContainer.append(img);
-                };
-
-                reader.readAsDataURL(file);
+            //message가 null이 아니라면 알림창을 띄우고 세션에서 삭제한다.
+            if (message != null && message != '') {
+                alert(message)
             }
-        }
 
-        // 파일 입력 필드 초기화 및 기존 이미지 제거
-        $("#newImageFiles").click(function() {
-            var imagePreviewContainer = $("#imagePreviewContainer");
-            imagePreviewContainer.empty();  // 기존 미리보기 이미지 제거
-        });
+            var moBtn = $(".modalBtn");
+            var modal = $("#myModal")
+
+            moBtn.off().on("click", function () {
+                //모달 열기
+                modal.modal("show")
+
+                $('.modal-title').text("간편 등록하기")
+
+                $("#saveChanges").show()
+                modal.find("input").show();
+            }) //modBtn 끝
+
+            $(".submitBtn").off().on("click", function () {
+                alert("글 작성이 완료되었습니다.");
+            }) //submitBtn 끝
+
+        })
     </script>
-</head>
 
+</head>
 <body>
+
 <div id="wrapper" layout:fragment="content">
     <div class="container-fluid mt-4">
         <h2 class="mb-3">서비스 카테고리 관리</h2>
-
         <!-- 검색 영역 -->
         <div class="card p-4 mb-4">
-            <form>
+            <form action="/roomService/category/list" method="get">
                 <div class="row g-3 align-items-center">
+                    <h5 class="card-title">카테고리 찾기</h5>
                     <div class="col-md-6">
-                        <label for="카테고리 이름" class="form-label fw-bold">카테고리 이름</label>
-                        <input type="text" class="form-control" id="카테고리 이름" placeholder="카테고리 이름">
+                        <select name="searchType" class="form-select">
+                            <option value="name" th:selected="${searchType == 'name'}">카테고리명</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <input type="text" name="keyword" class="form-control" placeholder="검색어를 입력하세요">
                     </div>
                 </div>
                 <!-- 조회 버튼 -->
                 <div class="text-center mt-4">
-                    <button type="button" class="btn btn-primary w-25" style="background-color: black">조회</button>
+                    <button type="submit" class="btn btn-primary w-25" style="background-color: black">조회</button>
                 </div>
             </form>
         </div>
 
         <!-- 목록 영역 -->
+
+        <div>
+
+
+        </div>
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">서비스 카테고리 목록</h5>
+                <h5 class="card-title">카테고리 목록</h5>
                 <table class="table table-bordered text-center">
                     <thead>
                     <tr>
-                        <th>No</th>
-                        <th>카테고리 이름</th>
-                        <th>삭제여부</th>
+                        <th style="width: 10%">No</th>
+                        <th style="width: 30%">카테고리명</th>
+                        <th style="width: 8%">삭제</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <th:block th:if="${#lists.isEmpty(serviceCateDTOS)}">
-                        <tr><td colspan="3">등록된 서비스 카테고리가 없습니다.</td></tr>
-                    </th:block>
 
-                    <th:block th:unless="${#lists.isEmpty(serviceCateDTOS)}">
-                        <tr th:each="data : ${serviceCateDTOS}">
+                    <th:block th:unless="${#lists.isEmpty(serviceCateDTOS)}"><!--값이 없으면이 아니면(있으면)-->
+                        <tr th:each="data:${serviceCateDTOS}">
                             <td th:text="${data.serviceCateId}">1</td>
-                            <td>
-                                <a th:href="@{/roomService/category/read(serviceCateId=${data.serviceCateId})}" style="text-decoration: none" th:text="${data.serviceCateName}">NTT호텔</a>
+                            <td >
+                                <a th:href="@{/roomService/category/read(serviceCateId=${data.serviceCateId})}" style="text-decoration: none" th:text="${data.serviceCateName}">한식</a>
                             </td>
                             <td>
-                                <a th:href="@{/roomService/category/delete(serviceCateId=${data.serviceCateId})}" class="badge bg-danger delBtn">삭제</a>
+                                <!--삭제 버튼 누르면 해당 카테고리 삭제됨-->
+                                <a th:href="@{/roomService/category/delete(serviceCateId=${data.serviceCateId})}" style="text-decoration: none" class="badge bg-danger delBtn">삭제</a>
                             </td>
                         </tr>
                     </th:block>
                     </tbody>
                 </table>
 
-                <!-- 페이지네이션 -->
-                <!-- 페이지네이션 코드 생략 -->
+                <th:block th:if="${#lists.isEmpty(serviceCateDTOS)}"><!--받아온 값이 없으면-->
+                    <div style="text-align: center">
+                        <p>등록된 카테고리가 없습니다.</p>
+                    </div>
+                </th:block>
+
 
                 <!-- 추가 버튼 -->
                 <div class="text-end mt-3">
-                    <button class="btn btn-primary" style="background-color: black" onclick="location.href='/roomService/category/register'">등록</button>
+                    <button class="btn btn-primary" style="background-color: black" onclick="location.href='/roomService/category/register' ">등록</button>
                     <button type="button" class="btn btn-primary modalBtn">간편 등록</button>
                 </div>
+
+
+                <!-- 페이지네이션 -->
+                <div class="d-flex justify-content-center">
+                    <ul class="pagination">
+                        <li class="page-item" th:unless="${pageInfo.startPage == 1}">
+                            <a class="page-link" th:href="@{/roomService/category/list(page=1)}">시작</a>
+                        </li>
+                        <li class="page-item" th:unless="${pageInfo.currentPage == 1}">
+                            <a class="page-link" th:href="@{/roomService/category/list(page=${pageInfo.prevPage})}">이전</a>
+                        </li>
+                        <th:block th:each="num : ${#numbers.sequence(pageInfo.startPage, pageInfo.endPage, 1)}">
+                            <li class="page-item" th:unless="${num == pageInfo.currentPage}">
+                                <a class="page-link" th:href="@{/roomService/category/list(page=${num})}" th:text="${num}">1</a>
+                            </li>
+                            <li class="page-item active" th:if="${num == pageInfo.currentPage}">
+                                <a class="page-link" th:href="@{/roomService/category/list(page=${num})}" th:text="${num}">[[${num}]]</a>
+                            </li>
+                        </th:block>
+                        <li class="page-item" th:unless="${pageInfo.currentPage >= pageInfo.lastPage}">
+                            <a class="page-link" th:href="@{/roomService/category/list(page=${pageInfo.nextPage})}">다음</a>
+                        </li>
+                        <li class="page-item" th:unless="${pageInfo.endPage == pageInfo.lastPage}">
+                            <a class="page-link" th:href="@{/roomService/category/list(page=${pageInfo.lastPage})}">끝</a>
+                        </li>
+                    </ul>
+                </div>
+
+
             </div>
         </div>
     </div>
 
-    <!-- 모달 - 간편 등록 -->
-    <div class="modal" id="myModal" tabindex="-1">
+    <!--모달-->
+    <div class="modal" id="myModal">
         <div class="modal-dialog">
             <div class="modal-content">
+
                 <!-- Modal Header -->
                 <div class="modal-header">
                     <h4 class="modal-title">간편등록</h4>
@@ -129,33 +159,39 @@
                 </div>
 
                 <form action="/roomService/category/register" method="post" enctype="multipart/form-data">
+
                     <!-- Modal body -->
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="serviceCateName" class="form-label">본사명:</label>
-                            <input type="text" class="form-control" id="serviceCateName" name="serviceCateName" minlength="2" required>
+                            <label for="serviceCateName" class="form-label">카테고리명:</label>
+                            <input type="text" class="form-control" id="serviceCateName" name="serviceCateName">
                         </div>
-
                         <!-- 새 이미지 업로드 및 미리보기 -->
                         <div>
-                            <label for="newImageFiles">본사이미지:</label>
-                            <input type="file" id="newImageFiles" name="imageFile" accept="image/*">
+                            <label for="newImageFiles">카테고리이미지:</label>
+                            <input type="file" id="newImageFiles" name="imageFiles" multiple onchange="previewImage(event)">
                             <br><small>이미지를 선택해 주세요.</small>
                         </div>
 
                         <!-- 미리보기 이미지 표시 -->
-                        <div id="imagePreviewContainer"></div>
+                        <div id="imagePreviewContainer">
+                            <!-- 미리보기가 여기 나타날 것입니다 -->
+                        </div>
+
                     </div>
 
                     <!-- Modal footer -->
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">닫기</button>
-                        <button type="submit" class="btn btn-primary">등록</button>
+                        <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">등록</button>
                     </div>
+
                 </form>
+
             </div>
         </div>
     </div>
+
 </div>
 
 </body>

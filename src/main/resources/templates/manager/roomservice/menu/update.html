@@ -5,9 +5,40 @@
       layout:decorate="~{layouts/layout}">
 <head>
     <meta charset="UTF-8">
-    <title>NTT호텔 - 서비스 카테고리 수정</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title>NTT호텔 - 메뉴 수정</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <script th:inline="javascript">
+
+        // 이미지 미리보기 함수
+        function previewImage(event) {
+
+            console.log("수정 진입")
+
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            previewContainer.innerHTML = '';  // 기존 미리보기 이미지 제거
+
+            const files = event.target.files;
+
+            if (files.length > 0) {
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = 'Image Preview';
+                        img.style.maxWidth = '200px';  // 미리보기 이미지 크기 조정
+                        img.style.marginTop = '10px';
+                        previewContainer.appendChild(img);
+                    }
+
+                    reader.readAsDataURL(file);  // 이미지 파일을 읽어서 미리보기
+                });
+            }
+        }
+    </script>
 </head>
 <body>
 <div id="wrapper" layout:fragment="content">
@@ -16,43 +47,78 @@
         <div class="row">
             <div class="col-1"></div><!--좌여백-->
             <div class="col-10">
-                <h2>카테고리 수정</h2>
+                <h2>메뉴 수정</h2>
 
                 <div class="card">
                     <div class="card-body">
 
                         <!--Controller에 multipart 선언 시 전송에서 multipart 지원-->
-                        <form th:action="@{/roomService/update}" method="post" enctype="multipart/form-data"
-                              th:object="${serviceCateDTO}">
-                            <input type="hidden" name="serviceCateId" th:field="*{serviceCateId}">
+                        <form th:action="@{/roomService/menu/update}" method="post" enctype="multipart/form-data"
+                              th:object="${serviceMenuDTO}">
+                            <input type="hidden" name="serviceMenuId" th:field="*{serviceMenuId}">
 
                             <table class="table">
                                 <!--DTO를 참고해서-->
                                 <tbody>
                                 <tr>
-                                    <td style="width: 15%">카테고리 이름 :</td>
+                                    <td style="width: 15%">메뉴 이름 :</td>
                                     <td style="width: 85%">
                                         <!-- 최소 2글자 이상 입력하도록 validation 추가 -->
                                         <input type="text" class="form-control" style="width: 300px"
                                                placeholder="카테고리를 입력하세요."
-                                               name="serviceCateName" th:field="*{serviceCateName}"
+                                               name="serviceMenuName" th:field="*{serviceMenuName}"
                                                minlength="2" required
                                                title="최소 2글자 이상 작성해주세요.">
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td style="width: 15%">카테고리 이미지 :</td>
+                                    <td style="width: 15%">메뉴 설명 :</td>
+                                    <td style="width: 85%">
+                                        <!-- 최소 2글자 이상 입력하도록 validation 추가 -->
+                                        <input type="text" class="form-control" style="width: 300px"
+                                               placeholder="메뉴 설명을 입력하세요."
+                                               name="serviceMenuInfo" th:field="*{serviceMenuInfo}"
+                                               minlength="2" required
+                                               title="최소 2글자 이상 작성해주세요.">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 15%">메뉴 상태 :</td>
+                                    <td style="width: 85%">
+                                        <!-- 최소 2글자 이상 입력하도록 validation 추가 -->
+                                        <label for="serviceMenuStatus" class="col-sm-3 col-form-label">메뉴 상태</label>
+                                        <select class="form-control" id="serviceMenuStatus" name="serviceMenuStatus" th:field="*{serviceMenuStatus}" required>
+                                            <option value="판매중">판매중</option>
+                                            <option value="준비중">준비중</option>
+                                            <option value="매진">매진</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 15%">메뉴 가격 :</td>
+                                    <td style="width: 85%">
+                                        <!-- 최소 2글자 이상 입력하도록 validation 추가 -->
+                                        <input type="number" class="form-control" style="width: 300px"
+                                               placeholder="메뉴 설명을 입력하세요."
+                                               name="serviceMenuPrice" th:field="*{serviceMenuPrice}"
+                                               >
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 15%">메뉴 이미지 :</td>
                                     <td style="width: 85%">
                                         <!-- 이미지 파일 업로드 -->
                                         <input type="file" class="form-control" style="width: 300px"
-                                               name="imageFile">
+                                               name="imageFiles">
                                     </td>
                                 </tr>
                                 </tbody>
                             </table>
 
                             <div class="d-flex justify-content-center">
-                                <button type="submit" class="btn btn-primary">수정</button> &nbsp&nbsp&nbsp
+                                <button type="submit" class="btn btn-primary">수정</button>  &nbsp&nbsp&nbsp
+                                <button class="btn btn-dark mx-2" onclick="location.href='/roomService/menu/list'">목록</button>
+                                &nbsp&nbsp&nbsp
                                 <button type="reset" class="btn btn-secondary">초기화</button>
                             </div>
                         </form>

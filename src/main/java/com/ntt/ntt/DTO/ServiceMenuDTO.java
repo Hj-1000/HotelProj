@@ -17,6 +17,7 @@ public class ServiceMenuDTO {
 
     private Integer serviceMenuId;
 
+
     private String serviceMenuName;
 
     private String serviceMenuInfo;
@@ -25,7 +26,7 @@ public class ServiceMenuDTO {
 
     private Integer serviceMenuPrice;
 
-    private ServiceCate serviceCateId;
+    private ServiceCate serviceCateId; //카테고리와 연결
 
     private LocalDateTime regDate;
 

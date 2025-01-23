@@ -21,8 +21,6 @@ public class ServiceCateDTO {
 
     private Integer serviceCateId;
 
-    private Image image;
-
     private String serviceCateName;
 
     private Hotel hotelId;
@@ -30,6 +28,9 @@ public class ServiceCateDTO {
     private LocalDateTime regDate;
 
     private LocalDateTime modDate;
+
+    @Builder.Default
+    private List<ServiceMenuDTO> serviceCateServiceMenuDTOList = new ArrayList<>();
 
     @Builder.Default
     private List<ImageDTO> serviceCateImageDTOList = new ArrayList<>();

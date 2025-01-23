@@ -5,78 +5,109 @@
       layout:decorate="~{layouts/layout}">
 <head>
     <meta charset="UTF-8">
-    <title>NTT호텔 - 서비스 메뉴 등록</title>
+    <title>NTT호텔 - 메뉴 등록</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script th:inline="javascript">
+
+        // 이미지 미리보기 함수
+        function previewImage(event) {
+
+            console.log("수정 진입")
+
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            previewContainer.innerHTML = '';  // 기존 미리보기 이미지 제거
+
+            const files = event.target.files;
+
+            if (files.length > 0) {
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = 'Image Preview';
+                        img.style.maxWidth = '200px';  // 미리보기 이미지 크기 조정
+                        img.style.marginTop = '10px';
+                        previewContainer.appendChild(img);
+                    }
+
+                    reader.readAsDataURL(file);  // 이미지 파일을 읽어서 미리보기
+                });
+            }
+        }
+
+
+
+    </script>
+
 </head>
 <body>
 <div id="wrapper" layout:fragment="content">
+
     <div class="container-fluid mt-4">
-        <div class="row justify-content-center">
-            <div class="col-12 col-md-8">
-                <h2 class="text-center mb-4">메뉴 등록</h2>
 
-                <div class="card">
-                    <div class="card-body">
-                        <!-- Controller에 multipart 선언 시 전송에서 multipart 지원 -->
-                        <form th:action="@{/roomService/menu/register}" method="post" enctype="multipart/form-data" th:object="${serviceMenuDTO}">
-                            <div class="mb-3 row">
-                                <label for="serviceMenuName" class="col-sm-3 col-form-label">메뉴 이름</label>
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="serviceMenuName" placeholder="메뉴 이름을 입력하세요."
-                                           name="serviceMenuName" th:field="*{serviceMenuName}" minlength="2" required
-                                           title="최소 2글자 이상 작성해주세요.">
-                                </div>
-                            </div>
+        <h2 class="mb-3">메뉴 등록</h2>
 
-                            <div class="mb-3 row">
-                                <label for="serviceMenuInfo" class="col-sm-3 col-form-label">메뉴 설명</label>
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="serviceMenuInfo" placeholder="메뉴 설명을 입력하세요."
-                                           name="serviceMenuInfo" th:field="*{serviceMenuInfo}" minlength="2" required
-                                           title="최소 2글자 이상 작성해주세요.">
-                                </div>
-                            </div>
+        <!-- 폼 -->
+        <div class="card p-4 mb-4">
+            <div class="row g-3 align-items-center">
+                <form action="/roomService/menu/register" method="post" enctype="multipart/form-data">
+                    <input type="text" id="serviceCateId" name="serviceCateId" th:value="${serviceMenuDTO.serviceCateId}">
 
-                            <div class="mb-3 row">
-                                <label for="serviceMenuStatus" class="col-sm-3 col-form-label">메뉴 상태</label>
-                                <div class="col-sm-9">
-                                    <select class="form-control" id="serviceMenuStatus" name="serviceMenuStatus" th:field="*{serviceMenuStatus}" required>
-                                        <option value="판매중">판매중</option>
-                                        <option value="준비중">준비중</option>
-                                        <option value="매진">매진</option>
-                                    </select>
-                                </div>
-                            </div>
 
-                            <div class="mb-3 row">
-                                <label for="serviceMenuPrice" class="col-sm-3 col-form-label">메뉴 가격</label>
-                                <div class="col-sm-9">
-                                    <input type="number" class="form-control" id="serviceMenuPrice" placeholder="메뉴 가격을 입력하세요."
-                                           name="serviceMenuPrice" th:field="*{serviceMenuPrice}" required
-                                           title="가격을 입력해주세요.">
-                                </div>
-                            </div>
-
-                            <div class="mb-3 row">
-                                <label for="imageFile" class="col-sm-3 col-form-label">메뉴 이미지</label>
-                                <div class="col-sm-9">
-                                    <input type="file" class="form-control" id="imageFile" name="imageFile">
-                                </div>
-                            </div>
-
-                            <div class="d-flex justify-content-center mt-4">
-                                <button type="submit" class="btn btn-primary mx-2">등록</button>
-                                <button class="btn btn-dark mx-2" onclick="location.href='/roomService/menu/list'">목록</button>
-                                <button type="reset" class="btn btn-secondary mx-2">초기화</button>
-                            </div>
-                        </form>
+                    <div class="mb-3 mt-3">
+                        <label for="serviceMenuName" class="form-label">메뉴이름:</label>
+                        <input type="text" class="form-control" id="serviceMenuName" name="serviceMenuName"
+                               placeholder="메뉴설명을 입력하세요."
+                               minlength="2" required
+                               title="최소 2글자 이상 작성해주세요.">
                     </div>
-                </div>
+                    <div class="mb-3">
+                        <label for="serviceMenuInfo" class="form-label">메뉴설명:</label>
+                        <input type="text" class="form-control" id="serviceMenuInfo" name="serviceMenuInfo"
+                               placeholder="메뉴설명을 입력하세요."
+                               minlength="2" required
+                               title="최소 2글자 이상 작성해주세요.">
+                    </div>
+                    <div class="mb-3 mt-3">
+                        <label for="serviceMenuStatus" class="form-label">메뉴상태:</label>
+                        <select class="form-control" id="serviceMenuStatus" name="serviceMenuStatus">
+                            <option value="판매중">판매중</option>
+                            <option value="준비중">준비중</option>
+                            <option value="매진">매진</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="serviceMenuPrice" class="form-label">메뉴가격:</label>
+                        <input type="number" class="form-control" id="serviceMenuPrice" name="serviceMenuPrice">
+                    </div>
+                    <!-- 새 이미지 업로드 및 미리보기 -->
+                    <div>
+                        <label for="newImageFiles">메뉴이미지:</label>
+                        <input type="file" id="newImageFiles" name="imageFiles" multiple onchange="previewImage(event)">
+                        <small>이미지를 선택해 주세요.</small>
+                    </div>
+
+                    <!-- 미리보기 이미지 표시 -->
+                    <div id="imagePreviewContainer">
+                        <!-- 미리보기가 여기 나타날 것입니다 -->
+                    </div>
+
+                    <div style="text-align: right">
+                        <button type="submit" class="btn btn-primary mx-2">등록</button>
+                        <button class="btn btn-dark mx-2" onclick="location.href='/roomService/menu/list'">목록</button>
+                        <button type="reset" class="btn btn-secondary mx-2">초기화</button>
+                    </div>
+
+                </form>
             </div>
         </div>
+
     </div>
 </div>
+
 </body>
 </html>
