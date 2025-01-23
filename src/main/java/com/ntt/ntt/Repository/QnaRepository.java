@@ -14,4 +14,8 @@ public interface QnaRepository extends JpaRepository<Qna, Integer> {
     // 제목, 내용, 작성자 이름에서 검색
     Page<Qna> findByQnaTitleContainingOrQnaContentContainingOrMemberMemberNameContaining(
             String titleKeyword, String contentKeyword, String memberNameKeyword, Pageable pageable);
+       // Qna를 ID로 조회하는 메서드 (JPA에서 자동으로 제공됨)
+                Optional<Qna> findById(Integer id);
 }
+
+

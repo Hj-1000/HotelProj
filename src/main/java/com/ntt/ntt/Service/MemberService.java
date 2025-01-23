@@ -224,4 +224,8 @@ public class MemberService implements UserDetailsService {
                 .collect(Collectors.toList());
     }
 
+    public Member readByMembername(String memberEmail) {
+        Optional<Member> member = memberRepository.findByMemberEmail(memberEmail);
+        return member.orElse(null);  // 없으면 null 반환
+    }
 }
