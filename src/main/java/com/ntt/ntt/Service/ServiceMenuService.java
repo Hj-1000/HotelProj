@@ -74,17 +74,51 @@ public class ServiceMenuService {
     출력 : 해당 데이터들(list)과 page 정보를 전달
     설명 : 요청한 페이지번호에 해당하는 데이터를 조회해서 전달
     --------------------------------*/
-    public Page<ServiceMenuDTO> list(Pageable page){
+    public Page<ServiceMenuDTO> list(Pageable page, String keyword, String searchType, Integer serviceCateId){
         //1. 페이지정보를 재가공
         int currentPage = page.getPageNumber()-1;
         int pageSize = 10;
         Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.DESC, "serviceMenuId"));
 
         //2. 조회
-        Page<ServiceMenu> serviceMenuPage = serviceMenuRepository.findAll(pageable);
+        Page<ServiceMenu> serviceMenu = null;
+        // serviceCateId가 있으면 카테고리에 속한 메뉴만 조회
+        if (serviceCateId != null) {
+            if (keyword != null && !keyword.isEmpty()) {
+                String keywordLike = "%" + keyword + "%"; // Like 조건을 위한 검색어 처리
+                //검색 타입에 따라 조건을 추가
+                if ("name".equals(searchType)) {
+                    //메뉴이름 검색
+                    serviceMenu = serviceMenuRepository.findByServiceCate_ServiceCateIdAndServiceMenuNameLike(serviceCateId, keywordLike, pageable);
+                }
+
+            } else {
+                //검색어가 없으면 해당 serviceCateId에 속한 모든 호텔 조회
+                serviceMenu = serviceMenuRepository.findByServiceCate_ServiceCateId(serviceCateId, pageable);
+            }
+        } else {
+            //serviceCateId가 없으면 모든 메뉴를 조회
+            if (keyword != null && !keyword.isEmpty()) {
+                String keywordLike = "%" + keyword + "%"; // Like 조건을 위한 검색어 처리
+
+                //검색 타입에 따라 조건을 추가
+                if ("name".equals(searchType)) {
+                    serviceMenu = serviceMenuRepository.findByServiceMenuNameLike(keywordLike, pageable);
+                } else if ("status".equals(searchType)) {
+                    serviceMenu = serviceMenuRepository.findByServiceMenuStatus(keywordLike, pageable);
+                }
+            } else {
+                // 검색어가 없으면 모든 호텔 리스트를 조회
+                serviceMenu = serviceMenuRepository.findAll(pageable);
+            }
+        }
+
+
+
+//        serviceMenuRepository.findAll(pageable);
 
         //3. 변환
-        Page<ServiceMenuDTO> serviceMenuDTOS = serviceMenuPage.map(entity ->modelMapper.map(entity, ServiceMenuDTO.class));
+        Page<ServiceMenuDTO> serviceMenuDTOS = serviceMenu.map(entity ->modelMapper.map(entity, ServiceMenuDTO.class));
         return serviceMenuDTOS;
     }
 

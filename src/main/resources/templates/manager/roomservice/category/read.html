@@ -74,7 +74,7 @@
             <!-- 추가 버튼 -->
             <div class="text-end mt-3">
                 <button type="button" class="btn btn-dark modalBtn">메뉴 등록</button>
-                <a class="btn btn-primary" th:href="@{/hotel/listByCompany(serviceCateId=${serviceCateDTO.serviceCateId})}">메뉴 관리</a>
+                <a class="btn btn-primary" th:href="@{/hotel/listByServiceCate(serviceCateId=${serviceCateDTO.serviceCateId})}">메뉴 관리</a>
                 <button class="btn btn-primary" style="background-color: black" onclick="location.href='/roomService/category/list' ">목록</button>
                 <a class="btn btn-primary" th:href="@{/roomService/category/update(serviceCateId=${serviceCateDTO.serviceCateId})}">수정</a>
                 <a class="btn btn-danger" th:href="@{/roomService/category/delete(serviceCateId=${serviceCateDTO.serviceCateId})}">삭제</a>
@@ -122,7 +122,7 @@
 
                         <!-- 새 이미지 업로드 및 미리보기 -->
                         <div>
-                            <label for="newImageFiles">본사이미지:</label>
+                            <label for="newImageFiles">메뉴이미지:</label>
                             <input type="file" id="newImageFiles" name="imageFiles" multiple onchange="previewImage(event)">
                             <small>이미지를 선택해 주세요.</small>
                         </div>

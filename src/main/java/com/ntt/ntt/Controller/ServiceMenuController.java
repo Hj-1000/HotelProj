@@ -49,18 +49,32 @@ public class ServiceMenuController {
 
     @Operation(summary = "전체목록", description = "전체목록을 조회한다.")
     @GetMapping("/list")
-    public String listSearch(@PageableDefault(page=1) Pageable page, Model model) {
-        Page<ServiceMenuDTO> serviceMenuDTOS =
-                serviceMenuService.list(page);
+    public String listSearch(@RequestParam(required = false) Integer serviceCateId,
+                             @RequestParam(required = false) String keyword,
+                             @RequestParam(required = false) String searchType,
+                             @PageableDefault(page=1) Pageable page,
+                             Model model) {
+        // serviceCateId 가 존재하는 경우 해당 메뉴들만 조회
+        Page<ServiceMenuDTO> serviceMenuDTOS = null;
+        if (serviceCateId != null) {
+            serviceMenuDTOS = serviceMenuService.list(page, keyword, searchType, serviceCateId);
+        } else {
+            serviceMenuDTOS = serviceMenuService.list(page, keyword, searchType, serviceCateId);
+        }
+        // 페이지 정보 계산
         Map<String, Integer> pageInfo = paginationUtil.pagination(serviceMenuDTOS);
-        model.addAttribute("serviceMenuDTOS", serviceMenuDTOS);
-        model.addAllAttributes(pageInfo);
+
 
         //만약 글이 10개 이하라면, 페이지 2는 표시되지 않도록 수정
         if (serviceMenuDTOS.getTotalPages() <= 1) {
             pageInfo.put("startPage", 1);
             pageInfo.put("endPage", 1);
         }
+        model.addAttribute("serviceMenuDTOS", serviceMenuDTOS);
+        model.addAttribute(pageInfo);
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("searchType",searchType);
+        model.addAttribute("serviceCateId", serviceCateId);
 
         return "/manager/roomservice/menu/list";
     }
