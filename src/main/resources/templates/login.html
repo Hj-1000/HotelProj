@@ -31,6 +31,7 @@
 <body>
     <div th:replace="~{fragments/header::header}"></div>
     <!--본문-->
+    <!-- successMessage를 표시 -->
     <div layout:fragment="content" class="login-container">
         <div class="card login-card">
             <h5 class="card-title text-center mb-4">로그인</h5>
@@ -43,10 +44,13 @@
                     <label for="password" class="form-label">비밀번호 :</label>
                     <input type="password" class="form-control" id="password" name="password">
                 </div>
+                <div th:if="${successMessage}" class="alert alert-success">
+                    <p th:text="${successMessage}"></p>
+                </div>
                     <button type="submit" class="btn btn-primary">로그인</button>
                     <!-- 회원가입 유형 선택 페이지로 이동 -->
                     <button type="button" class="btn btn-secondary" onclick="location.href='/selectrole'">회원가입</button>
-                    <button type="button" class="btn btn-secondary" onclick="location.href='/findPassword'">비밀번호 찾기</button>
+                    <button type="button" class="btn btn-secondary" onclick="location.href='/user/findPassword'">비밀번호 찾기</button>
                     <button type="button" class="btn btn-danger" onclick="location.href='/'">취소</button>
                 <div th:if="${param.error}" class="alert alert-danger mt-3" role="alert">
                     로그인에 실패했습니다. 이메일 또는 비밀번호를 확인하세요.

@@ -7,6 +7,7 @@ import com.ntt.ntt.Entity.Qna;
 import com.ntt.ntt.Repository.QnaRepository;
 import com.ntt.ntt.Service.MemberService;
 import com.ntt.ntt.Service.QnaService;
+import com.ntt.ntt.Service.ReplyService;
 import com.ntt.ntt.Util.PaginationUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class QnaController {
     private final QnaService qnaService;
     private final QnaRepository qnaRepository;
     private final PaginationUtil paginationUtil;
+    private final ReplyService replyService;
 
     // Q&A 페이지 이동
     @GetMapping("/qna")
@@ -36,7 +38,7 @@ public class QnaController {
         return null;
     }
 
-    // 질문 목록 페이지로 이동
+
     // 질문 목록 페이지로 이동
     @GetMapping("/qna/list")
     public String qnaListPage(
@@ -126,6 +128,9 @@ public class QnaController {
 
         model.addAttribute("qna", qna);
 
+        // 댓글 목록 조회
+        model.addAttribute("replies", replyService.readRepliesByQna(id));  // 댓글 목록 추가
+
         // 로그인된 사용자 정보 처리
         if (userDetails != null) {
             MemberDTO memberDTO = memberService.read(userDetails.getUsername());
@@ -133,8 +138,18 @@ public class QnaController {
             model.addAttribute("currentMember", currentMember); // 현재 로그인된 사용자
         }
 
+        // 관리자인 경우에만 댓글 작성 폼을 보여줌
+        if (userDetails != null && userDetails.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"))) {
+            model.addAttribute("canPostReply", true);  // 관리자에게 댓글 작성 권한 부여
+        } else {
+            model.addAttribute("canPostReply", false); // 일반 사용자에게 댓글 작성 권한 부여 안 함
+        }
+
         return "qna/read"; // qna/read.html로 이동
     }
+
+
 
     // 질문 수정 페이지로 이동
     @GetMapping("/qna/update/{id}")
@@ -153,7 +168,7 @@ public class QnaController {
     }
 
 
-    // Qna 수정 처리
+
     // Qna 수정 처리
     @PostMapping("/qna/update/{id}")
     public String updateQnaPorc(@PathVariable Integer id, QnaDTO qnaDTO, @AuthenticationPrincipal UserDetails userDetails) {
@@ -185,6 +200,22 @@ public class QnaController {
         } else {
             return "redirect:/qna/list";  // 질문이 없으면 목록 페이지로 리다이렉트
         }
+    }
+
+    // 댓글 작성 처리
+    @PostMapping("/qna/reply/register/{qnaId}")
+    public String registerReply(@PathVariable Integer qnaId, String replyContent, @AuthenticationPrincipal UserDetails userDetails, Model model) {
+        if (userDetails != null && userDetails.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"))) {
+            MemberDTO memberDTO = memberService.read(userDetails.getUsername());
+            Member member = dtoToEntity(memberDTO);
+
+            // 댓글 등록
+            replyService.registerReply(replyContent, qnaId, member);
+        } else {
+            model.addAttribute("errorMessage", "관리자만 댓글을 작성할 수 있습니다.");
+        }
+        return "redirect:/qna/read/" + qnaId;  // Q&A 상세보기 페이지로 리다이렉트
     }
 
     // MemberDTO를 Member 엔티티로 변환하는 메소드

@@ -1,5 +1,6 @@
 package com.ntt.ntt.Controller.hotel;
 
+import com.ntt.ntt.DTO.CompanyDTO;
 import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.Service.hotel.HotelService;
 import com.ntt.ntt.Util.PaginationUtil;
@@ -32,7 +33,11 @@ public class HotelController {
 
     //등록폼
     @GetMapping("/register")
-    public String registerForm() {
+    public String registerForm(Model model) {
+        //검증처리가 필요하면 빈 MenuDTO를 생성해서 전달한다.
+        List<CompanyDTO> companyDTOS = hotelService.getAllCompany();
+        model.addAttribute("companyDTOS", companyDTOS);
+        model.addAttribute("companyDTO", new CompanyDTO());
         return "/hotel/register";
     }
     //등록처리
@@ -57,35 +62,34 @@ public class HotelController {
 
 
 
-//    @GetMapping("/list")
-//    public String list(@RequestParam(required = false) String keyword,
-//                       @RequestParam(required = false) Integer keyword1,
-//                       @RequestParam(required = false) String searchType,
-//                       @PageableDefault(page = 1) Pageable page,
-//                       Model model) {
-//
-//        // 검색 기능을 포함한 서비스 호출
-//        Page<HotelDTO> hotelDTOS = hotelService.list(page, keyword, keyword1, searchType);
-//
-//        // 페이지 정보 계산
-//        Map<String, Integer> pageInfo = paginationUtil.pagination(hotelDTOS);
-//
-//        // 만약 글이 10개 이하라면, 페이지 2는 표시되지 않도록 수정
-//        if (hotelDTOS.getTotalPages() <= 1) {
-//            pageInfo.put("startPage", 1);
-//            pageInfo.put("endPage", 1);
-//        }
-//
-//        // 모델에 데이터 추가
-//        model.addAttribute("hotelDTOS", hotelDTOS);
-//        model.addAttribute("pageInfo", pageInfo);
-//
-//        // 검색어와 검색 타입을 폼에 전달할 수 있도록 추가
-//        model.addAttribute("keyword", keyword);
-//        model.addAttribute("searchType", searchType);
-//
-//        return "/hotel/list";
-//    }
+    //호텔목록 일반
+    @GetMapping("/list")
+    public String list(@RequestParam(required = false) String keyword,
+                       @RequestParam(required = false) String searchType,
+                       @PageableDefault(page = 1) Pageable page,
+                       Model model) {
+
+        Page<HotelDTO> hotelDTOS;
+
+        // 'location' 검색일 경우 정확히 일치하는 값만 검색
+        if ("location".equals(searchType)) {
+            hotelDTOS = hotelService.list(page, keyword, searchType, true); // 정확히 일치하는 location만 검색
+        } else {
+            hotelDTOS = hotelService.list(page, keyword, searchType, false); // 일반 검색
+        }
+
+        // 페이지 정보 계산
+        Map<String, Integer> pageInfo = paginationUtil.pagination(hotelDTOS);
+
+        // 모델에 데이터 추가
+        model.addAttribute("hotelDTOS", hotelDTOS);
+        model.addAttribute("pageInfo", pageInfo);
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("searchType", searchType);
+
+        return "/hotel/list";
+    }
+
 
     //호텔본사관리자 전용
     @GetMapping("/listByCompany")
@@ -106,13 +110,21 @@ public class HotelController {
         }
 
         // 페이지 정보 계산
-        Map<String, Integer> pageInfo = PaginationUtil.pagination(hotelDTOS);
+        Map<String, Integer> pageInfo = paginationUtil.pagination(hotelDTOS);
 
-        // 만약 글이 10개 이하라면, 페이지 2는 표시되지 않도록 수정
-        if (hotelDTOS.getTotalPages() <= 1) {
-            pageInfo.put("startPage", 1);
-            pageInfo.put("endPage", 1);
-        }
+        // 전체 페이지 수
+        int totalPages = hotelDTOS.getTotalPages();
+
+        // 현재 페이지 번호
+        int currentPage = pageInfo.get("currentPage");
+
+        // 시작 페이지와 끝 페이지 계산 (현재 페이지를 기준으로 최대 10페이지까지)
+        int startPage = Math.max(1, currentPage - 4); // 10개씩 끊어서 시작 페이지 계산
+        int endPage = Math.min(startPage + 9, totalPages); // 최대 10페이지까지, 전체 페이지 수를 넘지 않도록
+
+        // 페이지 정보 업데이트
+        pageInfo.put("startPage", startPage);
+        pageInfo.put("endPage", endPage);
 
         // 모델에 데이터 추가
         model.addAttribute("hotelDTOS", hotelDTOS);
@@ -125,8 +137,13 @@ public class HotelController {
         // companyId를 쿼리 파라미터로 다시 전달
         model.addAttribute("companyId", companyId);
 
+        List<CompanyDTO> companyDTOS = hotelService.getAllCompany();
+        model.addAttribute("companyDTOS", companyDTOS);
+        model.addAttribute("companyDTO", new CompanyDTO());
+
         return "/hotel/listByCompany";
     }
+
 
 
     //읽기
@@ -152,6 +169,10 @@ public class HotelController {
     @GetMapping("/modify")
     public String modifyServiceHTML(Integer hotelId, Model model) {
         HotelDTO hotelDTO = hotelService.read(hotelId);
+        List<CompanyDTO> companyDTOS = hotelService.getAllCompany();
+        model.addAttribute("companyDTOS", companyDTOS);
+        model.addAttribute("companyDTO", new CompanyDTO());
+        model.addAttribute("hotelDTO", hotelDTO);
         return "/hotel/modify";
     }
     //수정처리

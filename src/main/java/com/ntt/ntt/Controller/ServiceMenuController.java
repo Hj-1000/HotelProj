@@ -1,6 +1,8 @@
 package com.ntt.ntt.Controller;
 
+import com.ntt.ntt.DTO.ServiceCateDTO;
 import com.ntt.ntt.DTO.ServiceMenuDTO;
+import com.ntt.ntt.Service.ServiceCateService;
 import com.ntt.ntt.Service.ServiceMenuService;
 import com.ntt.ntt.Util.PaginationUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Map;
@@ -26,41 +29,62 @@ import java.util.Map;
 @Log4j2
 @RequiredArgsConstructor
 @RequestMapping("/roomService/menu") //url roomService아래에
-@Tag(name = "serviceMenuController", description = "룸서비스 카테고리 정보")
+@Tag(name = "serviceMenuController", description = "룸서비스 메뉴 정보")
 public class ServiceMenuController {
     private final ServiceMenuService serviceMenuService;
+    private final ServiceCateService serviceCateService;
     private final PaginationUtil paginationUtil;
 
     @Operation(summary = "등록폼", description = "등록폼 페이지로 이동한다.")
     @GetMapping("/register")
     public String registerForm(Model model){
         //검증처리가 필요하면 빈 MenuDTO를 생성해서 전달한다.
+        List<ServiceCateDTO> serviceCateDTOS = serviceCateService.getAllServiceCate();
+        model.addAttribute("serviceCateDTOS", serviceCateDTOS);
         model.addAttribute("serviceMenuDTO", new ServiceMenuDTO());
         return "/manager/roomservice/menu/register";
     }
 
     @Operation(summary = "등록창", description = "데이터 등록 후 목록페이지로 이동한다.")
     @PostMapping("/register")
-    public String registerProc(ServiceMenuDTO serviceMenuDTO, @RequestParam("imageFile") List<MultipartFile> imageFile) {
+    public String registerProc(ServiceMenuDTO serviceMenuDTO, @RequestParam("imageFiles") List<MultipartFile> imageFiles,
+                               RedirectAttributes redirectAttributes) {
         log.info("post에서 등록할 serviceMenuDTO" + serviceMenuDTO);
-        serviceMenuService.register(serviceMenuDTO, imageFile);
-        return "redirect:/roomService/list";
+        serviceMenuService.register(serviceMenuDTO, imageFiles);
+        redirectAttributes.addFlashAttribute("message", "메뉴 등록이 완료되었습니다.");
+        return "redirect:/roomService/menu/list";
     }
+
+
 
     @Operation(summary = "전체목록", description = "전체목록을 조회한다.")
     @GetMapping("/list")
-    public String listSearch(@PageableDefault(page=1) Pageable page, Model model) {
-        Page<ServiceMenuDTO> serviceMenuDTOS =
-                serviceMenuService.list(page);
+    public String listSearch(@RequestParam(required = false) Integer serviceCateId,
+                             @RequestParam(required = false) String keyword,
+                             @RequestParam(required = false) String searchType,
+                             @PageableDefault(page=1) Pageable page,
+                             Model model) {
+        // serviceCateId 가 존재하는 경우 해당 메뉴들만 조회
+        Page<ServiceMenuDTO> serviceMenuDTOS = null;
+        if (serviceCateId != null) {
+            serviceMenuDTOS = serviceMenuService.list(page, keyword, searchType, serviceCateId);
+        } else {
+            serviceMenuDTOS = serviceMenuService.list(page, keyword, searchType, serviceCateId);
+        }
+        // 페이지 정보 계산
         Map<String, Integer> pageInfo = paginationUtil.pagination(serviceMenuDTOS);
-        model.addAttribute("serviceMenuDTOS", serviceMenuDTOS);
-        model.addAllAttributes(pageInfo);
+
 
         //만약 글이 10개 이하라면, 페이지 2는 표시되지 않도록 수정
         if (serviceMenuDTOS.getTotalPages() <= 1) {
             pageInfo.put("startPage", 1);
             pageInfo.put("endPage", 1);
         }
+        model.addAttribute("serviceMenuDTOS", serviceMenuDTOS);
+        model.addAttribute("pageInfo",pageInfo);
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("searchType",searchType);
+        model.addAttribute("serviceCateId", serviceCateId);
 
         return "/manager/roomservice/menu/list";
     }
@@ -94,16 +118,19 @@ public class ServiceMenuController {
 
     @Operation(summary = "수정창", description = "수정할 내용을 데이터베이스에 저장 후 목록페이지로 이동한다.")
     @PostMapping("/update")
-    public String updateProc(ServiceMenuDTO serviceMenuDTO, @RequestParam("imageFile") List<MultipartFile> imageFile) {
-        serviceMenuService.update(serviceMenuDTO, imageFile);
-        return "redirect:/roomService/read?serviceMenuId="+ serviceMenuDTO.getServiceMenuId();
+    public String updateProc(ServiceMenuDTO serviceMenuDTO, @RequestParam("imageFiles") List<MultipartFile> imageFiles,
+                             RedirectAttributes redirectAttributes) {
+        serviceMenuService.update(serviceMenuDTO, imageFiles);
+        redirectAttributes.addFlashAttribute("message", "메뉴 수정이 완료되었습니다.");
+        return "redirect:/roomService/menu/read?serviceMenuId="+ serviceMenuDTO.getServiceMenuId();
     }
 
     @Operation(summary = "삭제처리", description = "해당 데이터를 삭제 후 목록페이지로 이동한다.")
     @GetMapping("/delete")
-    public String deleteForm(Integer serviceMenuId) {
+    public String deleteForm(Integer serviceMenuId, RedirectAttributes redirectAttributes) {
 
         serviceMenuService.delete(serviceMenuId);
-        return "redirect:/roomService/list";
+        redirectAttributes.addFlashAttribute("message", "메뉴 삭제가 완료되었습니다.");
+        return "redirect:/roomService/menu/list";
     }
 }

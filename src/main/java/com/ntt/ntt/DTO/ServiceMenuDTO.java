@@ -17,6 +17,8 @@ public class ServiceMenuDTO {
 
     private Integer serviceMenuId;
 
+    private String serviceCateName; //카테고리의 이름으로 불러오기 위함 2025-01-23 추가
+
     private String serviceMenuName;
 
     private String serviceMenuInfo;
@@ -25,7 +27,7 @@ public class ServiceMenuDTO {
 
     private Integer serviceMenuPrice;
 
-    private ServiceCate serviceCateId;
+    private ServiceCate serviceCateId; //카테고리와 연결
 
     private LocalDateTime regDate;
 

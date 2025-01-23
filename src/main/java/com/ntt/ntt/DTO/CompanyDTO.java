@@ -32,4 +32,8 @@ public class CompanyDTO {
 
     private Integer hotelCount; //지사 수 2025-01-22 추가
 
+    public CompanyDTO(Integer companyId, String companyName) {
+        this.companyId = companyId;
+        this.companyName = companyName;
+    }
 }

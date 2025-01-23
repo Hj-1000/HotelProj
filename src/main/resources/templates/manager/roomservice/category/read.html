@@ -5,8 +5,52 @@
       layout:decorate="~{layouts/layout}">
 <head>
     <meta charset="UTF-8">
-    <title>카테고리 상세보기</title>
+    <title>NTT호텔 - 카테고리 상세 페이지</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <script th:inline="javascript">
+        $(document).ready(function () {
+            console.log("간편 등록 모달 진입!");
+
+            // 세션에서 message를 가져온다
+            var message = [[${message}]]
+
+            //message가 null이 아니라면 알림창을 띄우고 세션에서 삭제한다.
+            if (message != null && message != '') {
+                alert(message)
+            }
+
+            var moBtn = $(".modalBtn");
+            var modal = $("#myModal");
+
+            moBtn.off().on("click", function () {
+                console.log("모달 진입");
+
+                // 모달 열기
+                modal.modal("show");
+
+                // 카테고리 ID를 hidden input에 설정
+                var serviceCateId = /*[[${serviceCateDTO.serviceCateId}]]*/ 'defaultId';  // 서버에서 넘겨받은 serviceCateId
+                if (serviceCateId !== 'defaultId') {
+                    $('#serviceCateId').val(serviceCateId);  // #serviceCateId에 값을 넣어줌
+                    console.log("serviceCateId 값 설정:", serviceCateId);
+                } else {
+                    console.log("serviceCateId 값이 올바르지 않음.");
+                }
+
+                $('.modal-title').text("간편 등록하기");
+                $("#saveChanges").show();
+                modal.find("input").show();
+            });
+
+            $(".submitBtn").off().on("click", function () {
+                alert("글 작성이 완료되었습니다.");
+            });
+        });
+    </script>
+
+
 </head>
 <body>
 <div id="wrapper" layout:fragment="content">
@@ -16,26 +60,99 @@
 
             <div class="card p-4 mb-4">
                 <div class="row g-3 align-items-center">
-                    <h3><a th:text="${serviceCateDTO.serviceCateName}">한식</a></h3>
-                    <div>
-                        <div th:each="img : ${serviceCateDTO.serviceCateImageDTOList}">
-                            <!-- 이미지가 있는 경우만 출력 -->
-                            <img th:src="@{'/upload/' + ${img.imagePath}}" alt="Category Image" width="300px">
-                        </div>
 
-                    </div>
+                    <!--등록한 사진이 있을 때-->
+                    <th:block th:if="${serviceCateDTO.serviceCateImageDTOList != 0}">
+                        <div th:each="img : ${serviceCateDTO.serviceCateImageDTOList}">
+                            <!-- 이미지 경로(path) -->
+                            <img th:src="@{'/upload/' + ${img.imagePath}}" alt="hotel Image" width="300px"/>
+                        </div>
+                    </th:block>
+
+                    <!--등록한 사진이 없을 때-->
+                    <th:block th:unless="${serviceCateDTO.serviceCateImageDTOList.size() != 0}">
+                        <!-- 이미지 경로(path) -->
+                        <img src="/img/default_img.jpg" alt="noImage" style="width: 300px"/>
+                    </th:block>
+
+                    <h3><a th:text="${serviceCateDTO.serviceCateName}">한식</a></h3>
                 </div>
             </div>
 
             <!-- 추가 버튼 -->
             <div class="text-end mt-3">
+                <button type="button" class="btn btn-dark modalBtn">메뉴 등록</button>
+                <a class="btn btn-primary" th:href="@{/roomService/serviceCateId(serviceCateId=${serviceCateDTO.serviceCateId})}">메뉴 관리</a>
                 <button class="btn btn-primary" style="background-color: black" onclick="location.href='/roomService/category/list' ">목록</button>
                 <a class="btn btn-primary" th:href="@{/roomService/category/update(serviceCateId=${serviceCateDTO.serviceCateId})}">수정</a>
                 <a class="btn btn-danger" th:href="@{/roomService/category/delete(serviceCateId=${serviceCateDTO.serviceCateId})}">삭제</a>
             </div>
 
         </div>
+    <div class="modal" id="myModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
 
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">메뉴 등록</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <form action="/roomService/menu/register" method="post" enctype="multipart/form-data">
+
+                        <input type="hidden" id="serviceCateId" name="serviceCateId" th:value="${serviceCateDTO.serviceCateId}">
+                        <p th:text="${serviceCateDTO.serviceCateId}"></p>
+
+
+                        <div class="mb-3 mt-3">
+                            <label for="serviceMenuName" class="form-label">메뉴명 :</label>
+                            <input type="text" class="form-control" id="serviceMenuName" name="serviceMenuName">
+                        </div>
+                        <div class="mb-3">
+                            <label for="serviceMenuInfo" class="form-label">메뉴설명:</label>
+                            <input type="text" class="form-control" id="serviceMenuInfo" name="serviceMenuInfo">
+                        </div>
+                        <div class="mb-3 mt-3">
+                            <label for="serviceMenuStatus" class="form-label">메뉴상태:</label>
+                            <select class="form-control" id="serviceMenuStatus" name="serviceMenuStatus">
+                                <option value="판매중">판매중</option>
+                                <option value="준비중">준비중</option>
+                                <option value="매진">매진</option>
+                            </select>
+                        </div>
+                        <div class="mb-3 mt-3">
+                            <label for="serviceMenuPrice" class="form-label">메뉴가격:</label>
+                            <input type="number" class="form-control" id="serviceMenuPrice" name="serviceMenuPrice">
+                        </div>
+
+                        <!-- 새 이미지 업로드 및 미리보기 -->
+                        <div>
+                            <label for="newImageFiles">메뉴이미지:</label>
+                            <input type="file" id="newImageFiles" name="imageFiles" multiple onchange="previewImage(event)">
+                            <small>이미지를 선택해 주세요.</small>
+                        </div>
+
+                        <!-- 미리보기 이미지 표시 -->
+                        <div id="imagePreviewContainer">
+                            <!-- 미리보기가 여기 나타날 것입니다 -->
+                        </div>
+
+                        <div style="text-align: right">
+
+                            <button type="submit" class="btn btn-primary">등록</button>
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">닫기</button>
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
 
 </div>
 

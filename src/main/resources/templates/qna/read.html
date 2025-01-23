@@ -75,6 +75,43 @@
         </form>
     </div>
 
+    <!-- 댓글 작성 -->
+    <div class="reply-form">
+        <h3>댓글 작성</h3>
+        <form th:action="@{/qna/reply/register/{qnaId}(qnaId=${qna.qnaId})}" method="post">
+            <textarea name="replyContent" placeholder="댓글을 입력하세요..." required></textarea>
+            <button type="submit" class="btn btn-primary">댓글 등록</button>
+        </form>
+        <p th:if="${not canPostReply}">관리자만 댓글을 작성할 수 있습니다.</p>
+    </div>
+
+    <!-- 댓글 목록 -->
+    <div class="reply-list">
+        <h3>댓글 목록</h3>
+        <div th:if="${not #lists.isEmpty(replies)}">
+            <div th:each="reply : ${replies}">
+                <div class="reply-content">
+                    <p><strong th:text="${reply.member.memberName}"></strong></p>
+                    <p th:text="${reply.replyContent}"></p>
+                    <p class="date" th:text="${#temporals.format(reply.regDate, 'yyyy-MM-dd HH:mm')}">작성일자</p>
+
+                    <!-- 댓글 수정, 삭제 버튼 -->
+                    <div th:if="${#authentication.principal != null and #authentication.principal.authorities.?[authority == 'ROLE_ADMIN'].size() > 0}">
+                        <form th:action="@{/reply/update/{id}(id=${reply.replyId})}" method="get">
+                            <button type="submit" class="btn btn-warning btn-sm">수정</button>
+                        </form>
+                        <form th:action="@{/reply/delete/{id}(id=${reply.replyId})}" method="post">
+                            <button type="submit" class="btn btn-danger btn-sm">삭제</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div th:if="${#lists.isEmpty(replies)}">
+            <p>댓글이 없습니다.</p>
+        </div>
+    </div>
+
     <!-- 돌아가기 링크 -->
     <a href="/qna/list" class="back-link btn btn-primary">돌아가기</a>
 </div>
