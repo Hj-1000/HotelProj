@@ -38,18 +38,18 @@ public class PasswordResetController {
         return "user/findPassword";
     }
 
-    // 비밀번호 찾기 요청 (POST)
+    // 비밀번호 찾기 요청
     @PostMapping("/user/findPassword")
     public String findPassword(@RequestParam("memberEmail") String email, Model model, HttpSession session) {
 
-        // 1. 이메일이 회원목록에 있는지 확인
+        // 1. 입력한 이메일이 회원목록에 있는지 확인
         Optional<Member> member = memberRepository.findByMemberEmail(email);
-        if (member.isEmpty()) {
+        if (member.isEmpty()) { // 입력한 이메일이 목록에 없을 경우
             model.addAttribute("errorMessage", "해당 이메일로 가입된 정보가 없습니다.");
-            return "user/findPassword";  // 다시 비밀번호 찾기 페이지로 돌아감
+            return "user/findPassword"; // 다시 비밀번호 찾기 페이지로 돌아감
         }
 
-        // 2. 랜덤 코드 생성
+        // 2. 이메일로 발송할 랜덤 코드 생성
         String resetCode = generateRandomCode();
 
         // 3. 세션에 코드 저장 (비동기 메서드는 즉시 실행되므로, 세션 저장을 먼저 함)
@@ -57,72 +57,76 @@ public class PasswordResetController {
         session.setAttribute("resetCodeTimestamp", System.currentTimeMillis());
         session.setAttribute("email", email);
 
-        // 4. 비동기 이메일 전송 (이메일이 발송되는 동안에도 컨트롤러는 바로 응답 가능)
+        // 4. 비동기 이메일 전송 (비밀번호 찾기를 위한 이메일 발송 속도가 느려서 비동기 메서드 사용, 이메일이 발송되는 동안에도 컨트롤러는 바로 응답 가능)
         emailService.sendPasswordResetEmail(email, resetCode);
 
         // 5. 코드 입력 페이지로 리디렉션
         return "redirect:/user/verifyCode"; // 코드 입력 페이지로 리디렉션
     }
 
-    // 랜덤 코드 생성 함수
+    // 이메일로 발송할 랜덤 코드 생성 함수
     private String generateRandomCode() {
         SecureRandom random = new SecureRandom();
         StringBuilder code = new StringBuilder();
+        // 랜덤 코드에 사용될 문자
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        // 랜덤 코드 길이 (6글자)
         for (int i = 0; i < 6; i++) {
             code.append(characters.charAt(random.nextInt(characters.length())));
         }
         return code.toString();
     }
 
+    // 인증 코드 입력 페이지
     @GetMapping("/user/verifyCode")
     public String verifyCodePage(HttpSession session) {
-        // 세션에서 인증 코드와 타임스탬프를 가져옵니다.
+        // 세션에 저장된 인증 코드와 타임스탬프를 가져와서
         String resetCode = (String) session.getAttribute("resetCode");
         Long timestamp = (Long) session.getAttribute("resetCodeTimestamp");
 
+        // 인증 코드나 타임스탬프가 세션에 없으면 비밀번호 찾기 페이지로 리디렉션
         if (resetCode == null || timestamp == null) {
-            // 인증 코드가 없거나 타임스탬프가 없으면 비밀번호 찾기 페이지로 리디렉션
             return "redirect:/user/findPassword";
         }
 
-        // 30초가 지나면 인증 코드가 만료된 것으로 간주 -> 테스트하느라 30초로 했는데 실제 적용시에는 3분(180000ms) 로 수정하기
+        // 30초가 지나면 인증 코드 만료 -> 테스트하느라 30초로 했는데 실제 적용시에는 3분(180000ms) 로 수정하기
         if (System.currentTimeMillis() - timestamp > 30000) {
-            // 인증 코드가 만료되었으면 세션에서 인증 코드와 타임스탬프를 삭제하고 비밀번호 찾기 페이지로 리디렉션
+            // 인증 코드가 만료되면 세션에서 인증 코드와 타임스탬프를 삭제하고 비밀번호 찾기 페이지로 리디렉션
             session.removeAttribute("resetCode");
             session.removeAttribute("resetCodeTimestamp");
-            return "redirect:/user/findPassword"; // 인증 코드 만료로 비밀번호 찾기 페이지로 리디렉션
+            return "redirect:/user/findPassword";
         }
 
         // 인증 코드가 유효하면 verifyCode 페이지를 반환
         return "user/verifyCode";
     }
 
-    // 코드 확인 요청 (POST)
+    // 인증 코드 확인 요청
     @PostMapping("/user/verifyCode")
     public String verifyCode(@RequestParam("verificationCode") String userCode, HttpSession session, Model model) {
-        // 세션에서 저장된 resetCode와 타임스탬프 가져오기
+        // 세션에서 저장된 인증 코드와 타임스탬프를 가져와서
         String resetCode = (String) session.getAttribute("resetCode");
         Long timestamp = (Long) session.getAttribute("resetCodeTimestamp");
 
+        // 인증 코드와 타임스탬프가 세션에 있으면
         if (resetCode != null && timestamp != null) {
             // 30초(30000ms) 초과 여부 확인 -> 테스트하느라 30초로 했는데 실제 적용시에는 3분(180000ms) 로 수정하기
             if (System.currentTimeMillis() - timestamp > 30000) {
-                // 만약 1분이 경과했다면 코드 만료 처리
+                // 만약 30초가 지났다면 코드 만료, 세션에서 인증 코드와 타임스탬프 삭제 후 다시 비밀번호 찾기 페이지로 리디렉션
                 model.addAttribute("errorMessage", "인증 코드가 만료되었습니다.");
                 session.removeAttribute("resetCode");
                 session.removeAttribute("resetCodeTimestamp");
-                return "redirect:/user/findPassword";  // 다시 비밀번호 찾기 페이지로 리디렉션
+                return "redirect:/user/findPassword";
             }
 
-            // 코드가 일치하면 인증 완료 표시를 세션에 저장
+            // 세션에 저장된 인증 코드와 사용자가 입력한 인증 코드가 일치하면 인증 완료 표시를 세션에 저장 후 비밀번호 재설정 페이지로 리디렉션
             if (resetCode.equals(userCode)) {
-                session.setAttribute("isVerified", true);  // 인증 코드 일치 시, 인증 완료된 상태로 세션에 저장
-                return "redirect:/user/resetPassword";  // 비밀번호 재설정 페이지로 리디렉션
+                session.setAttribute("isVerified", true);
+                return "redirect:/user/resetPassword";
             }
         }
 
-        // 코드가 일치하지 않으면 오류 메시지 표시
+        // 세션에 저장된 인증 코드와 사용자가 입력한 인증 코드가 일치하지 않으면 오류 메시지 표시
         model.addAttribute("errorMessage", "입력한 인증 코드가 올바르지 않습니다.");
         return "user/verifyCode"; // 코드 입력 페이지로 돌아감
     }
@@ -138,7 +142,7 @@ public class PasswordResetController {
 
         if (email == null) {
             response.put("success", false);
-            response.put("message", "세션이 만료되었습니다. 다시 시도해주세요.");
+            response.put("message", "이메일 정보가 없습니다. 다시 시도해주세요.");
             return response;
         }
 
@@ -156,24 +160,25 @@ public class PasswordResetController {
         return response;
     }
 
-    // 비밀번호 재설정 페이지 (GET)
+    // 비밀번호 재설정 페이지
     @GetMapping("/user/resetPassword")
     public String resetPasswordPage(HttpSession session, Model model) {
-        // 세션에서 저장된 인증 상태 확인
+        // 세션에 저장된 인증 상태 확인
         Boolean isVerified = (Boolean) session.getAttribute("isVerified");
 
-        // 인증되지 않은 경우, 인증 페이지로 리디렉션
+        // 인증되지 않은 경우 인증 페이지로 리디렉션
         if (isVerified == null || !isVerified) {
             model.addAttribute("errorMessage", "인증을 먼저 완료하세요.");
             return "redirect:/user/verifyCode";  // 인증을 먼저 완료해야 비밀번호 재설정 페이지에 접근 가능
         }
 
-        // 인증 상태가 true 인 경우, 인증상태를 지우고 비밀번호 재설정 페이지로 이동
+        // 인증되어있는 경우, 세션에서 인증코드와 인증상태를 지우고 비밀번호 재설정 페이지로 이동
         session.removeAttribute("resetCode");
         session.removeAttribute("isVerified");
         return "user/resetPassword";
     }
 
+    // 비밀번호 재설정 요청
     @PostMapping("/user/resetPassword")
     public String resetPassword(@RequestParam("newPassword") String newPassword, HttpSession session, Model model, RedirectAttributes redirectAttributes) {
         String email = (String) session.getAttribute("email");
@@ -199,6 +204,7 @@ public class PasswordResetController {
         }
     }
 
+    // html 에서 세션 만료 시간을 가져오기 위한 메서드
     @GetMapping("/user/getSessionExpiry")
     @ResponseBody
     public long getSessionExpiry(HttpSession session) {
