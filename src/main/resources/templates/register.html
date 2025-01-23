@@ -56,6 +56,9 @@
                 <input type="text" class="form-control" id="memberPhone" name="memberPhone">
             </div>
             <p>* 표시는 필수 입력 항목입니다.</p>
+            <div th:if="${errorMessage}" style="color: red;">
+                <p th:text="${errorMessage}"></p>
+            </div>
             <button type="submit" class="btn btn-primary">회원가입</button>
             <button type="button" class="btn btn-danger" onclick="location.href='/'">취소</button>
         </form>

@@ -33,11 +33,17 @@ public class MemberController {
         return "register";
     }
 
+    // 일반 유저 회원가입 요청
     @PostMapping("/register")
-    public String registerProc(MemberDTO memberDTO) {
-        memberSevice.saveUser(memberDTO);
-
-        return "redirect:/login";
+    public String registerProc(MemberDTO memberDTO, RedirectAttributes redirectAttributes) {
+        try {
+            memberSevice.saveUser(memberDTO);
+            return "redirect:/login"; // 회원가입 성공 시 로그인 페이지로 리다이렉트
+        } catch (IllegalStateException e) {
+            // 예외가 발생한 경우, 경고 메시지를 모델에 추가하여 회원가입 페이지로 리다이렉트
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/register"; // 회원가입 페이지로 리다이렉트
+        }
     }
 
     // 관리자 회원가입
@@ -46,11 +52,17 @@ public class MemberController {
         return "admin/register";
     }
 
+    // 관리자 회원가입 요청
     @PostMapping("/admin/register")
-    public String adminregisterProc(MemberDTO memberDTO) {
-        memberSevice.saveManager(memberDTO);
-
-        return "redirect:/login";
+    public String adminregisterProc(MemberDTO memberDTO, RedirectAttributes redirectAttributes) {
+        try {
+            memberSevice.saveUser(memberDTO);
+            return "redirect:/login"; // 회원가입 성공 시 로그인 페이지로 리다이렉트
+        } catch (IllegalStateException e) {
+            // 예외가 발생한 경우, 경고 메시지를 모델에 추가하여 회원가입 페이지로 리다이렉트
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/admin/register"; // 회원가입 페이지로 리다이렉트
+        }
     }
 
     // 로그인
