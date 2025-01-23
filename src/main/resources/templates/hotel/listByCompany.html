@@ -13,7 +13,13 @@
 
         $(document).ready(function () {
 
-            console.log("간편등록 모달 진입!")
+            // 세션에서 message 값을 가져옴
+            var message = [[${message}]];
+
+            // message가 null이 아니면 알림창을 띄우고 세션에서 삭제
+            if (message !== null && message !== '') {
+                alert(message);
+            }
 
             var moBtn = $(".modalBtn")
             var modal = $("#myModal")
@@ -55,7 +61,7 @@
                     <h5 class="card-title">지사 찾기</h5>
                     <div class="col-md-6">
                         <select name="searchType" class="form-select">
-                            <option value="name" th:selected="${searchType == 'name'}">호텔이름</option>
+                            <option value="name" th:selected="${searchType == 'name'}">지사명</option>
                             <option value="location" th:selected="${searchType == 'location'}">지역</option>
                             <option value="address" th:selected="${searchType == 'address'}">주소</option>
                             <option value="rating" th:selected="${searchType == 'rating'}">별점</option>
@@ -67,7 +73,7 @@
                 </div>
                 <!-- 조회 버튼 -->
                 <div class="text-center mt-4">
-                    <button type="submit" class="btn btn-primary w-25" style="background-color: black">조회</button>
+                    <button type="submit" class="btn btn-dark w-25" >조회</button>
                 </div>
             </form>
         </div>
@@ -85,8 +91,9 @@
                     <thead>
                     <tr>
                         <th style="width: 5%">No</th>
-                        <th style="width: 20%">지사명</th>
-                        <th style="width: 25%">주소</th>
+                        <th style="width: 10%">본사명</th>
+                        <th style="width: 15%">지사명</th>
+                        <th style="width: 20%">주소</th>
                         <th style="width: 10%">전화번호</th>
                         <th style="width: 10%">이메일</th>
                         <th style="width: 8%">체크인</th>
@@ -100,6 +107,7 @@
                     <th:block th:unless="${#lists.isEmpty(hotelDTOS)}"><!--값이 없으면이 아니면(있으면)-->
                         <tr th:each="data:${hotelDTOS}">
                             <td th:text="${data.hotelId}">호텔번호</td>
+                            <td th:text="${data.companyName}">본사명</td>
                             <td>
                                 <a th:href="@{/hotel/read(hotelId=${data.hotelId})}" style="text-decoration: none" th:text="${data.hotelName}">지사명</a>
                             </td>
@@ -131,8 +139,9 @@
 
                 <!-- 추가 버튼 -->
                 <div class="text-end mt-3">
-                    <button class="btn btn-primary" style="background-color: black" onclick="location.href='/hotel/register' ">등록</button>
-                    <button type="button" class="btn btn-primary modalBtn">간편 등록</button>
+                    <button class="btn btn-primary" onclick="location.href='/company/list' ">본사관리페이지</button>
+<!--                    <button class="btn btn-primary" style="background-color: black" onclick="location.href='/hotel/register' ">등록</button>-->
+<!--                    <button type="button" class="btn btn-primary modalBtn">간편 등록</button>-->
                 </div>
 
 
@@ -140,24 +149,24 @@
                 <div class="d-flex justify-content-center">
                     <ul class="pagination">
                         <li class="page-item" th:unless="${pageInfo.startPage == 1}">
-                            <a class="page-link" th:href="@{/hotel/list(page=1)}">시작</a>
+                            <a class="page-link" th:href="@{/hotel/listByCompany(page=1)}">시작</a>
                         </li>
                         <li class="page-item" th:unless="${pageInfo.currentPage == 1}">
-                            <a class="page-link" th:href="@{/hotel/list(page=${pageInfo.prevPage})}">이전</a>
+                            <a class="page-link" th:href="@{/hotel/listByCompany(page=${pageInfo.prevPage})}">이전</a>
                         </li>
                         <th:block th:each="num : ${#numbers.sequence(pageInfo.startPage, pageInfo.endPage, 1)}">
                             <li class="page-item" th:unless="${num == pageInfo.currentPage}">
-                                <a class="page-link" th:href="@{/hotel/list(page=${num})}" th:text="${num}">1</a>
+                                <a class="page-link" th:href="@{/hotel/listByCompany(page=${num})}" th:text="${num}">1</a>
                             </li>
                             <li class="page-item active" th:if="${num == pageInfo.currentPage}">
-                                <a class="page-link" th:href="@{/hotel/list(page=${num})}" th:text="${num}">[[${num}]]</a>
+                                <a class="page-link" th:href="@{/hotel/listByCompany(page=${num})}" th:text="${num}">[[${num}]]</a>
                             </li>
                         </th:block>
                         <li class="page-item" th:unless="${pageInfo.currentPage >= pageInfo.lastPage}">
-                            <a class="page-link" th:href="@{/hotel/list(page=${pageInfo.nextPage})}">다음</a>
+                            <a class="page-link" th:href="@{/hotel/listByCompany(page=${pageInfo.nextPage})}">다음</a>
                         </li>
                         <li class="page-item" th:unless="${pageInfo.endPage == pageInfo.lastPage}">
-                            <a class="page-link" th:href="@{/hotel/list(page=${pageInfo.lastPage})}">끝</a>
+                            <a class="page-link" th:href="@{/hotel/listByCompany(page=${pageInfo.lastPage})}">끝</a>
                         </li>
                     </ul>
                 </div>

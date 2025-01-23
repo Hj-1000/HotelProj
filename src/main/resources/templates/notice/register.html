@@ -23,7 +23,7 @@
   <div id="row" class="row">
     <div class="col-3"></div>
     <div class="col-6">
-      <form th:action="@{/notice/register}" method="post">
+      <form th:action="@{/notice/register}" method="post" enctype="multipart/form-data">
         <!--디자인-->
         <div class="card">
           <div class="card-header">
@@ -39,7 +39,14 @@
               <label for="noticeContent" class="form-label">내용:</label>
               <textarea type="text" class="form-control" id="noticeContent" name="noticeContent" placeholder="내용을 입력하세요"></textarea>
             </div>
-
+            <tr>
+              <td style="width:15%">이미지등록</td>
+              <td style="width:85%">
+                <!--컨트롤러에 MultipartFile imagefile 이름과 동일하게
+                DTO의 파일명인 아무상관없음-->
+                <input type="file" class="form-control" style="width:300px"
+                       name="multipartFile">
+              </td>
           </div>
           <div class="card-footer">
             <button type="submit" class="btn btn-primary">등록</button>

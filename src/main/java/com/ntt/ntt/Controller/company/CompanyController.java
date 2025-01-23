@@ -1,11 +1,8 @@
 package com.ntt.ntt.Controller.company;
 
 import com.ntt.ntt.DTO.CompanyDTO;
-import com.ntt.ntt.Entity.Image;
-import com.ntt.ntt.Service.ImageService;
 import com.ntt.ntt.Service.company.CompanyService;
 import com.ntt.ntt.Util.PaginationUtil;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -15,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.awt.*;
 import java.util.List;
@@ -36,11 +34,11 @@ public class CompanyController {
     }
     //등록처리
     @PostMapping("/register")
-    public String registerProc(@ModelAttribute CompanyDTO companyDTO, List<MultipartFile> imageFiles) {
+    public String registerProc(@ModelAttribute CompanyDTO companyDTO, List<MultipartFile> imageFiles, RedirectAttributes redirectAttributes) {
         log.info("본사 등록 진입");
 
         companyService.register(companyDTO, imageFiles);
-
+        redirectAttributes.addFlashAttribute("message", "본사 등록이 완료되었습니다.");
         return "redirect:/company/list";
     }
 
@@ -75,23 +73,21 @@ public class CompanyController {
 
     //읽기
     @GetMapping("/read")
-    public String read(@RequestParam Integer companyId, Model model) {
+    public String read(@RequestParam Integer companyId, Model model, RedirectAttributes redirectAttributes) {
         try {
             // 서비스에서 CompanyDTO 객체를 받아옴
             CompanyDTO companyDTO = companyService.read(companyId);
-
             // companyDTO를 모델에 추가
             model.addAttribute("companyDTO", companyDTO);
-
             // "read" 뷰로 이동
             return "/company/read";
 
-        } catch (EntityNotFoundException e) {
-            model.addAttribute("error", "해당 회사 정보를 찾을 수 없습니다.");
-            return "/company/list";  // 회사 정보가 없을 경우 목록으로 이동
+        } catch (NullPointerException e) {
+            redirectAttributes.addFlashAttribute("message", "해당 본사 정보를 찾을 수 없습니다.");
+            return "redirect:/company/list";  // 회사 정보가 없을 경우 목록으로 이동
         } catch (Exception e) {
-            model.addAttribute("error", "서버 오류가 발생했습니다.");
-            return "/company/list";  // 기타 예외 처리
+            redirectAttributes.addFlashAttribute("message", "서버 오류가 발생했습니다.");
+            return "redirect:/company/list";  // 기타 예외 처리
         }
     }
 
@@ -104,15 +100,17 @@ public class CompanyController {
     }
     //수정처리
     @PostMapping("/modify")
-    public String modifyService(CompanyDTO companyDTO, List<MultipartFile> newImageFiles) {
+    public String modifyService(CompanyDTO companyDTO, List<MultipartFile> newImageFiles, RedirectAttributes redirectAttributes) {
         companyService.update(companyDTO, newImageFiles);
+        redirectAttributes.addFlashAttribute("message", "본사 수정이 완료되었습니다.");
         return "redirect:/company/list";
     }
 
     //삭제
     @GetMapping("/delete")
-    public String delete(Integer companyId) {
+    public String delete(Integer companyId, RedirectAttributes redirectAttributes) {
         companyService.delete(companyId);
+        redirectAttributes.addFlashAttribute("message", "해당 본사 삭제가 완료되었습니다.");
         return "redirect:/company/list";
     }
 

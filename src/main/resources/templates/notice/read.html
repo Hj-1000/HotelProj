@@ -25,29 +25,41 @@
   <div id="row" class="row">
     <div class="col-3"></div>
     <div class="col-6">
-      <form th:action="@{/notice/register}" method="post">
-        <!--디자인-->
+              <!--디자인-->
         <div class="card">
           <div class="card-header">
             <h2>게시글 상세보기</h2></div>
           <div class="card-body">
             <!--Controller에서 model.addAttribute 명 :board-->
             <!--board.DTO 변수명-->
-            <p>번호: <span th:text="${notice.noticeId}"></span></p>
-            <p>제목: <span th:text="${notice.noticeTitle}"></span></p>
-            <p>내용: <span th:text="${notice.noticeContent}"></span></p>
-            <p>수정일: <span th:text="${#temporals.format(notice.modDate, 'yyyy-MM-dd HH:mm')}"></span></p>
+            <p>번호: <span th:text="${noticeDTO.noticeId}"></span></p>
+            <p>제목: <span th:text="${noticeDTO.noticeTitle}"></span></p>
+            <p>내용: <span th:text="${noticeDTO.noticeContent}"></span></p>
+<!--            <td style="width:20%">-->
+<!--              <th:block th:if="${noticeDTO.noticeImageDTOList} == null">-->
+<!--                <img src="images/no_image.jpg" width="200px" height="150px">-->
+<!--              </th:block>-->
+<!--            <div th:if="${noticeDTO.noticeImageDTOList != null}"-->
+<!--                 th:each="img : ${noticeDTO.noticeImageDTOList}">-->
+<!--              <img th:src="@{'/upload/' + (img.imagePath != null ? img.imagePath : 'default.jpg')}"-->
+<!--                   width="300px" height="200px">-->
+<!--            </div>-->
+              <div th:each="img : ${noticeDTO.noticeImageDTOList}"><!--그림파일이 존재하면-->
+                <img th:src="@{'/upload/' + ${img.imagePath}}" width="300px" height="200px">
+              </div>
+<!--            </td>-->
             <!--id와 name은 DTO에 변수명으로 작업-->
 
           </div>
           <div class="card-footer">
-            <a th:href="@{/notice/update(noticeId=${notice.noticeId})}" class="btn btn-primary">수정</a>
+            <form th:action="@{/notice/update}" method="post" enctype="multipart/form-data">
+            <a th:href="@{/notice/update(noticeId=${noticeDTO.noticeId})}" class="btn btn-primary">수정</a>
+            </form>
             <button type="button" class="btn btn-danger"
                     th:onclick="|location.href='@{/notice/list}'|">취소</button>
             <!--@{주소}, 문자열+주소 |문자열@{주소}|-->
           </div>
         </div>
-      </form>
     </div>
     <div class="col-3"></div>
   </div><!--row 끝-->
