@@ -148,6 +148,7 @@ public class CompanyService {
     }
 
     // 회사 정보 수정 (이미지 수정 포함)
+    // 새로운 이미지 추가 안할때도 기존이미지가 자꾸 삭제됨 이건 추후 수정 예정 :2025-01-22
     @Transactional
     public void update(CompanyDTO companyDTO, List<MultipartFile> newImageFiles) {
         // 회사 조회 및 수정
@@ -155,12 +156,12 @@ public class CompanyService {
         if (companyOpt.isPresent()) {
             Company company = companyOpt.get();
 
-            // 회사 정보 수정 (회사 이름 수정)
+            // 회사 정보 수정 (회사 이름과 관리자는 수정)
             company.setCompanyName(companyDTO.getCompanyName());
-            company.setCompanyManager(companyDTO.getCompanyManager());
+            company.setCompanyManager(companyDTO.getCompanyManager()); // 관리자가 추가된 부분
 
-            // 회사 정보 저장 (이 부분에서 회사 이름이 저장됨)
-            companyRepository.save(company);  // 회사 이름 저장
+            // 회사 정보 저장 (이 부분에서 회사 이름과 관리자 저장)
+            companyRepository.save(company);
 
             // 이미지 수정 처리
             if (newImageFiles != null && !newImageFiles.isEmpty()) {
@@ -173,7 +174,7 @@ public class CompanyService {
                     imageRepository.delete(existingImage);  // 이미지 엔티티 삭제
                 }
 
-                // 회사의 이미지 리스트에서 삭제된 이미지를 제거
+                // 회사의 이미지 리스트에서 기존 이미지를 제거 (삭제된 이미지 목록)
                 company.getCompanyImageList().clear();  // 기존 이미지 리스트 비우기
 
                 // 새 이미지들 업로드 처리
@@ -195,14 +196,13 @@ public class CompanyService {
                     // 회사와 이미지 연결 (회사 정보에 이미지 추가)
                     company.getCompanyImageList().add(newImage);  // 이미지를 회사의 이미지 리스트에 추가
                 }
-            }
-            else {
-                // 새 이미지가 없으면 기존 이미지 유지
-                // 이미지를 지우지 않고 그냥 유지하면 됩니다.
+            } else {
+                // 새 이미지가 없으면 기존 이미지는 삭제하지 않고 그대로 둔다.
+                // company.getCompanyImageList()는 그대로 유지됩니다.
             }
 
-            // 회사 정보 저장 (이미지와의 관계가 없더라도 회사 정보만 수정 후 저장)
-            companyRepository.save(company);  // 회사 정보 저장
+            // 최종 회사 정보와 이미지 정보 저장
+            companyRepository.save(company);  // 회사 정보 저장 (변경된 회사 정보 및 연결된 이미지 저장)
         } else {
             throw new RuntimeException("본사를 찾을 수 없습니다.");
         }

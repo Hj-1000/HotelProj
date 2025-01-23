@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
 //2. 보안권한 설정, 암호화, 로그인, 로그아웃, csrf
 @Configuration
@@ -45,6 +46,13 @@ public class SecurityConfig {
 //            auth.requestMatchers("/chief/**").hasRole("CHIEF"); //호텔장 전용
 //            auth.requestMatchers("/manager/**").hasRole("MANAGER"); //호텔매니저 전용
         });
+
+        // 로그인 실패 처리 핸들러
+        AuthenticationFailureHandler failureHandler = (request, response, exception) -> {
+            // 로그인 실패 메시지를 리다이렉트 애트리뷰트에 추가
+            request.getSession().setAttribute("loginError", "로그인에 실패했습니다. 이메일과 비밀번호를 확인하세요.");
+            response.sendRedirect("/login?error"); // 로그인 실패 시 로그인 페이지로 리다이렉트
+        };
         
         //로그인 정보
         http.formLogin(login->login
@@ -52,6 +60,7 @@ public class SecurityConfig {
             .defaultSuccessUrl("/") //로그인 성공시 / 페이지로 이동
             .usernameParameter("memberEmail") //memberEmail을 username으로 사용
             .permitAll() //모든 사용자가 로그인폼 사용
+            .failureHandler(failureHandler) // 로그인 실패 시 처리할 핸들러 설정
             .successHandler(new CustomAuthenticationSuccessHandler())); //로그인 성공시처리할 클래스
 
         //csrf 변조방지

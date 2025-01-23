@@ -8,12 +8,16 @@ import jakarta.persistence.Id;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
+
 public class NoticeDTO {
 
     private Integer noticeId;
@@ -25,5 +29,10 @@ public class NoticeDTO {
     private LocalDateTime regDate;
 
     private LocalDateTime modDate;
+
+    @Builder.Default
+    private List<ImageDTO> noticeImageDTOList = new ArrayList<>();
+
+
 
 }
