@@ -5,7 +5,7 @@
       layout:decorate="~{layouts/layout}">
 <head>
     <meta charset="UTF-8">
-    <title>NTT호텔 - 본사 등록</title>
+    <title>NTT호텔 - 지사 등록</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 
@@ -49,14 +49,22 @@
 
     <div class="container-fluid mt-4">
 
-        <h2 class="mb-3">본사 등록</h2>
+        <h2 class="mb-3">지사 등록</h2>
 
         <!-- 폼 -->
         <div class="card p-4 mb-4">
             <div class="row g-3 align-items-center">
                 <form action="/hotel/register" method="post" enctype="multipart/form-data">
                     <div class="mb-3 mt-3">
-                        <label for="hotelName" class="form-label">호텔명:</label>
+                        <label for="companyId" class="form-label">본사명:</label>
+                        <select id="companyId" name="companyId" class="form-select">
+                            <th:block th:each="companyDTOS : ${companyDTOS}">
+                                <option th:value="${companyDTOS.companyId}" th:text="${companyDTOS.companyName}">뒤에바</option>
+                            </th:block>
+                        </select>
+                    </div>
+                    <div class="mb-3 mt-3">
+                        <label for="hotelName" class="form-label">지사명:</label>
                         <input type="text" class="form-control" id="hotelName" name="hotelName">
                     </div>
                     <div class="mb-3">
