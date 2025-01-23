@@ -107,9 +107,24 @@ public class ServiceCateService{
         return serviceCateDTOS;
     }
 
+    //존재하는 카테고리 목록 가져오기
+    /*--------------------------------
+    함수명 : List<ServiceCateDTO> getAllServiceCate()
+    인수 : 조회할 메뉴 id 번호
+    출력 : 조회할 데이터
+    설명 : 해당 서비스 카테고리의 데이터를 조회해서 전달
+    --------------------------------*/
+    public List<ServiceCateDTO> getAllServiceCate() {
+        List<ServiceCate> serviceCate = serviceCateRepository.findAll();
+
+        List<ServiceCateDTO> serviceCateDTOS = serviceCate.stream()
+                .map(a -> new ServiceCateDTO(a.getServiceCateId(), a.getServiceCateName())).collect(Collectors.toList());
+
+        return serviceCateDTOS;
+    }
 
     //서비스 카테고리 상세보기
-/*--------------------------------
+    /*--------------------------------
     함수명 : ServiceCateDTO(Integer serviceCateId)
     인수 : 조회할 메뉴 id 번호
     출력 : 조회할 데이터

@@ -35,6 +35,11 @@ public class ServiceCateDTO {
     @Builder.Default
     private List<ImageDTO> serviceCateImageDTOList = new ArrayList<>();
 
+    public ServiceCateDTO(Integer serviceCateid, String serviceCateName) {
+        this.serviceCateId = serviceCateid;
+        this.serviceCateName = serviceCateName;
+    }
+
 
 
 
