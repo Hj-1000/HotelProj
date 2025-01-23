@@ -5,7 +5,7 @@
       layout:decorate="~{layouts/layout}">
 <head>
     <meta charset="UTF-8">
-    <title>NTT호텔 - 본사 수정</title>
+    <title>NTT호텔 - 지사 수정</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 
@@ -44,13 +44,17 @@
 <body>
 <div id="wrapper" layout:fragment="content">
     <div class="container-fluid mt-4">
-        <h2 class="mb-3">본사 수정</h2>
+        <h2 class="mb-3">지사 수정</h2>
         <!-- 폼 -->
         <div class="card p-4 mb-4">
             <div class="row g-3 align-items-center">
                 <form action="/hotel/modify" method="post" enctype="multipart/form-data" th:object="${hotelDTO}">
                     <input type="hidden" class="form-control hotelId" id="hotelId" name="hotelId" th:field="*{hotelId}">
+                    <div class="mb-3 mt-3">
+                        <label class="form-label">본사명:</label>
+                        <h5 th:text="${hotelDTO.companyName}"></h5>
 
+                    </div>
                     <div class="mb-3 mt-3">
                         <label for="hotelName" class="form-label">호텔명:</label>
                         <input type="text" class="form-control" id="hotelName" name="hotelName" th:field="*{hotelName}">
