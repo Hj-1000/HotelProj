@@ -5,7 +5,7 @@
       layout:decorate="~{layouts/layout}">
 <head>
     <meta charset="UTF-8">
-    <title>NTT호텔 - 지사 수정</title>
+    <title>NTT호텔 - 지사 등록</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 
@@ -38,50 +38,58 @@
                 });
             }
         }
+
+
+
     </script>
 
 </head>
 <body>
 <div id="wrapper" layout:fragment="content">
+
     <div class="container-fluid mt-4">
-        <h2 class="mb-3">지사 수정</h2>
+
+        <h2 class="mb-3">지사 등록</h2>
+
         <!-- 폼 -->
         <div class="card p-4 mb-4">
             <div class="row g-3 align-items-center">
-                <form action="/hotel/modify" method="post" enctype="multipart/form-data" th:object="${hotelDTO}">
-                    <input type="hidden" class="form-control hotelId" id="hotelId" name="hotelId" th:field="*{hotelId}">
+                <form action="/manager/hotel/register" method="post" enctype="multipart/form-data">
                     <div class="mb-3 mt-3">
-                        <label class="form-label">본사명:</label>
-                        <h5 th:text="${hotelDTO.companyName}"></h5>
-
+                        <label for="companyId" class="form-label">본사명:</label>
+                        <select id="companyId" name="companyId" class="form-select">
+                            <th:block th:each="companyDTOS : ${companyDTOS}">
+                                <option th:value="${companyDTOS.companyId}" th:text="${companyDTOS.companyName}">뒤에바</option>
+                            </th:block>
+                        </select>
                     </div>
                     <div class="mb-3 mt-3">
-                        <label for="hotelName" class="form-label">호텔명:</label>
-                        <input type="text" class="form-control" id="hotelName" name="hotelName" th:field="*{hotelName}">
+                        <label for="hotelName" class="form-label">지사명:</label>
+                        <input type="text" class="form-control" id="hotelName" name="hotelName">
                     </div>
                     <div class="mb-3">
                         <label for="hotelLocation" class="form-label">호텔지역:</label>
-                        <input type="text" class="form-control" id="hotelLocation" name="hotelLocation" th:field="*{hotelLocation}">
+                        <input type="text" class="form-control" id="hotelLocation" name="hotelLocation">
                     </div>
                     <div class="mb-3 mt-3">
                         <label for="hotelAddress" class="form-label">호텔주소:</label>
-                        <input type="text" class="form-control" id="hotelAddress" name="hotelAddress" th:field="*{hotelAddress}">
+                        <input type="text" class="form-control" id="hotelAddress" name="hotelAddress">
                     </div>
                     <div class="mb-3">
                         <label for="hotelInfo" class="form-label">호텔상세:</label>
-                        <textarea class="form-control" id="hotelInfo" name="hotelInfo" th:field="*{hotelInfo}"></textarea>
+                        <textarea class="form-control" id="hotelInfo" name="hotelInfo"></textarea>
                     </div>
                     <div class="mb-3">
                         <label for="hotelPhone" class="form-label">호텔전화:</label>
-                        <input type="text" class="form-control" id="hotelPhone" name="hotelPhone" th:field="*{hotelPhone}">
+                        <input type="text" class="form-control" id="hotelPhone" name="hotelPhone">
                     </div>
                     <div class="mb-3 mt-3">
                         <label for="hotelEmail" class="form-label">호텔이메일:</label>
-                        <input type="email" class="form-control" id="hotelEmail" name="hotelEmail" th:field="*{hotelEmail}">
+                        <input type="email" class="form-control" id="hotelEmail" name="hotelEmail">
                     </div>
                     <div class="mb-3 mt-3">
                         <label for="hotelCheckIn" class="form-label">호텔 체크인:</label>
-                        <select id="hotelCheckIn" name="hotelCheckIn" class="form-select" th:field="*{hotelCheckIn}">
+                        <select id="hotelCheckIn" name="hotelCheckIn" class="form-select">
                             <option value="00">00:00</option>
                             <option value="01">01:00</option>
                             <option value="02">02:00</option>
@@ -110,7 +118,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="hotelCheckOut" class="form-label">호텔 체크아웃:</label>
-                        <select id="hotelCheckOut" name="hotelCheckOut" class="form-select" th:field="*{hotelCheckOut}">
+                        <select id="hotelCheckOut" name="hotelCheckOut" class="form-select">
                             <option value="00">00:00</option>
                             <option value="01">01:00</option>
                             <option value="02">02:00</option>
@@ -137,18 +145,11 @@
                             <option value="23">23:00</option>
                         </select>
                     </div>
-                    <!-- 기존 이미지 표시 -->
-                    <div th:each="img : ${hotelDTO.hotelImgDTOList}">
-                        <label>기존 이미지:</label>
-                        <img th:src="@{'/upload/' + ${img.imagePath}}" alt="old" width="100">
-                        <img src="${img.imagePath}" alt="Company Image" width="100">
-                    </div>
-
                     <!-- 새 이미지 업로드 및 미리보기 -->
                     <div>
-                        <label for="newImageFiles">새 이미지:</label>
-                        <input type="file" id="newImageFiles" name="newImageFiles" multiple onchange="previewImage(event)">
-                        <small>이미지를 선택해 주세요. (기존 이미지는 삭제됩니다.)</small>
+                        <label for="newImageFiles">지사이미지:</label>
+                        <input type="file" id="newImageFiles" name="imageFiles" multiple onchange="previewImage(event)">
+                        <small>이미지를 선택해 주세요.</small>
                     </div>
 
                     <!-- 미리보기 이미지 표시 -->
@@ -159,11 +160,10 @@
                     <div style="text-align: right">
                         <button type="submit" class="btn btn-primary">등록</button>
                     </div>
-                </form>
 
+                </form>
             </div>
         </div>
-
 
     </div>
 </div>
