@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -50,6 +51,8 @@ public class RoomService {
         Pageable pageable = PageRequest.of(0, 4, Sort.by(Sort.Direction.DESC, "roomId"));
         Page<Room> roomsPage = roomRepository.findByRoomStatus(true, pageable);
 
+
+
         log.info("Rooms fetched from repository: {}", roomsPage.getContent());
 
         List<RoomDTO> roomDTOs = roomsPage.stream()
@@ -57,8 +60,12 @@ public class RoomService {
                     RoomDTO roomDTO = modelMapper.map(room, RoomDTO.class);
 
                     // Room 가격 포맷팅 추가
-                    String formattedPrice = String.format("%,d", room.getRoomPrice());
-                    roomDTO.setFormattedRoomPrice(formattedPrice);
+                    if (room.getRoomPrice() != null) {
+                        String formattedPrice = String.format("%,d", room.getRoomPrice());
+                        roomDTO.setFormattedRoomPrice(formattedPrice + " KRW");
+                    } else {
+                        roomDTO.setFormattedRoomPrice("가격 미정");
+                    }
 
                     List<ImageDTO> imagesDTOList = imageRepository.findByRoom_RoomId(room.getRoomId())
                             .stream()
@@ -76,35 +83,47 @@ public class RoomService {
         return roomDTOs;
     }
 
+    public Page<RoomDTO> getPaginatedRooms(Pageable pageable) {
+        // Room 데이터와 이미지를 함께 가져오기 위해 fetch join 사용
+        Page<Room> roomEntities = roomRepository.findAllWithImages(pageable);
 
-    public List<RoomDTO> roomList() {
-        // 모든 Room 데이터를 조회
-        List<Room> rooms = roomRepository.findAll();
+        // Room Entity를 DTO로 변환
+        return roomEntities.map(room -> {
+            // 예약 상태 업데이트
+            LocalDate today = LocalDate.now(); // 현재 날짜
+            if (room.getReservationEnd() != null) {
+                LocalDate reservationEndDate = LocalDate.parse(room.getReservationEnd());
+                // 오늘 날짜가 reservationEnd 이후라면 예약 불가로 설정
+                room.setRoomStatus(!reservationEndDate.isBefore(today));
+            }
 
-        // Room -> RoomDTO로 변환
-        return rooms.stream().map(room -> {
             RoomDTO roomDTO = modelMapper.map(room, RoomDTO.class);
 
-            // 이미지 경로 변환 및 추가
-            List<ImageDTO> imageDTOList = imageRepository.findByRoom_RoomId(room.getRoomId())
-                    .stream()
+            // Room의 이미지 리스트를 변환
+            List<ImageDTO> imageDTOList = room.getRoomImageList().stream()
                     .map(image -> {
-                        image.setImagePath(image.getImagePath().replace("c:/data/", ""));
+                        image.setImagePath(image.getImagePath().replace("c:/data/", "")); // 상대 경로로 변환
                         return modelMapper.map(image, ImageDTO.class);
                     })
                     .collect(Collectors.toList());
-
             roomDTO.setRoomImageDTOList(imageDTOList);
 
             // 가격 포맷팅 추가
-            roomDTO.setFormattedRoomPrice(String.format("%,d KRW", room.getRoomPrice()));
+            if (room.getRoomPrice() != null) {
+                roomDTO.setFormattedRoomPrice(String.format("%,d KRW", room.getRoomPrice()));
+            } else {
+                roomDTO.setFormattedRoomPrice("가격 미정");
+            }
+
             return roomDTO;
-        }).collect(Collectors.toList());
+        });
     }
 
 
 
-    // 1. 삽입 register
+
+
+    // 1. 등록 register
     public Integer registerRoom(RoomDTO roomDTO, List<MultipartFile> multipartFile) {
 
         // DTO -> Entity 변환
@@ -120,7 +139,7 @@ public class RoomService {
         return saveRoom.getRoomId();
     }
 
-    // 2. 읽기 read
+    // 2. 조회 read
     @Transactional(readOnly = true)
     public RoomDTO readRoom(Integer roomId) {
         // 데이터 조회

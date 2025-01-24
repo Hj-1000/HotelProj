@@ -3,6 +3,7 @@ package com.ntt.ntt.Entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -59,5 +60,13 @@ public class Room extends BaseEntity {
 
     public Room(Integer roomId) {
         this.roomId = roomId;
+    }
+
+    public void updateRoomStatus() {
+        LocalDate today = LocalDate.now();
+        if (this.reservationEnd != null) {
+            LocalDate reservationEndDate = LocalDate.parse(this.reservationEnd);
+            this.roomStatus = reservationEndDate.isAfter(today) || reservationEndDate.isEqual(today);
+        }
     }
 }
