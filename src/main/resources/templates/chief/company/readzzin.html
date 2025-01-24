@@ -5,21 +5,15 @@
       layout:decorate="~{layouts/layout}">
 <head>
     <meta charset="UTF-8">
-    <title>NTT호텔 - 지사관리</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title>NTT호텔 - 본사 상세 페이지</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 
     <script th:inline="javascript">
 
         $(document).ready(function () {
 
-            // 세션에서 message 값을 가져옴
-            var message = [[${message}]];
-
-            // message가 null이 아니면 알림창을 띄우고 세션에서 삭제
-            if (message !== null && message !== '') {
-                alert(message);
-            }
+            console.log("간편 지사등록 모달 진입!")
 
             var moBtn = $(".modalBtn")
             var modal = $("#myModal")
@@ -48,158 +42,66 @@
 
     </script>
 
+
 </head>
 <body>
-
 <div id="wrapper" layout:fragment="content">
+
     <div class="container-fluid mt-4">
-        <h2 class="mb-3">호텔 지사 관리</h2>
-        <!-- 검색 영역 -->
+        <h2 class="mb-3">본사 상세보기</h2>
+
         <div class="card p-4 mb-4">
-            <form action="/hotel/listByCompany" method="get">
-                <div class="row g-3 align-items-center">
-                    <h5 class="card-title">지사 찾기</h5>
-                    <div class="col-md-6">
-                        <select name="searchType" class="form-select">
-                            <option value="name" th:selected="${searchType == 'name'}">지사명</option>
-                            <option value="location" th:selected="${searchType == 'location'}">지역</option>
-                            <option value="address" th:selected="${searchType == 'address'}">주소</option>
-                            <option value="rating" th:selected="${searchType == 'rating'}">별점</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <input type="text" name="keyword" class="form-control" placeholder="검색어를 입력하세요">
-                    </div>
-                </div>
-                <!-- 조회 버튼 -->
-                <div class="text-center mt-4">
-                    <button type="submit" class="btn btn-dark w-25" >조회</button>
-                </div>
-            </form>
-        </div>
+            <div class="row g-3 align-items-center">
 
-        <!-- 목록 영역 -->
-
-        <div>
-
-
-        </div>
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">지사 목록</h5>
-                <table class="table table-bordered text-center">
-                    <thead>
-                    <tr>
-                        <th style="width: 5%">No</th>
-                        <th style="width: 10%">본사명</th>
-                        <th style="width: 15%">지사명</th>
-                        <th style="width: 20%">주소</th>
-                        <th style="width: 10%">전화번호</th>
-                        <th style="width: 10%">이메일</th>
-                        <th style="width: 8%">체크인</th>
-                        <th style="width: 8%">체크아웃</th>
-                        <th style="width: 5%">별점</th>
-                        <th style="width: 9%">삭제</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-
-                    <th:block th:unless="${#lists.isEmpty(hotelDTOS)}"><!--값이 없으면이 아니면(있으면)-->
-                        <tr th:each="data:${hotelDTOS}">
-                            <td th:text="${data.hotelId}">호텔번호</td>
-                            <td th:text="${data.companyName}">본사명</td>
-                            <td>
-                                <a th:href="@{/hotel/read(hotelId=${data.hotelId})}" style="text-decoration: none" th:text="${data.hotelName}">지사명</a>
-                            </td>
-                            <td th:text="${data.hotelAddress}">주소</td>
-                            <td th:text="${data.hotelPhone}">전화번호</td>
-                            <td th:text="${data.hotelEmail}">이메일</td>
-                            <td th:text="${data.hotelCheckIn}">체크인</td>
-                            <td th:text="${data.hotelCheckOut}">체크아웃</td>
-                            <td>별점</td> <!--이건 나중에...-->
-                            <td>
-                                <!--삭제 버튼 누르면 해당 본사 삭제됨-->
-                                <a th:href="@{/hotel/delete(hotelId=${data.hotelId})}" style="text-decoration: none" class="badge bg-danger delBtn">삭제</a>
-                            </td>
-                        </tr>
-                    </th:block>
-
-                    </tbody>
-
-
-
-                </table>
-
-                <th:block th:if="${#lists.isEmpty(hotelDTOS)}"><!--받아온 값이 없으면-->
-                    <div style="text-align: center">
-                        <p>등록된 호텔이 없습니다.</p>
+                <!--등록한 사진이 있을 때-->
+                <th:block th:if="${companyDTO.companyImgDTOList != 0}">
+                    <div th:each="img : ${companyDTO.companyImgDTOList}">
+                        <!-- 이미지 경로(path) -->
+                        <img th:src="@{'/upload/' + ${img.imagePath}}" alt="hotel Image" width="300px"/>
                     </div>
                 </th:block>
 
+                <!--등록한 사진이 없을 때-->
+                <th:block th:unless="${companyDTO.companyImgDTOList.size() != 0}">
+                    <!-- 이미지 경로(path) -->
+                    <img src="/img/default_img.jpg" alt="noImage" style="width: 300px"/>
+                </th:block>
 
-                <!-- 추가 버튼 -->
-                <div class="text-end mt-3">
-                    <button class="btn btn-primary" onclick="location.href='/company/list' ">본사관리페이지</button>
-                    <button class="btn btn-primary" style="background-color: black" onclick="location.href='/hotel/register' ">등록</button>
-                    <button type="button" class="btn btn-primary modalBtn">간편 등록</button>
-                </div>
-
-
-                <!-- 페이지네이션 -->
-                <div class="d-flex justify-content-center">
-                    <ul class="pagination">
-                        <li class="page-item" th:unless="${pageInfo.startPage == 1}">
-                            <a class="page-link" th:href="@{/hotel/listByCompany(page=1)}">시작</a>
-                        </li>
-                        <li class="page-item" th:unless="${pageInfo.currentPage == 1}">
-                            <a class="page-link" th:href="@{/hotel/listByCompany(page=${pageInfo.prevPage})}">이전</a>
-                        </li>
-                        <th:block th:each="num : ${#numbers.sequence(pageInfo.startPage, pageInfo.endPage, 1)}">
-                            <li class="page-item" th:unless="${num == pageInfo.currentPage}">
-                                <a class="page-link" th:href="@{/hotel/listByCompany(page=${num})}" th:text="${num}">1</a>
-                            </li>
-                            <li class="page-item active" th:if="${num == pageInfo.currentPage}">
-                                <a class="page-link" th:href="@{/hotel/listByCompany(page=${num})}" th:text="${num}">[[${num}]]</a>
-                            </li>
-                        </th:block>
-                        <li class="page-item" th:unless="${pageInfo.currentPage >= pageInfo.lastPage}">
-                            <a class="page-link" th:href="@{/hotel/listByCompany(page=${pageInfo.nextPage})}">다음</a>
-                        </li>
-                        <li class="page-item" th:unless="${pageInfo.endPage == pageInfo.lastPage}">
-                            <a class="page-link" th:href="@{/hotel/listByCompany(page=${pageInfo.lastPage})}">끝</a>
-                        </li>
-                    </ul>
-                </div>
-
-
+                <h3><a th:text="${companyDTO.companyName}">NTT hotel</a></h3>
+                <p>본사 담당자 : <span th:text="${companyDTO.companyManager}">마동석</span></p>
+                <p>등록일 : <span>[[${#temporals.format(companyDTO.regDate, 'yyyy년 MM월 dd일')}]]</span></p>
             </div>
+
+            <!-- 버튼 -->
+            <div class="text-end mt-3">
+                <a class="btn btn-primary" th:href="@{/company/modify(companyId=${companyDTO.companyId})}">수정</a>
+                <button type="button" class="btn btn-success modalBtn">지사 등록</button>
+                <a class="btn btn-dark" th:href="@{/manager/hotel/list(companyId=${companyDTO.companyId})}">지사 관리</a>
+                <button class="btn btn-light" onclick="location.href='/company/list' ">목록</button>
+            </div>
+
         </div>
+
     </div>
 
-    <!--모달-->
     <div class="modal" id="myModal">
         <div class="modal-dialog">
             <div class="modal-content">
 
                 <!-- Modal Header -->
                 <div class="modal-header">
-                    <h4 class="modal-title">간편등록</h4>
+                    <h4 class="modal-title">지사 등록</h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body">
 
                     <form action="/hotel/register" method="post" enctype="multipart/form-data">
+
+                        <input type="hidden" class="form-control" id="companyId" name="companyId" th:value="${companyDTO.companyId}">
+
                         <div class="mb-3 mt-3">
-                            <label for="companyId" class="form-label">본사명:</label>
-                            <select id="companyId" name="companyId" class="form-select">
-                                <th:block th:each="companyDTOS : ${companyDTOS}">
-                                    <option th:value="${companyDTOS.companyId}" th:text="${companyDTOS.companyName}">뒤에바</option>
-                                </th:block>
-                            </select>
-                        </div>
-                        <div class="mb-3 mt-3">
-                            <label for="hotelName" class="form-label">지사명:</label>
+                            <label for="hotelName" class="form-label">호텔명:</label>
                             <input type="text" class="form-control" id="hotelName" name="hotelName">
                         </div>
                         <div class="mb-3">
@@ -282,7 +184,7 @@
                         </div>
                         <!-- 새 이미지 업로드 및 미리보기 -->
                         <div>
-                            <label for="newImageFiles">지사이미지:</label>
+                            <label for="newImageFiles">본사이미지:</label>
                             <input type="file" id="newImageFiles" name="imageFiles" multiple onchange="previewImage(event)">
                             <small>이미지를 선택해 주세요.</small>
                         </div>
@@ -304,7 +206,10 @@
         </div>
     </div>
 
+
 </div>
+
+
 
 </body>
 </html>
