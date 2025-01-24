@@ -47,8 +47,9 @@
                     <button type="button" class="btn btn-secondary" onclick="location.href='/selectrole'">회원가입</button>
                     <button type="button" class="btn btn-secondary" onclick="location.href='/user/findPassword'">비밀번호 찾기</button>
                     <button type="button" class="btn btn-danger" onclick="location.href='/'">취소</button>
-                <div th:if="${param.error}" class="alert alert-danger mt-3" role="alert">
-                    로그인에 실패했습니다. 이메일 또는 비밀번호를 확인하세요.
+                <div th:if="${session.loginError}" class="alert alert-danger mt-3" role="alert">
+                    <!-- 왜인지 시큐리티, 멤버서비스에서 \n 으로 줄바꿈이 안되어서... 일단 꼼수로 %%% 문자를 줄바꿈 처리하도록 만들어놓음 -->
+                    <span th:utext="${session.loginError.replace('%%%', '<br/>')}"></span>
                 </div>
             </form>
         </div>

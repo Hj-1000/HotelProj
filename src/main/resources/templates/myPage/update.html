@@ -108,42 +108,34 @@
             document.getElementById('currentPassword2').value = this.value;
         });
 
-        function confirm() {
+        function test() {
             var currentPassword = document.getElementById('currentPassword').value;
+            var newPassword = document.getElementById('memberPassword').value;
+            var newPasswordCheck = document.getElementById('memberPasswordCheck').value;
+
+            // 현재 비밀번호 입력이 필수
             if (!currentPassword) {
                 alert("현재 비밀번호를 입력하세요.");
                 return false;
             }
 
-            function test() {
-                var currentPassword = document.getElementById('currentPassword').value;
-                var newPassword = document.getElementById('memberPassword').value;
-                var newPasswordCheck = document.getElementById('memberPasswordCheck').value;
-
-                // 현재 비밀번호 입력이 필수
-                if (!currentPassword) {
-                    alert("현재 비밀번호를 입력하세요.");
-                    return false;
-                }
-
-                // 새 비밀번호 입력란이 비어 있으면 비밀번호 변경을 하지 않음
-                if (newPassword.length === 0 && newPasswordCheck.length === 0) {
-                    return true; // 새 비밀번호가 없으면 현재 비밀번호 유지
-                }
-
-                // 새 비밀번호 유효성 검사
-                if (newPassword.length < 6) {
-                    alert('비밀번호는 6글자 이상이어야 합니다.');
-                    return false;
-                }
-
-                if (newPassword !== newPasswordCheck) {
-                    alert("새 비밀번호가 일치하지 않습니다.");
-                    return false;
-                }
-
-                return true;
+            // 새 비밀번호 입력란이 비어 있으면 비밀번호 변경을 하지 않음
+            if (newPassword.length === 0 && newPasswordCheck.length === 0) {
+                return true; // 새 비밀번호가 없으면 현재 비밀번호 유지
             }
+
+            // 새 비밀번호 유효성 검사
+            if (newPassword.length < 6) {
+                alert('비밀번호는 6글자 이상이어야 합니다.');
+                return false;
+            }
+
+            if (newPassword !== newPasswordCheck) {
+                alert("새 비밀번호가 일치하지 않습니다.");
+                return false;
+            }
+
+            return true;
         }
 
     </script>

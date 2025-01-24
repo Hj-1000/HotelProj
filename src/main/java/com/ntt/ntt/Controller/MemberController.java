@@ -107,7 +107,7 @@ public class MemberController {
         String memberEmail = userDetails.getUsername();
 
         try {
-            memberService.delete(memberEmail, currentPassword); // 비밀번호를 함께 전달
+            memberService.delete(memberEmail, currentPassword, redirectAttributes); // 비밀번호를 함께 전달
         } catch (IllegalArgumentException e) {
             // 비밀번호 불일치 시 처리
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
