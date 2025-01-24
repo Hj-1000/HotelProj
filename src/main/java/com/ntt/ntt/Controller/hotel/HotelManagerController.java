@@ -4,6 +4,7 @@ import com.ntt.ntt.DTO.CompanyDTO;
 import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.Service.hotel.HotelService;
 import com.ntt.ntt.Util.PaginationUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -66,60 +67,78 @@ public class HotelManagerController {
                        @RequestParam(required = false) Integer keyword1,  // 별점 검색용
                        @RequestParam(defaultValue = "1") int page, // 기본값을 1로 설정 (1-based)
                        @PageableDefault(size = 10) Pageable pageable, // 한 페이지에 10개씩
-                       Model model) {
+                       Model model, HttpServletRequest request,
+                       RedirectAttributes redirectAttributes
+                       ) {
 
-        // 페이지 번호를 0-based로 변환 (page는 1-based로 들어오므로 1을 빼줌)
-        Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize());
+        try {
+            // 페이지 번호를 0-based로 변환 (page는 1-based로 들어오므로 1을 빼줌)
+            Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize());
 
-        // companyId가 존재하는 경우 해당 회사의 지사들만 조회
-        Page<HotelDTO> hotelDTOS;
+            // companyId가 존재하는 경우 해당 회사의 지사들만 조회
+            Page<HotelDTO> hotelDTOS;
 
-        if (companyId != null) {
-            hotelDTOS = hotelService.listByCompany(adjustedPageable, keyword, keyword1, searchType, companyId);
-        } else {
-            hotelDTOS = hotelService.listByCompany(adjustedPageable, keyword, keyword1, searchType, companyId); // 기본적으로 모든 지사 조회
+            if (companyId != null) {
+
+                // 요청 URL 로그 출력
+                System.out.println("호텔리스트!! Requested URL: " + request.getRequestURL());
+                // companyId 값 출력 (디버깅용)
+                System.out.println("호텔리스트!! companyId: " + companyId);
+
+                hotelDTOS = hotelService.listByCompany(adjustedPageable, keyword, keyword1, searchType, companyId);
+            } else {
+                hotelDTOS = hotelService.listByCompany(adjustedPageable, keyword, keyword1, searchType, companyId); // 기본적으로 모든 지사 조회
+            }
+
+            // 페이지 정보 계산
+            Map<String, Integer> pageInfo = paginationUtil.pagination(hotelDTOS);
+
+            // 전체 페이지 수
+            int totalPages = hotelDTOS.getTotalPages();
+            int currentPage = pageInfo.get("currentPage");
+
+            // 시작 페이지와 끝 페이지 계산 (현재 페이지를 기준으로 최대 10페이지까지)
+            int startPage = Math.max(1, currentPage - 4); // 최대 10개씩 출력
+            int endPage = Math.min(startPage + 9, totalPages); // 전체 페이지 수를 넘지 않도록
+
+            // prevPage, nextPage, lastPage 계산
+            int prevPage = Math.max(1, currentPage - 1);
+            int nextPage = Math.min(totalPages, currentPage + 1);
+            int lastPage = totalPages;
+
+            // 페이지 정보 업데이트
+            pageInfo.put("startPage", startPage);
+            pageInfo.put("endPage", endPage);
+            pageInfo.put("prevPage", prevPage);
+            pageInfo.put("nextPage", nextPage);
+            pageInfo.put("lastPage", lastPage);
+
+
+            // 모델에 데이터 추가
+            model.addAttribute("hotelDTOS", hotelDTOS);
+            model.addAttribute("pageInfo", pageInfo);
+
+            // 검색어와 검색 타입을 폼에 전달할 수 있도록 추가
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("searchType", searchType);
+
+            // companyId를 쿼리 파라미터로 다시 전달
+            model.addAttribute("companyId", companyId);
+
+            // 회사 목록 추가
+            List<CompanyDTO> companyDTOS = hotelService.getAllCompany();
+            model.addAttribute("companyDTOS", companyDTOS);
+            model.addAttribute("companyDTO", new CompanyDTO());
+
+            return "/manager/hotel/list"; // 뷰 경로
+        } catch (NullPointerException e) {
+            // Flash Attribute로 메시지를 전달
+            redirectAttributes.addFlashAttribute("message", "해당 본사가 없습니다!");
+            return "redirect:/company/list"; // 목록 페이지로 리다이렉트
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("message", "서버 오류가 있습니다!");
+            return "redirect:/company/list"; // 목록 페이지로 리다이렉트
         }
-
-        // 페이지 정보 계산
-        Map<String, Integer> pageInfo = paginationUtil.pagination(hotelDTOS);
-
-        // 전체 페이지 수
-        int totalPages = hotelDTOS.getTotalPages();
-        int currentPage = pageInfo.get("currentPage");
-
-        // 시작 페이지와 끝 페이지 계산 (현재 페이지를 기준으로 최대 10페이지까지)
-        int startPage = Math.max(1, currentPage - 4); // 최대 10개씩 출력
-        int endPage = Math.min(startPage + 9, totalPages); // 전체 페이지 수를 넘지 않도록
-
-        // prevPage, nextPage, lastPage 계산
-        int prevPage = Math.max(1, currentPage - 1);
-        int nextPage = Math.min(totalPages, currentPage + 1);
-        int lastPage = totalPages;
-
-        // 페이지 정보 업데이트
-        pageInfo.put("startPage", startPage);
-        pageInfo.put("endPage", endPage);
-        pageInfo.put("prevPage", prevPage);
-        pageInfo.put("nextPage", nextPage);
-        pageInfo.put("lastPage", lastPage);
-
-        // 모델에 데이터 추가
-        model.addAttribute("hotelDTOS", hotelDTOS);
-        model.addAttribute("pageInfo", pageInfo);
-
-        // 검색어와 검색 타입을 폼에 전달할 수 있도록 추가
-        model.addAttribute("keyword", keyword);
-        model.addAttribute("searchType", searchType);
-
-        // companyId를 쿼리 파라미터로 다시 전달
-        model.addAttribute("companyId", companyId);
-
-        // 회사 목록 추가
-        List<CompanyDTO> companyDTOS = hotelService.getAllCompany();
-        model.addAttribute("companyDTOS", companyDTOS);
-        model.addAttribute("companyDTO", new CompanyDTO());
-
-        return "/manager/hotel/list"; // 뷰 경로
     }
 
 

@@ -119,25 +119,6 @@ public class HotelService {
                 // 검색어가 없으면 해당 companyId에 속한 모든 호텔 조회
                 hotels = hotelRepository.findByCompany_CompanyId(companyId, pageable);
             }
-        } else {
-            // companyId가 없으면 모든 호텔 조회
-            if (keyword != null && !keyword.isEmpty()) {
-                String keywordLike = "%" + keyword + "%";  // LIKE 조건을 위한 검색어 처리
-
-                // 검색 타입에 따라 조건을 추가
-                if ("name".equals(searchType)) {
-                    hotels = hotelRepository.findByHotelNameLike(keywordLike, pageable);
-                } else if ("location".equals(searchType)) {
-                    hotels = hotelRepository.findByHotelLocationLike(keywordLike, pageable);
-                } else if ("address".equals(searchType)) {
-                    hotels = hotelRepository.findByHotelAddressLike(keywordLike, pageable);
-                } else if ("rating".equals(searchType)) {
-                    hotels = hotelRepository.findByHotelRating(keyword1, pageable);
-                }
-            } else {
-                // 검색어가 없으면 모든 호텔 리스트를 조회
-                hotels = hotelRepository.findAll(pageable);
-            }
         }
 
         // 3. Hotel -> HotelDTO 변환
