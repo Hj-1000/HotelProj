@@ -25,7 +25,7 @@
     <!-- Room List Section -->
     <section class="py-5">
         <div class="container">
-            <h2 class="text-center mb-5">NTT 호텔 목록</h2>
+            <h2 class="text-center mb-5">NTT 호텔 모아보기</h2>
             <div id="room-list" class="row">
 
                 <!--반복문-->
@@ -35,9 +35,9 @@
                         <div class="room-card ">
                             <!--등록한 사진이 있을 때-->
                             <th:block th:if="${data.hotelImgDTOList != 0}">
-                                <div class="room-image" th:each="img : ${data.hotelImgDTOList}">
+                                <div class="room-image" th:each="data: ${data.hotelImgDTOList}">
                                     <!-- 이미지 경로(path) -->
-                                    <img th:src="@{'/upload/' + ${img.imagePath}}" alt="hotel Image" width="300px"/>
+                                    <img th:src="@{'/upload/' + ${data.imagePath}}" alt="hotel Image" width="300px"/>
                                 </div>
                             </th:block>
 
@@ -48,14 +48,13 @@
                                 </div>
                             </th:block>
                             <div class="room-text">
-                                <a th:href="@{'/hotel/list?searchType=location&keyword=' + ${data.hotelLocation}}">
-                                    <div class="room-location" th:text="${data.hotelLocation}">지역</div>
+                                <a th:href="@{'/hotel/list?searchType=location&keyword=' + ${data.hotelLocation}}" style="text-decoration: none">
+                                    <div class="badge bg-secondary" th:text="${data.hotelLocation}">지역</div>
                                 </a>
                                 <div class="room-details">
-                                    <h5 th:text="${data.hotelName}">호텔 이름</h5>
-                                    <p th:text="${data.hotelInfo}">호텔 설명</p>
-                                    <p>체크인: <span th:text="${data.hotelCheckIn}"></span>시 </p>
-                                    <p>체크아웃: <span th:text="${data.hotelCheckOut}"></span>시 </p>
+                                    <h4 th:text="${data.hotelName}">호텔 이름</h4>
+<!--                                    <p th:text="${data.hotelInfo}">호텔 설명</p>-->
+                                    <p> 체크인-체크아웃: <span th:text="${data.hotelCheckIn}"></span>시 - <span th:text="${data.hotelCheckOut}"></span>시</p>
                                     <div class="room-actions">
                                         <!--나중에 룸이랑 연결했을 때 사용-->
                                         <p class="room-price mb-0">300,000 KRW ~</p>
@@ -71,87 +70,49 @@
                 </th:block>
 
 
+                <!-- 페이지네이션 -->
+                <div class="d-flex justify-content-center">
+                    <ul class="pagination">
+                        <!-- 시작 버튼 -->
+                        <li class="page-item" th:unless="${pageInfo.currentPage == 1}">
+                            <a class="page-link" th:href="@{/hotel/list(page=1)}">시작</a>
+                        </li>
 
-            <div class="more-btn-container">
-                <button id="more-btn" class="btn btn-outline-primary">MORE</button>
+                        <!-- 이전 버튼 -->
+                        <li class="page-item" th:unless="${pageInfo.currentPage == 1}">
+                            <a class="page-link" th:href="@{/hotel/list(page=${pageInfo.prevPage})}">이전</a>
+                        </li>
+
+                        <!-- 페이지 번호 -->
+                        <th:block th:each="num : ${#numbers.sequence(pageInfo.startPage, pageInfo.endPage, 1)}">
+                            <li class="page-item" th:unless="${num == pageInfo.currentPage}">
+                                <a class="page-link" th:href="@{/hotel/list(page=${num})}" th:text="${num}">1</a>
+                            </li>
+                            <li class="page-item active" th:if="${num == pageInfo.currentPage}">
+                                <a class="page-link" th:href="@{/hotel/list(page=${num})}" th:text="${num}">[[${num}]]</a>
+                            </li>
+                        </th:block>
+
+                        <!-- 다음 버튼 -->
+                        <li class="page-item" th:unless="${pageInfo.currentPage >= pageInfo.lastPage}">
+                            <a class="page-link" th:href="@{/hotel/list(page=${pageInfo.nextPage})}">다음</a>
+                        </li>
+
+                        <!-- 끝 버튼 -->
+                        <li class="page-item" th:unless="${pageInfo.currentPage == pageInfo.lastPage}">
+                            <a class="page-link" th:href="@{/hotel/list(page=${pageInfo.lastPage})}">끝</a>
+                        </li>
+                    </ul>
+                </div>
+
+
+
+
+
             </div>
         </div>
     </section>
 
-    <script>
-        document.getElementById('more-btn').addEventListener('click', function() {
-            const roomList = document.getElementById('room-list');
-            const newRooms = `
-        <div class="col-md-4">
-            <div class="room-card">
-                <div class="room-image"><img src="/img/room_List_01.jpg" class="card-img-top" alt="Room Image"></div>
-                <div class="room-text">
-                    <div class="room-location">지역</div>
-                    <div class="room-details">
-                        <h5>방 이름</h5>
-                        <p>룸 설명</p>
-                        <p>예약기간: 20xx.xx.xx ~ 20xx.xx.xx</p>
-                        <p>숙박기간: 20xx.xx.xx ~ 20xx.xx.xx</p>
-                        <div class="room-actions">
-                            <p class="room-price mb-0">300,000 KRW ~</p>
-                            <div class="room-buttons">
-                                <button class="btn btn-outline-secondary btn-heart"><i class="fa-regular fa-heart"></i></button>
-                                <button class="btn btn-dark btn-book">예약하기</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="room-card">
-                <div class="room-image"><img src="/img/room_List_02.jpg" class="card-img-top" alt="Room Image"></div>
-                <div class="room-text">
-                    <div class="room-location">지역</div>
-                    <div class="room-details">
-                        <h5>방 이름</h5>
-                        <p>룸 설명</p>
-                        <p>예약기간: 20xx.xx.xx ~ 20xx.xx.xx</p>
-                        <p>숙박기간: 20xx.xx.xx ~ 20xx.xx.xx</p>
-                        <div class="room-actions">
-                            <p class="room-price mb-0">300,000 KRW ~</p>
-                            <div class="room-buttons">
-                                <button class="btn btn-outline-secondary btn-heart"><i class="fa-regular fa-heart"></i></button>
-                                <button class="btn btn-dark btn-book">예약하기</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="room-card">
-                <div class="room-image"><img src="/img/room_List_03.jpg" class="card-img-top" alt="Room Image"></div>
-                <div class="room-text">
-                    <div class="room-location">지역</div>
-                    <div class="room-details">
-                        <h5>방 이름</h5>
-                        <p>룸 설명</p>
-                        <p>예약기간: 20xx.xx.xx ~ 20xx.xx.xx</p>
-                        <p>숙박기간: 20xx.xx.xx ~ 20xx.xx.xx</p>
-                        <div class="room-actions">
-                            <p class="room-price mb-0">300,000 KRW ~</p>
-                            <div class="room-buttons">
-                                <button class="btn btn-outline-secondary btn-heart"><i class="fa-regular fa-heart"></i></button>
-                                <button class="btn btn-dark btn-book">예약하기</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-            roomList.insertAdjacentHTML('beforeend', newRooms);
-
-            this.disabled = true;
-            this.textContent = 'No More Rooms';
-        });
-    </script>
 </div>
 <div th:replace="~{fragments/footer::footer}"></div>
 </body>

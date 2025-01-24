@@ -59,8 +59,8 @@
         // function deleteCompany(obj){
         //
         //     var companyId = [[${companyId}]]    //아이템의 아이디를 가져온다.
-        //     let url = "/company/remove/" + companyId
-        //     let url1 = "/company/list"
+        ///company/remove/" + companyId
+        // /company/list"
         //
         //     console.log(companyId)
         //
@@ -72,7 +72,7 @@
         //         dataType : "json",
         //         success : function (result) {
         //
-        //             location.href='/company/list';
+        //            /company/list';
         //         },
         //         error : function (result, status, error) {
         //
@@ -82,7 +82,7 @@
         //                 location.href = '/user/login';
         //             }else if(result.status == '200') {
         //                 alert(result.responseText + " 글을 삭제 완료 했습니다")
-        //                 location.href='/company/list';
+        //                /company/list';
         //             }else {
         //                 /*여긴 또 잘 지워짐 ㅇㅅㅇ*/
         //                 // alert("글을 삭제 완료 했습니다")
@@ -105,7 +105,6 @@
         <h2 class="mb-3">호텔 본사 관리</h2>
         <!-- 검색 영역 -->
         <div class="card p-4 mb-4">
-            <form action="/company/list" method="get">
                 <div class="row g-3 align-items-center">
                     <h5 class="card-title">본사 찾기</h5>
                     <div class="col-md-6">
@@ -223,7 +222,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
-                <form action="/company/register" method="post" enctype="multipart/form-data">
+              /company/register" method="post" enctype="multipart/form-data">
 
                     <!-- Modal body -->
                     <div class="modal-body">

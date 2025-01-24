@@ -16,17 +16,29 @@ public class ServiceOrderItem extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer serviceOrderItemId;
     // 주문한 서비스의 수량
-    @Column(nullable = false)
     private Integer orderCount;
-    // 총 금액
-    private Integer totalPrice;
+    // 주문 당시 금액
+    private Integer orderPrice;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "serviceMenuId")
     private ServiceMenu serviceMenu;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "serviceOrderId")
     private ServiceOrder serviceOrder;
+
+
+    //주문한 수량과 메뉴의 가격의 곱이 곧 당시 주문의 금액
+    public void calculateOrderPrice() {
+        this.orderPrice = this.orderCount * this.serviceMenu.getServiceMenuPrice();
+    }
+    public void addCount(int orderCount) {
+        if (orderCount <= 0) {
+            throw new IllegalArgumentException("Count must be positive.");
+        }
+        this.orderCount += orderCount;
+        calculateOrderPrice(); // 수량이 변경될 때마다 가격 계산
+    }
 
 }
