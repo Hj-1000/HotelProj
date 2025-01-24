@@ -1,5 +1,6 @@
 package com.ntt.ntt.Entity;
 
+import com.ntt.ntt.Constant.ServiceMenuStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,8 +25,9 @@ public class ServiceMenu extends BaseEntity {
     @Column(length = 255)
     private String serviceMenuInfo;
     // 메뉴 상태(품절, 주문가능, ...)
-    @Column(nullable = false)
-    private String serviceMenuStatus;
+
+    @Enumerated(EnumType.STRING)
+    private ServiceMenuStatus serviceMenuStatus;
     // 메뉴 가격
     @Column(nullable = false)
     private Integer serviceMenuPrice;

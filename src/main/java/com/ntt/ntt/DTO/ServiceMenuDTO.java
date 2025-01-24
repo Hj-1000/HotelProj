@@ -1,5 +1,6 @@
 package com.ntt.ntt.DTO;
 
+import com.ntt.ntt.Constant.ServiceMenuStatus;
 import com.ntt.ntt.Entity.ServiceCate;
 import lombok.*;
 
@@ -23,7 +24,7 @@ public class ServiceMenuDTO {
 
     private String serviceMenuInfo;
 
-    private String serviceMenuStatus;
+    private ServiceMenuStatus serviceMenuStatus;
 
     private Integer serviceMenuPrice;
 

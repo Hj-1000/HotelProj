@@ -29,17 +29,23 @@
 <div id="wrapper" layout:fragment="content">
 
         <div class="container-fluid mt-4">
-            <h2 class="mb-3">카테고리 상세보기</h2>
+            <h2 class="mb-3">메뉴 상세보기</h2>
 
             <div class="card p-4 mb-4">
                 <div class="row g-3 align-items-center">
-                    <h3><a th:text="${serviceMenuDTO.serviceMenuName}">한식</a></h3>
+
                     <div>
+
                         <div th:each="img : ${serviceMenuDTO.serviceMenuImageDTOList}">
                             <!-- 이미지가 있는 경우만 출력 -->
                             <img th:src="@{'/upload/' + ${img.imagePath}}" alt="Category Image" width="300px">
+                            <h3><a th:text="${serviceMenuDTO.serviceMenuName}">한식</a></h3>
+                            <p>카테고리명 : <span th:text="${serviceMenuDTO.serviceCateName}">카테고리명</span></p>
+                            <p>메뉴명 : <span th:text="${serviceMenuDTO.serviceMenuName}">메뉴이름</span></p>
+                            <p>메뉴설명 : <span th:text="${serviceMenuDTO.serviceMenuInfo}">메뉴설명</span></p>
+                            <p>메뉴상태 : <span th:text="${serviceMenuDTO.serviceMenuStatus.description}">상세정보</span></p>
+                            <p>메뉴가격 : <span th:text="${serviceMenuDTO.serviceMenuPrice}">메뉴가격</span></p>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -48,7 +54,7 @@
             <div class="text-end mt-3">
                 <button class="btn btn-primary" style="background-color: black" onclick="location.href='/roomService/menu/list' ">목록</button>
                 <a class="btn btn-primary" th:href="@{/roomService/menu/update(serviceMenuId=${serviceMenuDTO.serviceMenuId})}">수정</a>
-                <a class="btn btn-danger" th:href="@{/roomService/menu/delete(serviceCateId=${serviceMenuDTO.serviceMenuId})}">삭제</a>
+                <a class="btn btn-danger" th:href="@{/roomService/menu/delete(serviceMenuId=${serviceMenuDTO.serviceMenuId})}">삭제</a>
             </div>
 
         </div>

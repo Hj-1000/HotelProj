@@ -1,7 +1,11 @@
 package com.ntt.ntt.Entity;
 
+import com.ntt.ntt.Constant.ServiceOrderStatus;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="serviceOrder")
@@ -16,7 +20,11 @@ public class ServiceOrder extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer serviceOrderId;
     // 주문상태
-    private String serviceOrderStatus;
+    @Enumerated(EnumType.STRING)
+    private ServiceOrderStatus serviceOrderStatus;
+
+    //주문의 총 금액
+    private int totalPrice;
 
     @ManyToOne
     @JoinColumn(name = "memberId")
@@ -25,6 +33,18 @@ public class ServiceOrder extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "roomId")
     private Room room;
+
+    @OneToMany(mappedBy = "serviceOrder", cascade = CascadeType.ALL,
+            orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<ServiceOrderItem> serviceOrderItemList = new ArrayList<>();
+
+    public void setServiceOrderItemList(ServiceOrderItem serviceOrderItem) {
+        this.serviceOrderItemList.add(serviceOrderItem);
+    }
+
+    public void setServiceOrderItemList(List<ServiceOrderItem> serviceOrderItemList) {
+        this.serviceOrderItemList = serviceOrderItemList;
+    }
 
 
 

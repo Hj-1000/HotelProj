@@ -8,6 +8,28 @@
 
     <script th:inline="javascript">
         $(document).ready(function () {
+
+            //수정버튼 클릭 이벤트 2025-01-24 리스트에서 수정해보고 싶어서 만들었음
+            $(".updateStatusBtn").on("click", function () {
+                const menuId = $(this).data("menu-id"); // 메뉴 ID
+                const newStatus = $(this).closest("tr").find(".menuStatusDropdown").val(); // 선택된 상태값
+
+                // AJAX 요청으로 상태값 업데이트
+                $.ajax({
+                    url: `/roomService/menu/updateStatus/${menuId}`,
+                    method: "POST",
+                    data: JSON.stringify({ serviceMenuStatus: newStatus }),
+                    contentType: "application/json",
+                    success: function (response) {
+                        alert(response.message); // 성공 메시지
+                        location.reload(); // 페이지 새로고침
+                    },
+                    error: function (xhr) {
+                        alert("상태 업데이트 중 오류가 발생했습니다."); // 오류 메시지
+                    }
+                });
+
+
             // 세션에서 message를 가져온다
             var message = [[${message}]]
 
@@ -73,15 +95,42 @@
                 <div class="row g-3 align-items-center">
                     <h5 class="card-title">메뉴 찾기</h5>
                     <div class="col-md-6">
+                        <label>검색 유형</label>
                         <select name="searchType" class="form-select">
-                            <option value="name" th:selected="${searchType == 'name'}">메뉴이름</option>
-                            <option value="status" th:selected="${searchType == 'status'}">메뉴상태</option>
+                            <option value="name" th:selected="${searchType == 'name'}">메뉴 이름</option>
                         </select>
                     </div>
                     <div class="col-md-6">
+                        <label>검색어</label>
                         <input type="text" name="keyword" class="form-control" placeholder="검색어를 입력하세요">
                     </div>
                 </div>
+
+                <!-- 상태 검색 라디오 버튼 -->
+                <div class="mt-4">
+                    <h6>메뉴 상태</h6>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="status" id="statusSell" value="SELL"
+                               th:checked="${param.status == 'SELL'}">
+                        <label class="form-check-label" for="statusSell">판매중</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="status" id="statusPrepare" value="PREPARE"
+                               th:checked="${param.status == 'PREPARE'}">
+                        <label class="form-check-label" for="statusPrepare">준비중</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="status" id="statusSoldOut" value="SOLD_OUT"
+                               th:checked="${param.status == 'SOLD_OUT'}">
+                        <label class="form-check-label" for="statusSoldOut">매진</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="status" id="statusAll" value=""
+                               th:checked="${param.status == null || param.status == ''}">
+                        <label class="form-check-label" for="statusAll">전체</label>
+                    </div>
+                </div>
+
                 <!-- 조회 버튼 -->
                 <div class="text-center mt-4">
                     <button type="submit" class="btn btn-primary w-25" style="background-color: black">조회</button>
@@ -103,29 +152,47 @@
                         <th>메뉴 설명</th>
                         <th>메뉴 상태</th>
                         <th>메뉴 가격</th>
+                        <th>수정</th> <!-- 수정 버튼 추가 -->
                         <th>삭제여부</th>
                     </tr>
                     </thead>
                     <tbody>
                     <th:block th:if="${#lists.isEmpty(serviceMenuDTOS)}">
-                        <tr><td colspan="7">등록된 서비스 메뉴가 없습니다.</td></tr>
+                        <tr><td colspan="8">등록된 서비스 메뉴가 없습니다.</td></tr>
                     </th:block>
 
                     <th:block th:unless="${#lists.isEmpty(serviceMenuDTOS)}">
                         <tr th:each="data, status: ${serviceMenuDTOS}">
-<!--                            <td th:text="${data.serviceMenuId}">1</td>-->
                             <td th:text="${status.index + 1}">1</td>
                             <td>
-                                <a th:href="@{/roomService/menu/list(serviceCateId=${data.serviceCateId.serviceCateId})}" style="text-decoration: none" th:text="${data.serviceCateName}">카테고리 이름</a>
+                                <a th:href="@{/roomService/menu/list(serviceCateId=${data.serviceCateId.serviceCateId})}"
+                                   style="text-decoration: none" th:text="${data.serviceCateName}">카테고리 이름</a>
                             </td>
                             <td>
-                                <a th:href="@{/roomService/menu/read(serviceMenuId=${data.serviceMenuId})}" style="text-decoration: none" th:text="${data.serviceMenuName}">메뉴이름</a>
+                                <a th:href="@{/roomService/menu/read(serviceMenuId=${data.serviceMenuId})}"
+                                   style="text-decoration: none" th:text="${data.serviceMenuName}">메뉴이름</a>
                             </td>
                             <td th:text="${data.serviceMenuInfo}">설명</td>
-                            <td th:text="${data.serviceMenuStatus}">상태</td>
+                            <td>
+                                <!-- 상태 드롭다운 -->
+                                <select class="form-select menuStatusDropdown"
+                                        th:data-menu-id="${data.serviceMenuId}"
+                                        th:value="${data.serviceMenuStatus}">
+                                    <option value="SELL" th:selected="${data.serviceMenuStatus == 'SELL'}">판매중</option>
+                                    <option value="PREPARE" th:selected="${data.serviceMenuStatus == 'PREPARE'}">준비중</option>
+                                    <option value="SOLD_OUT" th:selected="${data.serviceMenuStatus == 'SOLD_OUT'}">매진</option>
+                                </select>
+                            </td>
                             <td th:text="${data.serviceMenuPrice}">가격</td>
                             <td>
-                                <a th:href="@{/roomService/menu/delete(serviceMenuId=${data.serviceMenuId})}" class="badge bg-danger delBtn">삭제</a>
+                                <!-- 수정 버튼 -->
+                                <button class="btn btn-success updateStatusBtn"
+                                        th:data-menu-id="${data.serviceMenuId}"
+                                        style="width: 100px;">수정</button>
+                            </td>
+                            <td>
+                                <a th:href="@{/roomService/menu/delete(serviceMenuId=${data.serviceMenuId})}"
+                                   class="badge bg-danger delBtn">삭제</a>
                             </td>
                         </tr>
                     </th:block>
@@ -201,9 +268,9 @@
                         <div class="mb-3">
                             <label for="serviceMenuStatus" class="form-label">메뉴 상태:</label>
                             <select class="form-control" id="serviceMenuStatus" name="serviceMenuStatus">
-                                <option value="판매중">판매중</option>
-                                <option value="준비중">준비중</option>
-                                <option value="매진">매진</option>
+                                <option value="SELL">판매중</option>
+                                <option value="PREPARE">준비중</option>
+                                <option value="SOLD_OUT">매진</option>
                             </select>
                         </div>
                         <div class="mb-3">

@@ -15,15 +15,29 @@ public class ServiceCartItem extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer serviceCartItemId;
-    // 장바구니에 넣은 서비스의 수량
-    private Integer serviceCartItemCount;
 
-    @ManyToOne
+    // 장바구니에 넣은 서비스의 수량
+    private int count;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "serviceCartId")
     private ServiceCart serviceCart;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "serviceMenuId")
     private ServiceMenu serviceMenu;
 
+    public static ServiceCartItem serviceCartItem(ServiceCart serviceCart, ServiceMenu serviceMenu, int count) {
+        ServiceCartItem serviceCartItem = new ServiceCartItem();
+        serviceCartItem.setServiceCart(serviceCart);
+        serviceCartItem.setServiceMenu(serviceMenu);
+        serviceCartItem.setCount(count);
+
+        return serviceCartItem;
+    }
+
+    //count의 증가
+    public void addCount(int count) {
+        this.count += count;
+    }
 }

@@ -16,16 +16,15 @@ public class ServiceOrderItem extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer serviceOrderItemId;
     // 주문한 서비스의 수량
-    @Column(nullable = false)
-    private Integer orderCount;
+    private int orderCount;
     // 총 금액
-    private Integer totalPrice;
+    private int orderPrice;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "serviceMenuId")
     private ServiceMenu serviceMenu;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "serviceOrderId")
     private ServiceOrder serviceOrder;
 

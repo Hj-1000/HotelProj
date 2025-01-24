@@ -1,5 +1,6 @@
 package com.ntt.ntt.Repository;
 
+import com.ntt.ntt.Constant.ServiceMenuStatus;
 import com.ntt.ntt.Entity.Image;
 import com.ntt.ntt.Entity.ServiceMenu;
 import org.springframework.data.domain.Limit;
@@ -13,13 +14,15 @@ import java.util.List;
 @Repository
 public interface ServiceMenuRepository extends JpaRepository<ServiceMenu, Integer> {
     //카테고리 상관없이 가져오기
-    //메뉴 이름으로 검색하기
-    public Page<ServiceMenu> findByServiceMenuNameLike(String keyword, Pageable pageable);
-    //메뉴 상태로 검색하기
-    public Page<ServiceMenu> findByServiceMenuStatusLike(String keyword, Pageable pageable);
+    // 메뉴 이름으로 검색
+    Page<ServiceMenu> findByServiceMenuNameLike(String serviceMenuName, Pageable pageable);
 
-    //카테고리에 속한 메뉴 개수 카운트 하는 메서드
-    Integer countByServiceCate_ServiceCateId(Integer serviceCateId);
+    // 메뉴 상태로 검색
+    Page<ServiceMenu> findByServiceMenuStatus(ServiceMenuStatus serviceMenuStatus, Pageable pageable);
+
+    // 메뉴 카테고리와 상태 검색
+    Page<ServiceMenu> findByServiceCate_ServiceCateIdAndServiceMenuStatus(Integer serviceCateId, ServiceMenuStatus serviceMenuStatus, Pageable pageable);
+
     // 특정 카테고리에 속한 메뉴 조회
     public Page<ServiceMenu> findByServiceCate_ServiceCateId(Integer serviceCateId, Pageable pageable);
     //특정 카테고리에 속한 메뉴 조회(이름 포함)
