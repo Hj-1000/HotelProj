@@ -87,10 +87,10 @@
                                     <td style="width: 85%">
                                         <!-- 최소 2글자 이상 입력하도록 validation 추가 -->
                                         <label for="serviceMenuStatus" class="col-sm-3 col-form-label">메뉴 상태</label>
-                                        <select class="form-control" id="serviceMenuStatus" name="serviceMenuStatus" th:field="*{serviceMenuStatus}" required>
-                                            <option value="판매중">판매중</option>
-                                            <option value="준비중">준비중</option>
-                                            <option value="매진">매진</option>
+                                        <select class="form-control" id="serviceMenuStatus" name="serviceMenuStatus" th:field="*{serviceMenuStatus}">
+                                            <option value="SELL">판매중</option>
+                                            <option value="PREPARE">준비중</option>
+                                            <option value="SOLD_OUT">매진</option>
                                         </select>
                                     </td>
                                 </tr>

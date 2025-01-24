@@ -1,5 +1,6 @@
 package com.ntt.ntt.Service;
 
+import com.ntt.ntt.Constant.ServiceMenuStatus;
 import com.ntt.ntt.DTO.ImageDTO;
 import com.ntt.ntt.DTO.ServiceMenuDTO;
 import com.ntt.ntt.Entity.Image;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
 public class ServiceMenuService {
 
     private final ImageRepository imageRepository;
+    private final ServiceCateRepository serviceCateRepository;
     private final ServiceMenuRepository serviceMenuRepository;
     private final ModelMapper modelMapper;
 
@@ -69,6 +71,21 @@ public class ServiceMenuService {
 
 
     }
+    //enum값인 surviceMenuStatus를 설명값으로 검색하기 위한 변환 메서드 2025-01-24
+    private ServiceMenuStatus convertDescriptionToStatus(String description) {
+        if (description == null || description.isEmpty()) {
+            return null; // null일 경우 처리
+        }
+
+        for (ServiceMenuStatus status : ServiceMenuStatus.values()) {
+            if (status.getDescription().equals(description)) {
+                return status; // 설명값에 해당하는 Enum 값 반환
+            }
+        }
+
+        throw new IllegalArgumentException("올바르지 않은 상태값입니다: " + description);
+    }
+
     //서비스 메뉴 목록
     /*--------------------------------
     함수명 : Page<serviceMenuDTO> list(Pageable page)
@@ -76,56 +93,57 @@ public class ServiceMenuService {
     출력 : 해당 데이터들(list)과 page 정보를 전달
     설명 : 요청한 페이지번호에 해당하는 데이터를 조회해서 전달
     --------------------------------*/
-    public Page<ServiceMenuDTO> list(Pageable page, String keyword, String searchType, Integer serviceCateId){
-        //1. 페이지정보를 재가공
-        int currentPage = page.getPageNumber()-1;
+    public Page<ServiceMenuDTO> list(Pageable page, String keyword, String searchType, Integer serviceCateId, String status) {
+        int currentPage = page.getPageNumber() - 1;
         int pageSize = 10;
         Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.DESC, "serviceMenuId"));
 
-        //2. 조회
         Page<ServiceMenu> serviceMenu = null;
-        // serviceCateId가 있으면 메뉴에 속한 메뉴만 조회
+
         if (serviceCateId != null) {
-            if (keyword != null && !keyword.isEmpty()) {
-                String keywordLike = "%" + keyword + "%"; // Like 조건을 위한 검색어 처리
-                //검색 타입에 따라 조건을 추가
-                if ("name".equals(searchType)) {
-                    //메뉴이름 검색
-                    serviceMenu = serviceMenuRepository.findByServiceCate_ServiceCateIdAndServiceMenuNameLike(serviceCateId, keywordLike, pageable);
-                } else if ("cateName". equals(searchType)) {
-                    serviceMenu = serviceMenuRepository.findByServiceMenuIdAndServiceCate_ServiceCateName(serviceCateId, keywordLike, pageable);
+            // 카테고리 ID 기반 검색
+            if ("name".equals(searchType) && keyword != null && !keyword.isEmpty()) {
+                String keywordLike = "%" + keyword + "%";
+                serviceMenu = serviceMenuRepository.findByServiceCate_ServiceCateIdAndServiceMenuNameLike(serviceCateId, keywordLike, pageable);
+            } else if (status != null && !status.isEmpty()) {
+                try {
+                    ServiceMenuStatus menuStatus = ServiceMenuStatus.valueOf(status);
+                    serviceMenu = serviceMenuRepository.findByServiceCate_ServiceCateIdAndServiceMenuStatus(serviceCateId, menuStatus, pageable);
+                } catch (IllegalArgumentException e) {
+                    throw new RuntimeException("올바르지 않은 상태값입니다: " + status);
                 }
             } else {
-                //검색어가 없으면 해당 serviceCateId에 속한 모든 호텔 조회
                 serviceMenu = serviceMenuRepository.findByServiceCate_ServiceCateId(serviceCateId, pageable);
             }
         } else {
-            //serviceCateId가 없으면 모든 메뉴를 조회
-            if (keyword != null && !keyword.isEmpty()) {
-                String keywordLike = "%" + keyword + "%"; // Like 조건을 위한 검색어 처리
-
-                //검색 타입에 따라 조건을 추가
-                if ("name".equals(searchType)) {
-                    serviceMenu = serviceMenuRepository.findByServiceMenuNameLike(keywordLike, pageable);
-                } else if ("status".equals(searchType)) {
-                    serviceMenu = serviceMenuRepository.findByServiceMenuStatusLike(keywordLike, pageable);
+            // 전체 검색
+            if ("name".equals(searchType) && keyword != null && !keyword.isEmpty()) {
+                String keywordLike = "%" + keyword + "%";
+                serviceMenu = serviceMenuRepository.findByServiceMenuNameLike(keywordLike, pageable);
+            } else if (status != null && !status.isEmpty()) {
+                try {
+                    ServiceMenuStatus menuStatus = ServiceMenuStatus.valueOf(status);
+                    serviceMenu = serviceMenuRepository.findByServiceMenuStatus(menuStatus, pageable);
+                } catch (IllegalArgumentException e) {
+                    throw new RuntimeException("올바르지 않은 상태값입니다: " + status);
                 }
             } else {
-                // 검색어가 없으면 모든 호텔 리스트를 조회
                 serviceMenu = serviceMenuRepository.findAll(pageable);
             }
         }
 
-
-
-//        serviceMenuRepository.findAll(pageable);
-
-        //3. 변환
-        Page<ServiceMenuDTO> serviceMenuDTOS = serviceMenu.map(entity ->modelMapper.map(entity, ServiceMenuDTO.class));
-        return serviceMenuDTOS;
+        return serviceMenu.map(entity -> modelMapper.map(entity, ServiceMenuDTO.class));
     }
-    
-    
+
+    // 즉각적 수정을 위한 서비스
+//    public void updateMenuStatus(Integer menuId, String newStatus) {
+//        ServiceMenu serviceMenu = serviceMenuRepository.findById(menuId)
+//                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 메뉴입니다."));
+//        serviceMenu.setServiceMenuStatus(ServiceMenuStatus.valueOf(newStatus)); // 상태 업데이트
+//        serviceMenuRepository.save(serviceMenu); // 변경 저장
+//    }
+
+
     //서비스 메뉴 상세보기
 /*--------------------------------
     함수명 : serviceMenuDTO(Integer serviceMenuId)
@@ -184,6 +202,9 @@ public class ServiceMenuService {
             ServiceMenu serviceMenu = serviceMenuOpt.get();
             // serviceMenu 정보 업데이트
             serviceMenu.setServiceMenuName(serviceMenuDTO.getServiceMenuName());
+            serviceMenu.setServiceMenuInfo(serviceMenuDTO.getServiceMenuInfo());
+            serviceMenu.setServiceMenuPrice(serviceMenuDTO.getServiceMenuPrice());
+            serviceMenu.setServiceMenuStatus(serviceMenuDTO.getServiceMenuStatus());
             serviceMenuRepository.save(serviceMenu); // 메뉴 정보 업데이트
 
             // 기존 이미지들 삭제 및 새 이미지 등록 (있다면)
@@ -243,7 +264,7 @@ public class ServiceMenuService {
     설명 : 전달받은 데이터를 데이터베이스에 저장
     --------------------------------*/
     public void delete(Integer serviceMenuId) {
-                Optional<ServiceMenu> read = serviceMenuRepository.findById(serviceMenuId);
+        Optional<ServiceMenu> read = serviceMenuRepository.findById(serviceMenuId);
         if (read.isPresent()) {
             ServiceMenu serviceMenu = read.get();
 
