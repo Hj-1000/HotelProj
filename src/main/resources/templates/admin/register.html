@@ -34,14 +34,18 @@
     <div layout:fragment="content" class="register-container">
         <div class="card register-card">
             <h5 class="card-title text-center mb-4">관리자 회원가입</h5>
-        <form action="/admin/register" method="post" onsubmit="return test();">
+        <form action="/admin/register" method="post" onsubmit="return registerCheck();">
             <div class="mb-2">
-                <label for="memberName" class="form-label">*관리자이름 :</label>
+                <label for="memberName" class="form-label">*관리자 이름 :</label>
                 <input type="text" class="form-control" id="memberName" name="memberName" required>
             </div>
             <div class="mb-2">
-                <label for="memberEmail" class="form-label">*이메일 :</label>
-                <input type="email" class="form-control" id="memberEmail" name="memberEmail" required>
+                <label for="memberEmailInput" class="form-label">*이메일 :</label>
+                <div class="input-group">
+                    <input type="email" class="form-control" id="memberEmailInput" name="memberEmail">
+                    <button type="button" class="btn btn-secondary" onclick="emailCheck()">중복확인</button>
+                </div>
+                <small id="emailCheckMessage" style="display: none;"></small>
             </div>
             <div class="mb-2">
                 <label for="memberPassword" class="form-label">*비밀번호 :</label>
@@ -68,34 +72,82 @@
                 </select>
             </div>
             <p>* 표시는 필수 입력 항목입니다.</p>
-            <div th:if="${errorMessage}" style="color: red;">
-                <p th:text="${errorMessage}"></p>
-            </div>
             <button type="submit" class="btn btn-primary">회원가입</button>
             <button type="button" class="btn btn-danger" onclick="location.href='/'">취소</button>
         </form>
 
         <script type="text/javascript">
-            function test() {
+
+            // 이메일 중복확인
+            function emailCheck() {
+                var email = document.getElementById('memberEmailInput').value;
+                var messageElement = document.getElementById('emailCheckMessage');
+
+                if (!email) {
+                    messageElement.style.display = "block";
+                    messageElement.style.color = "red";
+                    messageElement.innerText = "이메일을 입력하세요.";
+                    return;
+                }
+
+                fetch('/checkEmail?email=' + encodeURIComponent(email), {
+                    method: 'GET',
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        messageElement.style.display = "block";
+                        if (data.exists) {
+                            messageElement.style.color = "red";
+                            messageElement.innerText = "이미 사용 중인 이메일입니다.";
+                        } else {
+                            messageElement.style.color = "green";
+                            messageElement.innerText = "사용 가능한 이메일입니다.";
+                        }
+                    })
+                    .catch(error => {
+                        console.error("에러 발생:", error);
+                        messageElement.style.display = "block";
+                        messageElement.style.color = "red";
+                        messageElement.innerText = "중복 확인 중 오류가 발생했습니다.";
+                    });
+            }
+
+            // 비밀번호 및 인증코드, 이메일 체크
+            function registerCheck() {
+                var email = document.getElementById('memberEmailInput').value;
                 var p0 = document.getElementById('code').value;
                 var p1 = document.getElementById('memberPassword').value;
                 var p2 = document.getElementById('memberPasswordCheck').value;
 
-                if(p0 != '980425') {
+                // 인증코드 체크
+                if (p0 != '980425') {
                     alert('인증코드가 일치하지 않습니다.');
-                    return false;
+                    return false; // 인증코드가 일치하지 않으면 폼 제출을 막음
                 }
 
-                if(p1.length < 6) {
+                // 비밀번호 길이 체크
+                if (p1.length < 6) {
                     alert('비밀번호는 6글자 이상이어야 합니다.');
                     return false;
                 }
 
-                if( p1 != p2 ) {
+                // 비밀번호 확인
+                if (p1 != p2) {
                     alert("비밀번호가 일치하지 않습니다.");
                     return false;
-                } else{
-                    return true;
+                } else {
+                    fetch('/checkEmail?email=' + encodeURIComponent(email), {
+                        method: 'GET',
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.exists) {
+                                // 이메일이 이미 존재하는 경우 alert 띄우기
+                                alert("이미 가입된 회원입니다.");
+                                return false; // 회원가입 제출 막기
+                            }
+                            alert("회원가입에 성공하였습니다. 로그인 페이지로 이동합니다.");
+                        })
                 }
             }
         </script>

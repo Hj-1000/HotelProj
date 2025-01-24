@@ -97,6 +97,12 @@ public class MemberService implements UserDetailsService {
         memberRepository.save(member);
     }
 
+    // 이메일 중복 확인
+    public boolean isEmailExists(String email) {
+        Optional<Member> member = memberRepository.findByMemberEmail(email);
+        return member.isPresent(); // 이미 존재하면 true 반환
+    }
+
     // 회원정보 수정
     public Member update(MemberDTO memberDTO) {
         // 현재 로그인한 사용자 이메일로 조회
@@ -154,6 +160,7 @@ public class MemberService implements UserDetailsService {
         return modelMapper.map(user.get(), MemberDTO.class);
     }
 
+    // 회원탈퇴
     @Transactional
     public void delete(String memberEmail, String currentPassword) {
         // 회원 존재 여부 확인
@@ -165,10 +172,10 @@ public class MemberService implements UserDetailsService {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        // 회원이 작성한 QNA 데이터를 먼저 삭제 또는 해제
-        qnaRepository.deleteByMember(member); // QNA 데이터 삭제
+        // 비밀번호가 일치하면 회원이 작성한 QNA 데이터를 먼저 삭제
+        qnaRepository.deleteByMember(member);
 
-        // 비밀번호 일치하면 회원 삭제
+        // 비밀번호가 일치하면 회원 삭제
         memberRepository.delete(member);
     }
 
