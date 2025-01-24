@@ -17,7 +17,7 @@ import java.util.List;
 public class ServiceCart extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer serviceCart;
+    private Integer serviceCartId;
     // 장바구니에 넣은 서비스의 수량
 
     @OneToOne
@@ -26,6 +26,7 @@ public class ServiceCart extends BaseEntity {
 
     @OneToMany(mappedBy = "serviceCart", cascade = CascadeType.ALL,
             orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<ServiceCartItem> serviceCartItemList = new ArrayList<>();
 
 

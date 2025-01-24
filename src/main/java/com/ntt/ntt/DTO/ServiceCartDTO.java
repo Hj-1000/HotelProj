@@ -20,7 +20,7 @@ public class ServiceCartDTO {
 
     public static ServiceCartDTO fromEntity(ServiceCart serviceCart) {
         return ServiceCartDTO.builder()
-                .serviceCartId(serviceCart.getServiceCart())  // 서비스 카트 ID
+                .serviceCartId(serviceCart.getServiceCartId())  // 서비스 카트 ID
                 .memberId(serviceCart.getMember().getMemberId())  // Member ID
                 .serviceCartItemList(serviceCart.getServiceCartItemList().stream()
                         .map(ServiceCartItemDTO::fromEntity)
