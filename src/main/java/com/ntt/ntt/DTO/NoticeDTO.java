@@ -1,5 +1,6 @@
 package com.ntt.ntt.DTO;
 
+import com.ntt.ntt.Entity.Notice;
 import com.ntt.ntt.Entity.Room;
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
@@ -30,6 +31,13 @@ public class NoticeDTO {
 
     private LocalDateTime modDate;
 
+    public NoticeDTO(Notice notice) {
+        this.noticeId = notice.getNoticeId();
+        this.noticeTitle = notice.getNoticeTitle();
+        this.noticeContent = notice.getNoticeContent();
+        this.regDate = notice.getRegDate();
+        this.modDate = notice.getModDate();
+    }
     @Builder.Default
     private List<ImageDTO> noticeImageDTOList = new ArrayList<>();
 

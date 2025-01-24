@@ -6,7 +6,7 @@
       layout:decorate="~{layouts/layout}">
 <head>
   <meta charset="UTF-8">
-  <title>Title</title>
+  <title>공지사항 리스트</title>
   <!--반응형웹-->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!--부트스트랩-->
@@ -27,7 +27,7 @@
 <body>
 <!--<div th:replace="~{fragments/header::header}"></div>-->
 <div layout:fragment="content">
-  <div id="container" class="container"><!--브라우저 사용 범위-->
+  <div  class="container-fluid mt-4"><!--브라우저 사용 범위-->
     <div id="row" class="row">
       <div class="col-1"></div><!--좌측여백-->
       <div id="listColumn" class="col-10"><!--작업디자인(표)-->
@@ -43,29 +43,94 @@
             <th style="width: 10%">작업</th>
           </tr>
           </thead>
+
           <tbody>
-          <!--Controller에서 전달받은 리스트로 반복처리-->
-          <!--model.addAttribute("변수명",).DTO(변수명)-->
-          <!--boardDTOList, id;subject; content; author; regdate; modDate;-->
-          <tr th:each="data:${noticeDTOList}"><!--더미값으로 채우기(가장 긴값)-->
+          <tr th:if="${#lists.isEmpty(noticeDTOList)}">
+            <td colspan="5" class="text-center">공지사항이 없습니다.</td>
+          </tr>
+          <tr th:each="data : ${noticeDTOList}">
             <td th:text="${data.noticeId}">0</td>
             <td>
-              <a th:href="@{/notice/read(noticeId=${data.noticeId})}" th:text="${data.noticeTitle}">
-                sample
-              </a>
+              <a th:href="@{/notice/read(noticeId=${data.noticeId})}" th:text="${data.noticeTitle}">sample</a>
             </td>
-
-            <td th:text="${#temporals.format(data.regDate,'yyyy-MM-dd hh:mm')}">2024-12-18 12:00:09</td>
-            <td th:text="${#temporals.format(data.modDate,'yyyy-MM-dd hh:mm')}">2024-12-18 12:00:09</td>
+<!--            <td th:text="${data.regDate != null ? #temporals.format(data.regDate, 'yyyy-MM-dd hh:mm') : 'N/A'}">2024-12-18 12:00</td>-->
+<!--            <td th:text="${data.modDate != null ? #temporals.format(data.modDate, 'yyyy-MM-dd hh:mm') : 'N/A'}">2024-12-18 12:00</td>-->
+            <td th:text="${#temporals.format(data.regDate, 'yyyy-MM-dd hh:mm')}">2024-12-18 12:00</td>
+            <td th:text="${#temporals.format(data.modDate, 'yyyy-MM-dd hh:mm')}">2024-12-18 12:00</td>
             <td>
-              <a th:href="@{/notice/update(noticeId=${data.noticeId})}">수정</a>/
+              <a th:href="@{/notice/update(noticeId=${data.noticeId})}">수정</a> /
               <a th:href="@{/notice/delete(noticeId=${data.noticeId})}">삭제</a>
             </td>
           </tr>
+
           </tbody>
+<!--          <tbody>-->
+<!--          Controller에서 전달받은 리스트로 반복처리-->
+<!--          model.addAttribute("변수명",).DTO(변수명)-->
+<!--          boardDTOList, id;subject; content; author; regdate; modDate;-->
+<!--          <tr th:each="data:${noticeDTOList}">&lt;!&ndash;더미값으로 채우기(가장 긴값)&ndash;&gt;-->
+<!--            <td th:text="${data.noticeId}">0</td>-->
+<!--            <td>-->
+<!--              <a th:href="@{/notice/read(noticeId=${data.noticeId})}" th:text="${data.noticeTitle}">-->
+<!--                sample-->
+<!--              </a>-->
+<!--            </td>-->
+
+<!--            <td th:text="${#temporals.format(data.regDate,'yyyy-MM-dd hh:mm')}">2024-12-18 12:00:09</td>-->
+<!--            <td th:text="${#temporals.format(data.modDate,'yyyy-MM-dd hh:mm')}">2024-12-18 12:00:09</td>-->
+<!--            <td>-->
+<!--              <a th:href="@{/notice/update(noticeId=${data.noticeId})}">수정</a>/-->
+<!--              <a th:href="@{/notice/delete(noticeId=${data.noticeId})}">삭제</a>-->
+<!--            </td>-->
+<!--          </tr>-->
+<!--          </tbody>-->
         </table>
-          <a th:href="@{/notice/register}"> <button class="btn btn-primary">등록</button></a>
+<!--          <div class="pagination d-flex justify-content-center">-->
+<!--            <ul class="pagination">-->
+<!--              &lt;!&ndash; 이전 버튼 &ndash;&gt;-->
+<!--              <li th:classappend="${pageNumber == 0} ? 'disabled'" class="page-item">-->
+<!--                <a class="page-link" th:href="@{/notice/list(page=${pageNumber - 1}, size=${size}, noticeTitle=${param?.noticeTitle ?: ''}, noticeContent=${param?.noticeContent ?: ''}, regDate=${param?.regDate ?: ''}, modDate=${param?.modDate ?: ''})}">이전</a>-->
+<!--              </li>-->
+
+<!--              &lt;!&ndash; 페이지 번호 버튼 &ndash;&gt;-->
+<!--              <li th:each="i : ${#notice.sequence(0, totalPages - 1)}"-->
+<!--                  th:classappend="${i == pageNumber} ? 'active'"-->
+<!--                  class="page-item">-->
+<!--                <a class="page-link"-->
+<!--                   th:href="@{/notice/list(page=${i}, size=${size}, noticeTitle=${param.noticeTitle},noticeContent=${param.noticeContent}, regDate=${param.regDate}, modDate=${param.modDate})}"-->
+<!--                   th:text="${i + 1}">-->
+<!--                </a>-->
+<!--              </li>-->
+
+<!--              &lt;!&ndash; 다음 버튼 &ndash;&gt;-->
+<!--              <li th:classappend="${pageNumber + 1 == totalPages} ? 'disabled'" class="page-item">-->
+<!--                <a class="page-link" th:href="@{/notice/list(page=${pageNumber + 1}, size=${size}, noticeTitle=${param.noticeTitle},noticeContent=${param.noticeContent}, regDate=${param.regDate}, modDate=${param.modDate})}">다음</a>-->
+<!--              </li>-->
+<!--            </ul>-->
+<!--          </div>-->
+
+          <a th:href="@{/notice/register}" ><button class="btn btn-primary">등록</button></a>
+          <div class="pagination d-flex justify-content-center">
+            <ul class="pagination">
+              <!-- 이전 버튼 -->
+              <li th:classappend="${pagination['currentPage'] == 1} ? 'disabled'" class="page-item">
+                <a class="page-link" th:href="@{/notice/list(page=${pagination['prevPage']}, size=${size})}">이전</a>
+              </li>
+
+              <!-- 페이지 번호 버튼 -->
+              <li th:each="i : ${#numbers.sequence(pagination['startPage'], pagination['endPage'])}"
+                  th:classappend="${i == pagination['currentPage']} ? 'active'" class="page-item">
+                <a class="page-link" th:href="@{/notice/list(page=${i-1}, size=${size})}" th:text="${i}">1</a>
+              </li>
+
+              <!-- 다음 버튼 -->
+              <li th:classappend="${pagination['currentPage'] == pagination['lastPage']}" class="page-item">
+                <a class="page-link" th:href="@{/notice/list(page=${pagination['nextPage']}, size=${size})}">다음</a>
+              </li>
+            </ul>
+          </div>
       </div><!--listColumn-->
+
       <div class="col-1"></div><!--우측여백-->
       </div>
     </div><!--row 행 끝-->

@@ -23,6 +23,7 @@ public class PaginationUtil {
         int totalPages = page.getTotalPages(); // 전체 페이지 수
         // Math.max(값,값,값,...) : 값들 중 최대값을 추출
         int startPage = Math.max(1, currentPage-blockLimit/2); //시작페이지 번호(1-10=-9/2=)
+
         // 계산된 끝 페이지 번호가 전체페이지번호보다 크면 전체페이지
         int endPage = Math.min(totalRecords, currentPage+blockLimit-1); // 화면에 끝나는 번호
 
