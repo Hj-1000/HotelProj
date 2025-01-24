@@ -30,7 +30,7 @@ public class CompanyController {
     //등록폼
     @GetMapping("/register")
     public String registerForm() {
-        return "/company/register";
+        return "/chief/company/register";
     }
     //등록처리
     @PostMapping("/register")
@@ -76,7 +76,7 @@ public class CompanyController {
         model.addAttribute("keyword", keyword);
         model.addAttribute("searchType", searchType);
 
-        return "/company/list";
+        return "/chief/company/list";
     }
 
 
@@ -89,7 +89,7 @@ public class CompanyController {
             // companyDTO를 모델에 추가
             model.addAttribute("companyDTO", companyDTO);
             // "read" 뷰로 이동
-            return "/company/read";
+            return "/chief/company/read";
 
         } catch (NullPointerException e) {
             redirectAttributes.addFlashAttribute("message", "해당 본사 정보를 찾을 수 없습니다.");
@@ -105,7 +105,7 @@ public class CompanyController {
     public String modifyServiceHTML(Integer companyId, Model model) {
         CompanyDTO companyDTO = companyService.read(companyId);
         model.addAttribute("companyDTO", companyDTO);
-        return "/company/modify";
+        return "/chief/company/modify";
     }
     //수정처리
     @PostMapping("/modify")

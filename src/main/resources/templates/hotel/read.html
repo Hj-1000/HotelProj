@@ -1,58 +1,119 @@
 <!DOCTYPE html>
 <html lang="en"
       xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/layout}">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
     <meta charset="UTF-8">
-    <title>NTT호텔 - 본사 상세 페이지</title>
+    <title>NTT 호텔 - [[${hotelDTOS.hotelName}]] 상세정보</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/b17b1596b8.js" crossorigin="anonymous"></script>
+    <link rel ="stylesheet" href="/assets/fonts/fontawesome-all.min.css">
+    <link rel ="stylesheet" href="/assets/css/bootstrap.min.css">
+    <link rel ="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/roomList.css}">
 </head>
 <body>
-<div id="wrapper" layout:fragment="content">
+<div th:replace="~{fragments/header::header}"></div>
+<div layout:fragment="content">
+    <!-- 룸 배너 이미지 -->
+    <section class="banner-container room-bnr ">
+        <img src="/img/bg_membership.jpg" alt="Hotel Banner">
+    </section>
 
-    <div class="container-fluid mt-4">
-        <h2 class="mb-3">본사 상세보기</h2>
+    <!-- Room List Section -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">NTT 호텔</h2>
+            <div id="room-list" class="row">
 
-        <div class="card p-4 mb-4">
-            <div class="row g-3 align-items-center">
+                <!--반복문-->
+                <th:block th:each="data : ${hotelDTOS}">
+                    <!-- Room Card -->
+                    <div class="col-md-4">
+                        <div class="room-card ">
+                            <!--등록한 사진이 있을 때-->
+                            <th:block th:if="${data.hotelImgDTOList != 0}">
+                                <div class="room-image" th:each="data: ${data.hotelImgDTOList}">
+                                    <!-- 이미지 경로(path) -->
+                                    <img th:src="@{'/upload/' + ${data.imagePath}}" alt="hotel Image" width="300px"/>
+                                </div>
+                            </th:block>
 
-                <!--등록한 사진이 있을 때-->
-                <th:block th:if="${hotelDTO.hotelImgDTOList != 0}">
-                    <div th:each="img : ${hotelDTO.hotelImgDTOList}">
-                        <!-- 이미지 경로(path) -->
-                        <img th:src="@{'/upload/' + ${img.imagePath}}" alt="hotel Image" width="300px"/>
+                            <!--등록한 사진이 없을 때-->
+                            <th:block th:unless="${data.hotelImgDTOList.size() != 0}">
+                                <div class="room-image">
+                                    <img src="/img/default_img.jpg" alt="noImage" style="width: 300px"/>
+                                </div>
+                            </th:block>
+                            <div class="room-text">
+                                <a th:href="@{'/hotel/list?searchType=location&keyword=' + ${data.hotelLocation}}" style="text-decoration: none">
+                                    <div class="badge bg-secondary" th:text="${data.hotelLocation}">지역</div>
+                                </a>
+                                <div class="room-details">
+                                    <h4 th:text="${data.hotelName}">호텔 이름</h4>
+<!--                                    <p th:text="${data.hotelInfo}">호텔 설명</p>-->
+                                    <p> 체크인-체크아웃: <span th:text="${data.hotelCheckIn}"></span>시 - <span th:text="${data.hotelCheckOut}"></span>시</p>
+                                    <div class="room-actions">
+                                        <!--나중에 룸이랑 연결했을 때 사용-->
+                                        <p class="room-price mb-0">300,000 KRW ~</p>
+                                        <div class="room-buttons">
+                                            <button class="btn btn-outline-secondary btn-heart"><i class="fa-regular fa-heart"></i></button>
+                                            <button class="btn btn-dark btn-book">예약하기</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </th:block>
 
-                <!--등록한 사진이 없을 때-->
-                <th:block th:unless="${hotelDTO.hotelImgDTOList.size() != 0}">
-                        <div>
-                            <img src="/img/default_img.jpg" alt="noImage" style="width: 300px"/>
-                        </div>
-                </th:block>
 
-                <h3 th:text="${hotelDTO.hotelName}">호텔이름</h3>
-                <p>호텔본사 : <span th:text="${hotelDTO.companyName}">본사명</span></p>
-                <p>호텔주소 : <span th:text="${hotelDTO.hotelAddress}">주소</span></p>
-                <p>상세정보 : <span th:text="${hotelDTO.hotelInfo}">상세정보</span></p>
-                <p>전화번호 : <span th:text="${hotelDTO.hotelPhone}">전화번호</span></p>
-                <p>이메일 : <span th:text="${hotelDTO.hotelEmail}">이메일</span></p>
-                <p>체크인 : <span th:text="${hotelDTO.hotelCheckIn}">체크인</span>시</p>
-                <p>체크아웃 : <span th:text="${hotelDTO.hotelCheckOut}">체크아웃</span>시</p>
+                <!-- 페이지네이션 -->
+                <div class="d-flex justify-content-center">
+                    <ul class="pagination">
+                        <!-- 시작 버튼 -->
+                        <li class="page-item" th:unless="${pageInfo.currentPage == 1}">
+                            <a class="page-link" th:href="@{/hotel/list(page=1)}">시작</a>
+                        </li>
+
+                        <!-- 이전 버튼 -->
+                        <li class="page-item" th:unless="${pageInfo.currentPage == 1}">
+                            <a class="page-link" th:href="@{/hotel/list(page=${pageInfo.prevPage})}">이전</a>
+                        </li>
+
+                        <!-- 페이지 번호 -->
+                        <th:block th:each="num : ${#numbers.sequence(pageInfo.startPage, pageInfo.endPage, 1)}">
+                            <li class="page-item" th:unless="${num == pageInfo.currentPage}">
+                                <a class="page-link" th:href="@{/hotel/list(page=${num})}" th:text="${num}">1</a>
+                            </li>
+                            <li class="page-item active" th:if="${num == pageInfo.currentPage}">
+                                <a class="page-link" th:href="@{/hotel/list(page=${num})}" th:text="${num}">[[${num}]]</a>
+                            </li>
+                        </th:block>
+
+                        <!-- 다음 버튼 -->
+                        <li class="page-item" th:unless="${pageInfo.currentPage >= pageInfo.lastPage}">
+                            <a class="page-link" th:href="@{/hotel/list(page=${pageInfo.nextPage})}">다음</a>
+                        </li>
+
+                        <!-- 끝 버튼 -->
+                        <li class="page-item" th:unless="${pageInfo.currentPage == pageInfo.lastPage}">
+                            <a class="page-link" th:href="@{/hotel/list(page=${pageInfo.lastPage})}">끝</a>
+                        </li>
+                    </ul>
+                </div>
+
+
+
+
+
             </div>
         </div>
+    </section>
 
-        <!-- 버튼 -->
-        <div class="text-end mt-3">
-            <button class="btn btn-primary" style="background-color: black" onclick="location.href='/hotel/listByCompany' ">목록</button>
-            <a class="btn btn-primary" th:href="@{/hotel/modify(hotelId=${hotelDTO.hotelId})}">수정</a>
-            <a class="btn btn-danger" th:href="@{/hotel/delete(hotelId=${hotelDTO.hotelId})}">삭제</a>
-        </div>
-
-    </div>
 </div>
-
-
+<div th:replace="~{fragments/footer::footer}"></div>
 </body>
 </html>

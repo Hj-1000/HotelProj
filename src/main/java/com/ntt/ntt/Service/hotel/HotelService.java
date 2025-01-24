@@ -151,8 +151,8 @@ public class HotelService {
     //일반회원 목록
     public Page<HotelDTO> list(Pageable page, String keyword, String searchType, boolean exactMatch) {
 
-        int currentPage = page.getPageNumber() - 1;
-        int pageSize = 10;
+        int currentPage = page.getPageNumber();  // Page.getPageNumber()는 0부터 시작
+        int pageSize = 9; // 한 페이지에 9개씩 표시
         Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.DESC, "hotelId"));
 
         Page<Hotel> hotels = null;
@@ -162,21 +162,22 @@ public class HotelService {
                 // 호텔명이 포함된 경우
                 hotels = hotelRepository.findByHotelNameLike("%" + keyword + "%", pageable);
             } else if ("location".equals(searchType)) {
-                // location일 경우 정확히 일치하는 값만 찾음
+                // 정확히 일치하는 location 검색
                 if (exactMatch) {
                     hotels = hotelRepository.findByHotelLocationEquals(keyword, pageable);
                 } else {
+                    // location에서 %가 포함되도록
                     hotels = hotelRepository.findByHotelLocationLike("%" + keyword + "%", pageable);
                 }
             } else if ("address".equals(searchType)) {
-                // 주소가 포함된 경우
+                // 주소 검색
                 hotels = hotelRepository.findByHotelAddressLike("%" + keyword + "%", pageable);
             } else if ("rating".equals(searchType)) {
                 // 별점 검색
                 hotels = hotelRepository.findByHotelRating(Integer.parseInt(keyword), pageable);
             }
         } else {
-            // 검색어가 없으면 모든 호텔 리스트 조회
+            // 검색어가 없으면 모든 호텔 리스트를 조회
             hotels = hotelRepository.findAll(pageable);
         }
 
