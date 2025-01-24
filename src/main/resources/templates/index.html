@@ -113,7 +113,37 @@
             <div class="bg-secondary text-white py-5" style="height: 300px;">지도 이미지</div>
         </div>
     </section>
+
+    <!-- 회원 탈퇴 성공 모달창 -->
+    <div th:if="${successMessage}" class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="successModalLabel">회원탈퇴 완료</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p th:text="${successMessage}">회원탈퇴가 완료되었습니다.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">확인</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <div th:replace="~{fragments/footer::footer}"></div>
+
+<script th:inline="javascript">
+    /* 회원 탈퇴 성공 모달창을 띄워주는 스크립트 */
+    var successMessage = /*[[${successMessage}]]*/ '';
+    if (successMessage) {
+        var myModal = new bootstrap.Modal(document.getElementById('successModal'), {
+            keyboard: false
+        });
+        myModal.show();
+    }
+</script>
+
 </body>
 </html>

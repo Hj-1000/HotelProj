@@ -5,9 +5,8 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum Role {
-
-    ADMIN("관리자"), CHIEF("호텔장"), MANAGER("호텔매니저"), USER("사용자");
+public enum ServiceMenuStatus {
+    SELL("판매중"), PREPARE("준비중"), SOLD_OUT("매진");
 
     private final String description;
 }

@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -44,14 +45,14 @@ public class MemberService implements UserDetailsService {
 
             // 회원의 상태가 '비활성'인 경우 로그인 차단
             if ("비활성".equals(memberEntity.getMemberStatus())) {
-                throw new UsernameNotFoundException("이 이메일은 비활성화된 계정입니다.");
+                throw new UsernameNotFoundException("이 이메일은 비활성화된 계정입니다.%%%관리자에게 문의해주세요.");
             }
             return User.withUsername(member.get().getMemberEmail())
                     .password(member.get().getMemberPassword()) // 암호화된 비밀번호 반환
                     .roles(member.get().getRole().name())
                     .build();
         } else { // 입력한 이메일이 존재하지 않으면 로그인 실패
-            throw new UsernameNotFoundException(email + " 오류!");
+            throw new UsernameNotFoundException("로그인에 실패했습니다.%%%이메일과 비밀번호를 확인해주세요.");
         }
     }
 
@@ -95,6 +96,12 @@ public class MemberService implements UserDetailsService {
         member.setMemberStatus("활성");
         member.setRole(memberDTO.getRole()); // 관리자는 회원가입시 선택한 권한으로 가입
         memberRepository.save(member);
+    }
+
+    // 이메일 중복 확인
+    public boolean isEmailExists(String email) {
+        Optional<Member> member = memberRepository.findByMemberEmail(email);
+        return member.isPresent(); // 이미 존재하면 true 반환
     }
 
     // 회원정보 수정
@@ -154,8 +161,9 @@ public class MemberService implements UserDetailsService {
         return modelMapper.map(user.get(), MemberDTO.class);
     }
 
+    // 회원탈퇴
     @Transactional
-    public void delete(String memberEmail, String currentPassword) {
+    public void delete(String memberEmail, String currentPassword, RedirectAttributes redirectAttributes) {
         // 회원 존재 여부 확인
         Member member = memberRepository.findByMemberEmail(memberEmail)
                 .orElseThrow(() -> new IllegalArgumentException("해당 이메일의 회원을 찾을 수 없습니다."));
@@ -165,11 +173,14 @@ public class MemberService implements UserDetailsService {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        // 회원이 작성한 QNA 데이터를 먼저 삭제 또는 해제
-        qnaRepository.deleteByMember(member); // QNA 데이터 삭제
+        // 비밀번호가 일치하면 회원이 작성한 QNA 데이터를 먼저 삭제
+        qnaRepository.deleteByMember(member);
 
-        // 비밀번호 일치하면 회원 삭제
+        // 비밀번호가 일치하면 회원 삭제
         memberRepository.delete(member);
+
+        // 회원 탈퇴 완료 후 메시지 추가
+        redirectAttributes.addFlashAttribute("successMessage", "회원탈퇴가 완료되었습니다. :(");
     }
 
     // 전체 회원 조회 및 검색기능

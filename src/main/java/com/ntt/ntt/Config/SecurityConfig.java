@@ -2,9 +2,16 @@ package com.ntt.ntt.Config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -14,6 +21,18 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    // Spring Security 로그인시 발생하는 에러들을 별도의 Exception 으로 처리하기 위해 추가
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider(UserDetailsService userDetailsService) { //아이디가 맞지 않을 때 UserNotFoundException을 발생하게 하는 메소드
+        DaoAuthenticationProvider bean = new DaoAuthenticationProvider();
+        bean.setHideUserNotFoundExceptions(false);
+        bean.setUserDetailsService(userDetailsService);
+        bean.setPasswordEncoder(passwordEncoder());
+
+        return bean;
+    }
+
     //비밀번호를 암호화처리
     @Bean
     PasswordEncoder passwordEncoder() {
@@ -49,8 +68,15 @@ public class SecurityConfig {
 
         // 로그인 실패 처리 핸들러
         AuthenticationFailureHandler failureHandler = (request, response, exception) -> {
-            // 로그인 실패 메시지를 리다이렉트 애트리뷰트에 추가
-            request.getSession().setAttribute("loginError", "로그인에 실패했습니다. 이메일과 비밀번호를 확인하세요.");
+            // exception이 UsernameNotFoundException인지 확인
+            if (exception instanceof UsernameNotFoundException) {
+                // 비활성화된 계정일 경우
+                String errorMessage = exception.getMessage();
+                request.getSession().setAttribute("loginError", errorMessage);
+            } else {
+                // 다른 로그인 실패 오류 메시지
+                request.getSession().setAttribute("loginError", "로그인에 실패했습니다.%%%이메일과 비밀번호를 확인해주세요.");
+            }
             response.sendRedirect("/login?error"); // 로그인 실패 시 로그인 페이지로 리다이렉트
         };
         

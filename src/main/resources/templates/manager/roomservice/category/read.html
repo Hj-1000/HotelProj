@@ -82,7 +82,7 @@
             <!-- 추가 버튼 -->
             <div class="text-end mt-3">
                 <button type="button" class="btn btn-dark modalBtn">메뉴 등록</button>
-                <a class="btn btn-primary" th:href="@{/roomService/serviceCateId(serviceCateId=${serviceCateDTO.serviceCateId})}">메뉴 관리</a>
+                <a class="btn btn-primary" th:href="@{/roomService/menu/list(serviceCateId=${serviceCateDTO.serviceCateId})}">메뉴 관리</a>
                 <button class="btn btn-primary" style="background-color: black" onclick="location.href='/roomService/category/list' ">목록</button>
                 <a class="btn btn-primary" th:href="@{/roomService/category/update(serviceCateId=${serviceCateDTO.serviceCateId})}">수정</a>
                 <a class="btn btn-danger" th:href="@{/roomService/category/delete(serviceCateId=${serviceCateDTO.serviceCateId})}">삭제</a>
@@ -104,9 +104,6 @@
                     <form action="/roomService/menu/register" method="post" enctype="multipart/form-data">
 
                         <input type="hidden" id="serviceCateId" name="serviceCateId" th:value="${serviceCateDTO.serviceCateId}">
-                        <p th:text="${serviceCateDTO.serviceCateId}"></p>
-
-
                         <div class="mb-3 mt-3">
                             <label for="serviceMenuName" class="form-label">메뉴명 :</label>
                             <input type="text" class="form-control" id="serviceMenuName" name="serviceMenuName">
@@ -118,9 +115,9 @@
                         <div class="mb-3 mt-3">
                             <label for="serviceMenuStatus" class="form-label">메뉴상태:</label>
                             <select class="form-control" id="serviceMenuStatus" name="serviceMenuStatus">
-                                <option value="판매중">판매중</option>
-                                <option value="준비중">준비중</option>
-                                <option value="매진">매진</option>
+                                <option value="SELL">판매중</option>
+                                <option value="PREPARE">준비중</option>
+                                <option value="SOLD_OUT">매진</option>
                             </select>
                         </div>
                         <div class="mb-3 mt-3">

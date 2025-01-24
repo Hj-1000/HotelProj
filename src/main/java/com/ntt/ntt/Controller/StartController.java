@@ -19,6 +19,7 @@ public class StartController {
 
     private final MemberService memberService;
 
+    // 전체회원관리 페이지
     @GetMapping("/admin/memberList")
     public String getAllMembers(@RequestParam(required = false) String role,
                                 @RequestParam(required = false) String email,

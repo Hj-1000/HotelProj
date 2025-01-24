@@ -28,11 +28,11 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         } else if (role.equals("ROLE_CHIEF")) {
             response.sendRedirect("/admin/executive"); // CHIEF 권한 사용자가 로그인시 임원관리 페이지로 리다이렉트
         } else if (role.equals("ROLE_MANAGER")) {
-            response.sendRedirect("/"); // MANAGER 권한 사용자가 로그인시 객실관리 페이지로 리다이렉트(지금 객실관리 페이지가 없어서 나중에 수정하기)
+            response.sendRedirect("/manager/room/list"); // MANAGER 권한 사용자가 로그인시 객실관리 페이지로 리다이렉트
         } else if (role.equals("ROLE_USER")) {
             response.sendRedirect("/"); // USER 권한 사용자가 로그인시 메인페이지로 리다이렉트
         } else {
-            response.sendRedirect("/login?error"); // 기본 로그인 페이지로 리다이렉트 (혹은 에러 페이지)
+            response.sendRedirect("/login?error"); // 기본 로그인 페이지로 리다이렉트
         }
     }
 }

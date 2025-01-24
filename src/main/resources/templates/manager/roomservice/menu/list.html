@@ -73,15 +73,42 @@
                 <div class="row g-3 align-items-center">
                     <h5 class="card-title">메뉴 찾기</h5>
                     <div class="col-md-6">
+                        <label>검색 유형</label>
                         <select name="searchType" class="form-select">
-                            <option value="name" th:selected="${searchType == 'name'}">메뉴이름</option>
-                            <option value="status" th:selected="${searchType == 'status'}">메뉴상태</option>
+                            <option value="name" th:selected="${searchType == 'name'}">메뉴 이름</option>
                         </select>
                     </div>
                     <div class="col-md-6">
+                        <label>검색어</label>
                         <input type="text" name="keyword" class="form-control" placeholder="검색어를 입력하세요">
                     </div>
                 </div>
+
+                <!-- 상태 검색 라디오 버튼 -->
+                <div class="mt-4">
+                    <h6>메뉴 상태</h6>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="status" id="statusSell" value="SELL"
+                               th:checked="${param.status == 'SELL'}">
+                        <label class="form-check-label" for="statusSell">판매중</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="status" id="statusPrepare" value="PREPARE"
+                               th:checked="${param.status == 'PREPARE'}">
+                        <label class="form-check-label" for="statusPrepare">준비중</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="status" id="statusSoldOut" value="SOLD_OUT"
+                               th:checked="${param.status == 'SOLD_OUT'}">
+                        <label class="form-check-label" for="statusSoldOut">매진</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="status" id="statusAll" value=""
+                               th:checked="${param.status == null || param.status == ''}">
+                        <label class="form-check-label" for="statusAll">전체</label>
+                    </div>
+                </div>
+
                 <!-- 조회 버튼 -->
                 <div class="text-center mt-4">
                     <button type="submit" class="btn btn-primary w-25" style="background-color: black">조회</button>
@@ -97,6 +124,7 @@
                     <thead>
                     <tr>
                         <th>No</th>
+                        <th>카테고리 이름</th>
                         <th>메뉴 이름</th>
                         <th>메뉴 설명</th>
                         <th>메뉴 상태</th>
@@ -110,13 +138,17 @@
                     </th:block>
 
                     <th:block th:unless="${#lists.isEmpty(serviceMenuDTOS)}">
-                        <tr th:each="data : ${serviceMenuDTOS}">
-                            <td th:text="${data.serviceMenuId}">1</td>
+                        <tr th:each="data, status: ${serviceMenuDTOS}">
+                            <!--                            <td th:text="${data.serviceMenuId}">1</td>-->
+                            <td th:text="${status.index + 1}">1</td>
                             <td>
-                                <a th:href="@{/roomService/menu/read(serviceMenuId=${data.serviceMenuId})}" style="text-decoration: none" th:text="${data.serviceMenuName}">NTT호텔</a>
+                                <a th:href="@{/roomService/menu/list(serviceCateId=${data.serviceCateId.serviceCateId})}" style="text-decoration: none" th:text="${data.serviceCateName}">카테고리 이름</a>
+                            </td>
+                            <td>
+                                <a th:href="@{/roomService/menu/read(serviceMenuId=${data.serviceMenuId})}" style="text-decoration: none" th:text="${data.serviceMenuName}">메뉴이름</a>
                             </td>
                             <td th:text="${data.serviceMenuInfo}">설명</td>
-                            <td th:text="${data.serviceMenuStatus}">상태</td>
+                            <td th:text="${data.serviceMenuStatus.description}">상태</td>
                             <td th:text="${data.serviceMenuPrice}">가격</td>
                             <td>
                                 <a th:href="@{/roomService/menu/delete(serviceMenuId=${data.serviceMenuId})}" class="badge bg-danger delBtn">삭제</a>
@@ -126,15 +158,12 @@
                     </tbody>
                 </table>
 
-                <!-- 페이지네이션 -->
-                <!-- 페이지네이션 코드 생략 -->
-
                 <!-- 추가 버튼 -->
                 <div class="text-end mt-3">
                     <button class="btn btn-primary" style="background-color: black" onclick="location.href='/roomService/menu/register'">등록</button>
                     <button type="button" class="btn btn-primary modalBtn">간편 등록</button>
                 </div>
-
+                <!-- 페이지네이션 -->
                 <div class="d-flex justify-content-center">
                     <ul class="pagination">
                         <li class="page-item" th:unless="${pageInfo.startPage == 1}">
@@ -178,6 +207,16 @@
                     <!-- Modal body -->
                     <div class="modal-body">
                         <div class="mb-3">
+                            <label for="serviceCateId" class="form-label">카테고리:</label>
+                            <select class="form-control" id="serviceCateId" name="serviceCateId" required>
+                                <option value="" disabled selected>카테고리를 선택하세요</option>
+                                <!-- 카테고리 목록을 반복하여 선택 항목으로 표시 -->
+                                <th:block th:each="serviceCateDTOS : ${serviceCateDTOS}">
+                                    <option th:value="${serviceCateDTOS.serviceCateId}" th:text="${serviceCateDTOS.serviceCateName}"></option>
+                                </th:block>
+                            </select>
+                        </div>
+                        <div class="mb-3">
                             <label for="serviceMenuName" class="form-label">메뉴 이름:</label>
                             <input type="text" class="form-control" id="serviceMenuName" name="serviceMenuName" minlength="2" required>
                         </div>
@@ -188,9 +227,9 @@
                         <div class="mb-3">
                             <label for="serviceMenuStatus" class="form-label">메뉴 상태:</label>
                             <select class="form-control" id="serviceMenuStatus" name="serviceMenuStatus">
-                                <option value="판매중">판매중</option>
-                                <option value="준비중">준비중</option>
-                                <option value="매진">매진</option>
+                                <option value="SELL">판매중</option>
+                                <option value="PREPARE">준비중</option>
+                                <option value="SOLD_OUT">매진</option>
                             </select>
                         </div>
                         <div class="mb-3">
