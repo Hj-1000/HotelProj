@@ -24,7 +24,6 @@
             var moBtn = $(".modalBtn")
             var modal = $("#myModal")
 
-            var title
 
             moBtn.off().on("click", function () {
 
@@ -54,9 +53,11 @@
 <div id="wrapper" layout:fragment="content">
     <div class="container-fluid mt-4">
         <h2 class="mb-3">호텔 지사 관리</h2>
+
         <!-- 검색 영역 -->
         <div class="card p-4 mb-4">
             <form action="/manager/hotel/list" method="get">
+                <input type="hidden" name="companyId" th:value="${companyId}">
                 <div class="row g-3 align-items-center">
                     <h5 class="card-title">지사 찾기</h5>
                     <div class="col-md-6">
@@ -73,7 +74,7 @@
                 </div>
                 <!-- 조회 버튼 -->
                 <div class="text-center mt-4">
-                    <button type="submit" class="btn btn-dark w-25" >조회</button>
+                    <button type="submit" class="btn btn-dark w-25" th:formaction="@{ /manager/hotel/list(companyId=${companyId}, searchType=${searchType}, keyword=${keyword}) }">조회</button>
                 </div>
             </form>
         </div>
@@ -109,7 +110,7 @@
                             <td th:text="${data.hotelId}">호텔번호</td>
                             <td th:text="${data.companyName}">본사명</td>
                             <td>
-                                <a th:href="@{/hotel/read(hotelId=${data.hotelId})}" style="text-decoration: none" th:text="${data.hotelName}">지사명</a>
+                                <a th:href="@{/manager/hotel/read(hotelId=${data.hotelId})}" style="text-decoration: none" th:text="${data.hotelName}">지사명</a>
                             </td>
                             <td th:text="${data.hotelAddress}">주소</td>
                             <td th:text="${data.hotelPhone}">전화번호</td>

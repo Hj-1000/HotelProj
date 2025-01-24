@@ -45,7 +45,7 @@
 
         <!-- 버튼 -->
         <div class="text-end mt-3">
-            <button class="btn btn-primary" style="background-color: black" onclick="location.href='/manager/hotel/list' ">목록</button>
+            <a class="btn btn-primary" style="background-color: black" th:href="@{/manager/hotel/list(companyId=${hotelDTO.companyId.companyId})}">목록</a>
             <a class="btn btn-primary" th:href="@{/manager/hotel/modify(hotelId=${hotelDTO.hotelId})}">수정</a>
             <a class="btn btn-danger" th:href="@{/manager/hotel/delete(hotelId=${hotelDTO.hotelId})}">삭제</a>
         </div>
