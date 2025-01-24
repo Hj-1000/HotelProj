@@ -24,7 +24,7 @@ public class ServiceOrder extends BaseEntity {
     private ServiceOrderStatus serviceOrderStatus;
 
     //주문의 총 금액
-    private int totalPrice;
+    private Integer totalPrice;
 
     @ManyToOne
     @JoinColumn(name = "memberId")
@@ -38,7 +38,7 @@ public class ServiceOrder extends BaseEntity {
             orphanRemoval = true, fetch = FetchType.LAZY)
     private List<ServiceOrderItem> serviceOrderItemList = new ArrayList<>();
 
-    public void setServiceOrderItemList(ServiceOrderItem serviceOrderItem) {
+    public void addServiceOrderItem(ServiceOrderItem serviceOrderItem) {
         this.serviceOrderItemList.add(serviceOrderItem);
     }
 
@@ -46,7 +46,13 @@ public class ServiceOrder extends BaseEntity {
         this.serviceOrderItemList = serviceOrderItemList;
     }
 
-
-
+    // orderItem의 모든 가격을 총합한 전체 주문금액
+    public void calculateTotalPrice() {
+        int total = 0;
+        for (ServiceOrderItem item : this.serviceOrderItemList) {
+            total += item.getOrderPrice();
+        }
+        this.totalPrice = total;
+    }
 
 }

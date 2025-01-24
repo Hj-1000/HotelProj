@@ -135,12 +135,13 @@ public class ServiceMenuService {
         return serviceMenu.map(entity -> modelMapper.map(entity, ServiceMenuDTO.class));
     }
 
-    public void updateMenuStatus(Integer menuId, String newStatus) {
-        ServiceMenu serviceMenu = serviceMenuRepository.findById(menuId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 메뉴입니다."));
-        serviceMenu.setServiceMenuStatus(ServiceMenuStatus.valueOf(newStatus)); // 상태 업데이트
-        serviceMenuRepository.save(serviceMenu); // 변경 저장
-    }
+    // 즉각적 수정을 위한 서비스
+//    public void updateMenuStatus(Integer menuId, String newStatus) {
+//        ServiceMenu serviceMenu = serviceMenuRepository.findById(menuId)
+//                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 메뉴입니다."));
+//        serviceMenu.setServiceMenuStatus(ServiceMenuStatus.valueOf(newStatus)); // 상태 업데이트
+//        serviceMenuRepository.save(serviceMenu); // 변경 저장
+//    }
 
 
     //서비스 메뉴 상세보기

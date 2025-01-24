@@ -8,28 +8,6 @@
 
     <script th:inline="javascript">
         $(document).ready(function () {
-
-            //수정버튼 클릭 이벤트 2025-01-24 리스트에서 수정해보고 싶어서 만들었음
-            $(".updateStatusBtn").on("click", function () {
-                const menuId = $(this).data("menu-id"); // 메뉴 ID
-                const newStatus = $(this).closest("tr").find(".menuStatusDropdown").val(); // 선택된 상태값
-
-                // AJAX 요청으로 상태값 업데이트
-                $.ajax({
-                    url: `/roomService/menu/updateStatus/${menuId}`,
-                    method: "POST",
-                    data: JSON.stringify({ serviceMenuStatus: newStatus }),
-                    contentType: "application/json",
-                    success: function (response) {
-                        alert(response.message); // 성공 메시지
-                        location.reload(); // 페이지 새로고침
-                    },
-                    error: function (xhr) {
-                        alert("상태 업데이트 중 오류가 발생했습니다."); // 오류 메시지
-                    }
-                });
-
-
             // 세션에서 message를 가져온다
             var message = [[${message}]]
 
@@ -142,7 +120,6 @@
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">서비스 메뉴 목록</h5>
-                <a class="btn btn-primary" th:href="@{/roomService/menu/list}">전체조회</a>
                 <table class="table table-bordered text-center">
                     <thead>
                     <tr>
@@ -152,47 +129,29 @@
                         <th>메뉴 설명</th>
                         <th>메뉴 상태</th>
                         <th>메뉴 가격</th>
-                        <th>수정</th> <!-- 수정 버튼 추가 -->
                         <th>삭제여부</th>
                     </tr>
                     </thead>
                     <tbody>
                     <th:block th:if="${#lists.isEmpty(serviceMenuDTOS)}">
-                        <tr><td colspan="8">등록된 서비스 메뉴가 없습니다.</td></tr>
+                        <tr><td colspan="7">등록된 서비스 메뉴가 없습니다.</td></tr>
                     </th:block>
 
                     <th:block th:unless="${#lists.isEmpty(serviceMenuDTOS)}">
                         <tr th:each="data, status: ${serviceMenuDTOS}">
+                            <!--                            <td th:text="${data.serviceMenuId}">1</td>-->
                             <td th:text="${status.index + 1}">1</td>
                             <td>
-                                <a th:href="@{/roomService/menu/list(serviceCateId=${data.serviceCateId.serviceCateId})}"
-                                   style="text-decoration: none" th:text="${data.serviceCateName}">카테고리 이름</a>
+                                <a th:href="@{/roomService/menu/list(serviceCateId=${data.serviceCateId.serviceCateId})}" style="text-decoration: none" th:text="${data.serviceCateName}">카테고리 이름</a>
                             </td>
                             <td>
-                                <a th:href="@{/roomService/menu/read(serviceMenuId=${data.serviceMenuId})}"
-                                   style="text-decoration: none" th:text="${data.serviceMenuName}">메뉴이름</a>
+                                <a th:href="@{/roomService/menu/read(serviceMenuId=${data.serviceMenuId})}" style="text-decoration: none" th:text="${data.serviceMenuName}">메뉴이름</a>
                             </td>
                             <td th:text="${data.serviceMenuInfo}">설명</td>
-                            <td>
-                                <!-- 상태 드롭다운 -->
-                                <select class="form-select menuStatusDropdown"
-                                        th:data-menu-id="${data.serviceMenuId}"
-                                        th:value="${data.serviceMenuStatus}">
-                                    <option value="SELL" th:selected="${data.serviceMenuStatus == 'SELL'}">판매중</option>
-                                    <option value="PREPARE" th:selected="${data.serviceMenuStatus == 'PREPARE'}">준비중</option>
-                                    <option value="SOLD_OUT" th:selected="${data.serviceMenuStatus == 'SOLD_OUT'}">매진</option>
-                                </select>
-                            </td>
+                            <td th:text="${data.serviceMenuStatus.description}">상태</td>
                             <td th:text="${data.serviceMenuPrice}">가격</td>
                             <td>
-                                <!-- 수정 버튼 -->
-                                <button class="btn btn-success updateStatusBtn"
-                                        th:data-menu-id="${data.serviceMenuId}"
-                                        style="width: 100px;">수정</button>
-                            </td>
-                            <td>
-                                <a th:href="@{/roomService/menu/delete(serviceMenuId=${data.serviceMenuId})}"
-                                   class="badge bg-danger delBtn">삭제</a>
+                                <a th:href="@{/roomService/menu/delete(serviceMenuId=${data.serviceMenuId})}" class="badge bg-danger delBtn">삭제</a>
                             </td>
                         </tr>
                     </th:block>
