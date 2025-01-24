@@ -31,7 +31,6 @@
 <body>
     <div th:replace="~{fragments/header::header}"></div>
     <!--본문-->
-    <!-- successMessage를 표시 -->
     <div layout:fragment="content" class="login-container">
         <div class="card login-card">
             <h5 class="card-title text-center mb-4">로그인</h5>
@@ -44,22 +43,31 @@
                     <label for="password" class="form-label">비밀번호 :</label>
                     <input type="password" class="form-control" id="password" name="password">
                 </div>
-                <div th:if="${successMessage}" class="alert alert-success">
-                    <p th:text="${successMessage}"></p>
-                </div>
                     <button type="submit" class="btn btn-primary">로그인</button>
-                    <!-- 회원가입 유형 선택 페이지로 이동 -->
                     <button type="button" class="btn btn-secondary" onclick="location.href='/selectrole'">회원가입</button>
                     <button type="button" class="btn btn-secondary" onclick="location.href='/user/findPassword'">비밀번호 찾기</button>
                     <button type="button" class="btn btn-danger" onclick="location.href='/'">취소</button>
-                <div th:if="${param.error}" class="alert alert-danger mt-3" role="alert">
-                    로그인에 실패했습니다. 이메일 또는 비밀번호를 확인하세요.
+                <div th:if="${session.loginError}" class="alert alert-danger mt-3" role="alert">
+                    <!-- 왜인지 시큐리티, 멤버서비스에서 \n 으로 줄바꿈이 안되어서... 일단 꼼수로 %%% 문자를 줄바꿈 처리하도록 만들어놓음 -->
+                    <span th:utext="${session.loginError.replace('%%%', '<br/>')}"></span>
                 </div>
             </form>
         </div>
     </div>
 
-
+    <script>
+        /* 페이지에서 벗어날 때 서버에 세션 무효화를 요청하는 스크립트
+        (로그인 실패 후 다른 페이지로 이동했다가 - ex) 회원가입, 비밀번호 찾기 -
+        다시 돌아왔을때 로그인 실패 메시지가 계속 남아 있는 문제 해결을 위해 추가) */
+        window.onbeforeunload = function() {
+            fetch('/logout', {
+                method: 'POST', // 세션 무효화 처리를 위한 요청
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+        };
+    </script>
 
     <div th:replace="~{fragments/footer::footer}"></div>
 </body>
