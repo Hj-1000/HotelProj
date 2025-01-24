@@ -7,6 +7,7 @@ import com.ntt.ntt.Util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
@@ -14,6 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +27,7 @@ public class RoomController {
     private final RoomService roomService;
 
 
-    // 유저 페이지 전달
+    // 유저 페이지
 
     @GetMapping("/")
     public String mainPageForm(Model model) {
@@ -42,16 +44,42 @@ public class RoomController {
     }
 
 
-    @GetMapping("/roomList")
+    @GetMapping("/roomList") // 초기 Thymeleaf 화면 렌더링
     public String roomListPageForm(Model model) {
-        // 모든 방 데이터를 가져옵니다.
-        List<RoomDTO> roomList = roomService.roomList();
+        Page<RoomDTO> initialRooms = roomService.getPaginatedRooms(PageRequest.of(0, 6));
 
-        // 방 데이터를 모델에 추가
-        model.addAttribute("roomList", roomList);
+        // Room 상태 업데이트를 로그로 확인 (디버깅용)
+        initialRooms.getContent().forEach(room -> log.info("Room: {}, Status: {}", room.getRoomName(), room.getRoomStatus()));
 
-        return "roomList"; // roomList.html로 이동
+        log.info("Room 데이터: {}", initialRooms.getContent());
+
+        model.addAttribute("roomList", initialRooms.getContent());
+
+        return "roomList"; // roomList.html 반환
     }
+
+    @GetMapping("/roomList/data") // AJAX 요청 처리
+    @ResponseBody
+    public Map<String, Object> roomListDataForm(@RequestParam(value = "page", defaultValue = "0") int page) {
+        int pageSize = 3; // 한 번에 로드할 방 개수
+
+        if (page < 0) {
+            page = 0; // 음수 방지
+        }
+
+        Page<RoomDTO> paginatedRooms = roomService.getPaginatedRooms(PageRequest.of(page, pageSize));
+
+        // Room 데이터 확인 로그
+        paginatedRooms.getContent().forEach(room -> log.info("Room: {}, Status: {}", room.getRoomName(), room.getRoomStatus()));
+
+        // 응답 데이터 생성
+        Map<String, Object> response = new HashMap<>();
+        response.put("rooms", paginatedRooms.getContent());
+        response.put("isLastPage", paginatedRooms.isLast());
+        return response;
+    }
+
+    /* -----------관리자 페이지----------- */
 
     // 1. Room 등록 페이지로 이동
     @GetMapping("/manager/room/register")
