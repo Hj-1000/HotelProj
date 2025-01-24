@@ -85,21 +85,19 @@ public class HotelService {
 
     //본사관리자용목록
     public Page<HotelDTO> listByCompany(Pageable page, String keyword, Integer keyword1, String searchType, Integer companyId) {
-
         // 1. 페이지 정보 재가공
-        int currentPage = page.getPageNumber() - 1;
-        int pageSize = 10;
+        int currentPage = page.getPageNumber(); // 기존 페이지 번호 그대로 사용
+        int pageSize = page.getPageSize(); // 페이지 사이즈 그대로 사용
         Pageable pageable = PageRequest.of(
                 currentPage, pageSize,
-                Sort.by(Sort.Direction.DESC, "hotelId")
+                Sort.by(Sort.Direction.DESC, "hotelId") // 최신순으로 정렬
         );
 
         // 2. 검색타입에 따른 호텔 조회
         Page<Hotel> hotels = null;
 
-        // companyId가 있을 경우 해당 회사의 호텔만 조회
         if (companyId != null) {
-            // companyId가 있으면 회사에 속한 호텔만 조회
+            // companyId가 있을 경우 해당 회사의 호텔만 조회
             if (keyword != null && !keyword.isEmpty()) {
                 String keywordLike = "%" + keyword + "%";  // LIKE 조건을 위한 검색어 처리
 
@@ -147,6 +145,70 @@ public class HotelService {
 
         return hotelDTOS;
     }
+
+//    public Page<HotelDTO> listByCompany(Pageable page, String keyword, Integer keyword1, String searchType, Integer companyId) {
+//
+//        // 1. 페이지 정보 재가공
+//        int currentPage = page.getPageNumber() - 1;
+//        int pageSize = 10;
+//        Pageable pageable = PageRequest.of(
+//                currentPage, pageSize,
+//                Sort.by(Sort.Direction.DESC, "hotelId")
+//        );
+//
+//        // 2. 검색타입에 따른 호텔 조회
+//        Page<Hotel> hotels = null;
+//
+//        // companyId가 있을 경우 해당 회사의 호텔만 조회
+//        if (companyId != null) {
+//            // companyId가 있으면 회사에 속한 호텔만 조회
+//            if (keyword != null && !keyword.isEmpty()) {
+//                String keywordLike = "%" + keyword + "%";  // LIKE 조건을 위한 검색어 처리
+//
+//                // 검색 타입에 따라 조건을 추가
+//                if ("name".equals(searchType)) {
+//                    // 호텔명 검색
+//                    hotels = hotelRepository.findByCompany_CompanyIdAndHotelNameLike(companyId, keywordLike, pageable);
+//                } else if ("location".equals(searchType)) {
+//                    // 지역 검색
+//                    hotels = hotelRepository.findByCompany_CompanyIdAndHotelLocationLike(companyId, keywordLike, pageable);
+//                } else if ("address".equals(searchType)) {
+//                    // 주소 검색
+//                    hotels = hotelRepository.findByCompany_CompanyIdAndHotelAddressLike(companyId, keywordLike, pageable);
+//                } else if ("rating".equals(searchType)) {
+//                    // 별점 검색
+//                    hotels = hotelRepository.findByCompany_CompanyIdAndHotelRating(companyId, keyword1, pageable);
+//                }
+//            } else {
+//                // 검색어가 없으면 해당 companyId에 속한 모든 호텔 조회
+//                hotels = hotelRepository.findByCompany_CompanyId(companyId, pageable);
+//            }
+//        } else {
+//            // companyId가 없으면 모든 호텔 조회
+//            if (keyword != null && !keyword.isEmpty()) {
+//                String keywordLike = "%" + keyword + "%";  // LIKE 조건을 위한 검색어 처리
+//
+//                // 검색 타입에 따라 조건을 추가
+//                if ("name".equals(searchType)) {
+//                    hotels = hotelRepository.findByHotelNameLike(keywordLike, pageable);
+//                } else if ("location".equals(searchType)) {
+//                    hotels = hotelRepository.findByHotelLocationLike(keywordLike, pageable);
+//                } else if ("address".equals(searchType)) {
+//                    hotels = hotelRepository.findByHotelAddressLike(keywordLike, pageable);
+//                } else if ("rating".equals(searchType)) {
+//                    hotels = hotelRepository.findByHotelRating(keyword1, pageable);
+//                }
+//            } else {
+//                // 검색어가 없으면 모든 호텔 리스트를 조회
+//                hotels = hotelRepository.findAll(pageable);
+//            }
+//        }
+//
+//        // 3. Hotel -> HotelDTO 변환
+//        Page<HotelDTO> hotelDTOS = hotels.map(entity -> modelMapper.map(entity, HotelDTO.class));
+//
+//        return hotelDTOS;
+//    }
 
     //일반회원 목록
     public Page<HotelDTO> list(Pageable page, String keyword, String searchType, boolean exactMatch) {

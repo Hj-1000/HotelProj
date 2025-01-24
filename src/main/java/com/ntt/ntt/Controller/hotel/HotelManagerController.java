@@ -7,6 +7,7 @@ import com.ntt.ntt.Util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
@@ -60,19 +61,23 @@ public class HotelManagerController {
     //호텔본사관리자 전용
     @GetMapping("/list")
     public String list(@RequestParam(required = false) Integer companyId,
-                                @RequestParam(required = false) String keyword,
-                                @RequestParam(required = false) String searchType,
-                                @RequestParam(required = false) Integer keyword1,  // 별점 검색용
-                                @PageableDefault(page = 1) Pageable page,
-                                Model model) {
+                       @RequestParam(required = false) String keyword,
+                       @RequestParam(required = false) String searchType,
+                       @RequestParam(required = false) Integer keyword1,  // 별점 검색용
+                       @RequestParam(defaultValue = "1") int page, // 기본값을 1로 설정 (1-based)
+                       @PageableDefault(size = 10) Pageable pageable, // 한 페이지에 10개씩
+                       Model model) {
+
+        // 페이지 번호를 0-based로 변환 (page는 1-based로 들어오므로 1을 빼줌)
+        Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize());
 
         // companyId가 존재하는 경우 해당 회사의 지사들만 조회
         Page<HotelDTO> hotelDTOS;
 
         if (companyId != null) {
-            hotelDTOS = hotelService.listByCompany(page, keyword, keyword1, searchType, companyId);
+            hotelDTOS = hotelService.listByCompany(adjustedPageable, keyword, keyword1, searchType, companyId);
         } else {
-            hotelDTOS = hotelService.listByCompany(page, keyword, keyword1, searchType, companyId); // 기본적으로 모든 지사 조회
+            hotelDTOS = hotelService.listByCompany(adjustedPageable, keyword, keyword1, searchType, companyId); // 기본적으로 모든 지사 조회
         }
 
         // 페이지 정보 계산
@@ -80,17 +85,23 @@ public class HotelManagerController {
 
         // 전체 페이지 수
         int totalPages = hotelDTOS.getTotalPages();
-
-        // 현재 페이지 번호
         int currentPage = pageInfo.get("currentPage");
 
         // 시작 페이지와 끝 페이지 계산 (현재 페이지를 기준으로 최대 10페이지까지)
-        int startPage = Math.max(1, currentPage - 4); // 10개씩 끊어서 시작 페이지 계산
-        int endPage = Math.min(startPage + 9, totalPages); // 최대 10페이지까지, 전체 페이지 수를 넘지 않도록
+        int startPage = Math.max(1, currentPage - 4); // 최대 10개씩 출력
+        int endPage = Math.min(startPage + 9, totalPages); // 전체 페이지 수를 넘지 않도록
+
+        // prevPage, nextPage, lastPage 계산
+        int prevPage = Math.max(1, currentPage - 1);
+        int nextPage = Math.min(totalPages, currentPage + 1);
+        int lastPage = totalPages;
 
         // 페이지 정보 업데이트
         pageInfo.put("startPage", startPage);
         pageInfo.put("endPage", endPage);
+        pageInfo.put("prevPage", prevPage);
+        pageInfo.put("nextPage", nextPage);
+        pageInfo.put("lastPage", lastPage);
 
         // 모델에 데이터 추가
         model.addAttribute("hotelDTOS", hotelDTOS);
@@ -103,14 +114,13 @@ public class HotelManagerController {
         // companyId를 쿼리 파라미터로 다시 전달
         model.addAttribute("companyId", companyId);
 
+        // 회사 목록 추가
         List<CompanyDTO> companyDTOS = hotelService.getAllCompany();
         model.addAttribute("companyDTOS", companyDTOS);
         model.addAttribute("companyDTO", new CompanyDTO());
 
-        return "/manager/hotel/list";
+        return "/manager/hotel/list"; // 뷰 경로
     }
-
-
 
 
     //읽기
