@@ -113,6 +113,7 @@ public class HotelManagerController {
             pageInfo.put("nextPage", nextPage);
             pageInfo.put("lastPage", lastPage);
 
+
             // 모델에 데이터 추가
             model.addAttribute("hotelDTOS", hotelDTOS);
             model.addAttribute("pageInfo", pageInfo);
