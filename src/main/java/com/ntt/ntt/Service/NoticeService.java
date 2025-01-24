@@ -7,6 +7,7 @@ import com.ntt.ntt.Util.FileUpload;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.ntt.ntt.Entity.Notice;
@@ -14,6 +15,8 @@ import com.ntt.ntt.DTO.NoticeDTO;
 import com.ntt.ntt.Repository.NoticeRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 
 import java.io.IOException;
@@ -33,12 +36,19 @@ import java.util.stream.Collectors;
 public class NoticeService {
 
     private final ImageRepository imageRepository;
+
     private final NoticeRepository noticeRepository;
+
     private final ModelMapper modelMapper;
 
     // 이미지 등록할 ImageService 의존성
     private final ImageService imageService;
     private final FileUpload fileUpload;
+
+    public Page<NoticeDTO> getNotices(int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        return noticeRepository.findAll(pageRequest).map(notice -> new NoticeDTO(notice));
+    }
 
     @Value("${dataUploadPath}")
     private String IMG_LOCATION;
@@ -101,6 +111,47 @@ public class NoticeService {
             throw new RuntimeException("공지사항이 없습니다");
         }
     }
+
+    public List<NoticeDTO> getFilteredNotice(String noticeTitle, String noticeContent,String regDate, String modDate) {
+
+        List<Notice> notices = noticeRepository.findAll();
+
+        if (noticeTitle != null && !noticeTitle.isEmpty()) {
+            notices = notices.stream()
+                    .filter(notice -> notice.getNoticeTitle().contains(noticeTitle))
+                    .collect(Collectors.toList());
+        }
+        if (noticeContent != null && !noticeContent.isEmpty()) {
+            notices = notices.stream()
+                    .filter(notice -> notice.getNoticeContent().contains(noticeContent))
+                    .collect(Collectors.toList());
+        }
+
+
+//        if (regDate != null && !regDate.isEmpty() && modDate != null && !modDate.isEmpty()) {
+//            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+//            LocalDate start = LocalDate.parse(regDate, formatter);
+//            LocalDate end = LocalDate.parse(modDate, formatter);
+//
+//            notices = notices.stream()
+//                    .filter(notice -> {
+//                        LocalDate createdDate = notice.getRegDate().toLocalDate();
+//                        return (createdDate.isEqual(start) || createdDate.isAfter(start)) &&
+//                                (createdDate.isEqual(end) || createdDate.isBefore(end));
+//                    })
+//                    .collect(Collectors.toList());
+//        }
+
+        return notices.stream()
+                .map(notice -> modelMapper.map(notice, NoticeDTO.class))
+                .collect(Collectors.toList());
+    }
+
+//    public Notice readByNoticeTitle(String noticeTitle) {
+//        Optional<Notice> notice = noticeRepository.findByNoticeTitle(noticeTitle);
+//        return notice.orElse(null);  // 없으면 null 반환
+//    }
+
 //    public void delete(Integer noticeId, List<MultipartFile> multipartFile) {
 //        noticeRepository.deleteById(noticeId);
 //        //파일삭제 추가
