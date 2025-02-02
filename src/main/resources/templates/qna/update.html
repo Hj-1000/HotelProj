@@ -9,7 +9,6 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f8f9fa;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -105,7 +104,7 @@
     </div>
   </form>
 
-  <a href="/qna/read?id=${qna.qnaId}" class="btn btn-secondary mt-3">돌아가기</a>
+  <a th:href="@{/qna/read/{id}(id=${qna.qnaId})}" class="btn btn-secondary mt-3">돌아가기</a>
 </div>
 
 <!-- 푸터 -->

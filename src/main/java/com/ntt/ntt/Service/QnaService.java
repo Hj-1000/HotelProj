@@ -34,26 +34,27 @@ public class QnaService {
         this.memberRepository = memberRepository;
     }
 
-
-
-
-
-    // findById 메서드 추가
-    public Qna findById(Integer qnaID) {
-        return qnaRepository.findById(qnaID)
-                .orElseThrow(() -> new EntityNotFoundException("Qna not found with id: " + qnaID));
-    }
-
-    public Page<Qna> getQnaPage(Integer page, String keyword) {
-        Pageable pageable = PageRequest.of(page - 1, 5, Sort.by(Sort.Order.desc("regDate")));
-
+    public Page<Qna> getQnaPage(int page, String keyword) {
+        Pageable pageable = PageRequest.of(page - 1, 10);  // page는 1부터 시작하므로 1을 빼서 처리
         if (keyword == null || keyword.isEmpty()) {
-            return qnaRepository.findAll(pageable);  // 검색어가 없으면 모든 Q&A를 반환
+            return qnaRepository.findAll(pageable);  // 검색어가 없으면 전체 목록
         } else {
-            return qnaRepository.findByQnaTitleContainingOrQnaContentContainingOrMemberMemberNameContaining(
-                    keyword, keyword, keyword, pageable );
+            return qnaRepository.findByQnaTitleContainingOrQnaContentContaining(keyword, keyword, pageable);  // 검색어로 필터링
         }
     }
+
+
+
+    // Qna ID로 찾는 메서드
+    public Qna findById(Integer qnaID) {
+        Optional<Qna> qnaOptional = qnaRepository.findById(qnaID);
+        if (qnaOptional.isPresent()) {
+            return qnaOptional.get();
+        } else {
+            throw new EntityNotFoundException("Qna not found with id: " + qnaID);
+        }
+    }
+
 
 
     // Qna 질문 등록
@@ -69,14 +70,20 @@ public class QnaService {
     }
 
 
+
     // Qna 수정
     public Qna updateQna(Integer id, QnaDTO qnaDTO) {
+        // id로 Qna를 찾음
         Qna qna = qnaRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Qna를 찾을 수 없습니다."));
+
+        // 수정할 내용 설정
         qna.setQnaTitle(qnaDTO.getQnaTitle());
         qna.setQnaContent(qnaDTO.getQnaContent());
         qna.setModDate(LocalDateTime.now());
-        return qnaRepository.save(qna);
+
+        // 수정 후 다시 저장 (id는 변경되지 않음)
+        return qnaRepository.save(qna);  // 이미 존재하는 엔티티를 저장하므로 id 변경 없음
     }
 
     // Qna 삭제

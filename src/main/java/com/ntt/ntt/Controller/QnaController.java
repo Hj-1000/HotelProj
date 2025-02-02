@@ -4,6 +4,7 @@ import com.ntt.ntt.DTO.MemberDTO;
 import com.ntt.ntt.DTO.QnaDTO;
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Entity.Qna;
+import com.ntt.ntt.Entity.Reply;
 import com.ntt.ntt.Repository.QnaRepository;
 import com.ntt.ntt.Service.MemberService;
 import com.ntt.ntt.Service.QnaService;
@@ -42,8 +43,8 @@ public class QnaController {
     // 질문 목록 페이지로 이동
     @GetMapping("/qna/list")
     public String qnaListPage(
-            @RequestParam(defaultValue = "1") int page, // 기본 페이지 번호 1
-            @RequestParam(required = false, defaultValue = "") String keyword, // 기본 검색어 빈 문자열
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "") String keyword,
             @AuthenticationPrincipal UserDetails userDetails,
             Model model) {
 
@@ -54,25 +55,24 @@ public class QnaController {
         Map<String, Integer> pagination = paginationUtil.pagination(qnaPage);
 
         // 모델에 데이터 추가
-        model.addAttribute("qnaList", qnaPage.getContent()); // 현재 페이지의 Q&A 리스트
-        model.addAttribute("pagination", pagination); // 페이지네이션 정보 추가
-        model.addAttribute("keyword", keyword); // 검색 키워드
+        model.addAttribute("qnaList", qnaPage.getContent());
+        model.addAttribute("pagination", pagination);
+        model.addAttribute("keyword", keyword);  // keyword를 그대로 모델에 전달
 
-        // 로그인된 사용자 정보 처리
         if (userDetails != null) {
             MemberDTO memberDTO = memberService.read(userDetails.getUsername());
             Member currentMember = dtoToEntity(memberDTO);
-            model.addAttribute("currentMember", currentMember); // 현재 로그인된 사용자
+            model.addAttribute("currentMember", currentMember);
         } else {
             model.addAttribute("errorMessage", "로그인 후 이용해주세요.");
         }
 
-        return "qna/list"; // qna/list.html로 이동
+        return "qna/list";
     }
 
     // 질문 작성 페이지로 이동
     @GetMapping("/qna/register")
-    public String qnaRegisterPage(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+    public String qnaRegisterPageForm(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         if (userDetails == null) {
             model.addAttribute("errorMessage", "로그인 후 질문을 남길 수 있습니다.");
             return "redirect:/login";  // 로그인 페이지로 리다이렉트
@@ -185,13 +185,20 @@ public class QnaController {
         return "redirect:/qna/list"; // 업데이트 후 Q&A 목록으로 리다이렉트
     }
 
+
     // 질문 삭제 처리
     @PostMapping("/qna/delete/{id}")
     public String deleteQnaPorc(@PathVariable("id") Integer id, @AuthenticationPrincipal UserDetails userDetails) {
+        // 질문 찾기
         Qna qna = qnaRepository.findById(id).orElse(null);
         if (qna != null) {
-            // 현재 로그인한 사용자가 해당 질문 작성자인지 확인
-            if (userDetails != null && qna.getMember().getMemberId().equals(dtoToEntity(memberService.read(userDetails.getUsername())).getMemberId())) {
+            // 로그인된 사용자 정보가 없으면 리스트로 리다이렉트
+            if (userDetails == null) {
+                return "redirect:/qna/list";  // 로그인 후 다시 시도하도록 유도
+            }
+
+            // 작성자가 존재하는지 확인
+            if (qna.getMember() != null && qna.getMember().getMemberId().equals(dtoToEntity(memberService.read(userDetails.getUsername())).getMemberId())) {
                 qnaService.deleteQna(id);  // QnaService에서 삭제 처리
                 return "redirect:/qna/list";  // 삭제 후 질문 목록 페이지로 리다이렉트
             } else {
@@ -216,6 +223,20 @@ public class QnaController {
             model.addAttribute("errorMessage", "관리자만 댓글을 작성할 수 있습니다.");
         }
         return "redirect:/qna/read/" + qnaId;  // Q&A 상세보기 페이지로 리다이렉트
+    }
+    // 댓글 수정
+    @GetMapping("/reply/update/{id}")
+    public String updateReply(@PathVariable Integer id, Model model) {
+        Reply reply = replyService.findById(id);
+        model.addAttribute("reply", reply);
+        return "/reply/update"; // 댓글 수정 폼으로 이동
+    }
+
+    // 댓글 삭제
+    @GetMapping("/reply/delete/{id}")
+    public String deleteReply(@PathVariable Integer id) {
+        replyService.deleteReply(id);
+        return "redirect:/qna/read/{qnaId}"; // 댓글 삭제 후 Q&A 페이지로 리디렉션
     }
 
     // MemberDTO를 Member 엔티티로 변환하는 메소드
