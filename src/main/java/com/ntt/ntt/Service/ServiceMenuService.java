@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-
 @Service
 @RequiredArgsConstructor
 @jakarta.transaction.Transactional
@@ -135,13 +134,30 @@ public class ServiceMenuService {
         return serviceMenu.map(entity -> modelMapper.map(entity, ServiceMenuDTO.class));
     }
 
-    // 즉각적 수정을 위한 서비스
-//    public void updateMenuStatus(Integer menuId, String newStatus) {
-//        ServiceMenu serviceMenu = serviceMenuRepository.findById(menuId)
-//                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 메뉴입니다."));
-//        serviceMenu.setServiceMenuStatus(ServiceMenuStatus.valueOf(newStatus)); // 상태 업데이트
-//        serviceMenuRepository.save(serviceMenu); // 변경 저장
-//    }
+
+    // 메뉴가 속한 카테고리를 조회
+    public List<ServiceMenuDTO> getMenusByCategory(Integer serviceCateId) {
+
+        List<ServiceMenu> serviceMenuList =
+                serviceMenuRepository.findServiceMenuByServiceCate_ServiceCateId(serviceCateId);
+
+        if (serviceMenuList == null) {
+            throw new RuntimeException("메뉴가 존재하지 않습니다.");
+        }
+
+
+        // 엔티티를 DTO로 변환
+        return serviceMenuList.stream()
+                .map(menu -> ServiceMenuDTO.builder()
+                        .serviceMenuId(menu.getServiceMenuId())
+                        .serviceCateName(menu.getServiceCate().getServiceCateName())
+                        .serviceMenuName(menu.getServiceMenuName())
+                        .serviceMenuInfo(menu.getServiceMenuInfo())
+                        .serviceMenuStatus(menu.getServiceMenuStatus())
+                        .serviceMenuPrice(menu.getServiceMenuPrice())
+                        .build())
+                .collect(Collectors.toList());
+    }
 
 
     //서비스 메뉴 상세보기
@@ -186,7 +202,7 @@ public class ServiceMenuService {
     }
 
 
-    //서비스 카테로고리 수정
+    //서비스 메뉴 수정
     /*--------------------------------
     함수명 : void update(serviceMenuDTO serviceMenuDTO, MultipartFile multipartFile)
     인수 : 조회할 메뉴 메뉴 번호
@@ -256,7 +272,7 @@ public class ServiceMenuService {
     }
 
 
-    //서비스 카테로고리 삭제
+    //서비스 메뉴 삭제
     /*--------------------------------
     함수명 : void delete(Integer serviceMenuId)
     인수 : 조회할 메뉴 메뉴 번호
@@ -292,4 +308,5 @@ public class ServiceMenuService {
         }
     }
 }
+
 

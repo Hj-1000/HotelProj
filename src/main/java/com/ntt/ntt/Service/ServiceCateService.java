@@ -168,7 +168,7 @@ public class ServiceCateService{
     }
 
 
-    //서비스 카테로고리 수정
+    //서비스 카테고리 수정
     /*--------------------------------
     함수명 : void update(ServiceCateDTO serviceCateDTO, MultipartFile multipartFile)
     인수 : 조회할 메뉴 카테고리 번호
@@ -235,7 +235,7 @@ public class ServiceCateService{
     }
 
 
-    //서비스 카테로고리 삭제
+    //서비스 카테고리 삭제
     /*--------------------------------
     함수명 : void delete(Integer serviceCateId)
     인수 : 조회할 메뉴 카테고리 번호

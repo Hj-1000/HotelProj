@@ -146,20 +146,4 @@ public class ServiceMenuController {
         redirectAttributes.addFlashAttribute("message", "메뉴 삭제가 완료되었습니다.");
         return "redirect:/roomService/menu/list";
     }
-
-    //수정버튼 즉각반영을 위한 컨트롤러
-//    @PostMapping("/menu/updateStatus/{menuId}")
-//    @ResponseBody
-//    public ResponseEntity<?> updateMenuStatus(@PathVariable Integer menuId,
-//                                              @RequestBody Map<String, String> request) {
-//        try {
-//            String newStatus = request.get("serviceMenuStatus");
-//            serviceMenuService.updateMenuStatus(menuId, newStatus); // 상태 업데이트 서비스 호출
-//            return ResponseEntity.ok(Map.of("message", "메뉴 상태가 성공적으로 업데이트되었습니다."));
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-//                    .body(Map.of("message", "상태 업데이트에 실패했습니다."));
-//        }
-//    }
-
 }
