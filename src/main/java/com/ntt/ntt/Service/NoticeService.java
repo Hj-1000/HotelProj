@@ -7,8 +7,8 @@ import com.ntt.ntt.Util.FileUpload;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import com.ntt.ntt.Entity.Notice;
 import com.ntt.ntt.DTO.NoticeDTO;
@@ -19,10 +19,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -46,8 +42,10 @@ public class NoticeService {
     private final FileUpload fileUpload;
 
     public Page<NoticeDTO> getNotices(int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page, size);
-        return noticeRepository.findAll(pageRequest).map(notice -> new NoticeDTO(notice));
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "noticeId"));
+        return noticeRepository.findAll(pageRequest).map(Notice::toDTO);
+//        PageRequest pageRequest = PageRequest.of(page, size);
+//        return noticeRepository.findAll(pageRequest).map(notice -> new NoticeDTO(notice));
     }
 
     @Value("${dataUploadPath}")

@@ -41,10 +41,24 @@ public class NoticeController {
             Model model) {
 
         // 페이징된 공지사항 데이터 조회
-        Page<NoticeDTO> noticePage = noticeService.getNotices(page, size);
+        Page<NoticeDTO> noticePage = noticeService.getNotices(page,size);
 
         // PaginationUtil을 사용하여 페이징 정보 가져오기
         Map<String, Integer> pagination = paginationUtil.pagination(noticePage);
+
+        // 전체 페이지 수
+        int totalPages = noticePage.getTotalPages();
+
+        // 현재 페이지 번호
+        int currentPage = pagination.get("currentPage");
+
+        // 시작 페이지와 끝 페이지 계산 (현재 페이지를 기준으로 최대 10페이지까지)
+        int startPage = Math.max(1, currentPage - 4); // 10개씩 끊어서 시작 페이지 계산
+        int endPage = Math.min(startPage + 9, totalPages); // 최대 10페이지까지, 전체 페이지 수를 넘지 않도록
+
+        // 페이지 정보 업데이트
+        pagination.put("startPage", startPage);
+        pagination.put("endPage", endPage);
 
         // 모델에 데이터를 추가
         model.addAttribute("noticeDTOList", noticePage.getContent());
