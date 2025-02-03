@@ -208,15 +208,15 @@ public class CompanyController {
 
 
     //수정폼
-    @GetMapping("/modify")
-    public String modifyServiceHTML(Integer companyId, Model model) {
+    @GetMapping("/update")
+    public String updateHTML(Integer companyId, Model model) {
         CompanyDTO companyDTO = companyService.read(companyId);
         model.addAttribute("companyDTO", companyDTO);
-        return "/chief/company/modify";
+        return "/chief/company/update";
     }
     //수정처리
     @PostMapping("/modify")
-    public String modifyService(CompanyDTO companyDTO, List<MultipartFile> newImageFiles, RedirectAttributes redirectAttributes) {
+    public String updateProc(CompanyDTO companyDTO, List<MultipartFile> newImageFiles, RedirectAttributes redirectAttributes) {
         companyService.update(companyDTO, newImageFiles);
         redirectAttributes.addFlashAttribute("message", "본사 수정이 완료되었습니다.");
         return "redirect:/company/list";

@@ -11,35 +11,19 @@
 
     <script th:inline="javascript">
 
-        // 이미지 미리보기 함수
-        function previewImage(event) {
+        $(document).ready(function () {
 
-            console.log("수정 진입")
+            // 세션에서 message 값을 가져옴
+            var message = [[${message}]];
 
-            const previewContainer = document.getElementById('imagePreviewContainer');
-            previewContainer.innerHTML = '';  // 기존 미리보기 이미지 제거
-
-            const files = event.target.files;
-
-            if (files.length > 0) {
-                Array.from(files).forEach(file => {
-                    const reader = new FileReader();
-
-                    reader.onload = function(e) {
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.alt = 'Image Preview';
-                        img.style.maxWidth = '200px';  // 미리보기 이미지 크기 조정
-                        img.style.marginTop = '10px';
-                        previewContainer.appendChild(img);
-                    }
-
-                    reader.readAsDataURL(file);  // 이미지 파일을 읽어서 미리보기
-                });
+            // message가 null이 아니면 알림창을 띄우고 세션에서 삭제
+            if (message !== null && message !== '') {
+                alert(message);
             }
-        }
-    </script>
 
+        })
+
+    </script>
 </head>
 <body>
 <div id="wrapper" layout:fragment="content">

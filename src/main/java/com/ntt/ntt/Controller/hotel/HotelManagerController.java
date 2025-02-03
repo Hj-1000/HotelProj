@@ -162,18 +162,18 @@ public class HotelManagerController {
 
 
     //수정폼
-    @GetMapping("/modify")
-    public String modifyForm(Integer hotelId, Model model) {
+    @GetMapping("/update")
+    public String updateForm(Integer hotelId, Model model) {
         HotelDTO hotelDTO = hotelService.read(hotelId);
         List<CompanyDTO> companyDTOS = hotelService.getAllCompany();
         model.addAttribute("companyDTOS", companyDTOS);
         model.addAttribute("companyDTO", new CompanyDTO());
         model.addAttribute("hotelDTO", hotelDTO);
-        return "/manager/hotel/modify";
+        return "/manager/hotel/update";
     }
     //수정처리
-    @PostMapping("/modify")
-    public String modifyProc(HotelDTO hotelDTO, List<MultipartFile> newImageFiles, RedirectAttributes redirectAttributes) {
+    @PostMapping("/update")
+    public String updateProc(HotelDTO hotelDTO, List<MultipartFile> newImageFiles, RedirectAttributes redirectAttributes) {
         hotelService.update(hotelDTO, newImageFiles);
         redirectAttributes.addFlashAttribute("message", "지사 수정이 완료되었습니다.");
         return "redirect:/manager/hotel/list";
