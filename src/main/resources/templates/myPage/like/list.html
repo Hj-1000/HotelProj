@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <title>즐겨찾기</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/b17b1596b8.js" crossorigin="anonymous"></script>
+    <link rel ="stylesheet" href="/assets/fonts/fontawesome-all.min.css">
+    <link rel ="stylesheet" href="/assets/css/bootstrap.min.css">
+    <link rel ="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/roomList.css}">
+
+    <script th:inline="javascript">
+
+        $(document).ready(function () {
+            // 세션에서 message 값을 가져옴
+            var message = [[${message}]];
+
+            // message가 null이 아니면 알림창을 띄우고 세션에서 삭제
+            if (message !== null && message !== '') {
+                alert(message);
+            }
+
+            $(".unlike").hide()
+
+            /*x버튼을 눌렀을때 장바구니 아이템 삭제*/
+
+            $(".like").on("click", function () {
+
+
+                if (confirm("즐겨찾기 목록에서 삭제할까요? 😥") == true) {    //확인
+
+                    let a = $(this).find('span:eq(0)')  //jquery
+
+                    console.log(a)
+
+                    deleteLikeQuest(a)
+
+                } else {
+
+
+                }
+
+            })
+
+            $(".unlike").on("click", function () {
+
+                let a = $(this).find('span:eq(0)')  //jquery
+
+                addLikeQuest(a)
+
+            })
+
+            const adminErr = [[${adminErr}]]
+            if (adminErr) {
+                alert(adminErr)
+            }
+
+            function page(page) {
+                location.href = "/" + page;
+            }
+
+
+
+            function deleteLikeQuest(obj){
+
+
+
+                let likeQuestId = obj.data("id");    //아이템의 아이디를 가져온다.
+                let url = "/likeQuest/" + likeQuestId;
+
+                console.log(likeQuestId)
+
+                // alert(url);
+
+                $.ajax({
+                    url :url,
+                    type : "delete" ,
+                    dataType : "json",
+                    success : function (result) {
+
+                        $(".like").hide()
+                        $(".unlike").show()
+
+                        location.href='/likes';
+                    },
+                    error : function (result, status, error) {
+
+                        if(result.status == '401'){
+                            // alert(result.responseText+'로그인 후 이용해주세요');
+                            alert('로그인 후 이용해주세요');
+                            location.href = '/user/login';
+                        }else if(result.status == '200') {
+                            alert(result.responseText + "를 즐겨찾기 목록에서 삭제 완료 했습니다😥")
+                            location.href='/likes';
+                        }else {
+                            alert("확인요망 : " + result.responseText )
+                            alert("확인요망 : " + result.status )
+
+                        }
+                    }
+                });
+                //삭제버튼은 버튼자체의 태그를 갖는다.
+
+            }
+
+
+
+
+            function addLikeQuest(){
+
+                var questId = [[${questId}]]
+                var count = $("#count").val();
+                var param = {
+                    questId: questId,
+                    count: count
+                }
+                $.ajax({
+                    url: "/likes",
+                    type: "post",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify(param),
+                    dataType: "json",
+                    success: function (result, status) {
+
+                        //나중에 모달창으로 꾸미자
+                        //혹은 html페이지에 표시도 가능
+                        alert("즐겨찾기 완료 되었습니다💖 (아직 준비중 추후 업데이트 예정)")
+
+                        $(".unlike").hide()
+
+                        $(".like").show()
+
+
+                    },
+                    error: function (result, status, error) {
+
+                        if (result.status == '401') {
+                            // alert(result.responseText+'로그인 후 이용해주세요');
+                            alert('로그인 후 이용해주세요');
+                            location.href = '/user/login';
+                        } else {
+                            alert("확인요망 : " + result.responseText)
+                        }
+
+                        //에러출력, favicon
+
+                        //실패 메시지 bindingResult.hasErrors() 의 메소드 이건 DTO message
+                    }
+
+
+                })
+
+            }
+
+
+        })
+
+
+    </script>
+
+</head>
+<body>
+<div th:replace="~{fragments/header::header}"></div>
+<div layout:fragment="content">
+    <div class="mt-5 mb-5 card border" style="width: 1300px; margin-left: auto; margin-right: auto">
+
+        <!-- Room List Section -->
+        <section class="py-5">
+            <h2 class="text-center mb-5">나의 즐겨찾기</h2> <!--여기 나 부분에 회원이름 넣을거임-->
+            <div class="container">
+                <div id="room-list" class="row">
+
+                    <div th:unless="${not likeDetailDTOList.hasContent()}">
+
+                        <!--반복문-->
+                        <th:block th:each="data : ${likeDetailDTOList}">
+                            <!-- Room Card -->
+                            <div class="col-md-4">
+                                <a th:href="@{/hotel/read(hotelId=${data.hotelId})}">
+                                    <div class="room-card ">
+                                        <!--등록한 사진이 있을 때-->
+                                        <th:block th:if="${data.imagePath != 0}">
+                                            <div class="room-image">
+                                                <!-- 이미지 경로(path) -->
+                                                <img th:src="@{'/upload/' + ${data.imagePath}}" alt="hotel Image" width="300px"/>
+                                            </div>
+                                        </th:block>
+
+                                        <!--등록한 사진이 없을 때-->
+                                        <th:block th:unless="${data.imagePath != 0}">
+                                            <div class="room-image">
+                                                <img src="/img/default_img.jpg" alt="noImage" style="width: 300px"/>
+                                            </div>
+                                        </th:block>
+                                        <div class="room-text">
+                                            <a th:href="@{'/hotel/list?searchType=location&keyword=' + ${data.hotelLocation}}" style="text-decoration: none">
+                                                <div class="badge bg-secondary" th:text="${data.hotelLocation}">지역</div>
+                                            </a>
+                                            <div class="room-details">
+                                                <h4 th:text="${data.hotelName}">호텔 이름</h4>
+                                                <!--                                    <p th:text="${data.hotelInfo}">호텔 설명</p>-->
+                                                <p> 입실시간: <span th:text="${data.hotelCheckIn}"></span>시 </p>
+                                                <div class="room-actions">
+                                                    <div class="room-buttons">
+                                                        <button class="btn btn-outline-secondary btn-heart"><i class="fa-regular fa-heart"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </a>
+                            </div>
+                        </th:block>
+
+                        <!-- 페이지네이션 -->
+                        <div class="d-flex justify-content-center">
+                            <ul class="pagination">
+                                <!-- 시작 버튼 -->
+                                <li class="page-item" th:unless="${pageInfo.currentPage == 1}">
+                                    <a class="page-link" th:href="@{/hotel/list(page=1)}">시작</a>
+                                </li>
+
+                                <!-- 이전 버튼 -->
+                                <li class="page-item" th:unless="${pageInfo.currentPage == 1}">
+                                    <a class="page-link" th:href="@{/hotel/list(page=${pageInfo.prevPage})}">이전</a>
+                                </li>
+
+                                <!-- 페이지 번호 -->
+                                <th:block th:each="num : ${#numbers.sequence(pageInfo.startPage, pageInfo.endPage, 1)}">
+                                    <li class="page-item" th:unless="${num == pageInfo.currentPage}">
+                                        <a class="page-link" th:href="@{/hotel/list(page=${num})}" th:text="${num}">1</a>
+                                    </li>
+                                    <li class="page-item active" th:if="${num == pageInfo.currentPage}">
+                                        <a class="page-link" th:href="@{/hotel/list(page=${num})}" th:text="${num}">[[${num}]]</a>
+                                    </li>
+                                </th:block>
+
+                                <!-- 다음 버튼 -->
+                                <li class="page-item" th:unless="${pageInfo.currentPage >= pageInfo.lastPage}">
+                                    <a class="page-link" th:href="@{/hotel/list(page=${pageInfo.nextPage})}">다음</a>
+                                </li>
+
+                                <!-- 끝 버튼 -->
+                                <li class="page-item" th:unless="${pageInfo.currentPage == pageInfo.lastPage}">
+                                    <a class="page-link" th:href="@{/hotel/list(page=${pageInfo.lastPage})}">끝</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+
+
+                    <div th:if="${not likeDetailDTOList.hasContent()}" style="text-align: center">
+                        <img src="/img/empty.png" alt="No likes available">
+                        <p>목록이 비어있습니다!</p>
+                    </div>
+
+
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+</div>
+<div th:replace="~{fragments/footer::footer}"></div>
+</body>
+</html>

@@ -43,7 +43,7 @@ public class Hotel extends BaseEntity {
     private String hotelCheckOut;
 
     @ManyToOne
-    @JoinColumn(name = "managerId")
+    @JoinColumn(name = "memberId")
     private Member member;
 
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL,
