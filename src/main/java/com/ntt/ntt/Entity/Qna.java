@@ -27,4 +27,8 @@ public class Qna extends BaseEntity {
     @JoinColumn(name = "member")  // 외래 키 컬럼명이 memberId일 때
     private Member member;
 
+    // 회원 이름을 따로 저장하는 필드 추가
+    @Column(nullable = false)
+    private String memberName;
 }
+

@@ -40,6 +40,7 @@ public class QnaController {
     }
 
 
+
     // 질문 목록 페이지로 이동
     @GetMapping("/qna/list")
     public String qnaListPage(
@@ -55,7 +56,7 @@ public class QnaController {
         Map<String, Integer> pagination = paginationUtil.pagination(qnaPage);
 
         // 모델에 데이터 추가
-        model.addAttribute("qnaList", qnaPage.getContent());
+        model.addAttribute("qnaList", qnaPage.getContent()); // qnaList에 마스킹된 이름이 포함되어 있음
         model.addAttribute("pagination", pagination);
         model.addAttribute("keyword", keyword);  // keyword를 그대로 모델에 전달
 
@@ -69,6 +70,7 @@ public class QnaController {
 
         return "qna/list";
     }
+
 
     // 질문 작성 페이지로 이동
     @GetMapping("/qna/register")
@@ -114,7 +116,7 @@ public class QnaController {
     // 질문 상세보기 페이지로 이동
     @GetMapping("/qna/read/{id}")
     public String readQnaForm(@PathVariable Integer id, @AuthenticationPrincipal UserDetails userDetails, Model model) {
-        Qna qna = qnaService.findById(id);
+        Qna qna = qnaService.findById(id); // 이미 마스킹된 이름이 포함됨
 
         // 날짜가 null인 경우 처리
         if (qna.getRegDate() == null) {

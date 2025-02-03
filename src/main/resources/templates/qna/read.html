@@ -69,7 +69,7 @@
 <div class="container">
     <h1 th:text="${qna.qnaTitle}">제목</h1>
     <p th:text="${qna.qnaContent}">내용</p>
-    <p><span th:text="'작성자: ' + ${qna.member.memberName}">작성자</span></p>
+    <span th:text="${qna.memberName}"></span>  <!-- 마스킹된 이름 출력 -->
 
     <!-- 작성일자 포맷 처리 및 null 체크 -->
     <p class="date" th:text="${#temporals.format(qna.regDate, 'yyyy-MM-dd HH:mm')}">작성일자</p>
@@ -132,5 +132,9 @@
 
 <!-- 푸터 -->
 <div th:replace="~{fragments/footer::footer}"></div>
+<!-- 작성자 이름 -->
+<p><span id="maskedName" th:text="${qna.member.memberName}">작성자</span></p>
+
+
 </body>
 </html>
