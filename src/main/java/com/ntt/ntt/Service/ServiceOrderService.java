@@ -67,5 +67,39 @@ public class ServiceOrderService {
         serviceOrderRepository.save(serviceOrder);
         return modelMapper.map(serviceOrder, ServiceOrderDTO.class);
     }
+
+    //2025.02.03 추가한 기능들
+    // 주문 취소 기능
+    public void cancelOrder(Integer serviceOrderId) {
+        ServiceOrder serviceOrder = serviceOrderRepository.findById(serviceOrderId)
+                .orElseThrow(() -> new RuntimeException("주문을 찾을 수 없습니다."));
+        serviceOrder.setServiceOrderStatus(ServiceOrderStatus.CANCELED);
+        serviceOrderRepository.save(serviceOrder);
+    }
+
+    // 특정 주문 상세 조회 (사용자 & 관리자용 공통)
+    public ServiceOrderDTO getOrderDetails(Integer serviceOrderId) {
+        ServiceOrder serviceOrder = serviceOrderRepository.findById(serviceOrderId)
+                .orElseThrow(() -> new RuntimeException("주문을 찾을 수 없습니다."));
+        return modelMapper.map(serviceOrder, ServiceOrderDTO.class);
+    }
+
+    // 모든 주문 목록 조회 (관리자용)
+    public List<ServiceOrderDTO> getAllOrders() {
+        List<ServiceOrder> serviceOrders = serviceOrderRepository.findAll();
+        return serviceOrders.stream()
+                .map(order -> modelMapper.map(order, ServiceOrderDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    // 주문 처리 기능 (예: 조리 중, 배달 중 등 상태 변경)
+    public ServiceOrderDTO processOrder(Integer serviceOrderId, ServiceOrderStatus status) {
+        ServiceOrder serviceOrder = serviceOrderRepository.findById(serviceOrderId)
+                .orElseThrow(() -> new RuntimeException("주문을 찾을 수 없습니다."));
+        serviceOrder.setServiceOrderStatus(status);
+        serviceOrderRepository.save(serviceOrder);
+        return modelMapper.map(serviceOrder, ServiceOrderDTO.class);
+    }
+
 }
 

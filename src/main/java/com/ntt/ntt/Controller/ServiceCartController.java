@@ -1,41 +1,23 @@
 package com.ntt.ntt.Controller;
 
-import com.ntt.ntt.DTO.ServiceCartDTO;
-import com.ntt.ntt.DTO.ServiceCartItemDTO;
-import com.ntt.ntt.Service.ServiceCartService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
-@RestController
-@RequestMapping("/api/cart")
-@RequiredArgsConstructor
-@Log4j2
+@Controller
+@RequestMapping("/manager/cart")
 public class ServiceCartController {
 
-    private final ServiceCartService serviceCartService;
+    @GetMapping
+    public String getCartPage(Model model) {
+        // 로그인한 회원의 ID를 세션 또는 인증 정보에서 가져오도록 설정할 수 있습니다.
+        Integer memberId = 1;  // 로그인한 회원의 ID, 실제로는 세션에서 가져옵니다.
 
-    // 특정 회원의 장바구니 조회
-    @GetMapping("/{memberId}")
-    public ResponseEntity<ServiceCartDTO> getCartByMemberId(@PathVariable Integer memberId) {
-        ServiceCartDTO serviceCartDTO = serviceCartService.getCartByMemberId(memberId);
-        return ResponseEntity.ok(serviceCartDTO);
-    }
+        // 추가적으로 모델에 데이터를 추가할 수 있습니다.
+        model.addAttribute("memberId", memberId);
 
-    // 장바구니에 아이템 추가
-    @PostMapping("/{serviceCartId}/items")
-    public ResponseEntity<Void> addItemToCart(@PathVariable Integer serviceCartId,
-                                              @RequestBody ServiceCartItemDTO serviceCartItemDTO) {
-        serviceCartService.addItemToCart(serviceCartId, serviceCartItemDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
-
-    // 장바구니 아이템 삭제
-    @DeleteMapping("/items/{serviceCartItemId}")
-    public ResponseEntity<Void> removeItemFromCart(@PathVariable Integer serviceCartItemId) {
-        serviceCartService.removeItemFromCart(serviceCartItemId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        // cart.html 템플릿을 반환
+        return "manager/roomservice/cart/cart";
     }
 }

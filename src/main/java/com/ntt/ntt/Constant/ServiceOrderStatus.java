@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ServiceOrderStatus {
-    PENDING("보류중"), COMPLETED("완료됨"), CANCELLED("취소됨");
+    PENDING("보류중"), COMPLETED("완료됨"), CANCELED("취소됨");
 
     private final String description;
 
