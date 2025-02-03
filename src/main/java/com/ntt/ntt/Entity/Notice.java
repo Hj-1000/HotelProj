@@ -1,5 +1,6 @@
 package com.ntt.ntt.Entity;
 
+import com.ntt.ntt.DTO.NoticeDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -37,5 +38,16 @@ public class Notice extends BaseEntity {
 
     public Notice(Integer noticeId) {
         this.noticeId = noticeId;
+
+    }
+
+    public NoticeDTO toDTO() {
+        return NoticeDTO.builder()
+                .noticeId(this.noticeId)
+                .noticeTitle(this.noticeTitle)
+                .noticeContent(this.noticeContent)
+                .regDate(this.getRegDate())
+                .modDate(this.getModDate())
+                .build();
     }
 }
