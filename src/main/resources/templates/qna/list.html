@@ -108,21 +108,20 @@
 <div class="container">
     <h1>Q&A 목록</h1>
 
-    <!-- 질문 유형 필드 추가 -->
     <form action="/qna/list" method="get" class="search-bar">
-        <input type="text" name="keyword" class="form-control" placeholder="검색어 입력" th:value="${keyword}" />
-        <button type="submit" class="btn btn-primary">검색</button>
-
-        <!-- 질문 유형 선택 추가 -->
-        <select name="qnaCategory" class="form-select" style="margin-left: 10px;">
+        <input type="text" name="keyword" placeholder="검색어" class="form-control" style="width: 250px;">
+        <select name="qnaCategory" class="form-select" style="width: 250px; margin-left: 10px;">
             <option value="">질문 유형을 선택하세요</option>
-            <option value="일반문의">일반 질문</option>
-            <option value="호텔문의">호텔 관련</option>
-            <option value="서비스문의">서비스 관련</option>
-            <option value="계정문의">계정 관련</option>
-            <option value="기타문의">기타</option>
+            <option value="일반문의" th:selected="${qnaCategory == '일반문의'}">일반문의</option>
+            <option value="호텔문의" th:selected="${qnaCategory == '호텔문의'}">호텔문의</option>
+            <option value="서비스문의" th:selected="${qnaCategory == '서비스문의'}">서비스문의</option>
+            <option value="계정문의" th:selected="${qnaCategory == '계정문의'}">계정문의</option>
+            <option value="기타문의" th:selected="${qnaCategory == '기타문의'}">기타문의</option>
         </select>
+
+        <button type="submit" class="btn btn-primary">검색</button>
     </form>
+
     <!-- 글 등록 버튼 -->
     <div class="add-question">
         <a href="/qna/register" class="btn btn-success">글 등록</a>

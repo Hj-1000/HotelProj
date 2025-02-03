@@ -6,6 +6,7 @@ import com.ntt.ntt.Entity.Reply;
 import com.ntt.ntt.Repository.MemberRepository;
 import com.ntt.ntt.Repository.QnaRepository;
 import com.ntt.ntt.Repository.ReplyRepository;
+import groovy.util.logging.Log4j2;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import java.util.Optional;
 
 @Service
 @Transactional
+@Log4j2
 
 public class ReplyService {
 

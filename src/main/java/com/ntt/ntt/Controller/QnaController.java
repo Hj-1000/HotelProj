@@ -10,6 +10,9 @@ import com.ntt.ntt.Service.MemberService;
 import com.ntt.ntt.Service.QnaService;
 import com.ntt.ntt.Service.ReplyService;
 import com.ntt.ntt.Util.PaginationUtil;
+import groovy.util.logging.Log4j2;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,6 +29,8 @@ import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
+@Log4j2
+@Tag(name = "qnaController", description = "Q&A페이지")
 public class QnaController {
 
     private final MemberService memberService;
@@ -35,6 +40,7 @@ public class QnaController {
     private final ReplyService replyService;
 
     // Q&A 페이지 이동
+    @Operation(summary = "메인페이지", description = "Q&A 페이지로 이동한다.")
     @GetMapping("/qna")
     public String qnaForm() {
         return null;
@@ -43,47 +49,43 @@ public class QnaController {
 
 
     // 질문 목록 페이지로 이동
+    @Operation(summary = "목록", description = "Q&A 목록 페이지로 이동한다.")
     @GetMapping("/qna/list")
     public String qnaListPage(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "") String keyword,
+            @RequestParam(required = false, defaultValue = "") String qnaCategory,
             @AuthenticationPrincipal UserDetails userDetails,
             Model model) {
 
-        // 페이지 처리 및 검색어 적용
-        Page<Qna> qnaPage = qnaService.getQnaPage(page, keyword);
+        // 서비스 메서드를 호출하여 QnA 목록을 가져옴
+        Page<Qna> qnaPage = qnaService.getQnaPage(page, keyword, qnaCategory, keyword);
 
-
-        // PaginationUtil을 이용해 페이지네이션 정보 생성
+        // 페이지네이션 정보 계산
         Map<String, Integer> pagination = paginationUtil.pagination(qnaPage);
 
         // 전체 페이지 수
         int totalPages = qnaPage.getTotalPages();
-
-        // 현재 페이지 번호
         int currentPage = pagination.get("currentPage");
 
-        // 시작 페이지와 끝 페이지 계산 (현재 페이지를 기준으로 최대 10페이지까지)
-        int startPage = Math.max(1, currentPage - 4); // 10개씩 끊어서 시작 페이지 계산
-        int endPage = Math.min(startPage + 9, totalPages); // 최대 10페이지까지, 전체 페이지 수를 넘지 않도록
+        // 시작 페이지와 끝 페이지 계산
+        int startPage = Math.max(1, currentPage - 4);
+        int endPage = Math.min(startPage + 9, totalPages);
 
         // 페이지 정보 업데이트
         pagination.put("startPage", startPage);
         pagination.put("endPage", endPage);
 
         // 모델에 데이터 추가
-        model.addAttribute("qnaList", qnaPage.getContent()); // qnaList에 마스킹된 이름이 포함되어 있음
+        model.addAttribute("qnaList", qnaPage.getContent());
         model.addAttribute("pagination", pagination);
-        model.addAttribute("keyword", keyword);  // keyword를 그대로 모델에 전달
-
-
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("qnaCategory", qnaCategory);
 
         if (userDetails != null) {
             MemberDTO memberDTO = memberService.read(userDetails.getUsername());
             Member currentMember = dtoToEntity(memberDTO);
             model.addAttribute("currentMember", currentMember);
-
-
         } else {
             model.addAttribute("errorMessage", "로그인 후 이용해주세요.");
         }
@@ -93,6 +95,7 @@ public class QnaController {
 
 
     // 질문 작성 페이지로 이동
+    @Operation(summary = "등록폼", description = "등록폼 페이지로 이동한다.")
     @GetMapping("/qna/register")
     public String qnaRegisterPageForm(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         if (userDetails == null) {
@@ -106,6 +109,7 @@ public class QnaController {
     }
 
     // 질문 제출 처리
+    @Operation(summary = "등록창", description = "데이터 등록 후 리스트 페이지로 이동한다.")
     @PostMapping("/qna/register")
     public String submitQuestionProc(@RequestParam String title,
                                      @RequestParam String content,
@@ -139,6 +143,7 @@ public class QnaController {
     }
 
     // 질문 상세보기 페이지로 이동
+    @Operation(summary = "상세보기창", description = "상세보기창으로 이동한다.")
     @GetMapping("/qna/read/{id}")
     public String readQnaForm(@PathVariable Integer id, @AuthenticationPrincipal UserDetails userDetails, Model model) {
         Qna qna = qnaService.findById(id); // 이미 마스킹된 이름이 포함됨
@@ -179,6 +184,7 @@ public class QnaController {
 
 
     // 질문 수정 페이지로 이동
+    @Operation(summary = "수정폼", description = "질문을 수정할수 있다.")
     @GetMapping("/qna/update/{id}")
     public String updateQnaForm(@PathVariable Integer id, @AuthenticationPrincipal UserDetails userDetails, Model model) {
         Qna qna = qnaService.findById(id);
@@ -198,6 +204,7 @@ public class QnaController {
 
     // Qna 수정 처리
     @PostMapping("/qna/update/{id}")
+    @Operation(summary = "수정창", description = "데이터 수정 후 목록페이지로 이동한다.")
     public String updateQnaPorc(@PathVariable Integer id, QnaDTO qnaDTO, @AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails != null) {
             MemberDTO memberDTO = memberService.read(userDetails.getUsername());
@@ -215,6 +222,7 @@ public class QnaController {
 
     // 질문 삭제 처리
     @PostMapping("/qna/delete/{id}")
+    @Operation(summary = "삭제", description = "데이터를 삭제할수있다.")
     public String deleteQnaPorc(@PathVariable("id") Integer id, @AuthenticationPrincipal UserDetails userDetails) {
         // 질문 찾기
         Qna qna = qnaRepository.findById(id).orElse(null);
@@ -238,6 +246,7 @@ public class QnaController {
 
     // 댓글 작성 처리
     @PostMapping("/qna/reply/register/{qnaId}")
+    @Operation(summary = "댓글등록", description = "상세보기 창에서 댓글을 등록한다.")
     public String registerReply(@PathVariable Integer qnaId, String replyContent, @AuthenticationPrincipal UserDetails userDetails, Model model) {
         if (userDetails != null && userDetails.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"))) {
@@ -253,6 +262,7 @@ public class QnaController {
     }
     // 댓글 수정
     @GetMapping("/reply/update/{id}")
+    @Operation(summary = "댓글수정폼", description = "댓글을 수정한다.")
     public String updateReply(@PathVariable Integer id, Model model) {
         Reply reply = replyService.findById(id);
         model.addAttribute("reply", reply);
@@ -261,6 +271,7 @@ public class QnaController {
 
     // 댓글 삭제
     @GetMapping("/reply/delete/{id}")
+    @Operation(summary = "댓글삭제", description = "댓글삭제 후 해당 상세보기 페이지로 이동한다.")
     public String deleteReply(@PathVariable Integer id) {
         replyService.deleteReply(id);
         return "redirect:/qna/read/{qnaId}"; // 댓글 삭제 후 Q&A 페이지로 리디렉션
