@@ -9,7 +9,6 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -62,7 +61,7 @@
             color: #555;
         }
 
-        .pagination {
+        .page-item {
             display: flex;
             justify-content: center;
             margin-top: 30px;
@@ -137,25 +136,28 @@
     </div>
 
     <!-- 페이지네이션 -->
-    <nav aria-label="pagination">
+    <div class="pagination-container" style="display: flex; justify-content: center; align-items: center;">
         <ul class="pagination">
             <!-- 이전 페이지 버튼 -->
             <li class="page-item" th:classappend="${pagination['currentPage'] == 1 ? 'disabled' : ''}">
-                <a class="page-link" th:href="@{/qna/list?page=${pagination['prevPage']}&keyword=${keyword}}">이전</a>
+                <a class="page-link"
+                   th:href="@{/qna/list(page=${pagination['prevPage']}, keyword=${keyword != null && keyword != '' ? keyword : ''})}">이전</a>
             </li>
 
             <!-- 페이지 번호 -->
             <li class="page-item" th:each="i : ${#numbers.sequence(pagination['startPage'], pagination['endPage'])}">
-                <a class="page-link" th:href="@{/qna/list?page={page}&keyword={keyword}(page=${i}, keyword=${keyword})}" th:text="${i}"></a>
+                <a class="page-link"
+                   th:href="@{/qna/list(page=${i}, keyword=${keyword != null && keyword != '' ? keyword : ''})}"
+                   th:text="${i}"></a>
             </li>
 
             <!-- 다음 페이지 버튼 -->
             <li class="page-item" th:classappend="${pagination['currentPage'] == pagination['lastPage'] ? 'disabled' : ''}">
-                <a class="page-link" th:href="@{/qna/list?page=${pagination['nextPage']}&keyword=${keyword}}">다음</a>
+                <a class="page-link"
+                   th:href="@{/qna/list(page=${pagination['nextPage']}, keyword=${keyword != null && keyword != '' ? keyword : ''})}">다음</a>
             </li>
         </ul>
-    </nav>
-</div>
+    </div>
 
 <!-- 푸터 -->
 <div th:replace="~{fragments/footer::footer}"></div>

@@ -18,11 +18,17 @@ public interface QnaRepository extends JpaRepository<Qna, Integer> {
        // Qna를 ID로 조회하는 메서드 (JPA에서 자동으로 제공됨)
                 Optional<Qna> findById(Integer id);
 
-  
-  //오류
+
+        // 제목(title) 또는 내용(content)에 검색어(keyword)가 포함된 질문을 페이징 처리하여 찾는 메서드
+        Page<Qna> findByQnaTitleContainingOrQnaContentContaining(String qnaTitle, String qnaContent, Pageable pageable);
+
+
+
+
+    //오류
 
     // 회원탈퇴시 해당 회원이 작성한 QnA 삭제하기 위해 추가
-    void deleteByMember(Member member);
+      void deleteByMember(Member member);
 
 }
 
