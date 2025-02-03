@@ -5,24 +5,23 @@ import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Entity.Qna;
 import com.ntt.ntt.Repository.MemberRepository;
 import com.ntt.ntt.Repository.QnaRepository;
+import groovy.util.logging.Log4j2;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+
 
 @Service
 @Transactional
+@Log4j2
 public class QnaService {
 
     private final QnaRepository qnaRepository;
@@ -34,16 +33,20 @@ public class QnaService {
         this.memberRepository = memberRepository;
     }
 
-    public Page<Qna> getQnaPage(int page, String keyword) {
-        Pageable pageable = PageRequest.of(page - 1, 10);
+    public Page<Qna> getQnaPage(int page, String keyword, String qnaCategory, String memberNameKeyword) {
+        Pageable pageable = PageRequest.of(page - 1, 10, Sort.by(Sort.Order.desc("regDate")));  // 페이지 번호는 1부터 시작하지만, Pageable은 0부터 시작하므로 -1 해줌
         Page<Qna> qnaPage;
 
-        if (keyword == null || keyword.isEmpty()) {
-            qnaPage = qnaRepository.findAll(pageable);
+        // keyword와 qnaCategory가 모두 null이거나 빈 문자열일 경우 전체 검색
+        if ((keyword == null || keyword.isEmpty()) && (qnaCategory == null || qnaCategory.isEmpty())) {
+            qnaPage = qnaRepository.findAll(pageable);  // 모든 Q&A 검색
         } else {
-            qnaPage = qnaRepository.findByQnaTitleContainingOrQnaContentContaining(keyword, keyword, pageable);
+            // qnaCategory와 keyword를 포함하여 검색
+            qnaPage = qnaRepository.findByQnaCategoryContainingOrQnaTitleContainingOrQnaContentContaining(
+                    qnaCategory, keyword, keyword, pageable);
         }
 
+        // 마스킹 처리
         qnaPage.getContent().forEach(qna -> {
             String maskedName = applyNameMasking(qna.getMember().getMemberName());
             qna.setMemberName(maskedName);
@@ -51,7 +54,6 @@ public class QnaService {
 
         return qnaPage;
     }
-
 
 
     public Qna findById(Integer qnaId) {
