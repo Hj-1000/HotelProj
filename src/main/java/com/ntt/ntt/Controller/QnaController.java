@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Map;
 
 @Controller
@@ -52,18 +53,37 @@ public class QnaController {
         // 페이지 처리 및 검색어 적용
         Page<Qna> qnaPage = qnaService.getQnaPage(page, keyword);
 
+
         // PaginationUtil을 이용해 페이지네이션 정보 생성
         Map<String, Integer> pagination = paginationUtil.pagination(qnaPage);
+
+        // 전체 페이지 수
+        int totalPages = qnaPage.getTotalPages();
+
+        // 현재 페이지 번호
+        int currentPage = pagination.get("currentPage");
+
+        // 시작 페이지와 끝 페이지 계산 (현재 페이지를 기준으로 최대 10페이지까지)
+        int startPage = Math.max(1, currentPage - 4); // 10개씩 끊어서 시작 페이지 계산
+        int endPage = Math.min(startPage + 9, totalPages); // 최대 10페이지까지, 전체 페이지 수를 넘지 않도록
+
+        // 페이지 정보 업데이트
+        pagination.put("startPage", startPage);
+        pagination.put("endPage", endPage);
 
         // 모델에 데이터 추가
         model.addAttribute("qnaList", qnaPage.getContent()); // qnaList에 마스킹된 이름이 포함되어 있음
         model.addAttribute("pagination", pagination);
         model.addAttribute("keyword", keyword);  // keyword를 그대로 모델에 전달
 
+
+
         if (userDetails != null) {
             MemberDTO memberDTO = memberService.read(userDetails.getUsername());
             Member currentMember = dtoToEntity(memberDTO);
             model.addAttribute("currentMember", currentMember);
+
+
         } else {
             model.addAttribute("errorMessage", "로그인 후 이용해주세요.");
         }
@@ -79,6 +99,9 @@ public class QnaController {
             model.addAttribute("errorMessage", "로그인 후 질문을 남길 수 있습니다.");
             return "redirect:/login";  // 로그인 페이지로 리다이렉트
         }
+
+        // 카테고리 목록 추가
+        model.addAttribute("categories", Arrays.asList("일반 질문", "호텔 관련", "서비스 관련", "계정 관련", "기타"));
         return "qna/register";  // qna/register.html로 넘겨줌
     }
 
@@ -86,6 +109,7 @@ public class QnaController {
     @PostMapping("/qna/register")
     public String submitQuestionProc(@RequestParam String title,
                                      @RequestParam String content,
+                                     @RequestParam String qnaCategory,  // 질문 유형 추가
                                      @AuthenticationPrincipal UserDetails userDetails,
                                      Model model) {
         if (userDetails != null) {
@@ -102,6 +126,7 @@ public class QnaController {
             QnaDTO qnaDTO = new QnaDTO();
             qnaDTO.setQnaTitle(title);
             qnaDTO.setQnaContent(content);
+            qnaDTO.setQnaCategory(qnaCategory);  // 카테고리 설정
 
             // QnaService를 사용하여 질문 저장
             qnaService.registerQna(qnaDTO, member);

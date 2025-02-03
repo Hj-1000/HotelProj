@@ -24,6 +24,8 @@ public class QnaDTO {
 
     private String memberName;
 
+    private String qnaCategory;  // 카테고리 추가
+
     private LocalDateTime regDate;
 
     private LocalDateTime modDate;
@@ -37,7 +39,7 @@ public class QnaDTO {
         qnaDTO.setRegDate(qna.getRegDate());
         qnaDTO.setModDate(qna.getModDate());
         qnaDTO.setMemberName(qna.getMember().getMemberName());  // 작성자 이름 설정
-
+        qnaDTO.setQnaCategory(qna.getQnaCategory());  // 질문 유형 설정
         return qnaDTO;
     }
     }

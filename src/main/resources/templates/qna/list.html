@@ -108,12 +108,21 @@
 <div class="container">
     <h1>Q&A 목록</h1>
 
-    <!-- 검색 바 -->
+    <!-- 질문 유형 필드 추가 -->
     <form action="/qna/list" method="get" class="search-bar">
         <input type="text" name="keyword" class="form-control" placeholder="검색어 입력" th:value="${keyword}" />
         <button type="submit" class="btn btn-primary">검색</button>
-    </form>
 
+        <!-- 질문 유형 선택 추가 -->
+        <select name="qnaCategory" class="form-select" style="margin-left: 10px;">
+            <option value="">질문 유형을 선택하세요</option>
+            <option value="일반문의">일반 질문</option>
+            <option value="호텔문의">호텔 관련</option>
+            <option value="서비스문의">서비스 관련</option>
+            <option value="계정문의">계정 관련</option>
+            <option value="기타문의">기타</option>
+        </select>
+    </form>
     <!-- 글 등록 버튼 -->
     <div class="add-question">
         <a href="/qna/register" class="btn btn-success">글 등록</a>
@@ -132,6 +141,7 @@
             <h4><a th:href="@{/qna/read/{id}(id=${qna.qnaId})}" th:text="${qna.qnaTitle}">제목</a></h4>
             <p th:text="'내용: ' + ${qna.qnaContent}">내용</p>
             <span th:text="${qna.memberName}"></span>  <!-- 마스킹된 이름 출력 -->
+            <p><strong>질문 유형: </strong><span th:text="${qna.qnaCategory}">질문 유형</span></p> <!-- 질문 유형 추가 -->
         </div>
     </div>
 

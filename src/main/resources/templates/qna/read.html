@@ -70,6 +70,7 @@
     <h1 th:text="${qna.qnaTitle}">제목</h1>
     <p th:text="${qna.qnaContent}">내용</p>
     <span th:text="${qna.memberName}"></span>  <!-- 마스킹된 이름 출력 -->
+    <p>질문 유형: <span th:text="${qna.qnaCategory}"></span></p> <!-- 질문 유형 추가 -->
 
     <!-- 작성일자 포맷 처리 및 null 체크 -->
     <p class="date" th:text="${#temporals.format(qna.regDate, 'yyyy-MM-dd HH:mm')}">작성일자</p>
