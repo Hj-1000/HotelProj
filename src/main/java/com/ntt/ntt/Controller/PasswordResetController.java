@@ -3,6 +3,7 @@ package com.ntt.ntt.Controller;
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Repository.MemberRepository;
 import com.ntt.ntt.Service.EmailService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -32,15 +33,15 @@ public class PasswordResetController {
     @Autowired
     private PasswordEncoder passwordEncoder;  // PasswordEncoder 주입
 
-    // 비밀번호 찾기 페이지
+    @Operation(summary = "비밀번호 찾기폼", description = "비밀번호 찾기 페이지로 이동한다.")
     @GetMapping("/user/findPassword")
-    public String findPassword() {
+    public String findPasswordForm() {
         return "user/findPassword";
     }
 
-    // 비밀번호 찾기 요청
+    @Operation(summary = "비밀번호 찾기 요청", description = "입력한 이메일이 데이터에 존재하는지 확인 후 해당 이메일로 인증코드를 발송한다.")
     @PostMapping("/user/findPassword")
-    public String findPassword(@RequestParam("memberEmail") String email, Model model, HttpSession session) {
+    public String findPasswordProc(@RequestParam("memberEmail") String email, Model model, HttpSession session) {
 
         // 1. 입력한 이메일이 회원목록에 있는지 확인
         Optional<Member> member = memberRepository.findByMemberEmail(email);
@@ -64,7 +65,7 @@ public class PasswordResetController {
         return "redirect:/user/verifyCode"; // 코드 입력 페이지로 리디렉션
     }
 
-    // 이메일로 발송할 랜덤 코드 생성 함수
+    @Operation(summary = "랜덤 코드 생성", description = "이메일로 발송할 랜덤 코드를 생성한다.")
     private String generateRandomCode() {
         SecureRandom random = new SecureRandom();
         StringBuilder code = new StringBuilder();
@@ -77,9 +78,9 @@ public class PasswordResetController {
         return code.toString();
     }
 
-    // 인증 코드 입력 페이지
+    @Operation(summary = "인증 코드 확인폼", description = "인증 코드 입력 페이지로 이동한다.")
     @GetMapping("/user/verifyCode")
-    public String verifyCodePage(HttpSession session) {
+    public String verifyCodeForm(HttpSession session) {
         // 세션에 저장된 인증 코드와 타임스탬프를 가져와서
         String resetCode = (String) session.getAttribute("resetCode");
         Long timestamp = (Long) session.getAttribute("resetCodeTimestamp");
@@ -101,9 +102,9 @@ public class PasswordResetController {
         return "user/verifyCode";
     }
 
-    // 인증 코드 확인 요청
+    @Operation(summary = "인증 코드 확인 요청", description = "인증 코드를 검증해 비밀번호 재설정 페이지로 이동한다.")
     @PostMapping("/user/verifyCode")
-    public String verifyCode(@RequestParam("verificationCode") String userCode, HttpSession session, Model model) {
+    public String verifyCodeProc(@RequestParam("verificationCode") String userCode, HttpSession session, Model model) {
         // 세션에서 저장된 인증 코드와 타임스탬프를 가져와서
         String resetCode = (String) session.getAttribute("resetCode");
         Long timestamp = (Long) session.getAttribute("resetCodeTimestamp");
@@ -131,7 +132,7 @@ public class PasswordResetController {
         return "user/verifyCode"; // 코드 입력 페이지로 돌아감
     }
 
-    // 인증 코드 재전송
+    @Operation(summary = "인증 코드 재전송", description = "이메일로 발송할 랜덤 코드를 다시 생성해 발송한다.")
     @PostMapping("/user/resendCode")
     @ResponseBody
     public Map<String, Object> resendCode(HttpSession session) {
@@ -160,9 +161,9 @@ public class PasswordResetController {
         return response;
     }
 
-    // 비밀번호 재설정 페이지
+    @Operation(summary = "비밀번호 재설정폼", description = "비밀번호 재설정 페이지로 이동한다.")
     @GetMapping("/user/resetPassword")
-    public String resetPasswordPage(HttpSession session, Model model) {
+    public String resetPasswordForm(HttpSession session, Model model) {
         // 세션에 저장된 인증 상태 확인
         Boolean isVerified = (Boolean) session.getAttribute("isVerified");
 
@@ -178,9 +179,9 @@ public class PasswordResetController {
         return "user/resetPassword";
     }
 
-    // 비밀번호 재설정 요청
+    @Operation(summary = "비밀번호 재설정 요청", description = "새로운 비밀번호를 암호화 한 후 기존 데이터를 수정한다.")
     @PostMapping("/user/resetPassword")
-    public String resetPassword(@RequestParam("newPassword") String newPassword, HttpSession session, Model model, RedirectAttributes redirectAttributes) {
+    public String resetPasswordProc(@RequestParam("newPassword") String newPassword, HttpSession session, Model model, RedirectAttributes redirectAttributes) {
         String email = (String) session.getAttribute("email");
 
         Optional<Member> member = memberRepository.findByMemberEmail(email);
@@ -204,7 +205,7 @@ public class PasswordResetController {
         }
     }
 
-    // html 에서 세션 만료 시간을 가져오기 위한 메서드
+    @Operation(summary = "세션 만료", description = "세션 만료 시간을 전달한다.")
     @GetMapping("/user/getSessionExpiry")
     @ResponseBody
     public long getSessionExpiry(HttpSession session) {

@@ -2,6 +2,7 @@ package com.ntt.ntt.Controller;
 
 import com.ntt.ntt.DTO.MemberDTO;
 import com.ntt.ntt.Service.MemberService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,19 +21,22 @@ public class MemberController {
 
     private final MemberService memberService;
 
-    // 회원가입 유형 선택 페이지
+    @Operation(summary = "회원가입 유형 선택", description = "회원가입 유형 선택 페이지로 이동한다.")
     @GetMapping("/selectrole")
     public String selectrole() {
         return "selectrole";
     }
 
-    // 일반 유저 회원가입 페이지
+    @Operation(summary = "사용자 회원가입폼", description = "일반 유저 회원가입 페이지로 이동한다.")
     @GetMapping("/register")
-    public String registerForm() {
+    public String registerForm(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails != null) {
+            return "redirect:/";  // 로그인되어있으면 메인페이지로 리다이렉트
+        }
         return "register";
     }
 
-    // 일반 유저 회원가입 요청
+    @Operation(summary = "사용자 회원가입 요청", description = "입력한 유저 정보를 데이터에 저장하고 로그인 페이지로 이동한다.")
     @PostMapping("/register")
     public String registerProc(MemberDTO memberDTO) {
         try {
@@ -44,13 +48,16 @@ public class MemberController {
         }
     }
 
-    // 관리자 회원가입 페이지
+    @Operation(summary = "관리자 회원가입폼", description = "관리자(어드민, 호텔장, 매니저) 회원가입 페이지로 이동한다.")
     @GetMapping("/admin/register")
-    public String adminregisterForm() {
+    public String adminregisterForm(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails != null) {
+            return "redirect:/";  // 로그인되어있으면 메인페이지로 리다이렉트
+        }
         return "admin/register";
     }
 
-    // 관리자 회원가입 요청
+    @Operation(summary = "관리자 회원가입 요청", description = "입력한 유저 정보를 데이터에 저장하고 로그인 페이지로 이동한다.")
     @PostMapping("/admin/register")
     public String adminregisterProc(MemberDTO memberDTO) {
         try {
@@ -62,7 +69,7 @@ public class MemberController {
         }
     }
 
-    // 이메일 중복 확인
+    @Operation(summary = "이메일 중복 확인", description = "입력한 이메일이 이미 데이터에 등록되어있는지 체크한다.")
     @GetMapping("/checkEmail")
     @ResponseBody
     public Map<String, Boolean> checkEmail(@RequestParam String email) {
@@ -72,24 +79,27 @@ public class MemberController {
         return response;
     }
 
-    // 로그인 페이지
+    @Operation(summary = "로그인", description = "로그인 페이지로 이동한다.")
     @GetMapping("/login")
     public String login() {
         return "login";
     }
 
-    // 회원정보 수정 페이지
+    @Operation(summary = "회원정보 수정폼", description = "회원정보 수정 페이지로 이동한다.")
     @GetMapping("/myPage/update")
     public String updateForm(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        if (userDetails == null) {
+            return "redirect:/login";  // 로그인되어있지 않으면 로그인 페이지로 리다이렉트
+        }
         String memberEmail = userDetails.getUsername();
         MemberDTO memberDTO = memberService.read(memberEmail);
         model.addAttribute("memberDTO", memberDTO);
         return "myPage/update";
     }
 
-    // 회원정보 수정 요청
+    @Operation(summary = "회원정보 수정 요청", description = "로그인한 사용자의 회원정보를 새로 입력한 값으로 업데이트한다.")
     @PostMapping("/myPage/update")
-    public String updateMember(@ModelAttribute MemberDTO memberDTO, RedirectAttributes redirectAttributes) {
+    public String updateProc(@ModelAttribute MemberDTO memberDTO, RedirectAttributes redirectAttributes) {
         try {
             memberService.update(memberDTO);
             redirectAttributes.addFlashAttribute("successMessage", "회원정보 수정에 성공하였습니다.");
@@ -100,9 +110,9 @@ public class MemberController {
         }
     }
 
-    // 회원탈퇴
+    @Operation(summary = "회원탈퇴", description = "회원탈퇴를 요청한 사용자의 정보를 삭제한다.")
     @PostMapping("/unregister")
-    public String unregisterForm(@AuthenticationPrincipal UserDetails userDetails, HttpSession session,
+    public String unregister(@AuthenticationPrincipal UserDetails userDetails, HttpSession session,
                              @RequestParam String currentPassword, RedirectAttributes redirectAttributes) {
         String memberEmail = userDetails.getUsername();
 
