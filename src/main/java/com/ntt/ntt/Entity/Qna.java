@@ -21,6 +21,8 @@ public class Qna extends BaseEntity {
     // Q&A 내용
     @Column(length = 255, nullable = false)
     private String qnaContent;
+    // 추가된 카테고리 필드
+    private String qnaCategory;
 
 
     @ManyToOne(fetch = FetchType.EAGER)
