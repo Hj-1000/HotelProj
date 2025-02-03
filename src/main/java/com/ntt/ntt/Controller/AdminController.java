@@ -1,8 +1,11 @@
 package com.ntt.ntt.Controller;
 
 import com.ntt.ntt.Constant.Role;
+import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.MemberDTO;
 import com.ntt.ntt.Service.MemberService;
+import com.ntt.ntt.Service.hotel.HotelService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,11 +18,12 @@ import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
-public class StartController {
+public class AdminController {
 
+    private final HotelService hotelService;
     private final MemberService memberService;
 
-    // 전체회원관리 페이지
+    @Operation(summary = "전체회원목록", description = "전체회원목록 페이지로 이동한다.")
     @GetMapping("/admin/memberList")
     public String getAllMembers(@RequestParam(required = false) String role,
                                 @RequestParam(required = false) String email,
@@ -56,7 +60,7 @@ public class StartController {
         return "admin/memberList";
     }
 
-    // 관리자가 회원정보 수정하기
+    @Operation(summary = "회원정보 수정", description = "모든 사용자의 회원정보를 새로 입력한 값으로 업데이트한다.")
     @PostMapping("/admin/update")
     public String adminUpdate(MemberDTO memberDTO, RedirectAttributes redirectAttributes) {
         try {
@@ -87,6 +91,23 @@ public class StartController {
     @GetMapping("/admin/hotelHeadquartersRegister")
     public String d(){
         return "admin/hotelHeadquartersRegister";
+    }
+
+    @GetMapping("/admin/mapTest")
+    public String read(@RequestParam Integer hotelId, Model model, RedirectAttributes redirectAttributes) {
+        try {
+            HotelDTO hotelDTO = hotelService.read(hotelId);
+            model.addAttribute("hotelDTO", hotelDTO);
+            return "/admin/mapTest";
+
+        } catch (NullPointerException e) {
+            // Flash Attribute로 메시지를 전달
+            redirectAttributes.addFlashAttribute("message", "해당 지사가 없습니다!");
+            return "redirect:/manager/hotel/list"; // 목록 페이지로 리다이렉트
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("message", "서버 오류가 있습니다!");
+            return "redirect:/manager/hotel/list"; // 목록 페이지로 리다이렉트
+        }
     }
 
 }

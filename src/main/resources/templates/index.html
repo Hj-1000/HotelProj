@@ -9,6 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" th:href="@{/css/user.css}">
+    <link rel="stylesheet" th:href="@{/css/map.css}">
 </head>
 <body>
 <div th:replace="~{fragments/header::header}"></div>
@@ -109,8 +110,140 @@
 
     <!-- 지도 섹션 -->
     <section class="text-center py-5 bg-light">
+
+        <h2>가까운 호텔 찾기</h2>
+
         <div class="container">
-            <div class="bg-secondary text-white py-5" style="height: 300px;">지도 이미지</div>
+            <div class="bg-secondary text-white d-flex justify-content-center" style="height: 500px;">
+                <div class="map_wrap">
+                    <div id="map" style="width:100%;height:100%;position:relative;overflow:hidden;"></div>
+                    <!-- 지도타입 컨트롤 div 입니다 -->
+                    <div class="custom_typecontrol radius_border">
+                        <span id="btnRoadmap" class="selected_btn" onclick="setMapType('roadmap')">지도</span>
+                        <span id="btnSkyview" class="btn" onclick="setMapType('skyview')">스카이뷰</span>
+                    </div>
+                    <!-- 지도 확대, 축소 컨트롤 div 입니다 -->
+                    <div class="custom_zoomcontrol radius_border">
+                        <span onclick="zoomIn()"><img src="https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/ico_plus.png" alt="확대"></span>
+                        <span onclick="zoomOut()"><img src="https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/ico_minus.png" alt="축소"></span>
+                    </div>
+                </div>
+                <script type="text/javascript"
+                        src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=0cb0450151c2b892da76c0d5dcd6535a&libraries=services"></script>
+                <script>
+                    var infowindow = new kakao.maps.InfoWindow({zIndex:1});
+                    var mapContainer = document.getElementById('map');
+                    var mapOption = {
+                        center: new kakao.maps.LatLng(37.566826, 126.9786567),
+                        level: 5
+                    };
+
+                    var map = new kakao.maps.Map(mapContainer, mapOption);
+                    var ps = new kakao.maps.services.Places();
+                    var myLocationMarker = null;
+
+                    function setMapType(maptype) {
+                        var roadmapControl = document.getElementById('btnRoadmap');
+                        var skyviewControl = document.getElementById('btnSkyview');
+                        if (maptype === 'roadmap') {
+                            map.setMapTypeId(kakao.maps.MapTypeId.ROADMAP);
+                            roadmapControl.className = 'selected_btn';
+                            skyviewControl.className = 'btn';
+                        } else {
+                            map.setMapTypeId(kakao.maps.MapTypeId.HYBRID);
+                            skyviewControl.className = 'selected_btn';
+                            roadmapControl.className = 'btn';
+                        }
+                    }
+
+                    function zoomIn() {
+                        map.setLevel(map.getLevel() - 1);
+                    }
+
+                    function zoomOut() {
+                        map.setLevel(map.getLevel() + 1);
+                    }
+
+                    function displayMarker(place) {
+                        var marker = new kakao.maps.Marker({
+                            map: map,
+                            position: new kakao.maps.LatLng(place.y, place.x)
+                        });
+
+                        kakao.maps.event.addListener(marker, 'click', function() {
+                            if (infowindow.getMap()) {
+                                infowindow.close();
+                            } else {
+                                infowindow.setContent('<div style="padding:5px;font-size:12px; color:black;">' + place.place_name + '</div>');
+                                infowindow.open(map, marker);
+                            }
+                        });
+
+                        kakao.maps.event.addListener(map, 'click', function() {
+                            if (infowindow.getMap()) {
+                                infowindow.close();
+                            }
+                        });
+                    }
+
+                    function showMyLocation() {
+                        if (navigator.geolocation) {
+                            navigator.geolocation.getCurrentPosition(function(position) {
+                                var lat = position.coords.latitude;
+                                var lng = position.coords.longitude;
+                                var myPosition = new kakao.maps.LatLng(lat, lng);
+
+                                if (myLocationMarker) {
+                                    myLocationMarker.setMap(null);
+                                }
+
+                                myLocationMarker = new kakao.maps.Marker({
+                                    map: map,
+                                    position: myPosition,
+                                    image: new kakao.maps.MarkerImage(
+                                        'https://t1.daumcdn.net/localimg/localimages/07/2018/mw/m640/ico_marker.png',
+                                        new kakao.maps.Size(30, 30),
+                                        { offset: new kakao.maps.Point(30, 30) }
+                                    )
+                                });
+
+                                map.setCenter(myPosition);
+
+                                // 내 위치에서 반경 5km 내 검색 실행
+                                searchNearbyPlaces(lat, lng);
+
+                            }, function(error) {
+                                alert('위치 정보를 가져올 수 없습니다.');
+                            });
+                        } else {
+                            alert('이 브라우저에서는 Geolocation을 지원하지 않습니다.');
+                        }
+                    }
+
+                    function searchNearbyPlaces(lat, lng) {
+                        var searchOption = {
+                            location: new kakao.maps.LatLng(lat, lng),
+                            radius: 5000 // 반경 5km
+                        };
+
+                        ps.keywordSearch('호텔', placesSearchCB, searchOption);
+                    }
+
+                    function placesSearchCB(data, status, pagination) {
+                        if (status === kakao.maps.services.Status.OK) {
+                            var bounds = new kakao.maps.LatLngBounds();
+                            for (var i = 0; i < data.length; i++) {
+                                displayMarker(data[i]);
+                                bounds.extend(new kakao.maps.LatLng(data[i].y, data[i].x));
+                            }
+                            map.setBounds(bounds);
+                        }
+                    }
+
+                    // 페이지 로드 시 내 위치 자동 표시 및 반경 5km 검색
+                    showMyLocation();
+                </script>
+            </div>
         </div>
     </section>
 
