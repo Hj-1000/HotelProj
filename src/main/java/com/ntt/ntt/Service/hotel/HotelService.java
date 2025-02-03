@@ -192,43 +192,90 @@ public class HotelService {
 //    }
 
     //일반회원 목록
+
+    @Transactional(readOnly = true)
     public Page<HotelDTO> list(Pageable page, String keyword, String searchType, boolean exactMatch) {
 
-        int currentPage = page.getPageNumber();  // Page.getPageNumber()는 0부터 시작
-        int pageSize = 9; // 한 페이지에 9개씩 표시
+        int currentPage = page.getPageNumber();
+        int pageSize = 9;
         Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.DESC, "hotelId"));
 
         Page<Hotel> hotels = null;
 
         if (keyword != null && !keyword.isEmpty()) {
             if ("name".equals(searchType)) {
-                // 호텔명이 포함된 경우
                 hotels = hotelRepository.findByHotelNameLike("%" + keyword + "%", pageable);
             } else if ("location".equals(searchType)) {
-                // 정확히 일치하는 location 검색
                 if (exactMatch) {
                     hotels = hotelRepository.findByHotelLocationEquals(keyword, pageable);
                 } else {
-                    // location에서 %가 포함되도록
                     hotels = hotelRepository.findByHotelLocationLike("%" + keyword + "%", pageable);
                 }
             } else if ("address".equals(searchType)) {
-                // 주소 검색
                 hotels = hotelRepository.findByHotelAddressLike("%" + keyword + "%", pageable);
             } else if ("rating".equals(searchType)) {
-                // 별점 검색
                 hotels = hotelRepository.findByHotelRating(Integer.parseInt(keyword), pageable);
             }
         } else {
-            // 검색어가 없으면 모든 호텔 리스트를 조회
             hotels = hotelRepository.findAll(pageable);
         }
 
         // Hotel -> HotelDTO 변환
-        Page<HotelDTO> hotelDTOS = hotels.map(entity -> modelMapper.map(entity, HotelDTO.class));
+        Page<HotelDTO> hotelDTOS = hotels.map(entity -> {
+            HotelDTO hotelDTO = modelMapper.map(entity, HotelDTO.class);
+
+            // 호텔에 대한 이미지 리스트 가져오기
+            List<ImageDTO> imgDTOList = imageRepository.findByHotel_HotelId(entity.getHotelId())
+                    .stream()
+                    .map(imagefile -> {
+                        imagefile.setImagePath(imagefile.getImagePath().replace("c:/data/", "")); // 경로 수정
+                        return modelMapper.map(imagefile, ImageDTO.class);
+                    })
+                    .collect(Collectors.toList());
+
+            hotelDTO.setHotelImgDTOList(imgDTOList); // 이미지 DTO 리스트 설정
+            return hotelDTO;
+        });
 
         return hotelDTOS;
     }
+//    public Page<HotelDTO> list(Pageable page, String keyword, String searchType, boolean exactMatch) {
+//
+//        int currentPage = page.getPageNumber();  // Page.getPageNumber()는 0부터 시작
+//        int pageSize = 9; // 한 페이지에 9개씩 표시
+//        Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.DESC, "hotelId"));
+//
+//        Page<Hotel> hotels = null;
+//
+//        if (keyword != null && !keyword.isEmpty()) {
+//            if ("name".equals(searchType)) {
+//                // 호텔명이 포함된 경우
+//                hotels = hotelRepository.findByHotelNameLike("%" + keyword + "%", pageable);
+//            } else if ("location".equals(searchType)) {
+//                // 정확히 일치하는 location 검색
+//                if (exactMatch) {
+//                    hotels = hotelRepository.findByHotelLocationEquals(keyword, pageable);
+//                } else {
+//                    // location에서 %가 포함되도록
+//                    hotels = hotelRepository.findByHotelLocationLike("%" + keyword + "%", pageable);
+//                }
+//            } else if ("address".equals(searchType)) {
+//                // 주소 검색
+//                hotels = hotelRepository.findByHotelAddressLike("%" + keyword + "%", pageable);
+//            } else if ("rating".equals(searchType)) {
+//                // 별점 검색
+//                hotels = hotelRepository.findByHotelRating(Integer.parseInt(keyword), pageable);
+//            }
+//        } else {
+//            // 검색어가 없으면 모든 호텔 리스트를 조회
+//            hotels = hotelRepository.findAll(pageable);
+//        }
+//
+//        // Hotel -> HotelDTO 변환
+//        Page<HotelDTO> hotelDTOS = hotels.map(entity -> modelMapper.map(entity, HotelDTO.class));
+//
+//        return hotelDTOS;
+//    }
 
 
     //개별보기

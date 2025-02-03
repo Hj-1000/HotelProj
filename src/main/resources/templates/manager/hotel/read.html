@@ -5,14 +5,14 @@
       layout:decorate="~{layouts/layout}">
 <head>
     <meta charset="UTF-8">
-    <title>NTT호텔 - 본사 상세 페이지</title>
+    <title>NTT호텔 - 지사 상세 페이지</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
 <div id="wrapper" layout:fragment="content">
 
     <div class="container-fluid mt-4">
-        <h2 class="mb-3">본사 상세보기</h2>
+        <h2 class="mb-3">지사 상세보기</h2>
 
         <div class="card p-4 mb-4">
             <div class="row g-3 align-items-center">
@@ -32,7 +32,7 @@
                         </div>
                 </th:block>
 
-                <h3 th:text="${hotelDTO.hotelName}">호텔이름</h3>
+                <h3 th:text="${hotelDTO.hotelName}">호텔(지사)이름</h3>
                 <p>호텔본사 : <span th:text="${hotelDTO.companyName}">본사명</span></p>
                 <p>호텔주소 : <span th:text="${hotelDTO.hotelAddress}">주소</span></p>
                 <p>상세정보 : <span th:text="${hotelDTO.hotelInfo}">상세정보</span></p>
