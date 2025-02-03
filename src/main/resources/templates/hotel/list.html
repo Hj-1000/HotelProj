@@ -13,6 +13,65 @@
     <link rel ="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/roomList.css}">
+
+    <script th:inline="javascript">
+
+        $(document).ready(function () {
+            $(".search").on("click", function (e) {
+                e.preventDefault();
+                page(0)
+            })
+        })
+
+        function page(page) {
+            location.href= "/hotel/list/" + page
+        }
+
+        //찜 버튼을 클릭했을 때 실행 할 함수
+        function addLike() {
+            console.log("홍길동")
+
+            var questId = [[${questId}]]
+            var count = $("#count").val();
+            var param = {
+                questId : questId,
+                count : count
+            }
+            $.ajax({
+                url : "/likes",
+                type : "post",
+                contentType : "application/json; charset=utf-8",
+                data : JSON.stringify(param),
+                dataType : "json",
+                success : function (result,status) {
+
+                    //나중에 모달창으로 꾸미자
+                    //혹은 html페이지에 표시도 가능
+                    alert("찜 완료 되었다개💖")
+
+
+                } ,
+                error : function (result, status, error) {
+
+                    if(result.status == '401'){
+                        // alert(result.responseText+'로그인 후 이용해주세요');
+                        alert('로그인 후 이용해주개');
+                        location.href = '/user/login';
+                    }else {
+                        alert("확인요망 : " + result.responseText)
+                    }
+
+                    //에러출력, favicon
+
+                    //실패 메시지 bindingResult.hasErrors() 의 메소드 이건 DTO message
+                }
+            })
+
+        }
+
+
+    </script>
+
 </head>
 <body>
 <div th:replace="~{fragments/header::header}"></div>
@@ -60,7 +119,7 @@
                                             <!--나중에 룸이랑 연결했을 때 사용-->
                                             <p class="room-price mb-0">300,000 KRW ~</p>
                                             <div class="room-buttons">
-                                                <button class="btn btn-outline-secondary btn-heart"><i class="fa-regular fa-heart"></i></button>
+                                                <button class="btn btn-outline-secondary btn-heart" onclick="addLike()"><i class="fa-regular fa-heart"></i></button>
                                             </div>
                                         </div>
                                     </div>
