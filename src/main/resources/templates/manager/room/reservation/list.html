@@ -14,7 +14,7 @@
         }
 
         h2 {
-            margin: 1.5rem auto;
+            margin: 1.5rem auto 2rem auto;
             font-weight: bold;
             font-size: 2.5rem;
         }
@@ -29,7 +29,7 @@
         /* 객실 목록 섹션 */
         .room-section {
             width: 80%;
-            padding: 0 1rem 1.5rem 1rem;
+            padding: 0 1rem 2rem 1rem;
             border-radius: 10px;
             background: #f8f9fa;
             border: 2px solid #ddd;
@@ -42,7 +42,6 @@
             gap: 10px;
             justify-items: center;
             align-items: center;
-            margin-top: 2rem;
         }
         .room-box {
             width: 120px;
@@ -67,12 +66,11 @@
             background-color: #FFB6C1; /* 분홍색: 예약 불가 */
         }
         .reservation-table-wrap {
-            padding: 0 2rem;
+            padding: 0 2rem 2rem 2rem;
         }
 
         .reservation-table {
             width: 100%;
-            margin-top: 2rem;
             border-collapse: collapse;
         }
         .reservation-table th, .reservation-table td {
@@ -85,11 +83,129 @@
         }
 
         /* 관리자 페이지 (예약 현황) */
+
+        #reservedTab {
+            border-right: 0;
+            border-bottom: 0;
+        }
+
+        #allTab {
+            border-left: 0;
+            border-bottom: 0;
+
+        }
+
         .admin-section {
             width:100%;
             border-radius: 10px;
             background: white;
             box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 0 2rem 2rem 2rem;
+        }
+
+        .table-tabs {
+            display: flex;
+            width: 100%;
+        }
+
+        .table-tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            background: #f8f9fa;
+        }
+
+        .table-tab.active {
+            background: #000;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .text-box {
+            position: relative;
+        }
+
+        .room-header {
+            display: flex;
+            justify-content: space-between; /* 좌우 정렬 */
+            align-items: center; /* 세로 정렬 */
+            width: 100%;
+            padding: 0 20px; /* 좌우 여백 */
+        }
+
+        /* 객실 목록 컨테이너 */
+        .room-header {
+            position: relative;
+            display: flex;
+            justify-content: center; /* 제목 가운데 정렬 */
+            align-items: center;
+            width: 100%;
+            padding: 10px 0;
+        }
+
+        /* 객실 목록 제목 */
+        .room-header h2 {
+            text-align: center;
+        }
+
+        /* 색상 설명 (TIP) */
+        .color-info {
+            position: absolute;
+            right: 1.25rem;
+            top: 45%;
+            transform: translateY(-50%); /* 세로 중앙 정렬 */
+            display: flex;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #555;
+            background: #fff;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 색상 박스 스타일 */
+        .color-box {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            margin-right: 5px;
+        }
+
+        /* 색상별 스타일 */
+        .green { background-color: #90EE90; } /* 예약 가능 */
+        .yellow { background-color: #FFD700; } /* 사용 중 */
+        .pink { background-color: #FFB6C1; } /* 예약 기간 만료 */
+
+        /* 구분선 추가 */
+        .color-info span {
+            position: relative;
+            padding: 0 5px;
+        }
+
+        /* 가운데 구분선 */
+        .color-info span:not(:first-child)::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 1px;
+            height: 12px;
+            background-color: #aaa;
+            transform: translateY(-50%);
         }
     </style>
 </head>
@@ -98,7 +214,16 @@
 
     <!-- 객실 목록 -->
     <div class="room-section">
-        <h2 class="text-center">객실 목록</h2>
+        <div class="room-header">
+            <h2 class="text-center">객실 목록</h2>
+            <div class="color-info">
+                <span><span class="color-box green"></span>예약 가능 (빈방)</span>
+                <span><span class="color-box yellow"></span>이용 중 (예약됨)</span>
+                <span><span class="color-box pink"></span>예약 불가 (기간 만료)</span>
+            </div>
+        </div>
+
+
         <div class="room-container">
             <div th:each="room : ${roomList}"
                  th:classappend="${room.isExpired ? 'unavailable' : (reservationMap[room.roomId] != null ? 'reserved' : 'available')}"
@@ -117,10 +242,55 @@
     </form>
 
 
+
+
     <!-- 전체 방 목록 (예약된 방 포함) -->
     <div class="admin-section">
         <h2 class="text-center">객실 관리 현황</h2>
-        <div class="reservation-table-wrap">
+        <div class="table-tabs">
+            <div id="reservedTab" class="table-tab active" onclick="changeTab('reserved')">예약된 방</div>
+            <div id="allTab" class="table-tab" onclick="changeTab('all')">모든 방</div>
+        </div>
+
+        <!-- 예약된 방만 표시 -->
+        <div id="reservedTable" class="tab-content active">
+            <table class="reservation-table">
+                <thead>
+                <tr>
+                    <th>No</th>
+                    <th>객실 이름</th>
+                    <th>예약자 이름</th>
+                    <th>예약자 이메일</th>
+                    <th>체크인 날짜</th>
+                    <th>체크아웃 날짜</th>
+                    <th>예약마감 날짜</th>
+                    <th>상태</th>
+                    <th>관리</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="reservation, iterStat : ${reservationList}">
+                    <td th:text="${iterStat.index + 1}"></td>
+                    <td th:text="${reservation.room.roomName}"></td>
+                    <td th:text="${reservation.memberName}"></td>
+                    <td th:text="${reservation.memberEmail}"></td>
+                    <td th:text="${reservation.checkInDate}"></td>
+                    <td th:text="${reservation.checkOutDate}"></td>
+                    <td th:text="${reservation.reservationEnd}"></td>
+                    <td th:text="${reservation.reservationStatus}"></td>
+                    <td>
+                        <form method="post" action="/manager/room/reservation/delete"
+                              onsubmit="return confirm('정말 예약을 취소하시겠습니까?');">
+                            <input type="hidden" name="reservationId" th:value="${reservation.reservationId}">
+                            <button type="submit" class="btn btn-danger">예약 취소</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="allTable" class="tab-content active">
             <table class="reservation-table">
                 <thead>
                 <tr>
@@ -170,9 +340,37 @@
                 </tbody>
             </table>
         </div>
+
     </div>
 
     <script>
+
+        /* Tab */
+
+        function changeTab(tab) {
+            localStorage.setItem("selectedTab", tab);
+
+            // 모든 테이블 숨기기
+            document.getElementById("reservedTable").classList.remove("active");
+            document.getElementById("allTable").classList.remove("active");
+
+            // 선택된 테이블만 보이도록 설정
+            document.getElementById(tab + "Table").classList.add("active");
+
+            // 탭 버튼 스타일 업데이트
+            document.getElementById("reservedTab").classList.remove("active");
+            document.getElementById("allTab").classList.remove("active");
+            document.getElementById(tab + "Tab").classList.add("active");
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            let savedTab = localStorage.getItem("selectedTab") || "reserved";
+            changeTab(savedTab);
+        });
+
+
+        /* 예약 관리 */
+
         document.addEventListener("DOMContentLoaded", function () {
             document.querySelectorAll(".room-box").forEach(room => {
                 room.addEventListener("click", function () {

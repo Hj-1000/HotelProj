@@ -39,41 +39,47 @@ public class ReservationManagerController {
 
     // 2. 방 목록 가져오기
     @GetMapping("/list")
-    public String reservationListPageForm(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+    public String listReservationForm(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         List<RoomDTO> roomList = roomService.getRoomListWithReservations();
         List<ReservationDTO> reservationList = reservationService.getAllReservations();
 
-        // reservationList를 roomId 기준으로 매핑
         Map<Integer, ReservationDTO> reservationMap = new HashMap<>();
         for (ReservationDTO reservation : reservationList) {
-            if (reservation.getReservationEnd() == null || reservation.getReservationEnd().isEmpty()) {
-                System.out.println(" reservationEnd가 NULL이거나 빈 값임! roomId: " + reservation.getRoomId());
-            } else {
-                System.out.println(" roomId: " + reservation.getRoomId() + " | reservationEnd: " + reservation.getReservationEnd());
-            }
-
             reservationMap.put(reservation.getRoomId(), reservation);
         }
 
-        // 현재 로그인한 사용자의 ID 가져오기 (UserDetails에서 이메일을 가져와서 memberId 조회)
         if (userDetails != null) {
-            String email = userDetails.getUsername(); // 기본적으로 username은 email로 설정됨
+            String email = userDetails.getUsername();
             Member member = memberRepository.findByMemberEmail(email)
                     .orElseThrow(() -> new IllegalArgumentException("해당 회원 정보를 찾을 수 없습니다."));
-            model.addAttribute("memberId", member.getMemberId()); //  Model에 memberId 추가
+            model.addAttribute("memberId", member.getMemberId());
         }
 
         model.addAttribute("roomList", roomList);
         model.addAttribute("reservationMap", reservationMap);
+        model.addAttribute("reservationList", reservationList); // Thymeleaf에 전달
 
         return "manager/room/reservation/list";
     }
 
     // 3. 특정 방의 예약 정보 조회
-    @GetMapping("/details")
-    public String getReservationByRoomIdForm(@RequestParam("roomId") Integer roomId, Model model) {
+    @GetMapping("/read")
+    public String readReservationForm(@RequestParam("roomId") Integer roomId, Model model) {
         model.addAttribute("reservation", reservationService.getReservationByRoomId(roomId));
-        return "manager/room/reservation/details";
+
+        List<RoomDTO> roomList = roomService.getRoomListWithReservations();
+        List<ReservationDTO> reservationList = reservationService.getAllReservations();
+
+        Map<Integer, ReservationDTO> reservationMap = new HashMap<>();
+        for (ReservationDTO reservation : reservationList) {
+            reservationMap.put(reservation.getRoomId(), reservation);
+        }
+
+        model.addAttribute("roomList", roomList);
+        model.addAttribute("reservationMap", reservationMap);
+        model.addAttribute("reservationList", reservationList);
+
+        return "manager/room/reservation/list";
     }
 
     // 4. 예약 수정

@@ -22,4 +22,5 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
 
     // 특정 방의 예약을 삭제 (예약 취소 기능)
     void deleteByRoom_RoomId(Integer roomId);
+
 }
