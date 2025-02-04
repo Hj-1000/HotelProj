@@ -2,11 +2,11 @@ package com.ntt.ntt.Controller.hotel;
 
 import com.ntt.ntt.DTO.CompanyDTO;
 import com.ntt.ntt.DTO.HotelDTO;
+import com.ntt.ntt.DTO.ImageDTO;
 import com.ntt.ntt.DTO.RoomDTO;
 import com.ntt.ntt.Service.RoomService;
 import com.ntt.ntt.Service.hotel.HotelService;
 import com.ntt.ntt.Util.PaginationUtil;
-import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -88,22 +88,79 @@ public class HotelController {
 
 
     //읽기
+//    @GetMapping("/read")
+//    public String read(@RequestParam Integer hotelId,
+//                       @RequestParam(value = "keyword", required = false) String keyword,
+//                       @RequestParam(value = "category", required = false) String category,
+//                       @PageableDefault(size = 5, page = 0) Pageable pageable,
+//                       Model model, RedirectAttributes redirectAttributes) {
+//        try {
+//            // 호텔 정보 조회
+//            HotelDTO hotelDTO = hotelService.read(hotelId);
+//
+//            // 방 목록 조회
+//            Page<RoomDTO> roomDTOS = roomService.searchRooms(keyword, category, pageable);
+//
+//            // 방 목록에 관련된 이미지와 가격 포맷팅 처리
+//            for (RoomDTO room : roomDTOS) {
+//                if (room.getRoomImageDTOList() != null && !room.getRoomImageDTOList().isEmpty()) {
+//                    log.info("Room ID: {} - 이미지 개수: {}", room.getRoomId(), room.getRoomImageDTOList().size());
+//                } else {
+//                    log.info("Room ID: {} - 이미지 없음", room.getRoomId());
+//                }
+//                // 가격 포맷팅
+//                if (room.getFormattedRoomPrice() == null) {
+//                    String formattedPrice = String.format("%,d", room.getRoomPrice());
+//                    room.setFormattedRoomPrice(formattedPrice);
+//                }
+//            }
+//
+//            // 페이지네이션 정보 생성
+//            Map<String, Integer> pageInfo = PaginationUtil.pagination(roomDTOS);
+//            model.addAllAttributes(pageInfo); // 페이지 정보 추가
+//
+//            model.addAttribute("hotelDTO", hotelDTO);
+//
+//            // 모델에 방 목록 추가
+//            model.addAttribute("rooms", roomDTOS);
+//            model.addAttribute("keyword", keyword); // 검색 키워드 전달
+//            model.addAttribute("category", category); // 검색 카테고리 전달
+//
+//            return "/hotel/read"; // 호텔 상세 보기 페이지로 이동
+//
+//        } catch (NullPointerException e) {
+//            // 호텔이 없는 경우 처리
+//            redirectAttributes.addFlashAttribute("message", "해당 호텔이 없습니다!");
+//            return "redirect:/hotel/list"; // 목록 페이지로 리다이렉트
+//        } catch (Exception e) {
+//            // 서버 오류 처리
+//            redirectAttributes.addFlashAttribute("message", "서버 오류가 있습니다!");
+//            return "redirect:/hotel/list"; // 목록 페이지로 리다이렉트
+//        }
+//    }
+
+
     @GetMapping("/read")
     public String read(@RequestParam Integer hotelId,
-                       @RequestParam(value = "keyword", required = false) String keyword,
-                       @RequestParam(value = "category", required = false) String category,
-                       @PageableDefault(size = 5, page = 0) Pageable pageable,
-                       Model model, RedirectAttributes redirectAttributes) {
+                       @RequestParam(defaultValue = "0") int page,
+                       Model model,
+                       RedirectAttributes redirectAttributes) {
         try {
-            // 호텔 정보 조회
             HotelDTO hotelDTO = hotelService.read(hotelId);
+            if (hotelDTO == null) {
+                redirectAttributes.addFlashAttribute("message", "해당 호텔이 존재하지 않습니다!");
+                return "redirect:/hotel/list";
+            }
 
-            // 방 목록 조회
-            Page<RoomDTO> roomDTOS = roomService.searchRooms(keyword, category, pageable);
+            // Pageable 객체 생성
+            Pageable pageable = PageRequest.of(page, 10);  // 10개씩 표시
+
+            // 호텔 ID에 맞는 방 목록을 페이징 처리하여 가져옵니다.
+            Page<RoomDTO> roomsForHotel = roomService.getRoomsByHotelId(hotelId, pageable);
 
             // 방 목록에 관련된 이미지와 가격 포맷팅 처리
-            for (RoomDTO room : roomDTOS) {
-                if (room.getRoomImageDTOList() != null && !room.getRoomImageDTOList().isEmpty()) {
+            for (RoomDTO room : roomsForHotel) {
+                if (room.getRoomImageDTOList() != null) {
                     log.info("Room ID: {} - 이미지 개수: {}", room.getRoomId(), room.getRoomImageDTOList().size());
                 } else {
                     log.info("Room ID: {} - 이미지 없음", room.getRoomId());
@@ -115,27 +172,15 @@ public class HotelController {
                 }
             }
 
-            // 페이지네이션 정보 생성
-            Map<String, Integer> pageInfo = PaginationUtil.pagination(roomDTOS);
-            model.addAllAttributes(pageInfo); // 페이지 정보 추가
-
             model.addAttribute("hotelDTO", hotelDTO);
+            model.addAttribute("rooms", roomsForHotel);  // 현재 페이지의 객실 목록
+//            model.addAttribute("totalPages", roomsForHotel.getTotalPages());  // 총 페이지 수
+            model.addAttribute("currentPage", page);  // 현재 페이지
 
-            // 모델에 방 목록 추가
-            model.addAttribute("roomDTOS", roomDTOS);
-            model.addAttribute("keyword", keyword); // 검색 키워드 전달
-            model.addAttribute("category", category); // 검색 카테고리 전달
-
-            return "/hotel/read"; // 호텔 상세 보기 페이지로 이동
-
-        } catch (NullPointerException e) {
-            // 호텔이 없는 경우 처리
-            redirectAttributes.addFlashAttribute("message", "해당 호텔이 없습니다!");
-            return "redirect:/hotel/list"; // 목록 페이지로 리다이렉트
+            return "/hotel/read";
         } catch (Exception e) {
-            // 서버 오류 처리
-            redirectAttributes.addFlashAttribute("message", "서버 오류가 있습니다!");
-            return "redirect:/hotel/list"; // 목록 페이지로 리다이렉트
+            redirectAttributes.addFlashAttribute("message", "서버 오류가 발생했습니다!");
+            return "redirect:/hotel/list";
         }
     }
 

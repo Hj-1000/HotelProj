@@ -165,7 +165,7 @@
         <div class="container">
             <h2 class="text-center mb-5">Room List</h2>
             <div id="room-list" class="row">
-                <div class="col-md-4" th:each="room : ${roomDTOS}">
+                <div class="col-md-4" th:each="room : ${rooms}">
                     <div class="room-card"
                          th:data-room-id="${room.roomId}"
                          th:data-stay-start="${room.stayStart}"

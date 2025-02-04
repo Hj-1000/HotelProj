@@ -2,7 +2,6 @@ package com.ntt.ntt.Controller.hotel;
 
 import com.ntt.ntt.DTO.CompanyDTO;
 import com.ntt.ntt.DTO.HotelDTO;
-import com.ntt.ntt.DTO.ImageDTO;
 import com.ntt.ntt.DTO.RoomDTO;
 import com.ntt.ntt.Service.RoomService;
 import com.ntt.ntt.Service.hotel.HotelService;
@@ -162,16 +161,23 @@ public class HotelManagerController {
 
             // Pageable 객체 생성
             Pageable pageable = PageRequest.of(page, 10);  // 10개씩 표시
+
+            // 호텔 ID에 맞는 방 목록을 페이징 처리하여 가져옵니다.
             Page<RoomDTO> roomsForHotel = roomService.getRoomsByHotelId(hotelId, pageable);
 
-            // 각 객실에 대해 첫 번째 이미지 정보만 모델에 추가
-            roomsForHotel.getContent().forEach(roomDTO -> {
-                // 첫 번째 이미지만 가져오기
-                if (!roomDTO.getRoomImageDTOList().isEmpty()) {
-                    ImageDTO firstImage = roomDTO.getRoomImageDTOList().get(0);
-                    model.addAttribute("firstImage", firstImage);
+            // 방 목록에 관련된 이미지와 가격 포맷팅 처리
+            for (RoomDTO room : roomsForHotel) {
+                if (room.getRoomImageDTOList() != null && !room.getRoomImageDTOList().isEmpty()) {
+                    log.info("Room ID: {} - 이미지 개수: {}", room.getRoomId(), room.getRoomImageDTOList().size());
+                } else {
+                    log.info("Room ID: {} - 이미지 없음", room.getRoomId());
                 }
-            });
+                // 가격 포맷팅
+                if (room.getFormattedRoomPrice() == null) {
+                    String formattedPrice = String.format("%,d", room.getRoomPrice());
+                    room.setFormattedRoomPrice(formattedPrice);
+                }
+            }
 
             model.addAttribute("hotelDTO", hotelDTO);
             model.addAttribute("rooms", roomsForHotel.getContent());  // 현재 페이지의 객실 목록
@@ -184,6 +190,7 @@ public class HotelManagerController {
             return "redirect:/manager/hotel/list";
         }
     }
+
 
 
     //수정폼
