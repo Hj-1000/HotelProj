@@ -11,93 +11,6 @@
 
     <script th:inline="javascript">
 
-        // 페이지 로드 시 자동으로 호텔 목록을 로드
-        window.onload = function() {
-            // 검색 버튼 클릭 시
-            document.getElementById("searchBtn").addEventListener("click", function() {
-                const searchType = document.getElementById("searchType").value;
-                const keyword = document.getElementById("keyword").value;
-                const companyId = document.getElementById("companyId").value;  // 선택된 회사 ID
-
-                // 검색 쿼리 생성
-                const query = `?companyId=${companyId}&searchType=${searchType}&keyword=${keyword}&page=1&size=10`;
-
-                // AJAX로 데이터 요청
-                fetch(`/hotel/list${query}`)
-                    .then(response => response.json()) // 응답을 JSON으로 변환
-                    .then(data => {
-                        if (data.hotelDTOS) {
-                            displayHotelList(data.hotelDTOS);  // 호텔 목록 표시
-                            displayPagination(data.pageInfo);  // 페이지네이션 표시
-                        } else {
-                            console.error("호텔 목록을 가져오는 데 실패했습니다.");
-                        }
-                    })
-                    .catch(error => {
-                        console.error("서버 오류:", error);
-                    });
-            });
-        };
-
-        // 호텔 목록을 테이블에 표시
-        function displayHotelList(hotelDTOS) {
-            const hotelTableBody = document.getElementById("hotelTable").getElementsByTagName('tbody')[0];
-            hotelTableBody.innerHTML = ''; // 기존 내용 초기화
-
-            hotelDTOS.forEach((hotel, index) => {
-                const row = document.createElement("tr");
-
-                row.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${hotel.companyName}</td>
-            <td><a href="/manager/hotel/read?hotelId=${hotel.hotelId}" style="text-decoration: none">${hotel.hotelName}</a></td>
-            <td>${hotel.hotelAddress}</td>
-            <td>${hotel.hotelPhone}</td>
-            <td>${hotel.hotelEmail}</td>
-            <td>${hotel.hotelCheckIn}</td>
-            <td>${hotel.hotelCheckOut}</td>
-            <td>${hotel.rating}</td>
-            <td><a href="/hotel/delete?hotelId=${hotel.hotelId}" class="badge bg-danger delBtn">삭제</a></td>
-        `;
-
-                hotelTableBody.appendChild(row);
-            });
-        }
-
-        // 페이지네이션 표시
-        function displayPagination(pageInfo) {
-            const paginationContainer = document.getElementById("pagination");
-            paginationContainer.innerHTML = "";  // 기존 페이지네이션 초기화
-
-            let paginationHTML = `<button onclick="changePage(${pageInfo.prevPage})">Previous</button>`;
-
-            for (let i = pageInfo.startPage; i <= pageInfo.endPage; i++) {
-                paginationHTML += `<button onclick="changePage(${i})">${i}</button>`;
-            }
-
-            paginationHTML += `<button onclick="changePage(${pageInfo.nextPage})">Next</button>`;
-            paginationContainer.innerHTML = paginationHTML;
-        }
-
-        // 페이지 변경 시
-        function changePage(page) {
-            const companyId = document.getElementById("companyId").value;
-            const searchType = document.getElementById("searchType").value;
-            const keyword = document.getElementById("keyword").value;
-
-            const query = `?companyId=${companyId}&searchType=${searchType}&keyword=${keyword}&page=${page}&size=10`;
-
-            fetch(`/hotel/list${query}`)
-                .then(response => response.json())
-                .then(data => {
-                    displayHotelList(data.hotelDTOS);
-                    displayPagination(data.pageInfo);
-                })
-                .catch(error => {
-                    console.error("페이지 변경 오류:", error);
-                });
-        }
-
 
         $(document).ready(function () {
 
@@ -202,7 +115,7 @@
             <div class="card-body">
                 <h5 class="card-title">지사 목록</h5>
                 <table class="table table-bordered text-center" id="hotelTable">
-                    <thead>
+                    <thead class="table-dark">
                     <tr>
                         <th>No</th>
                         <th>본사명</th>

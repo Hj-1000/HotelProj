@@ -99,6 +99,7 @@
 
             <!-- 수정 및 목록으로 돌아가기 버튼 -->
             <div class="action-buttons">
+                <a th:href="@{/manager/hotel/read(hotelId=${room.hotelId.hotelId})}" class="btn btn-dark" >지사관리</a>
                 <a th:href="@{/manager/room/update/{roomId}(roomId=${room.roomId})}" class="btn btn-primary">수정</a>
                 <a th:href="@{/manager/room/list}" class="btn btn-secondary">목록</a>
             </div>

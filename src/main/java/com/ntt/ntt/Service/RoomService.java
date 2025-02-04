@@ -347,4 +347,17 @@ public class RoomService {
         room.setRoomStatus(false);
         roomRepository.save(room);
     }
+
+    // hotelId에 맞는 방들을 가져오는 메서드
+    public Page<RoomDTO> getRoomsByHotelId(Integer hotelId, Pageable pageable) {
+        Page<Room> rooms = roomRepository.findByHotelId_HotelId(hotelId, pageable);
+        return rooms.map(RoomDTO::fromEntity);
+    }
+
+
+
+
+
+
+
 }
