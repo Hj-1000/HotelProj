@@ -25,4 +25,6 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
 
     @Query("SELECT r FROM Room r LEFT JOIN FETCH r.roomImageList")
     Page<Room> findAllWithImages(Pageable pageable);
+
+
 }

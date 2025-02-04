@@ -27,7 +27,7 @@ public class RoomController {
     private final RoomService roomService;
 
 
-    // 유저 페이지
+    // 유저 페이지 메인
 
     @GetMapping("/")
     public String mainPageForm(Model model) {
@@ -43,6 +43,7 @@ public class RoomController {
         return "index"; // index.html 반환
     }
 
+    // 유저 페이지 메인 roomlist
 
     @GetMapping("/roomList") // 초기 Thymeleaf 화면 렌더링
     public String roomListPageForm(Model model) {
@@ -58,7 +59,9 @@ public class RoomController {
         return "roomList"; // roomList.html 반환
     }
 
-    @GetMapping("/roomList/data") // AJAX 요청 처리
+    // AJAX 요청 처리
+
+    @GetMapping("/roomList/data")
     @ResponseBody
     public Map<String, Object> roomListDataForm(@RequestParam(value = "page", defaultValue = "0") int page) {
         int pageSize = 3; // 한 번에 로드할 방 개수
@@ -125,6 +128,8 @@ public class RoomController {
         // 검색 조건과 페이징 정보를 이용하여 데이터 가져오기
         Page<RoomDTO> roomDTOS = roomService.searchRooms(keyword, category, pageable);
 
+
+
         // 로그로 이미지 확인
         for (RoomDTO room : roomDTOS) {
             if (room.getRoomImageDTOList() != null && !room.getRoomImageDTOList().isEmpty()) {
@@ -136,6 +141,22 @@ public class RoomController {
 
         // 페이지네이션 정보 생성
         Map<String, Integer> pageInfo = PaginationUtil.pagination(roomDTOS);
+
+
+        // 전체 페이지 수
+        int totalPages = roomDTOS.getTotalPages();
+
+        // 현재 페이지 번호
+        int currentPage = pageInfo.get("currentPage");
+
+        // 시작 페이지와 끝 페이지 계산 (현재 페이지를 기준으로 최대 10페이지까지)
+        int startPage = Math.max(1, currentPage - 4); // 10개씩 끊어서 시작 페이지 계산
+        int endPage = Math.min(startPage + 9, totalPages); // 최대 10페이지까지, 전체 페이지 수를 넘지 않도록
+
+        // 페이지 정보 업데이트
+        pageInfo.put("startPage", startPage);
+        pageInfo.put("endPage", endPage);
+
 
         // 모델에 데이터 추가
         model.addAttribute("list", roomDTOS); // 페이징된 RoomDTO 리스트

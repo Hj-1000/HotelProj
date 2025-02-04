@@ -6,78 +6,185 @@
 <head>
     <meta charset="UTF-8">
     <title>객실 예약 관리</title>
-    <link rel="stylesheet" th:href="@{/css/reservation.css}"/>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <style>
+
+        #wrapper {
+            padding: 0 !important;
+        }
+
+        .wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        /* 객실 목록 섹션 */
+        .room-section {
+            width: 80%;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            border: 2px solid #ddd;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .room-container {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            justify-items: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .room-box {
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #ddd;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            border-radius: 10px;
+        }
+        .available {
+            background-color: #90EE90; /* 초록색: 예약 가능 */
+        }
+        .reserved {
+            background-color: #FFD700; /* 노란색: 예약됨 */
+        }
+        .unavailable {
+            background-color: #FFB6C1; /* 분홍색: 예약 불가 */
+        }
+        .reservation-table {
+            width: 100%;
+            margin-top: 30px;
+            border-collapse: collapse;
+        }
+        .reservation-table th, .reservation-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        .reservation-table th {
+            background-color: #f2f2f2;
+        }
+
+        /* 관리자 페이지 (예약 현황) */
+        .admin-section {
+            width:100%;
+            padding: 20px;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 <body>
-<div layout:fragment="content" class="container mt-4">
-    <h2 class="text-center mb-4">객실 예약 관리</h2>
+<div layout:fragment="content" class="wrap mt-4">
 
-    <!-- 방 목록 -->
-    <div class="room-grid mb-4">
-        <div class="row row-cols-5 g-3" id="room-list">
-            <!-- 방 목록은 JavaScript로 동적으로 렌더링 -->
-        </div>
-    </div>
-
-    <!-- 방 상세 정보 -->
-    <div id="room-details" class="card d-none">
-        <div class="card-body">
-            <h5 class="card-title">객실 상세 정보</h5>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item"><strong>객실 이름:</strong> <span id="room-name"></span></li>
-                <li class="list-group-item"><strong>객실 타입:</strong> <span id="room-type"></span></li>
-                <li class="list-group-item"><strong>상태:</strong> <span id="room-status"></span></li>
-                <li class="list-group-item"><strong>가격:</strong> <span id="room-price"></span></li>
-                <li class="list-group-item"><strong>예약 기간:</strong> <span id="reservation-period"></span></li>
-            </ul>
-            <div class="mt-3">
-                <button class="btn btn-primary" id="reserve-room">객실 예약</button>
-                <button class="btn btn-danger" id="disable-room">사용 중지</button>
+    <!-- 객실 목록 -->
+    <div class="room-section">
+        <h2 class="text-center">객실 목록</h2>
+        <div class="room-container">
+            <div th:each="room : ${roomList}"
+                 th:classappend="${room.isExpired ? 'unavailable' : (reservationMap[room.roomId] != null ? 'reserved' : 'available')}"
+                 class="room-box"
+                 th:attr="data-room-id=${room.roomId}, data-is-expired=${room.isExpired}">
+                <span th:text="${room.roomName}"></span>
             </div>
         </div>
     </div>
 
+
+    <!-- 예약 요청 form -->
+    <form id="reservationForm" method="post" action="/manager/room/reservation/register">
+        <input type="hidden" name="roomId" id="roomId">
+        <input type="hidden" name="memberId" id="memberId" th:value="${memberId}">
+    </form>
+
+
+    <!-- 전체 방 목록 (예약된 방 포함) -->
+    <div class="admin-section">
+        <h3 class="text-center mt-4">객실 관리 현황</h3>
+        <table class="reservation-table">
+            <thead>
+            <tr>
+                <th>No</th>
+                <th>객실 이름</th>
+                <th>예약자 ID</th>
+                <th>체크인 날짜</th>
+                <th>체크아웃 날짜</th>
+                <th>예약마감 날짜</th>
+                <th>상태</th>
+                <th>관리</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="room, iterStat : ${roomList}" th:with="reservation=${reservationMap[room.roomId]}">
+                <td th:text="${iterStat.index + 1}"></td>
+                <td th:text="${room.roomName}"></td>
+
+                <!-- 예약자 ID (예약된 경우만 표시) -->
+                <td th:text="${reservation != null ? reservation.memberId : ''}"></td>
+
+                <!-- 체크인 및 체크아웃 날짜 (예약된 경우만 표시) -->
+                <td th:text="${reservation != null ? reservation.checkInDate : ''}"></td>
+                <td th:text="${reservation != null ? reservation.checkOutDate : ''}"></td>
+
+                <!-- 모든 객실의 예약 마감 날짜 표시 -->
+                <td th:text="${room.reservationEnd != null ? room.reservationEnd : 'N/A'}"></td>
+
+                <!-- 예약 상태 -->
+                <td>
+                    <span th:if="${room.isExpired}">예약 기간 만료</span>
+                    <span th:unless="${room.isExpired}">
+                <span th:if="${reservationMap[room.roomId] != null}">예약됨</span>
+                <span th:unless="${reservationMap[room.roomId] != null}">예약 가능</span>
+                </span>
+                </td>
+
+                <!-- 예약 취소 버튼 -->
+                <td>
+                    <form th:if="${reservation != null}" method="post" action="/manager/room/reservation/delete"
+                          th:onsubmit="return confirm('예약을 취소하시겠습니까?')">
+                        <input type="hidden" name="reservationId" th:value="${reservation.reservationId}">
+                        <button type="submit" class="btn btn-danger">예약 취소</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const roomList = document.getElementById('room-list');
-            const roomDetails = document.getElementById('room-details');
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".room-box").forEach(room => {
+                room.addEventListener("click", function () {
+                    let roomId = this.getAttribute("data-room-id");
+                    let isExpired = this.getAttribute("data-is-expired") === 'true';
+                    let isReserved = this.classList.contains("reserved"); // 예약된 방인지 확인
 
-            // 방 목록 가져오기
-            fetch('/manager/room/reservation/rooms')
-                .then(response => response.json())
-                .then(rooms => {
-                    roomList.innerHTML = '';
-                    rooms.forEach(room => {
-                        const roomDiv = document.createElement('div');
-                        roomDiv.className = 'col';
-                        roomDiv.innerHTML = `
-                            <div class="card ${room.status === '사용 중' ? 'bg-warning' : room.status === '예약됨' ? 'bg-secondary text-white' : 'bg-light'}">
-                                <div class="card-body text-center">
-                                    <h5 class="card-title">${room.name}</h5>
-                                    <p class="card-text">${room.status}</p>
-                                    <button class="btn btn-outline-primary btn-sm view-room-details" data-id="${room.id}">상세 보기</button>
-                                </div>
-                            </div>`;
-                        roomList.appendChild(roomDiv);
-                    });
+                    if (isExpired) {
+                        alert("예약 기간이 만료되었습니다.");
+                        return;
+                    }
 
-                    // 상세 보기 버튼에 이벤트 추가
-                    document.querySelectorAll('.view-room-details').forEach(button => {
-                        button.addEventListener('click', () => {
-                            fetch(`/manager/room/reservation/room/${button.dataset.id}`)
-                                .then(response => response.json())
-                                .then(data => {
-                                    roomDetails.classList.remove('d-none');
-                                    document.getElementById('room-name').textContent = data.name;
-                                    document.getElementById('room-type').textContent = data.type;
-                                    document.getElementById('room-status').textContent = data.status;
-                                    document.getElementById('room-price').textContent = data.price;
-                                    document.getElementById('reservation-period').textContent = data.reservationPeriod;
-                                });
-                        });
-                    });
+                    if (isReserved) {
+                        alert("이미 예약된 방입니다.");
+                        return;
+                    }
+
+                    if (confirm("이 방을 예약하시겠습니까?")) {
+                        document.getElementById("roomId").value = roomId;
+                        document.getElementById("reservationForm").submit();
+                    }
                 });
+            });
         });
     </script>
 </div>
