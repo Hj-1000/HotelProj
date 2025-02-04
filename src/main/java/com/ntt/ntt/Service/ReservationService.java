@@ -2,9 +2,10 @@ package com.ntt.ntt.Service;
 
 
 import com.ntt.ntt.DTO.ReservationDTO;
-import com.ntt.ntt.DTO.RoomDTO;
+import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Entity.Reservation;
 import com.ntt.ntt.Entity.Room;
+import com.ntt.ntt.Repository.MemberRepository;
 import com.ntt.ntt.Repository.ReservationRepository;
 import com.ntt.ntt.Repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,54 +27,90 @@ public class ReservationService {
     private final RoomRepository roomRepository;
     private final ReservationRepository reservationRepository;
     private final ModelMapper modelMapper;
+    private final MemberRepository memberRepository;
 
-    // 방 목록 가져오기
-    public List<RoomDTO> getRooms() {
-        List<Room> rooms = roomRepository.findAll();
-        return rooms.stream()
-                .map(room -> modelMapper.map(room, RoomDTO.class))
+    // 1. 모든 예약 목록 가져오기
+    public List<ReservationDTO> getAllReservations() {
+        List<ReservationDTO> reservations = reservationRepository.findAll()
+                .stream()
+                .map(ReservationDTO::fromEntity)
                 .collect(Collectors.toList());
+
+        for (ReservationDTO res : reservations) {
+            System.out.println("예약된 방 ID: " + res.getRoomId() + ", 예약자 ID: " + res.getMemberId());
+        }
+
+        return reservations;
     }
 
-    // 방 상세 정보 가져오기
-    public RoomDTO getRoomDetails(Integer roomId) {
+    // 2. 특정 방의 예약 정보 조회
+    public ReservationDTO getReservationByRoomId(Integer roomId) {
+        Reservation reservation = reservationRepository.findFirstByRoom_RoomId(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 방의 예약 정보가 없습니다."));
+        return ReservationDTO.fromEntity(reservation); // DTO 변환 적용
+    }
+
+    // 3. 방 예약 추가 (로그인 없이 가능하도록 설정)
+    public ReservationDTO registerReservation(Integer roomId, Integer memberId) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 방을 찾을 수 없습니다."));
-        return modelMapper.map(room, RoomDTO.class);
-    }
 
-    // 예약 추가
-    public Integer registerReservation(ReservationDTO reservationDTO) {
-        Reservation reservation = modelMapper.map(reservationDTO, Reservation.class);
+        if (!room.getRoomStatus()) {
+            throw new IllegalStateException("이미 예약된 방입니다.");
+        }
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원 정보를 찾을 수 없습니다."));
+
+        Reservation reservation = Reservation.builder()
+                .checkInDate(String.valueOf(LocalDate.now()))
+                .checkOutDate(String.valueOf(LocalDate.now().plusDays(1)))
+                .totalPrice(room.getRoomPrice())
+                .reservationStatus("예약됨")
+                .room(room)
+                .member(member)
+                .build();
+
         reservationRepository.save(reservation);
-        return reservation.getReservationId();
+
+        // 예약 완료 후 상태 변경
+        room.setRoomStatus(false);
+        roomRepository.save(room);
+
+        System.out.println("예약된 방 ID: " + room.getRoomId() + ", 상태: " + room.getRoomStatus()); // 디버깅 로그
+
+        return ReservationDTO.fromEntity(reservation);
     }
 
-    // 예약 수정
+    // 4. 방 예약 수정
     public void updateReservation(Integer reservationId, ReservationDTO reservationDTO) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 예약을 찾을 수 없습니다."));
+
+        // 체크인/체크아웃 날짜 업데이트
         reservation.setCheckInDate(reservationDTO.getCheckInDate());
         reservation.setCheckOutDate(reservationDTO.getCheckOutDate());
         reservation.setTotalPrice(reservationDTO.getTotalPrice());
-        reservation.setReservationStatus(reservationDTO.getReservationStatus());
+
+        // 예약 상태가 비어있지 않은 경우 업데이트
+        if (reservationDTO.getReservationStatus() != null && !reservationDTO.getReservationStatus().isEmpty()) {
+            reservation.setReservationStatus(reservationDTO.getReservationStatus());
+        }
+
         reservationRepository.save(reservation);
     }
 
-    // 예약 삭제
+    // 5. 방 예약 삭제 (예약 취소)
     public void deleteReservation(Integer reservationId) {
-        reservationRepository.deleteById(reservationId);
-    }
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 예약을 찾을 수 없습니다."));
 
-    // 방 상태 변경
-    public void changeRoomStatus(Integer roomId, String status) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 방을 찾을 수 없습니다."));
+        Room room = reservation.getRoom();
 
-        // String 값을 Boolean으로 변환
-        Boolean booleanStatus = Boolean.valueOf(status);
+        reservationRepository.delete(reservation);
 
-        room.setRoomStatus(booleanStatus);
+        // 방을 예약 가능 상태로 변경
+        room.setRoomStatus(true);
         roomRepository.save(room);
     }
 }

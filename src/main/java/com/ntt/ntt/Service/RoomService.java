@@ -6,6 +6,7 @@ import com.ntt.ntt.DTO.RoomDTO;
 import com.ntt.ntt.Entity.Image;
 import com.ntt.ntt.Entity.Room;
 import com.ntt.ntt.Repository.ImageRepository;
+import com.ntt.ntt.Repository.ReservationRepository;
 import com.ntt.ntt.Repository.RoomRepository;
 import com.ntt.ntt.Util.FileUpload;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,8 @@ public class RoomService {
     private final ImageRepository imageRepository;
     private final RoomRepository roomRepository;
     private final ModelMapper modelMapper;
+
+    private final ReservationRepository reservationRepository;
 
 
     // 이미지 등록할 ImageService 의존성 추가
@@ -120,6 +123,19 @@ public class RoomService {
     }
 
 
+    // 모든 방 목록 가져오기 (예약 여부 포함)
+    public List<RoomDTO> getRoomListWithReservations() {
+        List<Room> rooms = roomRepository.findAll();
+        return rooms.stream()
+                .map(room -> {
+                    RoomDTO dto = modelMapper.map(room, RoomDTO.class);
+                    dto.setRoomStatus(reservationRepository.existsByRoom_RoomId(room.getRoomId()));
+                    dto.setExpired(room.getReservationEnd() != null &&
+                            LocalDate.parse(room.getReservationEnd()).isBefore(LocalDate.now()));
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
 
 
 
@@ -305,5 +321,13 @@ public class RoomService {
             roomDTO.setRoomImageDTOList(imageDTOList);
             return roomDTO;
         });
+    }
+
+    // 방 강제 사용 중지 (관리자 기능)
+    public void disableRoom(Integer roomId) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 방을 찾을 수 없습니다."));
+        room.setRoomStatus(false);
+        roomRepository.save(room);
     }
 }
