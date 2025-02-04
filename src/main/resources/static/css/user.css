@@ -64,6 +64,16 @@ header {
 
 /* 룸 추천 */
 
+
+.recommended-wrap {
+    position: relative;
+}
+
+.more-btn {
+    position: absolute;
+    right: 0;
+}
+
 h5 {
     font-size: 1.25rem;
     margin-bottom: 1rem !important;
