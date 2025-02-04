@@ -3,11 +3,8 @@ package com.ntt.ntt.Service;
 import com.ntt.ntt.Constant.ServiceOrderStatus;
 import com.ntt.ntt.DTO.ServiceOrderDTO;
 import com.ntt.ntt.DTO.ServiceOrderItemDTO;
-import com.ntt.ntt.Entity.ServiceMenu;
-import com.ntt.ntt.Entity.ServiceOrder;
-import com.ntt.ntt.Entity.ServiceOrderItem;
-import com.ntt.ntt.Repository.ServiceOrderItemRepository;
-import com.ntt.ntt.Repository.ServiceOrderRepository;
+import com.ntt.ntt.Entity.*;
+import com.ntt.ntt.Repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -24,7 +21,9 @@ import java.util.stream.Collectors;
 @Log4j2
 public class ServiceOrderService {
     private final ServiceOrderRepository serviceOrderRepository;
-    private final ServiceOrderItemRepository serviceOrderItemRepository;
+    private final ServiceMenuRepository serviceMenuRepository;
+    private final MemberRepository memberRepository;
+    private final RoomRepository roomRepository;
     private final ModelMapper modelMapper;
 
     // 특정 회원의 주문 목록 조회
@@ -40,23 +39,49 @@ public class ServiceOrderService {
 
     // 주문 생성
     public ServiceOrderDTO createOrder(Integer memberId, Integer roomId, List<ServiceOrderItemDTO> orderItems) {
-        ServiceOrder serviceOrder = new ServiceOrder();
-        serviceOrder.setMember(serviceOrder.getMember());
-        serviceOrder.setRoom(serviceOrder.getRoom());
-        serviceOrder.setServiceOrderStatus(ServiceOrderStatus.PENDING); // 기본적으로 보류 상태로 설정
-        serviceOrder.setServiceOrderItemList(new ArrayList<>()); // 주문 아이템 리스트 초기화
+        //  회원 및 방 정보 조회
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다: " + memberId));
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new RuntimeException("방 정보를 찾을 수 없습니다: " + roomId));
+
+        //  주문 생성
+        ServiceOrder serviceOrder = ServiceOrder.builder()
+                .member(member)
+                .room(room)
+                .serviceOrderStatus(ServiceOrderStatus.PENDING) // 기본 주문 상태
+                .build();
+
+        List<ServiceOrderItem> orderItemList = new ArrayList<>();
+        int totalPrice = 0;
 
         for (ServiceOrderItemDTO itemDTO : orderItems) {
-            ServiceMenu serviceMenu = new ServiceMenu();
-            serviceMenu.setServiceMenuId(itemDTO.getServiceMenuId());
-            ServiceOrderItem serviceOrderItem = modelMapper.map(itemDTO, ServiceOrderItem.class);
-            serviceOrderItem.setServiceMenu(serviceMenu);
-            serviceOrderItem.setOrderPrice(itemDTO.getOrderCount() * serviceMenu.getServiceMenuPrice()); // 가격 계산
-            serviceOrder.addServiceOrderItem(serviceOrderItem); // 주문에 아이템 추가
+            ServiceMenu menu = serviceMenuRepository.findById(itemDTO.getServiceMenuId())
+                    .orElseThrow(() -> new RuntimeException("메뉴를 찾을 수 없습니다: " + itemDTO.getServiceMenuId()));
+
+            if (menu.getServiceMenuPrice() == null) {
+                throw new RuntimeException("메뉴 가격이 설정되지 않았습니다: " + menu.getServiceMenuName());
+            }
+
+            //  주문 아이템 생성
+            ServiceOrderItem orderItem = ServiceOrderItem.builder()
+                    .serviceOrder(serviceOrder)
+                    .serviceMenu(menu)
+                    .orderCount(itemDTO.getOrderCount())
+                    .orderPrice(menu.getServiceMenuPrice() * itemDTO.getOrderCount())
+                    .build();
+
+            totalPrice += orderItem.getOrderPrice();
+            orderItemList.add(orderItem);
         }
 
+        // 주문 정보 저장
+        serviceOrder.setServiceOrderItemList(orderItemList);
+        serviceOrder.calculateTotalPrice(); // 총 금액 계산
         serviceOrderRepository.save(serviceOrder);
-        return modelMapper.map(serviceOrder, ServiceOrderDTO.class);
+
+        //  DTO 변환 후 반환
+        return ServiceOrderDTO.fromEntity(serviceOrder);
     }
 
     // 주문 상태 변경

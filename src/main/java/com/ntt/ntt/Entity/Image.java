@@ -51,7 +51,4 @@ public class Image extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "bannerId")
     private Banner banner;
-
-
-
 }

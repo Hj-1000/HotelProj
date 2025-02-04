@@ -1,4 +1,4 @@
-package com.ntt.ntt.Controller;
+package com.ntt.ntt.Controller.ServiceCategory;
 
 import com.ntt.ntt.DTO.ServiceCateDTO;
 import com.ntt.ntt.Service.ServiceCateService;

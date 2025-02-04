@@ -1,4 +1,4 @@
-package com.ntt.ntt.Controller;
+package com.ntt.ntt.Controller.ServiceCart;
 
 import com.ntt.ntt.DTO.ServiceCartDTO;
 import com.ntt.ntt.DTO.ServiceCartItemDTO;
