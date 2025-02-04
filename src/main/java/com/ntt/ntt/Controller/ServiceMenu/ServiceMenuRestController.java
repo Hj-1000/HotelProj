@@ -1,4 +1,4 @@
-package com.ntt.ntt.Controller;
+package com.ntt.ntt.Controller.ServiceMenu;
 
 import com.ntt.ntt.DTO.ServiceMenuDTO;
 import com.ntt.ntt.Service.ServiceMenuService;
