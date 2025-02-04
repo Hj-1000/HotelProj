@@ -1,4 +1,4 @@
-package com.ntt.ntt.Controller;
+package com.ntt.ntt.Controller.ServiceOrder;
 
 import com.ntt.ntt.DTO.ServiceOrderItemDTO;
 import com.ntt.ntt.Service.ServiceOrderItemService;

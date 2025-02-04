@@ -30,7 +30,7 @@ public class ServiceMenu extends BaseEntity {
     private ServiceMenuStatus serviceMenuStatus;
     // 메뉴 가격
     @Column(nullable = false)
-    private Integer serviceMenuPrice;
+    private Integer serviceMenuPrice = 0;
 
     @ManyToOne
     @JoinColumn(name = "serviceCateId")

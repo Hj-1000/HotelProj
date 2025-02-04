@@ -34,7 +34,11 @@ public class ServiceMenuDTO {
 
     private LocalDateTime modDate;
 
+    //2025.02.04추가
+    private String imageName;
+    private String imagePath;
+
     @Builder.Default
     private List<ImageDTO> serviceMenuImageDTOList = new ArrayList<>();
-    // TODO:25-01-24 정상 코드로 복귀 이거 잘 되는거 확인했으면 이 주석은 지울것
+
 }
