@@ -6,6 +6,7 @@ import com.ntt.ntt.DTO.RoomDTO;
 import com.ntt.ntt.Service.RoomService;
 import com.ntt.ntt.Service.hotel.HotelService;
 import com.ntt.ntt.Util.PaginationUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -137,7 +138,6 @@ public class HotelController {
             return "redirect:/hotel/list"; // 목록 페이지로 리다이렉트
         }
     }
-
 
 
 }
