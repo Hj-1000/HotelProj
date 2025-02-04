@@ -5,14 +5,52 @@
       layout:decorate="~{layouts/layout}">
 <head>
     <meta charset="UTF-8">
-    <title>NTT호텔 - 지사 상세 페이지</title>
+    <title>NTT호텔 - [[${hotelDTO.hotelName}]] 지사 정보</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap JS (필요한 경우 Popper.js 포함) -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+
+    <script th:inline="javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+            var moBtn = document.querySelectorAll(".modalBtn");  // 버튼을 모든 요소로 처리
+            var modalElement = document.getElementById("myModal"); // 모달 요소 가져오기
+            var modal = new bootstrap.Modal(modalElement); // 부트스트랩 Modal 객체 생성
+
+            // 모달 버튼 클릭 시
+            moBtn.forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    console.log("모달 진입좀해라");
+
+                    modal.show(); // 모달 열기
+
+                    document.querySelector('.modal-title').innerText = "간편 등록하기"; // 타이틀 업데이트
+
+                    // 모달 내에서 동적으로 요소 보여주기
+                    document.getElementById("saveChanges").style.display = "block";
+                    document.querySelectorAll('.modal-body input').forEach(function(input) {
+                        input.style.display = "block";
+                    });
+                });
+            });
+
+            // 서브밋 버튼 클릭 이벤트
+            document.querySelector(".submitBtn").addEventListener("click", function () {
+                alert("글 작성이 완료되었습니다.");
+            });
+        });
+    </script>
+
+
 </head>
 <body>
 <div id="wrapper" layout:fragment="content">
 
     <div class="container-fluid mt-4">
-        <h2 class="mb-3">지사 상세보기</h2>
+        <h2 class="mb-3">지사 정보</h2>
 
         <div class="card p-4 mb-4">
             <div class="row g-3 align-items-center">
@@ -41,16 +79,237 @@
                 <p>체크인 : <span th:text="${hotelDTO.hotelCheckIn}">체크인</span>시</p>
                 <p>체크아웃 : <span th:text="${hotelDTO.hotelCheckOut}">체크아웃</span>시</p>
             </div>
+
+            <!-- 버튼 -->
+            <div class="text-end mt-3">
+                <a class="btn btn-primary" style="background-color: black" th:href="@{/manager/hotel/list(companyId=${hotelDTO.companyId.companyId})}">목록</a>
+                <button type="button" class="btn btn-success modalBtn">객실 등록</button>
+                <a class="btn btn-primary" th:href="@{/manager/hotel/modify(hotelId=${hotelDTO.hotelId})}">수정</a>
+                <a class="btn btn-danger" th:href="@{/manager/hotel/delete(hotelId=${hotelDTO.hotelId})}">삭제</a>
+            </div>
+
         </div>
 
-        <!-- 버튼 -->
-        <div class="text-end mt-3">
-            <a class="btn btn-primary" style="background-color: black" th:href="@{/manager/hotel/list(companyId=${hotelDTO.companyId.companyId})}">목록</a>
-            <a class="btn btn-primary" th:href="@{/manager/hotel/modify(hotelId=${hotelDTO.hotelId})}">수정</a>
-            <a class="btn btn-danger" th:href="@{/manager/hotel/delete(hotelId=${hotelDTO.hotelId})}">삭제</a>
+
+        <!-- 본사에 속한 객실 목록 -->
+        <div class="container-fluid mt-4">
+            <h2 class="mb-3">객실 관리</h2>
+
+            <div class="card p-4 mb-4">
+                <form action="/manager/room/list" method="get" id="searchForm">
+                    <div class="row g-3 align-items-center">
+                        <h5 class="card-title">객실 찾기</h5>
+                        <div class="col-md-6">
+                            <select name="searchType" id="searchType" class="form-select">
+                                <option value="name">객실명</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" id="keyword" class="form-control" placeholder="검색어를 입력하세요">
+                        </div>
+                    </div>
+                    <!-- 조회 버튼 -->
+                    <div class="text-center mt-4">
+                        <button type="button" id="searchBtn" class="btn btn-dark w-25">조회</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 목록 영역 -->
+            <div class="card">
+                <div class="card-body">
+                    <table class="table table-bordered text-center" id="hotelTable">
+                        <thead class="table-dark">
+                        <tr>
+                            <th scope="col">이미지</th>
+                            <th scope="col">객실 ID</th>
+                            <th scope="col">객실 이름</th>
+                            <th scope="col">객실 타입</th>
+                            <th scope="col">가격</th>
+                            <th scope="col">상태</th>
+                            <th scope="col">예약 기간</th>
+                            <th scope="col">숙박 기간</th>
+                            <th scope="col">기능</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="room : ${rooms}">
+                            <!-- 이미지 -->
+                            <td class="align-middle text-center">
+                                <img th:if="${room.roomImageDTOList != null and !room.roomImageDTOList.isEmpty()}"
+                                     th:src="@{'/upload/' + ${room.roomImageDTOList[0].imagePath}}"
+                                     alt="Room Image"
+                                     class="room-image" width="100px">
+                                <span th:if="${room.roomImageDTOList == null or room.roomImageDTOList.isEmpty()}">
+                                    <img src="/img/default_img.jpg" width="100px">
+                                </span>
+                            </td>
+
+
+                            <!-- 나머지 -->
+                            <td class="align-middle text-center" th:text="${room.roomId}"></td>
+                            <td class="align-middle text-center" th:text="${room.roomName}"></td>
+                            <td class="align-middle text-center" th:text="${room.roomType}"></td>
+                            <td class="align-middle text-center" th:text="${room.roomPrice} + ' KRW'"></td>
+                            <td class="align-middle text-center">
+                                <span th:if="${room.roomStatus != null and room.roomStatus}" class="badge bg-success">Available</span>
+                                <span th:if="${room.roomStatus == null or !room.roomStatus}" class="badge bg-danger">Unavailable</span>
+                            </td>
+                            <td class="align-middle text-center" th:text="${room.reservationStart} + ' ~ ' + ${room.reservationEnd}">예약 기간 없음</td>
+                            <td class="align-middle text-center" th:text="${room.stayStart} + ' ~ ' + ${room.stayEnd}">숙박 기간 없음</td>
+                            <td class="align-middle text-center">
+                                <div class="button-group">
+                                    <a th:href="@{/manager/room/{roomId}(roomId=${room.roomId})}" class="btn btn-info btn-sm">보기</a>
+                                    <a th:href="@{/manager/room/update/{roomId}(roomId=${room.roomId})}" class="btn btn-warning btn-sm">수정</a>
+                                    <a th:href="@{/manager/room/delete/{roomId}(roomId=${room.roomId})}"
+                                       onclick="return confirm('진짜로 삭제할꺼야?')"
+                                       class="btn btn-danger btn-sm">삭제</a>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+
+                    </table>
+
+                    <th:block th:if="${#lists.isEmpty(rooms)}">
+                        <div style="text-align: center">
+                            <p>등록된 객실이 없습니다.</p>
+                        </div>
+                    </th:block>
+
+                    <!-- 페이지네이션 -->
+                    <div th:if="${totalPages > 1}">
+                        <ul class="pagination">
+                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+                                <a class="page-link" th:href="@{/manager/hotel/read(hotelId=${hotelDTO.hotelId}, page=0)}">첫 페이지</a>
+                            </li>
+                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+                                <a class="page-link" th:href="@{/manager/hotel/read(hotelId=${hotelDTO.hotelId}, page=${currentPage - 1})}">이전</a>
+                            </li>
+                            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled' : ''">
+                                <a class="page-link" th:href="@{/manager/hotel/read(hotelId=${hotelDTO.hotelId}, page=${currentPage + 1})}">다음</a>
+                            </li>
+                            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled' : ''">
+                                <a class="page-link" th:href="@{/manager/hotel/read(hotelId=${hotelDTO.hotelId}, page=${totalPages - 1})}">마지막 페이지</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </div>
+
+
+    <!-- 방 등록 모달 -->
+    <div class="modal" id="myModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="myModalLabel">객실 등록</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <form th:action="@{/manager/room/register}" th:object="${room}" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        <!-- 지사(호텔) -->
+                        <div class="mb-3 mt-3">
+                            <label for="hotelId" class="form-label">지사명:</label>
+                            <select id="hotelId" name="hotelId" class="form-select">
+                                <option th:value="${hotelDTO.hotelId}" th:text="${hotelDTO.hotelName}">뒤에바</option>
+                            </select>
+                        </div>
+                        <!-- 객실 이름 -->
+                        <div class="mb-3">
+                            <label for="roomName" class="form-label">객실 이름</label>
+                            <input type="text" class="form-control" id="roomName" name="roomName" placeholder="객실 이름을 입력하세요" required>
+                            <div class="invalid-feedback">
+                                객실 이름을 입력해야 합니다.
+                            </div>
+                        </div>
+
+                        <!-- 객실 타입 -->
+                        <div class="mb-3">
+                            <label for="roomType" class="form-label">객실 타입</label>
+                            <select class="form-select" id="roomType" name="roomType" required>
+                                <option value="" disabled selected>객실 타입을 선택하세요</option>
+                                <option value="Single">Single Room</option>
+                                <option value="Double">Double Room</option>
+                                <option value="Suite">Suite Room</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                객실 타입을 선택해야 합니다.
+                            </div>
+                        </div>
+
+                        <!-- 객실 가격 -->
+                        <div class="mb-3">
+                            <label for="roomPrice" class="form-label">객실 가격 (KRW)</label>
+                            <input type="number" class="form-control" id="roomPrice" name="roomPrice" placeholder="가격을 입력하세요" required>
+                            <div class="invalid-feedback">
+                                가격을 입력해야 합니다.
+                            </div>
+                        </div>
+
+                        <!-- 객실 상태 -->
+                        <div class="mb-3">
+                            <label class="form-label">객실 상태</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" id="statusAvailable" name="roomStatus" value="true">
+                                <label class="form-check-label" for="statusAvailable">예약 가능</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" id="statusUnavailable" name="roomStatus" value="false">
+                                <label class="form-check-label" for="statusUnavailable">예약 불가</label>
+                            </div>
+                        </div>
+
+                        <!-- 객실 정보 -->
+                        <div class="mb-3">
+                            <label for="roomInfo" class="form-label">객실 설명</label>
+                            <textarea class="form-control" id="roomInfo" name="roomInfo" placeholder="객실 설명을 입력하세요" rows="3"></textarea>
+                        </div>
+
+                        <!-- 예약 기간 및 숙박 기간 -->
+                        <div class="date-container">
+                            <div class="date-group">
+                                <label class="form-label">예약 기간</label>
+                                <div class="date-fields">
+                                    <input type="date" class="form-control" id="reservationStart" name="reservationStart" required>
+                                    ~
+                                    <input type="date" class="form-control" id="reservationEnd" name="reservationEnd" required>
+                                </div>
+                            </div>
+                            <div class="date-group">
+                                <label class="form-label">숙박 기간</label>
+                                <div class="date-fields">
+                                    <input type="date" class="form-control" id="stayStart" name="stayStart" required>
+                                    ~
+                                    <input type="date" class="form-control" id="stayEnd" name="stayEnd" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 객실 이미지 업로드 -->
+                        <div class="mb-3">
+                            <label for="imageFile" class="form-label">객실 이미지 업로드</label>
+                            <input type="file" class="form-control" id="imageFile" name="imageFile" multiple>
+                            <small class="form-text text-muted">여러 이미지를 선택하려면 Ctrl(또는 Cmd) 키를 누른 상태로 이미지를 선택하세요.</small>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary">등록</button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
 </div>
 
 

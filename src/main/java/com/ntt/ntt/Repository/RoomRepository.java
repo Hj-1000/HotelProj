@@ -1,11 +1,15 @@
 package com.ntt.ntt.Repository;
 
+import com.ntt.ntt.DTO.RoomDTO;
+import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.Room;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Integer> {
@@ -26,5 +30,6 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
     @Query("SELECT r FROM Room r LEFT JOIN FETCH r.roomImageList")
     Page<Room> findAllWithImages(Pageable pageable);
 
+    Page<Room> findByHotelId_HotelId (Integer hotelId, Pageable pageable);
 
 }

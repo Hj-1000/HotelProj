@@ -18,10 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -347,4 +344,28 @@ public class RoomService {
         room.setRoomStatus(false);
         roomRepository.save(room);
     }
+
+    // hotelId에 맞는 방들을 가져오는 메서드
+    public Page<RoomDTO> getRoomsByHotelId(Integer hotelId, Pageable pageable) {
+        // 호텔 ID에 맞는 Room 데이터 조회 (페이징 처리)
+        Page<Room> roomsPage = roomRepository.findByHotelId_HotelId(hotelId, pageable);
+
+        // 각 Room 객체를 RoomDTO로 변환하여 리스트에 추가
+        List<RoomDTO> roomDTOs = roomsPage.getContent().stream()
+                .map(room -> modelMapper.map(room, RoomDTO.class))
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(roomDTOs, pageable, roomsPage.getTotalElements());
+    }
+
+
+
+
+
+
+
+
+
+
+
 }
