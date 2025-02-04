@@ -46,6 +46,15 @@
             <h1 class="text-center mb-5">객실 등록</h1>
             <!-- Room Registration Form -->
             <form th:action="@{/manager/room/register}" th:object="${room}" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                <!-- 지사(호텔) -->
+                <div class="mb-3 mt-3">
+                    <label for="hotelId" class="form-label">지사명:</label>
+                    <select id="hotelId" name="hotelId" class="form-select">
+                        <th:block th:each="hotelDTOS : ${hotelDTOS}">
+                            <option th:value="${hotelDTOS.hotelId}" th:text="${hotelDTOS.hotelName}">뒤에바</option>
+                        </th:block>
+                    </select>
+                </div>
                 <!-- 객실 이름 -->
                 <div class="mb-3">
                     <label for="roomName" class="form-label">객실 이름</label>

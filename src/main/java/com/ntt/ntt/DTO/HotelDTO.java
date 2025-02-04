@@ -48,4 +48,8 @@ public class HotelDTO {
     private Company companyId; //회사 연결 (회사 안에 들어있는 호텔) 2025-01-22 추가
     private String companyName; //회사 연결 (회사 안에 들어있는 호텔) 2025-01-22 추가
 
+    public HotelDTO(Integer hotelId, String hotelName) {
+        this.hotelId = hotelId;
+        this.hotelName = hotelName;
+    }
 }

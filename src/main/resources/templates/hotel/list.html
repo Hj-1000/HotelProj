@@ -29,12 +29,12 @@
 
         //찜 버튼을 클릭했을 때 실행 할 함수
         function addLike() {
-            console.log("홍길동")
+            console.log("아구찜")
 
-            var questId = [[${questId}]]
+            var hotelId = [[${hotelId}]]
             var count = $("#count").val();
             var param = {
-                questId : questId,
+                hotelId : hotelId,
                 count : count
             }
             $.ajax({
@@ -47,7 +47,7 @@
 
                     //나중에 모달창으로 꾸미자
                     //혹은 html페이지에 표시도 가능
-                    alert("찜 완료 되었다개💖")
+                    alert("찜 완료 되었습니다~!")
 
 
                 } ,
@@ -55,8 +55,8 @@
 
                     if(result.status == '401'){
                         // alert(result.responseText+'로그인 후 이용해주세요');
-                        alert('로그인 후 이용해주개');
-                        location.href = '/user/login';
+                        alert('로그인 후 이용해주세요');
+                        location.href = '/login';
                     }else {
                         alert("확인요망 : " + result.responseText)
                     }

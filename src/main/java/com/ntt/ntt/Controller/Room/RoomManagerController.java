@@ -1,6 +1,7 @@
-package com.ntt.ntt.Controller.Room;
+package com.ntt.ntt.Controller.room;
 
 
+import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.RoomDTO;
 import com.ntt.ntt.Service.RoomService;
 import com.ntt.ntt.Util.PaginationUtil;
@@ -34,6 +35,10 @@ public class RoomManagerController {
         //빈 RoomDTO 전달
         model.addAttribute("room", new RoomDTO());
 
+        //hotelDTO hotelName 전달하기
+        List<HotelDTO> hotelDTOS = roomService.getAllHotel();
+        model.addAttribute("hotelDTOS", hotelDTOS);
+        model.addAttribute("hotelDTO", new HotelDTO());
 
         //register.htm로 이동
         return "manager/room/register";
