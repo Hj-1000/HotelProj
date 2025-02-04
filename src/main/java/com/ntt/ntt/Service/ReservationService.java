@@ -64,16 +64,10 @@ public class ReservationService {
 
     // 2. 모든 예약 목록 가져오기
     public List<ReservationDTO> getAllReservations() {
-        List<ReservationDTO> reservations = reservationRepository.findAll()
+        return reservationRepository.findAll()
                 .stream()
-                .map(ReservationDTO::fromEntity)
+                .map(ReservationDTO::fromEntity) // memberName, memberEmail 자동 포함
                 .collect(Collectors.toList());
-
-        for (ReservationDTO res : reservations) {
-            System.out.println("예약된 방 ID: " + res.getRoomId() + ", 예약자 ID: " + res.getMemberId());
-        }
-
-        return reservations;
     }
 
     // 3. 특정 방의 예약 정보 조회
@@ -115,4 +109,5 @@ public class ReservationService {
         room.setRoomStatus(true);
         roomRepository.save(room);
     }
+
 }

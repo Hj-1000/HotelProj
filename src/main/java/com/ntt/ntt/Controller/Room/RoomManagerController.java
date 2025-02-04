@@ -59,7 +59,7 @@ public class RoomManagerController {
 
     // 2. 모든 객실 조회
     @GetMapping("/list")
-    public String list(
+    public String listForm(
             @PageableDefault(size = 5, page = 0) Pageable pageable,
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "category", required = false) String category,
@@ -76,7 +76,6 @@ public class RoomManagerController {
 
         // 검색 조건과 페이징 정보를 이용하여 데이터 가져오기
         Page<RoomDTO> roomDTOS = roomService.searchRooms(keyword, category, pageable);
-
 
 
         // 로그로 이미지 확인
