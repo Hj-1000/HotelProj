@@ -1,0 +1,55 @@
+/* 알림 벨 스타일 */
+.notification-bell {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    position: relative;
+    margin-left: 10px; /* Q&A와 알림 벨 사이에 간격을 둡니다 */
+}
+
+.notification-bell #unread-count {
+    position: absolute;
+    top: -5px;
+    right: 3px;
+    background-color: red;
+    color: white;
+    border-radius: 20%;
+    padding: 5px;
+    font-size: 0.8rem;
+}
+
+/* 알림 목록 스타일 */
+.notification-list {
+    position: absolute;
+    top: 50px; /* 벨 아이콘 아래에 위치 */
+    right: 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 250px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: none;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.notification-list .notification-item {
+    padding: 10px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.notification-list .notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-list .notification-item p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* 알림 목록이 보일 때 */
+.notification-bell:active + .notification-list,
+.notification-bell:hover + .notification-list {
+    display: block;
+}

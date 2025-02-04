@@ -11,7 +11,9 @@
     <link rel ="stylesheet" href="/assets/css/bootstrap.min.css">
     <link rel ="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/notificationbell.css}">
 </head>
+
 <body>
 <div layout:fragment="layout">
     <div class="d-flex">
@@ -67,12 +69,29 @@
                     <li><a href="#" class="nav-link text-white"><i class="fa-regular fa-snowflake"></i> 비밀번호 변경</a></li>
                     <li><a href="#" class="nav-link text-white"><i class="fa-regular fa-snowflake"></i> 다국어관리</a></li>
                     <li><a href="/notice/list" class="nav-link text-white"><i class="fa-regular fa-snowflake"></i> 공지사항</a></li>
-                    <li><a href="/qna" class="nav-link text-white"><i class="fa-regular fa-snowflake"></i> Q&A </a></li>
+
+                    <!-- Q&A와 알림 벨을 같은 라인에 배치 -->
+                    <div class="d-flex align-items-center">
+                        <a href="/qna" class="nav-link text-white">Q&A</a> <!-- text-white 클래스를 추가하여 동일한 색으로 설정 -->
+
+                        <!-- 알림 벨 이모티콘 추가 -->
+                        <button class="notification-bell nav-link text-white" id="notification-bell">
+                            🔔 <span id="unread-count">0</span>
+                        </button>
+                    </div>
+
+
+
 
 
 
                 </div>
             </ul>
+
+            <!-- 알림 목록을 표시할 곳 -->
+            <div class="notification-list" id="notification-list" style="display: none;">
+                <!-- 여기에 알림 항목들이 표시됩니다. -->
+            </div>
 
             <!-- CHIEF Menu -->
             <!--<ul class="nav nav-pills flex-column mb-auto" th:if="${#authentication.hasRole('ADMIN') or #authentication.hasRole('CHIEF')}">
