@@ -3,9 +3,13 @@ package com.ntt.ntt.Controller;
 import com.ntt.ntt.Util.PaginationUtil;
 import com.ntt.ntt.DTO.NoticeDTO;
 import com.ntt.ntt.Service.NoticeService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.data.domain.Page;
 import org.springframework.ui.Model;
@@ -15,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,18 +27,19 @@ import java.util.List;
 @Controller
 @RequiredArgsConstructor
 @Log
+@Tag(name = "NoticeController", description = "notice페이지")
 public class NoticeController {
     private final NoticeService noticeService;
 
 
     @Autowired
     private PaginationUtil paginationUtil;
-
+    @Operation(summary = "이동폼", description = "리스트 페이지로 이동한다.")
     @GetMapping("/notice")
     public String notice(){
         return "redirect:/notice/list";
     }
-
+    @Operation(summary = "이동폼", description = "리스트 페이지로 이동한다.")
     @GetMapping("/notice/list")
     public String listNotices(
             @RequestParam(defaultValue = "0") int page,
@@ -67,84 +73,29 @@ public class NoticeController {
         return "notice/list";
     }
 
-//    @GetMapping("/notice/list")
-//    public String getAllnotice2(
-//            @RequestParam(required = false, defaultValue = "") String noticeTitle,
-//            @RequestParam(required = false, defaultValue = "") String noticeContent,
-//            @RequestParam(required = false, defaultValue = "") String regDate,
-//            @RequestParam(required = false, defaultValue = "") String modDate,
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "10") int size,
-//            Model model) {
-//        try {
-//            // 필터링된 리스트 가져오기
-//            List<NoticeDTO> filteredNotice = noticeService.getFilteredNotice(noticeTitle, noticeContent, regDate, modDate);
-//
-//            // 페이징 처리
-//            int startIdx = page * size;
-//            int endIdx = Math.min(startIdx + size, filteredNotice.size());
-//            List<NoticeDTO> pagedNotice = filteredNotice.subList(startIdx, endIdx);
-//
-//            model.addAttribute("noticeDTOList", pagedNotice);
-//            model.addAttribute("pageNumber", page);
-//            model.addAttribute("totalPages", (int) Math.ceil((double) filteredNotice.size() / size));
-//            model.addAttribute("size", size);
-//        } catch (Exception e) {
-//            model.addAttribute("error", "목록을 가져오는 중 오류가 발생했습니다.");
-//            e.printStackTrace();
-//        }
-//        model.addAttribute("noticeTitle", noticeTitle);
-//        return "notice/list";
-//    }
-//    @GetMapping("/notice/list")
-//    public String getAllnotice(@RequestParam(required = false) String noticeTitle,
-//                               @RequestParam(required = false) String noticeContent,
-//                               @RequestParam(required = false) String regDate,
-//                               @RequestParam(required = false) String modDate,
-//                               @RequestParam(defaultValue = "0") int page,  // 추가됨
-//                               @RequestParam(defaultValue = "10") int size, // 추가됨
-//                                Model model) {
-//        try {
-//            // 필터링된 리스트 가져오기
-//            List<NoticeDTO> filteredNotice = noticeService.getFilteredNotice(noticeTitle,noticeContent,regDate, modDate);
-//
-//            // 페이징 처리
-//            int startIdx = page * size;
-//            int endIdx = Math.min(startIdx + size, filteredNotice.size());
-//            List<NoticeDTO> pagedNotice = filteredNotice.subList(startIdx, endIdx);
-//
-//            model.addAttribute("noticeDTOList", pagedNotice);
-//            model.addAttribute("pageNumber", page);
-//            model.addAttribute("totalPages", (int) Math.ceil((double) filteredNotice.size() / size));
-//            model.addAttribute("size", size);
-//
-//        } catch (Exception e) {
-//            model.addAttribute("error", "목록을 가져오는 중 오류가 발생했습니다.");
-//            e.printStackTrace();
-//        }
-//        return "notice/list";
-//    }
-//    @GetMapping("/notice/list")
-//    public String listForm(Model model){
-//        List<NoticeDTO> noticeDTOList = noticeService.list();
-//
-//        model.addAttribute("noticeDTOList", noticeDTOList);
-//        return "notice/list";
-//    }
 
+
+    @Operation(summary = "등록폼", description = "공지사항 등록폼 페이지로 이동한다.")
     @GetMapping("/notice/register")
-    public String registerForm(Model model){
+
+    public String registerForm(@AuthenticationPrincipal UserDetails userDetails, Model model){
+        if (userDetails == null) {
+            model.addAttribute("errorMessage","로그인 후 글을 남길수 있습니다");
+            return "redirect:/login";
+        }
         model.addAttribute("noticeDTO", new NoticeDTO());
         return "notice/register";
-    }
 
+
+    }
+    @Operation(summary = "등록창", description = "공지사항 등록 후 리스트 페이지로 이동한다.")
     @PostMapping("/notice/register")
     public String registerProc(NoticeDTO noticeDTO, @RequestParam("multipartFile") List<MultipartFile> multipartFile){
 
         noticeService.register(noticeDTO, multipartFile);
         return "redirect:/notice/list";
     }
-
+    @Operation(summary = "이동폼", description = "공지사항 상세보기 페이지로 이동한다.")
     @GetMapping("/notice/read")
     public String readForm(@RequestParam Integer noticeId, Model model){
         NoticeDTO noticeDTO = noticeService.read(noticeId);
@@ -152,28 +103,33 @@ public class NoticeController {
         model.addAttribute("noticeDTO", noticeDTO);
         return "notice/read";
     }
+    @Operation(summary = "수정폼", description = "공지사항 수정 페이지로 이동한다.")
     @GetMapping("/notice/update")
     public String updateForm(@RequestParam Integer noticeId, Model model){
         NoticeDTO noticeDTO = noticeService.read(noticeId);
         model.addAttribute("noticeDTO", noticeDTO);
         return "notice/update";
     }
+    @Operation(summary = "수정창", description = "공지사항 수정후 리스트 페이지로 이동한다.")
     @PostMapping("/notice/update")
     public String updateProc(@ModelAttribute NoticeDTO noticeDTO,@RequestParam("multipartFile") List<MultipartFile> multipartFile){
         noticeService.update(noticeDTO, multipartFile);
         return "redirect:/notice/list";
     }
+    @Operation(summary = "삭제폼", description = "공지사항 삭제 후 리스트 페이지로 이동한다.")
     @GetMapping("/notice/delete")
     public String deleteForm(@RequestParam Integer noticeId, List<MultipartFile> multipartFile){
         noticeService.delete(noticeId);
         return "redirect:/notice/list";
     }
+    @Operation(summary = "유저 공지사항 이동폼", description = "유저 공지사항 리스트 페이지로 이동한다.")
     @GetMapping("/notice/userlist")
     public String userlistForm(Model model){
         List<NoticeDTO> noticeDTOList = noticeService.list();
         model.addAttribute("noticeDTOList", noticeDTOList);
         return "notice/userlist";
     }
+    @Operation(summary = "유저 상세보기 이동폼", description = "유저 공지사항 상세보기 페이지로 이동한다.")
     @GetMapping("/notice/userread")
     public String userreadForm(@RequestParam Integer noticeId, Model model) {
         NoticeDTO noticeDTO = noticeService.read(noticeId);
