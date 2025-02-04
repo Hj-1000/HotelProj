@@ -62,7 +62,9 @@ public class RoomController {
     @GetMapping("/roomList/data")
     @ResponseBody
     public Map<String, Object> roomListDataForm(@RequestParam(value = "page", defaultValue = "0") int page) {
-        int pageSize = 3; // 한 번에 로드할 방 개수
+
+        // 한 번에 로드할 방 개수
+        int pageSize = 3;
 
         if (page < 0) {
             page = 0; // 음수 방지

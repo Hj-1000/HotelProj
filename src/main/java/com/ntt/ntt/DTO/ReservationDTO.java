@@ -1,5 +1,6 @@
 package com.ntt.ntt.DTO;
 
+import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Entity.Reservation;
 import lombok.*;
 
@@ -25,6 +26,10 @@ public class ReservationDTO {
 
     private Integer memberId;
 
+    private String memberName;
+
+    private String memberEmail;
+
     private Integer roomId;
 
     private RoomDTO room;
@@ -44,6 +49,8 @@ public class ReservationDTO {
     // Entity -> DTO 변환 메서드
     public static ReservationDTO fromEntity(Reservation reservation) {
         RoomDTO roomDTO = RoomDTO.fromEntity(reservation.getRoom());
+        // 예약자 정보 가져오기
+        Member member = reservation.getMember();
 
         return new ReservationDTO(
                 reservation.getReservationId(),
@@ -51,14 +58,15 @@ public class ReservationDTO {
                 reservation.getCheckOutDate(),
                 reservation.getTotalPrice(),
                 reservation.getReservationStatus(),
-                reservation.getMember().getMemberId(),
+                member.getMemberId(),
+                member.getMemberName(),
+                member.getMemberEmail(),
                 reservation.getRoom().getRoomId(),
-                roomDTO, // RoomDTO 매핑
+                roomDTO,
                 reservation.getRegDate(),
                 reservation.getModDate(),
-                roomDTO.getReservationEnd() != null
-                        && LocalDate.parse(roomDTO.getReservationEnd()).isAfter(LocalDate.now()), // 예약 여부 설정
-                roomDTO.getReservationEnd() // RoomDTO에서 reservationEnd 값 가져오기
+                roomDTO.getReservationEnd() != null && LocalDate.parse(roomDTO.getReservationEnd()).isAfter(LocalDate.now()),
+                roomDTO.getReservationEnd()
         );
     }
 }
