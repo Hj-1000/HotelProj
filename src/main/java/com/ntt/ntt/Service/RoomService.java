@@ -1,13 +1,18 @@
 package com.ntt.ntt.Service;
 
 
+import com.ntt.ntt.DTO.CompanyDTO;
+import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.ImageDTO;
 import com.ntt.ntt.DTO.RoomDTO;
+import com.ntt.ntt.Entity.Company;
+import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.Image;
 import com.ntt.ntt.Entity.Room;
 import com.ntt.ntt.Repository.ImageRepository;
 import com.ntt.ntt.Repository.ReservationRepository;
 import com.ntt.ntt.Repository.RoomRepository;
+import com.ntt.ntt.Repository.hotel.HotelRepository;
 import com.ntt.ntt.Util.FileUpload;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -35,6 +40,9 @@ public class RoomService {
 
     private final ImageRepository imageRepository;
     private final RoomRepository roomRepository;
+
+    private final HotelRepository hotelRepository;
+
     private final ModelMapper modelMapper;
 
     private final ReservationRepository reservationRepository;
@@ -137,6 +145,15 @@ public class RoomService {
                 .collect(Collectors.toList());
     }
 
+    //호텔 불러오기
+    public List<HotelDTO> getAllHotel() {
+        List<Hotel> hotels = hotelRepository.findAll();
+
+        List<HotelDTO> hotelDTOS = hotels.stream()
+                .map(a -> new HotelDTO(a.getHotelId(), a.getHotelName())).collect(Collectors.toList());
+
+        return hotelDTOS;
+    }
 
 
     // 1. 등록 register

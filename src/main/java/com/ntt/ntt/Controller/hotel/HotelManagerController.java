@@ -33,7 +33,7 @@ public class HotelManagerController {
     //등록폼
     @GetMapping("/register")
     public String registerForm(Model model) {
-        //검증처리가 필요하면 빈 MenuDTO를 생성해서 전달한다.
+        //검증처리가 필요하면 빈 companyDTO를 생성해서 전달한다.
         List<CompanyDTO> companyDTOS = hotelService.getAllCompany();
         model.addAttribute("companyDTOS", companyDTOS);
         model.addAttribute("companyDTO", new CompanyDTO());
