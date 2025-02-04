@@ -1,4 +1,4 @@
-package com.ntt.ntt.Controller;
+package com.ntt.ntt.Controller.Room;
 
 
 import com.ntt.ntt.DTO.RoomDTO;
@@ -7,7 +7,6 @@ import com.ntt.ntt.Util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
@@ -15,77 +14,22 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Controller
+@RequestMapping("/manager/room")
 @RequiredArgsConstructor
 @Log4j2
-public class RoomController {
+public class RoomManagerController {
 
     private final RoomService roomService;
 
 
-    // 유저 페이지 메인
-
-    @GetMapping("/")
-    public String mainPageForm(Model model) {
-        // 추천 방 목록 가져오기
-        List<RoomDTO> recommendedRooms = roomService.listRecommendedRooms();
-
-        // 로그로 확인
-        log.info("Recommended rooms sent to index page: {}", recommendedRooms);
-
-        // 모델에 추천 방 데이터를 추가
-        model.addAttribute("recommendedRooms", recommendedRooms);
-
-        return "index"; // index.html 반환
-    }
-
-    // 유저 페이지 메인 roomlist
-
-    @GetMapping("/roomList") // 초기 Thymeleaf 화면 렌더링
-    public String roomListPageForm(Model model) {
-        Page<RoomDTO> initialRooms = roomService.getPaginatedRooms(PageRequest.of(0, 6));
-
-        // Room 상태 업데이트를 로그로 확인 (디버깅용)
-        initialRooms.getContent().forEach(room -> log.info("Room: {}, Status: {}", room.getRoomName(), room.getRoomStatus()));
-
-        log.info("Room 데이터: {}", initialRooms.getContent());
-
-        model.addAttribute("roomList", initialRooms.getContent());
-
-        return "roomList"; // roomList.html 반환
-    }
-
-    // AJAX 요청 처리
-
-    @GetMapping("/roomList/data")
-    @ResponseBody
-    public Map<String, Object> roomListDataForm(@RequestParam(value = "page", defaultValue = "0") int page) {
-        int pageSize = 3; // 한 번에 로드할 방 개수
-
-        if (page < 0) {
-            page = 0; // 음수 방지
-        }
-
-        Page<RoomDTO> paginatedRooms = roomService.getPaginatedRooms(PageRequest.of(page, pageSize));
-
-        // Room 데이터 확인 로그
-        paginatedRooms.getContent().forEach(room -> log.info("Room: {}, Status: {}", room.getRoomName(), room.getRoomStatus()));
-
-        // 응답 데이터 생성
-        Map<String, Object> response = new HashMap<>();
-        response.put("rooms", paginatedRooms.getContent());
-        response.put("isLastPage", paginatedRooms.isLast());
-        return response;
-    }
-
     /* -----------관리자 페이지----------- */
 
     // 1. Room 등록 페이지로 이동
-    @GetMapping("/manager/room/register")
+    @GetMapping("/register")
     public String registerRoomForm(Model model) {
         //빈 RoomDTO 전달
         model.addAttribute("room", new RoomDTO());
@@ -96,7 +40,7 @@ public class RoomController {
     }
 
     // Room 등록
-    @PostMapping("/manager/room/register")
+    @PostMapping("/register")
     public String registerRoomProc(@ModelAttribute RoomDTO roomDTO, @RequestParam("imageFile") List<MultipartFile> imageFile) {
 
         log.info("Room registration data: {}", roomDTO); // 확인 로그 추가
@@ -109,7 +53,7 @@ public class RoomController {
     }
 
     // 2. 모든 객실 조회
-    @GetMapping("/manager/room/list")
+    @GetMapping("/list")
     public String list(
             @PageableDefault(size = 5, page = 0) Pageable pageable,
             @RequestParam(value = "keyword", required = false) String keyword,
@@ -176,7 +120,7 @@ public class RoomController {
     }
 
     // 특정 룸 조회
-    @GetMapping("/manager/room/{roomId}")
+    @GetMapping("/{roomId}")
     public String getRoomDetailsForm(@PathVariable Integer roomId, Model model) {
         log.info("Fetching details for roomId: {}", roomId);
 
@@ -191,7 +135,7 @@ public class RoomController {
     }
 
     // 3. Room 수정 페이지로 이동
-    @GetMapping("/manager/room/update/{roomId}")
+    @GetMapping("/update/{roomId}")
     public String updateRoomForm(@PathVariable Integer roomId, Model model) {
         // 수정할 Room 데이터 가져오기
         RoomDTO room = roomService.readRoom(roomId);
@@ -203,7 +147,7 @@ public class RoomController {
     }
 
     // Room 수정
-    @PostMapping("/manager/room/update/{roomId}")
+    @PostMapping("/update/{roomId}")
     public String updateRoomProc(@PathVariable Integer roomId,
                                  @ModelAttribute RoomDTO roomDTO,
                                  @RequestParam("imageFile") List<MultipartFile> imageFile) {
@@ -217,7 +161,7 @@ public class RoomController {
 
 
     // 4. Room 삭제
-    @GetMapping("/manager/room/delete/{roomId}")
+    @GetMapping("/delete/{roomId}")
     public String deleteRoomForm(@PathVariable Integer roomId) {
         // Room 삭제
         roomService.deleteRoom(roomId);

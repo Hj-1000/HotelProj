@@ -13,6 +13,12 @@
             padding: 0 !important;
         }
 
+        h2 {
+            margin: 1.5rem auto;
+            font-weight: bold;
+            font-size: 2.5rem;
+        }
+
         .wrap {
             display: flex;
             flex-direction: column;
@@ -23,7 +29,7 @@
         /* 객실 목록 섹션 */
         .room-section {
             width: 80%;
-            padding: 20px;
+            padding: 0 1rem 1.5rem 1rem;
             border-radius: 10px;
             background: #f8f9fa;
             border: 2px solid #ddd;
@@ -36,7 +42,7 @@
             gap: 10px;
             justify-items: center;
             align-items: center;
-            margin-top: 20px;
+            margin-top: 2rem;
         }
         .room-box {
             width: 120px;
@@ -60,14 +66,18 @@
         .unavailable {
             background-color: #FFB6C1; /* 분홍색: 예약 불가 */
         }
+        .reservation-table-wrap {
+            padding: 0 2rem;
+        }
+
         .reservation-table {
             width: 100%;
-            margin-top: 30px;
+            margin-top: 2rem;
             border-collapse: collapse;
         }
         .reservation-table th, .reservation-table td {
             border: 1px solid #ddd;
-            padding: 10px;
+            padding: 1rem;
             text-align: center;
         }
         .reservation-table th {
@@ -77,7 +87,6 @@
         /* 관리자 페이지 (예약 현황) */
         .admin-section {
             width:100%;
-            padding: 20px;
             border-radius: 10px;
             background: white;
             box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
@@ -94,7 +103,7 @@
             <div th:each="room : ${roomList}"
                  th:classappend="${room.isExpired ? 'unavailable' : (reservationMap[room.roomId] != null ? 'reserved' : 'available')}"
                  class="room-box"
-                 th:attr="data-room-id=${room.roomId}, data-is-expired=${room.isExpired}">
+                 th:attr="data-room-id=${room.roomId}, data-is-expired=${room.isExpired}, data-reservation-id=${reservationMap[room.roomId] != null ? reservationMap[room.roomId].reservationId : ''}">
                 <span th:text="${room.roomName}"></span>
             </div>
         </div>
@@ -110,55 +119,57 @@
 
     <!-- 전체 방 목록 (예약된 방 포함) -->
     <div class="admin-section">
-        <h3 class="text-center mt-4">객실 관리 현황</h3>
-        <table class="reservation-table">
-            <thead>
-            <tr>
-                <th>No</th>
-                <th>객실 이름</th>
-                <th>예약자 ID</th>
-                <th>체크인 날짜</th>
-                <th>체크아웃 날짜</th>
-                <th>예약마감 날짜</th>
-                <th>상태</th>
-                <th>관리</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="room, iterStat : ${roomList}" th:with="reservation=${reservationMap[room.roomId]}">
-                <td th:text="${iterStat.index + 1}"></td>
-                <td th:text="${room.roomName}"></td>
+        <h2 class="text-center">객실 관리 현황</h2>
+        <div class="reservation-table-wrap">
+            <table class="reservation-table">
+                <thead>
+                <tr>
+                    <th>No</th>
+                    <th>객실 이름</th>
+                    <th>예약자 ID</th>
+                    <th>체크인 날짜</th>
+                    <th>체크아웃 날짜</th>
+                    <th>예약마감 날짜</th>
+                    <th>상태</th>
+                    <th>관리</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="room, iterStat : ${roomList}" th:with="reservation=${reservationMap[room.roomId]}">
+                    <td th:text="${iterStat.index + 1}"></td>
+                    <td th:text="${room.roomName}"></td>
 
-                <!-- 예약자 ID (예약된 경우만 표시) -->
-                <td th:text="${reservation != null ? reservation.memberId : ''}"></td>
+                    <!-- 예약자 ID (예약된 경우만 표시) -->
+                    <td th:text="${reservation != null ? reservation.memberId : ''}"></td>
 
-                <!-- 체크인 및 체크아웃 날짜 (예약된 경우만 표시) -->
-                <td th:text="${reservation != null ? reservation.checkInDate : ''}"></td>
-                <td th:text="${reservation != null ? reservation.checkOutDate : ''}"></td>
+                    <!-- 체크인 및 체크아웃 날짜 (예약된 경우만 표시) -->
+                    <td th:text="${reservation != null ? reservation.checkInDate : ''}"></td>
+                    <td th:text="${reservation != null ? reservation.checkOutDate : ''}"></td>
 
-                <!-- 모든 객실의 예약 마감 날짜 표시 -->
-                <td th:text="${room.reservationEnd != null ? room.reservationEnd : 'N/A'}"></td>
+                    <!-- 모든 객실의 예약 마감 날짜 표시 -->
+                    <td th:text="${room.reservationEnd != null ? room.reservationEnd : 'N/A'}"></td>
 
-                <!-- 예약 상태 -->
-                <td>
-                    <span th:if="${room.isExpired}">예약 기간 만료</span>
-                    <span th:unless="${room.isExpired}">
-                <span th:if="${reservationMap[room.roomId] != null}">예약됨</span>
-                <span th:unless="${reservationMap[room.roomId] != null}">예약 가능</span>
-                </span>
-                </td>
+                    <!-- 예약 상태 -->
+                    <td>
+                        <span th:if="${room.isExpired}">예약 기간 만료</span>
+                        <span th:unless="${room.isExpired}">
+                    <span th:if="${reservationMap[room.roomId] != null}">예약됨</span>
+                    <span th:unless="${reservationMap[room.roomId] != null}">예약 가능</span>
+                    </span>
+                    </td>
 
-                <!-- 예약 취소 버튼 -->
-                <td>
-                    <form th:if="${reservation != null}" method="post" action="/manager/room/reservation/delete"
-                          th:onsubmit="return confirm('예약을 취소하시겠습니까?')">
-                        <input type="hidden" name="reservationId" th:value="${reservation.reservationId}">
-                        <button type="submit" class="btn btn-danger">예약 취소</button>
-                    </form>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+                    <!-- 예약 취소 버튼 -->
+                    <td>
+                        <form th:if="${reservation != null}" method="post" action="/manager/room/reservation/delete"
+                              th:onsubmit="return confirm('예약을 취소하시겠습니까?')">
+                            <input type="hidden" name="reservationId" th:value="${reservation.reservationId}">
+                            <button type="submit" class="btn btn-danger">예약 취소</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
@@ -167,24 +178,51 @@
                 room.addEventListener("click", function () {
                     let roomId = this.getAttribute("data-room-id");
                     let isExpired = this.getAttribute("data-is-expired") === 'true';
-                    let isReserved = this.classList.contains("reserved"); // 예약된 방인지 확인
+                    let isReserved = this.classList.contains("reserved"); // 예약 여부 확인
+                    let reservationId = this.getAttribute("data-reservation-id"); // 예약 ID 가져오기
 
+                    // 만료된 방 체크
                     if (isExpired) {
                         alert("예약 기간이 만료되었습니다.");
                         return;
                     }
 
+                    // 예약된 방 클릭 시 바로 취소 여부 묻기
                     if (isReserved) {
-                        alert("이미 예약된 방입니다.");
+                        if (confirm("예약을 취소하시겠습니까?")) {
+                            cancelReservation(reservationId);
+                        }
                         return;
                     }
 
+                    // 예약 가능 방 클릭 시
                     if (confirm("이 방을 예약하시겠습니까?")) {
                         document.getElementById("roomId").value = roomId;
                         document.getElementById("reservationForm").submit();
                     }
                 });
             });
+
+            // 예약 취소 요청 함수
+            function cancelReservation(reservationId) {
+                if (!reservationId) {
+                    alert("예약 정보를 찾을 수 없습니다.");
+                    return;
+                }
+
+                let form = document.createElement("form");
+                form.method = "post";
+                form.action = "/manager/room/reservation/delete";
+
+                let input = document.createElement("input");
+                input.type = "hidden";
+                input.name = "reservationId";
+                input.value = reservationId;
+                form.appendChild(input);
+
+                document.body.appendChild(form);
+                form.submit();
+            }
         });
     </script>
 </div>

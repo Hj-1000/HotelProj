@@ -1,4 +1,4 @@
-package com.ntt.ntt.Controller;
+package com.ntt.ntt.Controller.reservation;
 
 
 import com.ntt.ntt.DTO.ReservationDTO;
@@ -23,7 +23,7 @@ import java.util.Map;
 @RequestMapping("/manager/room/reservation")
 @RequiredArgsConstructor
 @Log4j2
-public class ReservationController {
+public class ReservationManagerController {
 
     private final ReservationService reservationService;
     private final RoomService roomService;

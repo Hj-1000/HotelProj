@@ -29,28 +29,8 @@ public class ReservationService {
     private final ModelMapper modelMapper;
     private final MemberRepository memberRepository;
 
-    // 1. 모든 예약 목록 가져오기
-    public List<ReservationDTO> getAllReservations() {
-        List<ReservationDTO> reservations = reservationRepository.findAll()
-                .stream()
-                .map(ReservationDTO::fromEntity)
-                .collect(Collectors.toList());
 
-        for (ReservationDTO res : reservations) {
-            System.out.println("예약된 방 ID: " + res.getRoomId() + ", 예약자 ID: " + res.getMemberId());
-        }
-
-        return reservations;
-    }
-
-    // 2. 특정 방의 예약 정보 조회
-    public ReservationDTO getReservationByRoomId(Integer roomId) {
-        Reservation reservation = reservationRepository.findFirstByRoom_RoomId(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 방의 예약 정보가 없습니다."));
-        return ReservationDTO.fromEntity(reservation); // DTO 변환 적용
-    }
-
-    // 3. 방 예약 추가 (로그인 없이 가능하도록 설정)
+    // 1. 방 예약 추가
     public ReservationDTO registerReservation(Integer roomId, Integer memberId) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 방을 찾을 수 없습니다."));
@@ -81,6 +61,28 @@ public class ReservationService {
 
         return ReservationDTO.fromEntity(reservation);
     }
+
+    // 2. 모든 예약 목록 가져오기
+    public List<ReservationDTO> getAllReservations() {
+        List<ReservationDTO> reservations = reservationRepository.findAll()
+                .stream()
+                .map(ReservationDTO::fromEntity)
+                .collect(Collectors.toList());
+
+        for (ReservationDTO res : reservations) {
+            System.out.println("예약된 방 ID: " + res.getRoomId() + ", 예약자 ID: " + res.getMemberId());
+        }
+
+        return reservations;
+    }
+
+    // 3. 특정 방의 예약 정보 조회
+    public ReservationDTO getReservationByRoomId(Integer roomId) {
+        Reservation reservation = reservationRepository.findFirstByRoom_RoomId(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 방의 예약 정보가 없습니다."));
+        return ReservationDTO.fromEntity(reservation); // DTO 변환 적용
+    }
+
 
     // 4. 방 예약 수정
     public void updateReservation(Integer reservationId, ReservationDTO reservationDTO) {
