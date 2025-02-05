@@ -7,20 +7,23 @@ import com.ntt.ntt.Entity.Qna;
 import com.ntt.ntt.Entity.Reply;
 import com.ntt.ntt.Repository.QnaRepository;
 import com.ntt.ntt.Service.MemberService;
+import com.ntt.ntt.Service.NotificationService;
 import com.ntt.ntt.Service.QnaService;
 import com.ntt.ntt.Service.ReplyService;
 import com.ntt.ntt.Util.PaginationUtil;
 import groovy.util.logging.Log4j2;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -38,6 +41,8 @@ public class QnaController {
     private final QnaRepository qnaRepository;
     private final PaginationUtil paginationUtil;
     private final ReplyService replyService;
+    private final NotificationService notificationService;
+
 
     // Q&A 페이지 이동
     @Operation(summary = "메인페이지", description = "Q&A 페이지로 이동한다.")
@@ -131,9 +136,13 @@ public class QnaController {
             qnaDTO.setQnaTitle(title);
             qnaDTO.setQnaContent(content);
             qnaDTO.setQnaCategory(qnaCategory);  // 카테고리 설정
+            qnaService.registerQna(qnaDTO, member);
 
             // QnaService를 사용하여 질문 저장
             qnaService.registerQna(qnaDTO, member);
+
+            // 🔹 알림 생성 (관리자에게 알림 보내기)
+            notificationService.createNotification(member, "새로운 Q&A가 등록되었습니다.");
 
             return "redirect:/qna/list";  // 질문 목록 페이지로 리다이렉트
         } else {
