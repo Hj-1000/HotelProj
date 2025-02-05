@@ -27,21 +27,13 @@
             $(".unlike").hide();
 
             $(".like").on("click", function () {
-                if (confirm("즐겨찾기 목록에서 삭제할까요? 😥")) {
-                    let a = $(this).find('span:eq(0)');
-                    deleteLikeQuest(a);
-                }
+                deleteLikeQuest(a);
             });
 
             $(".unlike").on("click", function () {
                 let a = $(this).find('span:eq(0)');
                 addLikeQuest(a);
             });
-
-            const adminErr = [[${adminErr}]];
-            if (adminErr) {
-                alert(adminErr);
-            }
 
             function page(page) {
                 location.href = "/" + page;
