@@ -1,31 +1,23 @@
 package com.ntt.ntt.DTO;
 
-import com.ntt.ntt.Entity.ServiceCart;
-import com.ntt.ntt.Entity.ServiceCartItem;
-import com.ntt.ntt.Entity.ServiceMenu;
-import lombok.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
 @ToString
-@AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class ServiceCartItemDTO {
+    private Integer ServiceCartItemId;
 
-    private Integer serviceCartItemId;
-    private Integer count; // 서비스 수량
-    private Integer serviceMenuId; // 서비스 메뉴 ID
-    private String serviceMenuName; // 서비스 메뉴 이름
-    private Integer serviceMenuPrice; // 서비스 메뉴 가격
+    @NotNull(message = "상품 아이디는 필수 입력 값 입니다.")
+    private Integer ServiceMenuId;
 
-    public static ServiceCartItemDTO fromEntity(ServiceCartItem serviceCartItem) {
-        return ServiceCartItemDTO.builder()
-                .serviceCartItemId(serviceCartItem.getServiceCartItemId())
-                .count(serviceCartItem.getCount())
-                .serviceMenuId(serviceCartItem.getServiceMenu().getServiceMenuId())
-                .serviceMenuName(serviceCartItem.getServiceMenu().getServiceMenuName())
-                .serviceMenuPrice(serviceCartItem.getServiceMenu().getServiceMenuPrice())
-                .build();
-    }
+    @Min(value = 1, message = "최소수량은 1개 입니다.")
+    private int count;
+
 }
