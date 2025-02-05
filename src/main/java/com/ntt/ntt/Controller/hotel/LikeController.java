@@ -42,7 +42,7 @@ public class LikeController {
         } catch (Exception e) {
             e.printStackTrace(); // 예외 출력 (서버 로그에서 확인 가능)
             redirectAttributes.addFlashAttribute("error", "좋아요 목록을 불러오는 중 오류가 발생했습니다. 다시 시도해주세요.");
-            return "redirect:/myPage/like/list";
+            return "redirect:/hotel/list";
         }
     }
 
@@ -66,13 +66,6 @@ public class LikeController {
     }
 
 
-
-
-//    public int likeRegisterProc(LikeDTO likeDTO){
-//
-//        return likeService.likeRegister(likeDTO);
-//
-//    }
 
     @ResponseBody
     @PostMapping("/delete")
