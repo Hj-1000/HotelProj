@@ -1,117 +1,184 @@
 package com.ntt.ntt.Service.hotel;
 
 
-import com.ntt.ntt.DTO.LikeDetailDTO;
-import com.ntt.ntt.DTO.LikeHotelDTO;
+import com.ntt.ntt.DTO.HotelDTO;
+import com.ntt.ntt.DTO.ImageDTO;
+import com.ntt.ntt.DTO.LikeDTO;
 import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.LikeHotel;
 import com.ntt.ntt.Entity.Likes;
 import com.ntt.ntt.Entity.Member;
+import com.ntt.ntt.Repository.ImageRepository;
 import com.ntt.ntt.Repository.MemberRepository;
 import com.ntt.ntt.Repository.hotel.HotelRepository;
 import com.ntt.ntt.Repository.hotel.LikeHotelRepository;
 import com.ntt.ntt.Repository.hotel.LikeRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class LikeService {
 
-    private final HotelRepository hotelRepository; //즐겨찾기에 넣을 호텔 을 찾기위해
-    private final MemberRepository memberRepository;
-                        //즐겨찾기 를 만들 회원
-    private final LikeRepository likeRepository; //즐겨찾기  저장, 수정등
-    private final LikeHotelRepository likeHotelRepository; //즐겨찾기 에 담을 즐찾호텔
-
+    private final HotelRepository hotelRepository; // 즐겨찾기에 넣을 호텔 을 찾기위해
+    private final MemberRepository memberRepository; // 즐겨찾기 를 만들 회원
+    private final LikeRepository likeRepository; // 즐겨찾기  저장, 수정등
+    private final LikeHotelRepository likeHotelRepository; // 즐겨찾기 에 담을 즐찾호텔
+    private final ModelMapper modelMapper;
+    private final ImageRepository imageRepository;
 
     //등록
-    public Integer addLikeHotel(LikeHotelDTO likehotelDTO, String memberEmail) {
-        //컨트롤러에서 입력받은 likehotelDTO의 id를 통해 상품을 찾습니다.
-        Hotel hotel = hotelRepository.findById(likehotelDTO.getHotelId())
-                .orElseThrow(EntityNotFoundException::new);
+    public Integer likeRegister(LikeDTO likeDTO, String memberEmail) {
+        System.out.println("찜 요청 받은 이메일: " + likeDTO.getMemberEmail());
 
+        // 회원 조회
+        Member member = memberRepository.findByMemberEmail(memberEmail)
+                .orElseThrow(() -> new NoSuchElementException("해당 이메일의 회원이 존재하지 않습니다."));
 
-        // email Like를 찾습니다.
-        Optional<Member> member = memberRepository.findByMemberEmail(memberEmail);
-
-        Likes likes = likeRepository.findByMember_MemberId(member.get().getMemberId());
-        //회원으로 찾은 Like가 없다면
-        if (likes == null) {
-            likes = likes.createLike(member.orElse(null));
-            likeRepository.save(likes);
+        // 기존 Likes 조회 (없으면 새로 생성)
+        Likes like = likeRepository.findByMember_MemberEmail(memberEmail);
+        if (like == null) {
+            like = Likes.builder()
+                    .member(member)
+                    .build();
+            likeRepository.save(like);
         }
 
-        //찾은 상품을 likehotel으로 변환합니다.
+        // 호텔 조회 (Optional 처리)
+        Hotel hotel = hotelRepository.findById(likeDTO.getHotelId())
+                .orElseThrow(() -> new NoSuchElementException("해당 호텔이 존재하지 않습니다."));
 
-        //즐겨찾기에 이미 같은 상품이 있다면을 알고 싶어서 즐겨찾기호텔 을 찾아봅니다.
-        LikeHotel savedlikeHotel
-                = likeHotelRepository.findByLikes_LikesIdAndHotel_HotelId
-                (likes.getLikesId(), hotel.getHotelId());
+        // LikeHotel 매핑
+        LikeHotel likehotel = modelMapper.map(likeDTO, LikeHotel.class);
+        likehotel.setLikes(like);
+        likehotel.setHotel(hotel);
+        likehotel.setCreateBy(memberEmail);  // createBy에 memberEmail 설정
 
-        //변환된 X , 직접 즐겨찾기 아이디와 호텔 id로 찾거나
-        // 직접 생성해서 likehotel을 Like에 담습니다.
-        if(savedlikeHotel !=null){
-            return savedlikeHotel.getLikeHotelId();
-        }else {
-            LikeHotel likeHotel
-                    =LikeHotel.createLikeHotel(likes, hotel);
-            return likeHotel.getLikeHotelId();
-        }
+        // 기존 찜 데이터가 존재하면 ID를 유지하여 업데이트
+        likeHotelRepository.findByHotel_HotelId(likeDTO.getHotelId())
+                .stream().findFirst()
+                .ifPresent(existingLikeHotel -> likehotel.setLikeHotelId(existingLikeHotel.getLikeHotelId()));
 
+        // 저장
+        likeHotelRepository.save(likehotel);
+
+        return likehotel.getLikeHotelId();
     }
+
 
 
     //목록
-    @Transactional(readOnly = true)
-    public Page<LikeDetailDTO> likeList(String memberEmail, Pageable pageable) {
+    public List<LikeDTO> likeList(String email) {
+        try {
+            List<LikeHotel> likeHotelList = likeHotelRepository.findByLikes_Member_MemberEmail(email);
 
-        Optional<Member> member = memberRepository.findByMemberEmail(memberEmail);
+            if (likeHotelList == null || likeHotelList.isEmpty()) {
+                System.out.println("조회된 likeHotelList가 없습니다.");
+                return Collections.emptyList();
+            }
 
-        Likes likes = likeRepository.findByMember_MemberId(member.get().getMemberId());
+            List<LikeDTO> likeDTOS = likeHotelList.stream().map(likehotel -> {
+                        try {
+                            if (likehotel.getHotel() == null) {
+                                System.out.println("likehotel의 getHotel()이 null입니다: " + likehotel);
+                                return null; // null 값 처리 (필요하면 Optional 사용 가능)
+                            }
 
-        if (likes == null) {
-            return Page.empty();  // 빈 페이지를 반환
+                            HotelDTO hotelDTO = modelMapper.map(likehotel.getHotel(), HotelDTO.class);
+
+                            LikeDTO likeDTO = LikeDTO.builder()
+                                    .likeHotelId(likehotel.getLikeHotelId())
+                                    .hotelDTO(hotelDTO)
+                                    .build();
+
+                            List<ImageDTO> hotelImageDTOList = imageRepository.findByHotel_HotelId(likehotel.getHotel().getHotelId())
+                                    .stream()
+                                    .map(hotelImg -> modelMapper.map(hotelImg, ImageDTO.class))
+                                    .collect(Collectors.toList());
+
+                            if (likeDTO.getHotelDTO() != null) {
+                                likeDTO.getHotelDTO().setHotelImgDTOList(hotelImageDTOList);
+                            } else {
+                                System.out.println("likeDTO의 getHotelDTO()가 null입니다!");
+                            }
+
+                            return likeDTO;
+                        } catch (Exception e) {
+                            System.out.println("예외 발생 (LikeHotel -> LikeDTO 변환 중): " + e.getMessage());
+                            e.printStackTrace();
+                            return null; // 예외 발생 시 해당 요소를 무시하고 계속 진행
+                        }
+                    }).filter(Objects::nonNull) // null 값 제거
+                    .collect(Collectors.toList());
+
+            System.out.println("최종 LikeDTO 리스트: " + likeDTOS);
+            return likeDTOS;
+        } catch (Exception e) {
+            System.out.println("likeList() 메서드 실행 중 예외 발생: " + e.getMessage());
+            e.printStackTrace();
+            return Collections.emptyList();
         }
-
-        return likeHotelRepository.likeList(likes.getLikesId(), pageable);
     }
 
 
 
-    //현재 즐겨찾기 가 내꺼인지 확인하는 메소드
-    @Transactional(readOnly = true)
-    public boolean validateLikeHotel(Integer likeHotelId, String email){
+//    public List<LikeDTO> likeList(String email) {
+//
+//        List<LikeHotel> likeHotelList = likeHotelRepository.findByLikes_Member_MemberEmail(email);
+//        System.out.println("조회된 LikeHotel 목록: " + likeHotelList);
+//
+////        List<hotelDTO> hotelDTOS = null;
+////        likeHotelList.forEach(likeHotel -> {
+////            hotelDTO hotelDTO = modelMapper.map(likeHotel.getHotel(),hotelDTO.class);
+////            hotelDTOS.add(hotelDTO);
+////        });
+//
+//        List<LikeDTO> likeDTOS = likeHotelList.stream().map(likehotel -> {
+//            HotelDTO hotelDTO = modelMapper.map(likehotel.getHotel(), HotelDTO.class);
+//
+//            if (likehotel.getHotel() == null) {
+//                System.out.println("likehotel의 getHotel()이 null입니다: " + likehotel);
+//                return null;
+//            }
+//
+//            LikeDTO likeDTO = LikeDTO.builder()
+//                    .likeHotelId(likehotel.getLikeHotelId())
+//                    .hotelDTO(hotelDTO)
+//                    .build();
+//
+//            List<ImageDTO> hotelImageDTOList = imageRepository.findByHotel_HotelId(likehotel.getHotel().getHotelId())
+//                    .stream()
+//                    .map(hotelImg -> modelMapper.map(hotelImg, ImageDTO.class))
+//                    .collect(Collectors.toList());
+//
+//            System.out.println("호텔 이미지 리스트: " + hotelImageDTOList);
+//
+//            if (likeDTO.getHotelDTO() != null) {
+//                likeDTO.getHotelDTO().setHotelImgDTOList(hotelImageDTOList);
+//            } else {
+//                System.out.println("likeDTO의 getHotelDTO()가 null입니다!");
+//            }
+//
+//
+//            return likeDTO;
+//
+//        }).collect(Collectors.toList());
+//
+//        System.out.println(likeDTOS );
+//
+//        return likeDTOS;
+//    }
 
-        LikeHotel likehotel = likeHotelRepository
-                .findById(likeHotelId).orElseThrow(EntityNotFoundException::new);
-
-        if(likehotel.getCreateBy().equals(email)){
-            // ==이면 객체를 비교하고 , .equals는 값을 비교한다.
-            return true;
-        }
-        return false;
-    }
-
-    //삭제(취소)
-    public String deleteLikeHotel(Integer likeHotelId){
-        LikeHotel likeHotel
-                = likeHotelRepository
-                .findById(likeHotelId)
-                .orElseThrow(EntityNotFoundException::new);
-        String likeHotelName = likeHotel.getHotel().getHotelName();
-        likeHotelRepository.delete(likeHotel);
-
-        return likeHotelName;
+    //삭제
+    @Transactional
+    public void likeDelete(int likeHotelId) {
+        likeHotelRepository.deleteById(likeHotelId);
     }
 
 
