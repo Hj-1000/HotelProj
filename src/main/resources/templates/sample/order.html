@@ -1,0 +1,200 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en"-->
+<!--      xmlns:th="http://www.thymeleaf.org"-->
+<!--      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">-->
+
+<!--<head>-->
+<!--  <meta charset="UTF-8">-->
+<!--  <title>Order</title>-->
+<!--  &lt;!&ndash;반응형웹&ndash;&gt;-->
+<!--  <meta name="viewport" content="width=device-width, initial-scale=1">-->
+<!--  &lt;!&ndash;부트스트랩&ndash;&gt;-->
+<!--  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">-->
+<!--  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>-->
+<!--</head>-->
+<!--<style>-->
+<!--  .container{-->
+<!--    margin-top: 20px;-->
+<!--    margin-bottom: 100px;-->
+<!--    height: 90%;-->
+<!--    /*border-style: solid;*/-->
+<!--    /*border-color:blue;*/-->
+<!--  }-->
+<!--   /*div{*/-->
+<!--   /*  border-style: solid;*/-->
+<!--   /*  border-color:red;*/-->
+<!--   /*}*/-->
+<!--   .row{-->
+<!--     border-style:solid;-->
+<!--     border-color:yellow;-->
+<!--   }-->
+<!--   col{-->
+<!--     border-style:solid;-->
+<!--     border-color:orange;-->
+<!--   }-->
+<!--</style>-->
+<!--<body>-->
+<!--&lt;!&ndash;<div layout:fragment="content">&ndash;&gt;-->
+<!--<div th:replace="~{fragments/header::header}"></div>-->
+<!--<div id="container" class="container">-->
+<!--  <div class="row">-->
+<!--    <div class="col-2">-->
+<!--      <img src="/img/logo.jpg" alt="로고">-->
+<!--      <div class="btn-group btn-group-vertical">-->
+<!--        <button type="button" class="btn btn-warning">한식</button>-->
+<!--        <button type="button" class="btn btn-warning">중식</button>-->
+<!--        <button type="button" class="btn btn-warning">양식</button>-->
+<!--        <button type="button" class="btn btn-warning">일식</button>-->
+<!--        <button type="button" class="btn btn-warning">영우</button>-->
+<!--      </div>-->
+
+
+<!--    </div>-->
+<!--    <div class="col-9">-->
+<!--              &lt;!&ndash;디자인&ndash;&gt;-->
+<!--        <div class="card">-->
+<!--&lt;!&ndash;          <div class="card-header">&ndash;&gt;-->
+<!--&lt;!&ndash;            <h6>MENU</h6></div>&ndash;&gt;-->
+<!--          <div class="card-body">-->
+<!--           <div class="row-4"></div>-->
+<!--            <div class="col-4">-->
+<!--              <img src="/img/food1.jpg" alt="메뉴1">-->
+<!--            </div>-->
+<!--            <div class="col-4">-->
+<!--              <img src="/img/food1.jpg" alt="메뉴2">-->
+<!--            </div>-->
+<!--            <div class="col-4">-->
+<!--              <img src="/img/food1.jpg" alt="메뉴2">-->
+<!--            </div>-->
+<!--           <div class="row-4"></div>-->
+<!--            <div class="col-4"></div>-->
+<!--            <div class="col-4"></div>-->
+<!--            <div class="col-4"></div>-->
+<!--           <div class="row-4"></div>-->
+<!--          </div>-->
+<!--&lt;!&ndash;          <div class="card-footer">&ndash;&gt;-->
+<!--&lt;!&ndash;          </div>&ndash;&gt;-->
+<!--        </div>-->
+<!--    </div>-->
+<!--    <div class="col-1"></div>-->
+<!--  </div>&lt;!&ndash;row 끝&ndash;&gt;-->
+<!--</div>&lt;!&ndash;container 끝&ndash;&gt;-->
+<!--<div th:replace="~{fragments/footer::footer}"></div>-->
+<!--</body>-->
+<!--</html>-->
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>order</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f8f8;
+        }
+        .container {
+            width: 800px;
+            border: 2px solid black;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+        .content {
+            display: flex;
+            justify-content: space-between;
+        }
+        .categories {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border: 1px solid yellow;
+        }
+        .category {
+            background-color: #FFD86E;
+            padding: 10px;
+            border: 1px solid black;
+            cursor: pointer;
+            width: 150px;
+            text-align: center;
+            border-radius: 5%;
+        }
+        .menu-container {
+            justify-content: center;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            width: 600px;
+            border: 1px solid yellow;
+        }
+        .menu-item {
+            background-color: #FFD86E;
+            padding: 15px;
+            border: 1px solid black;
+            width: 180px;
+            height: 100px;
+            text-align: center;
+            border-radius: 5%;
+        }
+        .footer {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 40px;
+            border: 1px solid yellow;
+        }
+        .total {
+            background-color: #4A90E2;
+            color: white;
+            padding: 10px;
+            width: 100px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 5%;
+        }
+        .button {
+            background-color: #FFD86E;
+            padding: 15px;
+            border: 1px solid black;
+            cursor: pointer;
+            text-align: center;
+            width: 100px;
+            border-radius: 5%;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="content">
+        <div class="categories">
+            <div class="category">한식</div>
+            <div class="category">중식</div>
+            <div class="category">일식</div>
+            <div class="category">양식</div>
+            <div class="category">영우식</div>
+        </div>
+
+        <div class="menu-container">
+            <div class="menu-item"><img src="#" alt="메뉴1사진"><br>메뉴이름<br>가격</div>
+            <div class="menu-item"><img src="#" alt="메뉴2사진"><br>메뉴이름<br>가격</div>
+            <div class="menu-item"><img src="#" alt="메뉴3사진"><br>메뉴이름<br>가격</div>
+            <div class="menu-item"><img src="#" alt="메뉴4사진"><br>메뉴이름<br>가격</div>
+            <div class="menu-item"><img src="#" alt="메뉴5사진"><br>메뉴이름<br>가격</div>
+            <div class="menu-item"><img src="#" alt="메뉴6사진"><br>메뉴이름<br>가격</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="total">총 금액<br>₩0,000</div>
+        <div class="button">결제하기</div>
+        <div class="button">처음으로</div>
+    </div>
+</div>
+</body>
+</html>
