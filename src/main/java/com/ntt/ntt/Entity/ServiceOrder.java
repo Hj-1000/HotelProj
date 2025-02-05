@@ -19,17 +19,12 @@ public class ServiceOrder extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer serviceOrderId;
-    // 주문상태
-    @Enumerated(EnumType.STRING)
-    private ServiceOrderStatus serviceOrderStatus;
 
-    //주문의 총 금액
-    private Integer totalPrice;
-
+    //외부키 memberId
     @ManyToOne
     @JoinColumn(name = "memberId")
     private Member member;
-
+    //외부키 roomId
     @ManyToOne
     @JoinColumn(name = "roomId")
     private Room room;
@@ -38,21 +33,14 @@ public class ServiceOrder extends BaseEntity {
             orphanRemoval = true, fetch = FetchType.LAZY)
     private List<ServiceOrderItem> serviceOrderItemList = new ArrayList<>();
 
-    public void addServiceOrderItem(ServiceOrderItem serviceOrderItem) {
+    public void setServiceOrderItemList(ServiceOrderItem serviceOrderItem) {
         this.serviceOrderItemList.add(serviceOrderItem);
     }
 
     public void setServiceOrderItemList(List<ServiceOrderItem> serviceOrderItemList) {
         this.serviceOrderItemList = serviceOrderItemList;
     }
-
-    // orderItem의 모든 가격을 총합한 전체 주문금액
-    public void calculateTotalPrice() {
-        int total = 0;
-        for (ServiceOrderItem item : this.serviceOrderItemList) {
-            total += item.getOrderPrice();
-        }
-        this.totalPrice = total;
-    }
-
+    // 주문상태
+    @Enumerated(EnumType.STRING)
+    private ServiceOrderStatus serviceOrderStatus;
 }

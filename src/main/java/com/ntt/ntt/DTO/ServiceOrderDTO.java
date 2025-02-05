@@ -1,37 +1,23 @@
 package com.ntt.ntt.DTO;
 
-import com.ntt.ntt.Entity.Member;
-import com.ntt.ntt.Entity.Room;
-import com.ntt.ntt.Entity.ServiceOrder;
-import lombok.*;
-
-import java.util.List;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
 @ToString
-@AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class ServiceOrderDTO {
 
-    private Integer serviceOrderId;
-    private Integer totalPrice; // 총 주문 금액
-    private Integer memberId; // 사용자 ID
-    private Integer roomId; // 방 ID
-    private String serviceOrderStatus; // 주문 상태
-    private List<ServiceOrderItemDTO> serviceOrderItemList; // 주문 항목 리스트
+    @NotNull(message = "정상적인 주문페이지가 아닙니다. 상품페이지로 다시 와주세요.")
+    private Integer serviceMenuId; // 서비스 메뉴의 id로 받기로 함
 
-    public static ServiceOrderDTO fromEntity(ServiceOrder serviceOrder) {
-        return ServiceOrderDTO.builder()
-                .serviceOrderId(serviceOrder.getServiceOrderId())
-                .totalPrice(serviceOrder.getTotalPrice())
-                .memberId(serviceOrder.getMember().getMemberId())
-                .roomId(serviceOrder.getRoom().getRoomId())
-                .serviceOrderStatus(serviceOrder.getServiceOrderStatus().name()) // Enum을 String으로 변환
-                .serviceOrderItemList(serviceOrder.getServiceOrderItemList().stream()
-                        .map(ServiceOrderItemDTO::fromEntity)
-                        .toList())
-                .build();
-    }
+    @Min(value = 1, message = "최소 주문 수량은 1개입니다.")
+    @Max(value = 999, message = "최대 주문 수량은 999개 입니다.")
+    private int count;
 }
