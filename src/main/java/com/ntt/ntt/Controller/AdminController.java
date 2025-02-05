@@ -4,6 +4,7 @@ import com.ntt.ntt.Constant.Role;
 import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.MemberDTO;
 import com.ntt.ntt.Service.MemberService;
+import com.ntt.ntt.Service.NotificationService;
 import com.ntt.ntt.Service.hotel.HotelService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class AdminController {
 
     private final HotelService hotelService;
     private final MemberService memberService;
+    private final NotificationService notificationService;
 
     @Operation(summary = "전체회원목록", description = "전체회원목록 페이지로 이동한다.")
     @GetMapping("/admin/memberList")
