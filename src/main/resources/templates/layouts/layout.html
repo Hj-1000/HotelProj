@@ -70,23 +70,26 @@
                     <li><a href="#" class="nav-link text-white"><i class="fa-regular fa-snowflake"></i> 비밀번호 변경</a></li>
                     <li><a href="#" class="nav-link text-white"><i class="fa-regular fa-snowflake"></i> 다국어관리</a></li>
                     <li><a href="/notice/list" class="nav-link text-white"><i class="fa-regular fa-snowflake"></i> 공지사항</a></li>
+
                     <!-- Q&A와 알림 벨을 같은 라인에 배치 -->
                     <div class="d-flex align-items-center">
-                        <a href="/qna" class="nav-link text-white">Q&A</a> <!-- text-white 클래스를 추가하여 동일한 색으로 설정 -->
-
-                        <!-- 알림 벨 이모티콘 -->
+                        <a href="/qna" class="nav-link text-white">Q&A</a>
+                        <!-- 벨 아이콘 부분 -->
                         <button class="notification-bell nav-link text-white" id="notification-bell" data-bs-toggle="dropdown" aria-expanded="false">
                             🔔 <span id="unread-count" th:text="${unreadCount}">0</span>
                         </button>
 
-                        <!-- 알림 목록 드롭다운 -->
-                        <ul class="dropdown-menu" id="notification-list" aria-labelledby="notification-bell">
-                            <li><span class="dropdown-item">알림이 없습니다.</span></li> <!-- 기본 알림이 없을 때 표시될 내용 -->
+                        <ul class="dropdown-menu" id="notification-list">
+                            <li th:if="${#lists.isEmpty(notifications)}"><span class="dropdown-item">알림이 없습니다.</span></li>
+                            <li th:each="notification : ${notifications}">
+                        <span class="dropdown-item">
+                            <p th:text="${notification.notificationMessage}"></p>
+                            <span th:text="${notification.timestamp}"></span>
+                            <span th:text="${memberId}"></span>
+                        </span>
+                            </li>
                         </ul>
                     </div>
-
-
-
 
                 </div>
             </ul>

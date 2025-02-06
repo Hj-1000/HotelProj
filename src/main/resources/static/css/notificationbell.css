@@ -9,14 +9,14 @@
 
 .notification-bell span {
     position: absolute;
-    top: -5px; /* 배지를 벨 아이콘 위로 조금 올리기 */
-    right: -5px; /* 배지를 벨 아이콘 오른쪽으로 이동 */
+    top: 20%;
+    right: -5px;
     background: red;
     color: white;
     font-size: 0.8rem;
     border-radius: 50%;
-    padding: 3px 7px;
-    min-width: 18px; /* 숫자가 한 자리일 때도 크기 유지 */
+    padding: 7px 7px;
+    min-width: 19px;
     text-align: center;
     font-weight: bold;
 }
@@ -31,19 +31,11 @@
     max-height: 300px;
     overflow-y: auto;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-    display: none !important; /* 강제로 display를 none으로 설정 */
+    display: none !important;
 }
 
 .notification-item {
     padding: 10px;
     border-bottom: 1px solid #eee;
     cursor: pointer;
-}
-
-.notification-item.unread {
-    background: #f8d7da;
-}
-
-.notification-item.read {
-    background: #d4edda;
 }
