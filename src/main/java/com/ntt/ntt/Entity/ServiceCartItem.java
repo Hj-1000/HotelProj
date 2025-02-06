@@ -29,6 +29,7 @@ public class ServiceCartItem extends BaseEntity {
     // 장바구니에 넣은 서비스의 수량
     private int count;
 
+    // 카트에 담길 아이템을 참조하는 ServiceCartItem
     public static ServiceCartItem serviceCartItem(ServiceCart serviceCart, ServiceMenu serviceMenu, int count) {
         ServiceCartItem serviceCartItem = new ServiceCartItem();
         serviceCartItem.setServiceCart(serviceCart);

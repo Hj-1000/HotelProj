@@ -2,6 +2,8 @@ package com.ntt.ntt.Entity;
 
 import com.ntt.ntt.Constant.ServiceMenuStatus;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 
 import java.util.List;
@@ -13,7 +15,7 @@ import java.util.List;
 @ToString(exclude = "serviceCate")
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+
 public class ServiceMenu extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,6 +33,11 @@ public class ServiceMenu extends BaseEntity {
     // 메뉴 가격
     @Column(nullable = false)
     private Integer serviceMenuPrice = 0;
+
+    //재고수량
+    @NotNull
+    @PositiveOrZero
+    private Integer serviceMenuQuantity;  // 메뉴 재고수량 추가 2025-02-06
 
     @ManyToOne
     @JoinColumn(name = "serviceCateId")

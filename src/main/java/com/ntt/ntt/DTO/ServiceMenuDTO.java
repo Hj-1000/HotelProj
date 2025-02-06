@@ -28,6 +28,9 @@ public class ServiceMenuDTO {
 
     private Integer serviceMenuPrice;
 
+    private Integer serviceMenuQuantity; // 메뉴 재고수량 추가 2025-02-06
+
+
     private ServiceCate serviceCateId; //카테고리와 연결
 
     private LocalDateTime regDate;
