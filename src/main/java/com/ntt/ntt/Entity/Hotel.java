@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name="hotel")
@@ -49,6 +50,9 @@ public class Hotel extends BaseEntity {
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL,
             orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Image> hotelImageList;
+
+    @OneToMany(mappedBy = "hotel", cascade = CascadeType.REMOVE)
+    private Set<LikeHotel> likeHotels;
 
     public Hotel(Integer hotelId) {
         this.hotelId = hotelId;

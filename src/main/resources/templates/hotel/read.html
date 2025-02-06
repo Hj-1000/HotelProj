@@ -26,6 +26,9 @@
                 alert(message);
             }
 
+            $(".likeBtn").show();
+            $(".delBtn").hide();
+
         }
 
         function page(page) {
@@ -48,15 +51,48 @@
                 data: JSON.stringify(param),
                 dataType: "json",
                 success: function (result, status) {
-                    alert("찜 완료 되었습니다~!");
+                    alert(result.responseText);
+                    $(".likeBtn").hide();
+                    $(".delBtn").show();
+                    window.location.href = "/like/list"; // ✅ 성공 후 페이지 이동
                 },
                 error: function (result, status, error) {
                     if (result.status == '401') {
                         alert('로그인 후 이용해주세요');
                         location.href = '/login';
                     } else {
-                        alert(result.responseText);
+                        alert(result.responseText)
                     }
+                }
+            });
+        }
+
+        function delLike() {
+            var likeHotelId = $('.likeHotelId').val()?.trim(); // 값 가져오기 + 공백 제거
+
+            if (!likeHotelId || isNaN(likeHotelId)) {
+                console.warn("삭제할 likeHotelId가 없습니다.");
+                return;
+            }
+
+            var paramData = {
+                "likeHotelId": Number(likeHotelId) // `parseInt` 대신 `Number` 사용
+            };
+
+            console.log("보내는 데이터:", JSON.stringify(paramData)); // JSON 확인
+
+            $.ajax({
+                url: "/like/delete",
+                type: "POST",
+                data: JSON.stringify(paramData), // ✅ JSON 형식으로 변환하여 전송
+                contentType: "application/json; charset=utf-8",
+                success: function (result) { // ✅ `dataType: "json"` 제거
+                    alert("삭제 완료");
+                    location.reload();
+                },
+                error: function (xhr) {
+                    console.error("삭제 실패:", xhr.responseText);
+                    alert("삭제 실패: " + xhr.responseText);
                 }
             });
         }
@@ -94,6 +130,8 @@
                                 </div>
                             </th:block>
 
+<!--                            <input type="hidden" th:value="${hotelDTO.hotelId}">-->
+
                             <h3 th:text="${hotelDTO.hotelName}">호텔(지사)이름</h3>
                             <p>호텔본사 : <span th:text="${hotelDTO.companyName}">본사명</span></p>
                             <p>호텔주소 : <span th:text="${hotelDTO.hotelAddress}">주소</span></p>
@@ -104,9 +142,12 @@
                             <p>체크아웃 : <span th:text="${hotelDTO.hotelCheckOut}">체크아웃</span>시</p>
                         </div>
 
-                        <div style="width: 50px">
-                            <button class="btn btn-outline-secondary btn-heart likeBtn" onclick="addLike()">
-                                <i class="fa-regular fa-heart"></i>
+                        <div>
+                            <button class="btn btn-outline-danger likeBtn" onclick="addLike()" style="width: 110px">
+                                즐겨찾기<i class="fa-regular fa-heart"></i>
+                            </button>
+                            <button class="btn btn-danger delBtn" style="width: 110px">
+                                완료<i class="fa-regular fa-heart"></i>
                             </button>
                         </div>
 
@@ -166,11 +207,11 @@
                             <img th:if="${!#lists.isEmpty(room.roomImageDTOList)}"
                                  th:src="@{'/upload/' + ${room.roomImageDTOList[0].imagePath}}"
                                  class="card-img-top"
-                                 th:alt="${room.roomName}">
+                                 th:alt="${room.roomName}" width="100%">
                             <img th:if="${#lists.isEmpty(room.roomImageDTOList)}"
                                  src="/img/default_img.jpg"
                                  class="card-img-top"
-                                 alt="Default Room Image">
+                                 alt="Default Room Image" width="100%">
                             <!-- 예약 종료-->
                             <div class="sold-out-overlay" th:if="${!room.roomStatus}">
                                 예약 종료
