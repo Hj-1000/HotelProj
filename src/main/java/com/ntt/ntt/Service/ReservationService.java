@@ -2,6 +2,7 @@ package com.ntt.ntt.Service;
 
 
 import com.ntt.ntt.DTO.ReservationDTO;
+import com.ntt.ntt.DTO.RoomDTO;
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Entity.Reservation;
 import com.ntt.ntt.Entity.Room;
@@ -88,7 +89,11 @@ public class ReservationService {
         reservation.setCheckOutDate(reservationDTO.getCheckOutDate());
 
         // 예약 마감 날짜 업데이트
-        reservation.getRoom().setReservationEnd(reservationDTO.getReservationEnd());
+
+        RoomDTO roomDTO = reservationDTO.getRoom(); // RoomDTO 객체에서 예약 마감 날짜 가져오기
+        if (roomDTO != null) {
+            reservation.getRoom().setReservationEnd(roomDTO.getReservationEnd()); // Room 엔티티에 반영
+        }
 
         // 예약자 정보 업데이트
         Member member = memberRepository.findById(memberId)
