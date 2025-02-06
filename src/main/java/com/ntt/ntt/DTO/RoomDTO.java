@@ -66,30 +66,30 @@ public class RoomDTO {
                 room.getModDate(),
                 new ArrayList<>(),
                 null,
-                // 예약 시작일 문자열 변환
-                room.getReservationStart() != null ? room.getReservationStart().toString() : null,
-                // 예약 종료일 문자열 변환
-                room.getReservationEnd() != null ? room.getReservationEnd().toString() : null,
-                // 투숙 시작일 문자열 변환
-                room.getStayStart() != null ? room.getStayStart().toString() : null,
-                // 투숙 종료일 문자열 변환
-                room.getStayEnd() != null ? room.getStayEnd().toString() : null,
-                // 예약 여부 확인 (예약 시작일이 있으면 true)
+                room.getReservationStart() != null ? room.getReservationStart().toString() : "",
+                room.getReservationEnd() != null ? room.getReservationEnd().toString() : "",
+                room.getStayStart() != null ? room.getStayStart().toString() : "",
+                room.getStayEnd() != null ? room.getStayEnd().toString() : "",
                 room.getReservationStart() != null
         );
     }
 
     // reservationEnd 설정 후 checkIfExpired() 호출하여 예약 기간 만료 여부 업데이트
     public void setReservationEnd(String reservationEnd) {
-        this.reservationEnd = reservationEnd;
-        this.isExpired = checkIfExpired(reservationEnd);
+        this.reservationEnd = (reservationEnd != null) ? reservationEnd : "";
+        this.isExpired = checkIfExpired(this.reservationEnd);
     }
+
     // 예약 기간 만료 여부 확인
     private boolean checkIfExpired(String reservationEnd) {
-        if (reservationEnd == null || reservationEnd.isEmpty()) {
+        if (reservationEnd == null || reservationEnd.trim().isEmpty()) {
             return false;
         }
-        LocalDate endDate = LocalDate.parse(reservationEnd);
-        return endDate.isBefore(LocalDate.now());
+        try {
+            LocalDate endDate = LocalDate.parse(reservationEnd);
+            return endDate.isBefore(LocalDate.now());
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

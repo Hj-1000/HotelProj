@@ -1,11 +1,9 @@
 package com.ntt.ntt.Service;
 
 
-import com.ntt.ntt.DTO.CompanyDTO;
 import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.ImageDTO;
 import com.ntt.ntt.DTO.RoomDTO;
-import com.ntt.ntt.Entity.Company;
 import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.Image;
 import com.ntt.ntt.Entity.Room;
@@ -252,6 +250,15 @@ public class RoomService {
         }
 
         // Room 저장
+
+        roomRepository.save(room);
+    }
+
+    public void updateReservationEnd(Integer roomId, String reservationEnd) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 방을 찾을 수 없습니다."));
+
+        room.setReservationEnd(reservationEnd);
         roomRepository.save(room);
     }
 

@@ -1,6 +1,5 @@
 package com.ntt.ntt.Controller.reservation;
 
-
 import com.ntt.ntt.DTO.ReservationDTO;
 import com.ntt.ntt.DTO.RoomDTO;
 import com.ntt.ntt.Entity.Member;
@@ -9,6 +8,7 @@ import com.ntt.ntt.Service.ReservationService;
 import com.ntt.ntt.Service.RoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/manager/room/reservation")
@@ -57,7 +58,7 @@ public class ReservationManagerController {
 
         model.addAttribute("roomList", roomList);
         model.addAttribute("reservationMap", reservationMap);
-        model.addAttribute("reservationList", reservationList); // Thymeleaf에 전달
+        model.addAttribute("reservationList", reservationList);
 
         return "manager/room/reservation/list";
     }
@@ -84,13 +85,27 @@ public class ReservationManagerController {
 
     // 4. 예약 수정
     @PostMapping("/update")
-    public String updateReservationProc(@RequestParam("reservationId") Integer reservationId,
+    public String updateReservationProc(@RequestParam(value = "reservationId", required = false) Integer reservationId,
+                                        @RequestParam(value = "roomId", required = true) Integer roomId,
+                                        @RequestParam(value = "reservationEnd", required = false) String reservationEnd,
                                         @ModelAttribute ReservationDTO reservationDTO) {
-        reservationService.updateReservation(reservationId, reservationDTO);
+
+        // 🚨 roomId가 없으면 400 에러 방지
+        if (roomId == null) {
+            throw new IllegalArgumentException("객실 ID(roomId)가 필요합니다.");
+        }
+
+        // ✅ 예약 ID가 없을 경우 예약 마감 날짜만 수정
+        if (reservationId == null) {
+            roomService.updateReservationEnd(roomId, reservationEnd);
+            return "redirect:/manager/room/reservation/list";
+        }
+
+        reservationService.updateReservation(reservationId, reservationDTO, reservationDTO.getMemberId());
         return "redirect:/manager/room/reservation/list";
     }
 
-    // 5. 예약 삭제 (GET 방식으로도 변경 가능)
+    // 5. 예약 삭제
     @PostMapping("/delete")
     public String deleteReservationProc(@RequestParam("reservationId") Integer reservationId) {
         reservationService.deleteReservation(reservationId);
@@ -102,5 +117,20 @@ public class ReservationManagerController {
     public String disableRoomProc(@RequestParam("roomId") Integer roomId) {
         roomService.disableRoom(roomId);
         return "redirect:/manager/room/reservation/list";
+    }
+
+    // 7. 회원 정보 조회 API
+    @GetMapping("/member/details")
+    @ResponseBody
+    public ResponseEntity<?> getMemberDetails(@RequestParam("memberId") Integer memberId) {
+        Optional<Member> member = memberRepository.findById(memberId);
+        if (member.isPresent()) {
+            return ResponseEntity.ok(Map.of(
+                    "memberName", member.get().getMemberName(),
+                    "memberEmail", member.get().getMemberEmail()
+            ));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

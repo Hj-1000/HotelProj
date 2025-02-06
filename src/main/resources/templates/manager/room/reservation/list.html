@@ -23,7 +23,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 30px;
+            gap: 1rem;
         }
 
         /* 객실 목록 섹션 */
@@ -101,6 +101,7 @@
             background: white;
             box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
             padding: 0 2rem 2rem 2rem;
+            border-radius: 0;
         }
 
         .table-tabs {
@@ -136,22 +137,16 @@
             position: relative;
         }
 
+        /* 객실 목록 컨테이너 */
+
+
         .room-header {
+            position: relative;
             display: flex;
             justify-content: space-between; /* 좌우 정렬 */
             align-items: center; /* 세로 정렬 */
             width: 100%;
             padding: 0 20px; /* 좌우 여백 */
-        }
-
-        /* 객실 목록 컨테이너 */
-        .room-header {
-            position: relative;
-            display: flex;
-            justify-content: center; /* 제목 가운데 정렬 */
-            align-items: center;
-            width: 100%;
-            padding: 10px 0;
         }
 
         /* 객실 목록 제목 */
@@ -207,6 +202,70 @@
             background-color: #aaa;
             transform: translateY(-50%);
         }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 40%;
+            border-radius: 10px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* 예약 기간 만료된 방 수정 버튼 색상 */
+        .btn-danger {
+            background-color: #dc3545 !important;  /* 빨간색 */
+            border-color: #dc3545 !important; /* 테두리도 빨간색 */
+            color: white !important; /* 텍스트 색상 */
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+
+        .btn-warning {
+            background-color: #FFD700; /* 노란색 */
+            border-color: #FFD700;
+            color: black;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+
+        .btn-primary {
+            background-color: #007BFF !important;  /* 파란색 */
+            border-color: #007BFF !important; /* 테두리도 파란색 */
+            color: white !important; /* 텍스트 색상 */
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 5px; /* 둥근 모서리 */
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3 !important; /* 더 진한 파란색 */
+            border-color: #0056b3 !important;
+        }
+
     </style>
 </head>
 <body>
@@ -259,11 +318,11 @@
                 <tr>
                     <th>No</th>
                     <th>객실 이름</th>
+                    <th>예약자 ID</th>
                     <th>예약자 이름</th>
                     <th>예약자 이메일</th>
                     <th>체크인 날짜</th>
                     <th>체크아웃 날짜</th>
-                    <th>예약마감 날짜</th>
                     <th>상태</th>
                     <th>관리</th>
                 </tr>
@@ -272,11 +331,11 @@
                 <tr th:each="reservation, iterStat : ${reservationList}">
                     <td th:text="${iterStat.index + 1}"></td>
                     <td th:text="${reservation.room.roomName}"></td>
+                    <td th:text="${reservation.memberId}"></td>
                     <td th:text="${reservation.memberName}"></td>
                     <td th:text="${reservation.memberEmail}"></td>
                     <td th:text="${reservation.checkInDate}"></td>
                     <td th:text="${reservation.checkOutDate}"></td>
-                    <td th:text="${reservation.reservationEnd}"></td>
                     <td th:text="${reservation.reservationStatus}"></td>
                     <td>
                         <form method="post" action="/manager/room/reservation/delete"
@@ -297,6 +356,8 @@
                     <th>No</th>
                     <th>객실 이름</th>
                     <th>예약자 ID</th>
+                    <th>예약자 이름</th>
+                    <th>예약자 이메일</th>
                     <th>체크인 날짜</th>
                     <th>체크아웃 날짜</th>
                     <th>예약마감 날짜</th>
@@ -312,6 +373,11 @@
                     <!-- 예약자 ID (예약된 경우만 표시) -->
                     <td th:text="${reservation != null ? reservation.memberId : ''}"></td>
 
+                    <!-- 예약자 ID 이름 -->
+                    <td th:text="${reservation != null ? reservation.memberName : ''}"></td>
+                    <!-- 예약자 ID 이메일 -->
+                    <td th:text="${reservation != null ? reservation.memberEmail : ''}"></td>
+
                     <!-- 체크인 및 체크아웃 날짜 (예약된 경우만 표시) -->
                     <td th:text="${reservation != null ? reservation.checkInDate : ''}"></td>
                     <td th:text="${reservation != null ? reservation.checkOutDate : ''}"></td>
@@ -323,18 +389,51 @@
                     <td>
                         <span th:if="${room.isExpired}">예약 기간 만료</span>
                         <span th:unless="${room.isExpired}">
-                    <span th:if="${reservationMap[room.roomId] != null}">예약됨</span>
-                    <span th:unless="${reservationMap[room.roomId] != null}">예약 가능</span>
-                    </span>
+                            <span th:if="${reservation != null}">예약됨</span>
+                            <span th:unless="${reservation != null}">예약 가능</span>
+                        </span>
                     </td>
 
-                    <!-- 예약 취소 버튼 -->
+                    <!-- 수정 버튼 추가 (모든 방에서 활성화) -->
                     <td>
-                        <form th:if="${reservation != null}" method="post" action="/manager/room/reservation/delete"
-                              th:onsubmit="return confirm('예약을 취소하시겠습니까?')">
-                            <input type="hidden" name="reservationId" th:value="${reservation.reservationId}">
-                            <button type="submit" class="btn btn-danger">예약 취소</button>
-                        </form>
+                        <button th:classappend="${room.isExpired ? 'btn-danger' : (reservation != null ? 'btn-warning' : 'btn-primary')}"
+                                th:text="${room.isExpired ? '수정' : (reservation != null ? '수정' : '등록')}"
+                                th:attr="data-room-id=${room.roomId},
+                                        data-reservation-id=${reservation != null ? reservation.reservationId : '-1'},
+                                        data-member-id=${reservation != null ? reservation.memberId : ''},
+                                        data-checkin=${reservation != null ? reservation.checkInDate : ''},
+                                        data-checkout=${reservation != null ? reservation.checkOutDate : ''},
+                                        data-reservationEnd=${reservation != null ? reservation.reservationEnd : room.reservationEnd},
+                                        data-is-expired=${room.isExpired}"
+                                                    onclick="
+                                    if (this.getAttribute('data-is-expired') === 'true') {
+                                        openEditModal(
+                                            this.getAttribute('data-room-id'),
+                                            this.getAttribute('data-reservation-id'),
+                                            this.getAttribute('data-member-id'),
+                                            this.getAttribute('data-checkin'),
+                                            this.getAttribute('data-checkout'),
+                                            this.getAttribute('data-reservationEnd'),
+                                            this.getAttribute('data-is-expired')
+                                        );
+                                    } else if (this.getAttribute('data-reservation-id') !== '-1') {
+                                        openEditModal(
+                                            this.getAttribute('data-room-id'),
+                                            this.getAttribute('data-reservation-id'),
+                                            this.getAttribute('data-member-id'),
+                                            this.getAttribute('data-checkin'),
+                                            this.getAttribute('data-checkout'),
+                                            this.getAttribute('data-reservationEnd'),
+                                            'false'
+                                        );
+                                    } else {
+                                        openRegisterModal(
+                                            this.getAttribute('data-room-id'),
+                                            this.getAttribute('data-reservationEnd')
+                                        );
+                                    }
+                                ">
+                        </button>
                     </td>
                 </tr>
                 </tbody>
@@ -343,21 +442,76 @@
 
     </div>
 
+    <!-- 수정 모달 -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3>객실 정보 수정</h3>
+            <form id="editForm" method="post" action="/manager/room/reservation/update"  th:object="${reservationDTO}" >
+                <input type="hidden" id="editRoomId" name="roomId">
+                <input type="hidden" id="editReservationId" name="reservationId">
+
+                <label>예약자 ID:</label>
+                <input type="number" id="editMemberId" name="memberId" min="1"><br>
+                <label>예약자 이름:</label>
+                <input type="text" id="editMemberName" name="memberName"  readonly><br>
+                <label>예약자 이메일:</label>
+                <input type="email" id="editMemberEmail" name="memberEmail" readonly><br>
+
+                <label>체크인 날짜:</label>
+                <input type="date" id="editCheckIn" name="checkInDate"><br>
+                <label>체크아웃 날짜:</label>
+                <input type="date" id="editCheckOut" name="checkOutDate"><br>
+                <label>예약마감 날짜:</label>
+                <input type="date" id="editReservationEnd"  name="reservationEnd" ><br>
+
+
+                <button type="submit" class="btn btn-primary">수정</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 예약 등록 모달 -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeRegisterModal()">&times;</span>
+            <h3>새로운 예약 등록</h3>
+            <form id="registerForm" method="post" action="/manager/room/reservation/register">
+                <input type="hidden" id="registerRoomId" name="roomId">
+
+                <label>예약자 ID:</label>
+                <input type="number" id="registerMemberId" name="memberId" min="1"><br>
+
+                <label>예약자 이름:</label>
+                <input type="text" id="registerMemberName" name="memberName" readonly><br>
+
+                <label>예약자 이메일:</label>
+                <input type="email" id="registerMemberEmail" name="memberEmail" readonly><br>
+
+                <label>체크인 날짜:</label>
+                <input type="date" id="registerCheckIn" name="checkInDate"><br>
+
+                <label>체크아웃 날짜:</label>
+                <input type="date" id="registerCheckOut" name="checkOutDate"><br>
+
+                <label>예약마감 날짜:</label>
+                <input type="date" id="registerReservationEnd" name="reservationEnd" readonly><br>
+
+                <button type="submit" class="btn btn-primary">등록</button>
+            </form>
+        </div>
+    </div>
+
     <script>
+
 
         /* Tab */
 
         function changeTab(tab) {
             localStorage.setItem("selectedTab", tab);
-
-            // 모든 테이블 숨기기
             document.getElementById("reservedTable").classList.remove("active");
             document.getElementById("allTable").classList.remove("active");
-
-            // 선택된 테이블만 보이도록 설정
             document.getElementById(tab + "Table").classList.add("active");
-
-            // 탭 버튼 스타일 업데이트
             document.getElementById("reservedTab").classList.remove("active");
             document.getElementById("allTab").classList.remove("active");
             document.getElementById(tab + "Tab").classList.add("active");
@@ -367,6 +521,212 @@
             let savedTab = localStorage.getItem("selectedTab") || "reserved";
             changeTab(savedTab);
         });
+
+        /* 수정 버튼 구분*/
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // 수정 버튼을 모두 선택합니다.
+            const editButtons = document.querySelectorAll(".btn-warning");
+
+            editButtons.forEach(button => {
+                // data-is-expired 속성 값 확인
+                const isExpired = button.getAttribute("data-is-expired") === 'true';
+
+                // 예약 기간 만료된 방만 빨간색으로 스타일 변경
+                if (isExpired) {
+                    button.style.backgroundColor = "red"; // 빨간색
+                    button.style.borderColor = "darkred"; // 테두리 색상 변경
+                } else {
+                    button.style.backgroundColor = "#FFD700"; // 예약된 방은 기존 노란색
+                    button.style.borderColor = "#FFD700"; // 테두리 색상 변경
+                }
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            console.log("DOM 로드 완료!");
+
+            // 모달 요소 확인
+            let modal = document.getElementById("editModal");
+            if (!modal) {
+                console.error("[오류] `editModal`을 찾을 수 없습니다.");
+            }
+
+            // 모달 닫기 버튼 이벤트 추가
+            let closeBtn = document.querySelector(".close");
+            if (closeBtn) {
+                closeBtn.addEventListener("click", closeModal);
+            }
+
+            // 예약자 ID 변경 시 자동 업데이트
+            let memberIdInput = document.getElementById("editMemberId");
+            if (memberIdInput) {
+                memberIdInput.addEventListener("change", function () {
+                    fetchMemberDetails(this.value);
+                });
+            } else {
+                console.error("[오류] `editMemberId` 요소가 없습니다.");
+            }
+        });
+
+        /* 수정 모달 */
+        function openEditModal(roomId, reservationId, memberId, checkIn, checkOut, reservationEnd, isExpired) {
+            console.log("모달 열기 함수 실행됨!", { roomId, reservationId, memberId, checkIn, checkOut, reservationEnd, isExpired });
+
+            let modal = document.getElementById("editModal");
+            if (!modal) {
+                console.error("[오류] `editModal`이 존재하지 않습니다.");
+                return;
+            }
+
+            let editRoomId = document.getElementById("editRoomId");
+            let editReservationId = document.getElementById("editReservationId");
+            let editMemberId = document.getElementById("editMemberId");
+            let editMemberName = document.getElementById("editMemberName");
+            let editMemberEmail = document.getElementById("editMemberEmail");
+            let editCheckIn = document.getElementById("editCheckIn");
+            let editCheckOut = document.getElementById("editCheckOut");
+            let editReservationEnd = document.getElementById("editReservationEnd");
+            let editButton = document.querySelector(".btn-primary");
+
+
+            editRoomId.value = roomId;
+            editReservationId.value = reservationId || "";
+            editMemberId.value = memberId || "";
+            editCheckIn.value = checkIn || "";
+            editCheckOut.value = checkOut || "";
+
+            editReservationEnd.value = reservationEnd && reservationEnd !== 'null' && reservationEnd !== 'undefined' ? reservationEnd : '';
+
+            if (!roomId || roomId === 'null' || roomId === 'undefined') {
+                console.error("[오류] `roomId`가 존재하지 않습니다.");
+                alert("객실 정보를 찾을 수 없습니다.");
+                return;
+            }
+
+            if (!editRoomId || !editReservationId || !editMemberId || !editCheckIn || !editCheckOut || !editReservationEnd) {
+                console.error("[오류] 입력 필드 중 하나 이상이 존재하지 않습니다.");
+                return;
+            }
+
+            if (!reservationEnd || reservationEnd === 'null' || reservationEnd === 'undefined') {
+                reservationEnd = document.querySelector(`[data-room-id='${roomId}']`).getAttribute("data-reservationEnd") || '';
+            }
+
+            // 예약 기간 만료 여부 확인
+            let isRoomExpired = (isExpired === 'true' || isExpired === true || new Date(reservationEnd) < new Date());
+
+            //  예약 기간이 만료된 방일 경우
+            if (isRoomExpired) {
+                console.log("예약 기간 만료된 방: 예약 마감 날짜만 수정 가능");
+
+                // 모든 입력 필드 비활성화
+                editReservationId.value = "";
+                editMemberId.value = "";
+                editMemberName.value = "";
+                editMemberEmail.value = "";
+                editCheckIn.value = "";
+                editCheckOut.value = "";
+
+                editMemberId.disabled = true;
+                editMemberName.disabled = true;
+                editMemberEmail.disabled = true;
+                editCheckIn.disabled = true;
+                editCheckOut.disabled = true;
+
+                // 예약 마감 날짜만 수정 가능
+                editReservationEnd.disabled = false;
+
+                // 수정 버튼 색상 변경
+                editButton.style.backgroundColor = "red"; // 예약 기간 만료 방은 빨간색
+            } else {
+                console.log("예약 가능 또는 예약된 방: 모든 정보 수정 가능");
+
+                // 기존 예약 정보 입력
+                editReservationId.value = reservationId || "";
+                editMemberId.value = memberId || "";
+                editCheckIn.value = checkIn || "";
+                editCheckOut.value = checkOut || "";
+                editReservationEnd.value = reservationEnd || "";
+
+                // 예약된 방 및 예약 가능 방 (isExpired가 false일 경우)
+                editMemberName.disabled = true;
+                editMemberEmail.disabled = true;
+                editCheckIn.disabled = false;
+                editCheckOut.disabled = false;
+                editMemberId.disabled = false;
+
+
+                // 예약 마감 날짜는 수정 불가
+                editReservationEnd.disabled = true;
+
+                // 버튼 색상 기본 색 (예약 가능, 예약됨)
+                editButton.style.backgroundColor = "#000000";
+            }
+
+            modal.style.display = "block";
+        }
+
+        function closeModal() {
+            let modal = document.getElementById("editModal");
+            if (modal) {
+                modal.style.display = "none";
+            }
+        }
+
+
+        // 예약자 ID 변경 시 자동으로 이름 & 이메일 업데이트
+        document.getElementById("registerMemberId").addEventListener("change", function () {
+            fetchMemberDetails(this.value);
+        });
+
+        function fetchMemberDetails(memberId) {
+            if (!memberId) return;
+
+            fetch(`/manager/room/reservation/member/details?memberId=${memberId}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("registerMemberName").value = data.memberName || "";
+                    document.getElementById("registerMemberEmail").value = data.memberEmail || "";
+                })
+                .catch(error => console.error("회원 정보 불러오기 오류:", error));
+        }
+
+
+        /* 예약 등록 모달 열기 */
+        function openRegisterModal(roomId, reservationEnd) {
+            console.log("신규 예약 모달 열기!", { roomId, reservationEnd });
+
+            let modal = document.getElementById("registerModal");
+            if (!modal) {
+                console.error("[오류] `registerModal`이 존재하지 않습니다.");
+                return;
+            }
+
+            let registerRoomId = document.getElementById("registerRoomId");
+            let registerReservationEnd = document.getElementById("registerReservationEnd");
+
+            if (!roomId || roomId === 'null' || roomId === 'undefined') {
+                console.error("[오류] `roomId`가 존재하지 않습니다.");
+                alert("객실 정보를 찾을 수 없습니다.");
+                return;
+            }
+
+            registerRoomId.value = roomId;
+            registerReservationEnd.value = reservationEnd || '';
+
+            modal.style.display = "block";
+        }
+
+        /* 예약 등록 모달 닫기 */
+        function closeRegisterModal() {
+            let modal = document.getElementById("registerModal");
+            if (modal) {
+                modal.style.display = "none";
+            }
+        }
+
+
 
 
         /* 예약 관리 */
@@ -421,6 +781,21 @@
                 document.body.appendChild(form);
                 form.submit();
             }
+        });
+
+        /* 예약 수정 버튼 클릭*/
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".btn-warning").forEach(button => {
+                button.addEventListener("click", function () {
+                    let roomId = this.getAttribute("data-room-id");
+                    let reservationId = this.getAttribute("data-reservation-id");
+                    let checkIn = this.getAttribute("data-checkin");
+                    let checkOut = this.getAttribute("data-checkout");
+                    let reservationEnd = this.getAttribute("data-reservationEnd");
+
+                    openEditModal(roomId, reservationId, checkIn, checkOut, reservationEnd);
+                });
+            });
         });
     </script>
 </div>
