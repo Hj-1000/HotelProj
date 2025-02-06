@@ -250,15 +250,6 @@ public class RoomService {
         }
 
         // Room 저장
-
-        roomRepository.save(room);
-    }
-
-    public void updateReservationEnd(Integer roomId, String reservationEnd) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 방을 찾을 수 없습니다."));
-
-        room.setReservationEnd(reservationEnd);
         roomRepository.save(room);
     }
 
@@ -366,13 +357,18 @@ public class RoomService {
     }
 
 
+    public void updateReservationEnd(Integer roomId, String reservationEnd) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 방을 찾을 수 없습니다."));
 
+        // 예약 마감 날짜가 비어있으면 기본값 설정
+        if (reservationEnd == null || reservationEnd.trim().isEmpty()) {
+            throw new IllegalArgumentException("예약 마감 날짜가 필요합니다.");
+        }
 
-
-
-
-
-
+        room.setReservationEnd(reservationEnd);
+        roomRepository.save(room);
+    }
 
 
 }

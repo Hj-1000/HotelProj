@@ -42,7 +42,7 @@ public class ReservationDTO {
     private Boolean reserved;
 
     // 예약 종료일
-    private String reservationEnd = "";
+    private String reservationEnd;
 
 
 
