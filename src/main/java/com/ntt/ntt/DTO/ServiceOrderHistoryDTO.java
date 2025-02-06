@@ -23,8 +23,6 @@ public class ServiceOrderHistoryDTO {
 
     private LocalDateTime regDate; //주문 날짜 생성날짜
 
-    private LocalDateTime modDate; //수정 날짜
-
     private ServiceOrderStatus serviceOrderStatus; //주문 상태
 
     private List<ServiceOrderItemDTO> serviceOrderItemDTOList = new ArrayList<>();
