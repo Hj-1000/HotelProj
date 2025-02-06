@@ -73,7 +73,10 @@
                     </div>
                     <div class="mb-3 mt-3">
                         <label for="hotelAddress" class="form-label">호텔주소:</label>
-                        <input type="text" class="form-control" id="hotelAddress" name="hotelAddress">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="hotelAddress" name="hotelAddress">
+                            <button type="button" class="btn btn-secondary" onclick="execDaumPostcode()">주소찾기</button>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="hotelInfo" class="form-label">호텔상세:</label>
@@ -162,6 +165,29 @@
                     </div>
 
                 </form>
+
+                <!--daum지도 API를 연동-->
+                <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+                <script>
+                    //우편번호찾기를 클릭시 처리되는 메소드
+                    //daum에서 제공하는 기본 메소드
+                    function execDaumPostcode() {
+                        new daum.Postcode({
+                            oncomplete: function(data) {
+                                var addr = '';
+
+                                if (data.userSelectedType === 'R') {
+                                    addr = data.roadAddress;
+                                } else {
+                                    addr = data.jibunAddress;
+                                }
+                                //조회한 주소를 html에 id명이 address를 찾아 value에 값을 적용한다.
+                                document.getElementById("hotelAddress").value = addr;
+                            }
+                        }).open(); //주소검색창 열기
+                    }
+                </script>
+
             </div>
         </div>
 

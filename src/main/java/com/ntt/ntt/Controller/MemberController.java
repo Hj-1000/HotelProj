@@ -128,4 +128,24 @@ public class MemberController {
         return "redirect:/"; // 메인 페이지로 리디렉션
     }
 
+    /* 이 아래로는 일단 임시로 멤버커트롤러에 다 넣어놨는데 나중에 어느 컨트롤러로 넣을지 생각하기(위에 회원정보 수정부분도 MyPageController 를 따로 만들어서 할지 생각해보기) */
+
+    @Operation(summary = "호텔 예약내역 조회", description = "호텔 예약내역 조회 페이지로 이동한다.")
+    @GetMapping("/myPage/reservationList")
+    public String reservationList(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return "redirect:/login";  // 로그인되어있지 않으면 로그인 페이지로 리다이렉트
+        }
+        return "myPage/reservationList";
+    }
+
+    @Operation(summary = "룸서비스", description = "룸서비스 페이지로 이동한다.")
+    @GetMapping("/myPage/roomService")
+    public String roomService(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return "redirect:/login";  // 로그인되어있지 않으면 로그인 페이지로 리다이렉트
+        }
+        return "myPage/roomService";
+    }
+
 }

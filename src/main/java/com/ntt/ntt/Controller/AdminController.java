@@ -23,7 +23,6 @@ public class AdminController {
 
     private final HotelService hotelService;
     private final MemberService memberService;
-    private final NotificationService notificationService;
 
     @Operation(summary = "전체회원목록", description = "전체회원목록 페이지로 이동한다.")
     @GetMapping("/admin/memberList")
@@ -95,6 +94,7 @@ public class AdminController {
         return "admin/hotelHeadquartersRegister";
     }
 
+    // 설정한 주소가 지도로 잘 나오는지 테스트용으로 만듦, 기능 구현 완성 이후에는 삭제하기
     @GetMapping("/admin/mapTest")
     public String read(@RequestParam Integer hotelId, Model model, RedirectAttributes redirectAttributes) {
         try {
