@@ -250,6 +250,15 @@ public class RoomService {
         }
 
         // Room 저장
+
+        roomRepository.save(room);
+    }
+
+    public void updateReservationEnd(Integer roomId, String reservationEnd) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 방을 찾을 수 없습니다."));
+
+        room.setReservationEnd(reservationEnd);
         roomRepository.save(room);
     }
 

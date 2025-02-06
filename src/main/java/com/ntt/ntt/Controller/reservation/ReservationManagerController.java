@@ -90,12 +90,16 @@ public class ReservationManagerController {
                                         @RequestParam(value = "reservationEnd", required = false) String reservationEnd,
                                         @ModelAttribute ReservationDTO reservationDTO) {
 
+
         // roomId가 없으면 400 에러 방지
+
         if (roomId == null) {
             throw new IllegalArgumentException("객실 ID(roomId)가 필요합니다.");
         }
 
+
         // 예약 ID가 없을 경우, 예약 마감 날짜만 수정
+
         if (reservationId == null) {
             roomService.updateReservationEnd(roomId, reservationEnd);
             return "redirect:/manager/room/reservation/list";

@@ -1,162 +1,240 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>호텔 페이지</title>
+    <title>hotelread</title>
+    <!--반응형웹-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--부트스트랩-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <title>hotelread</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-            margin: 0;
-            padding: 0;
-            border:1px solid orange;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f8f8;
+            border: 1px solid orange;
         }
         .container {
             width: 90%;
-            margin: auto;
-            border:1px solid orange;
-        }
-        .hotel-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: 20px;
-
-        }
-        .hotel-header img {
-            width: 30%;
-            height: auto;
-        }
-        .hotel-details {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 20px 0;
-        }
-        .hotel-info {
+            height: 90%;
+            border: 1px solid black;
+            padding: 10px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            background: antiquewhite;
+            /*border-radius: 5%;*/
+        }
+        .hotelmain{
+            width:45%;
+            height: 40%;
+            border: 1px solid orange;
+        }
+        .hotel1{
+            width:25%;
+            height: 25%;
+            flex:2;
             border:1px solid orange;
-        }
-        .hotel-info h1 {
-            font-size: 24px;
-            margin: 0;
-
-        }
-        .hotel-info p {
-            font-size: 16px;
-            color: gray;
-        }
-        .hotel-price {
-            font-size: 24px;
-            color: #4A90E2;
-            font-weight: bold;
-        }
-        .hotel-images {
-            /*display: flex;*/
-            gap: 15px;
-        }
-        .hotel-images img {
-            width: 30%;
-            height: auto;
-        }
-        .hotel-amenities {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-        }
-        .hotel-map {
-            margin-top: 20px;
-            display: flex;
-            justify-content: space-between;
-            border:1px solid orange;
-        }
-        .hotel-map iframe {
-            width: 70%;
-            height: 300px;
-        }
-        .room-selection {
-            margin-top: 20px;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .room-selection h3 {
-            margin: 0;
-            font-size: 20px;
-        }
-        .room-selection ul {
-            list-style: none;
-            padding: 0;
-            margin: 10px 0;
-        }
-        .room-selection li {
-            display: flex;
-            justify-content: space-between;
             padding: 10px;
-            border-bottom: 1px solid #ddd;
-        }
-        .room-selection button {
-            background-color: #FFD86E;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .room-selection button:hover {
-            background-color: #F0C16B;
+
+
         }
     </style>
 </head>
 <body>
+<!--<div th:replace="~{fragments/header::header}"></div>-->
 <div class="container">
-    <div class="hotel-header">
-        <div class="hotel-info">
-            <h1>호텔 이름</h1>
-            <p>호텔 정보(호텔명 주소 등)</p>
-        </div>
-        <div class="hotel-price">₩65,000원</div>
+    <div class="hotelmain">
+        <img src="#" alt="hotelmain">
+    </div>
+    <div class="hotel1">
+        <img src="#" alt="hotel1">
     </div>
 
-    <div class="hotel-images">
 
-        <img src="hotel-image1.jpg" alt="호텔 이미지 1">
 
-        <img src="hotel-image2.jpg" alt="호텔 이미지 2">
-        <img src="hotel-image3.jpg" alt="호텔 이미지 3">
-    </div>
 
-    <div class="hotel-amenities">
-        <div>유선전화</div>
-        <div>무선인터넷</div>
-        <div>금연</div>
-    </div>
 
-    <div class="hotel-map">
-        <div>이곳 누르면 정확한 위치를 확인할 수 있습니다</div>
-        <iframe src="https://www.google.com/maps/embed?pb=..." allowfullscreen></iframe>
-    </div>
 
-    <div class="room-selection">
-        <h3>호텔 방 목록</h3>
-        <ul>
-            <li>
-                <span>스탠다드 더블</span>
-                <button>선택</button>
-            </li>
-            <li>
-                <span>디럭스 트윈</span>
-                <button>선택</button>
-            </li>
-            <li>
-                <span>스위트 룸</span>
-                <button>선택</button>
-            </li>
-        </ul>
-    </div>
+
 </div>
+<script>
+
+</script>
+
 </body>
 </html>
+
+
+
+
+
+
+
+<!--<!DOCTYPE html>-->
+<!--<html lang="ko">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>호텔 페이지</title>-->
+<!--    <style>-->
+<!--        body {-->
+<!--            font-family: Arial, sans-serif;-->
+<!--            background-color: #f2f2f2;-->
+<!--            margin: 0;-->
+<!--            padding: 0;-->
+<!--            border:1px solid orange;-->
+<!--        }-->
+<!--        .container {-->
+<!--            width: 90%;-->
+<!--            margin: auto;-->
+<!--            border:1px solid orange;-->
+<!--        }-->
+<!--        .hotel-header {-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            justify-content: space-between;-->
+<!--            margin-top: 20px;-->
+
+<!--        }-->
+<!--        .hotel-header img {-->
+<!--            width: 30%;-->
+<!--            height: auto;-->
+<!--        }-->
+<!--        .hotel-details {-->
+<!--            display: flex;-->
+<!--            justify-content: space-between;-->
+<!--            align-items: center;-->
+<!--            margin: 20px 0;-->
+<!--        }-->
+<!--        .hotel-info {-->
+<!--            display: flex;-->
+<!--            flex-direction: column;-->
+<!--            justify-content: center;-->
+<!--            border:1px solid orange;-->
+<!--        }-->
+<!--        .hotel-info h1 {-->
+<!--            font-size: 24px;-->
+<!--            margin: 0;-->
+
+<!--        }-->
+<!--        .hotel-info p {-->
+<!--            font-size: 16px;-->
+<!--            color: gray;-->
+<!--        }-->
+<!--        .hotel-price {-->
+<!--            font-size: 24px;-->
+<!--            color: #4A90E2;-->
+<!--            font-weight: bold;-->
+<!--        }-->
+<!--        .hotel-images {-->
+<!--            /*display: flex;*/-->
+<!--            gap: 15px;-->
+<!--        }-->
+<!--        .hotel-images img {-->
+<!--            width: 30%;-->
+<!--            height: auto;-->
+<!--        }-->
+<!--        .hotel-amenities {-->
+<!--            display: flex;-->
+<!--            justify-content: space-between;-->
+<!--            margin-top: 20px;-->
+<!--        }-->
+<!--        .hotel-map {-->
+<!--            margin-top: 20px;-->
+<!--            display: flex;-->
+<!--            justify-content: space-between;-->
+<!--            border:1px solid orange;-->
+<!--        }-->
+<!--        .hotel-map iframe {-->
+<!--            width: 70%;-->
+<!--            height: 300px;-->
+<!--        }-->
+<!--        .room-selection {-->
+<!--            margin-top: 20px;-->
+<!--            background-color: #fff;-->
+<!--            padding: 20px;-->
+<!--            border-radius: 8px;-->
+<!--            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);-->
+<!--        }-->
+<!--        .room-selection h3 {-->
+<!--            margin: 0;-->
+<!--            font-size: 20px;-->
+<!--        }-->
+<!--        .room-selection ul {-->
+<!--            list-style: none;-->
+<!--            padding: 0;-->
+<!--            margin: 10px 0;-->
+<!--        }-->
+<!--        .room-selection li {-->
+<!--            display: flex;-->
+<!--            justify-content: space-between;-->
+<!--            padding: 10px;-->
+<!--            border-bottom: 1px solid #ddd;-->
+<!--        }-->
+<!--        .room-selection button {-->
+<!--            background-color: #FFD86E;-->
+<!--            border: none;-->
+<!--            padding: 10px 20px;-->
+<!--            cursor: pointer;-->
+<!--            font-weight: bold;-->
+<!--        }-->
+<!--        .room-selection button:hover {-->
+<!--            background-color: #F0C16B;-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="container">-->
+<!--    <div class="hotel-header">-->
+<!--        <div class="hotel-info">-->
+<!--            <h1>호텔 이름</h1>-->
+<!--            <p>호텔 정보(호텔명 주소 등)</p>-->
+<!--        </div>-->
+<!--        <div class="hotel-price">₩000원</div>-->
+<!--    </div>-->
+
+<!--    <div class="hotel-images">-->
+
+<!--        <img src="hotel-image1.jpg" alt="호텔 이미지 1">-->
+
+<!--        <img src="hotel-image2.jpg" alt="호텔 이미지 2">-->
+<!--        <img src="hotel-image3.jpg" alt="호텔 이미지 3">-->
+<!--    </div>-->
+
+<!--    <div class="hotel-amenities">-->
+<!--        <div>유선전화</div>-->
+<!--        <div>무선인터넷</div>-->
+<!--        <div>금연</div>-->
+<!--    </div>-->
+
+<!--    <div class="hotel-map">-->
+<!--        <div>이곳 누르면 정확한 위치를 확인할 수 있습니다</div>-->
+<!--        <iframe src="https://www.google.com/maps/embed?pb=..." allowfullscreen></iframe>-->
+<!--    </div>-->
+
+<!--    <div class="room-selection">-->
+<!--        <h3>호텔 방 목록</h3>-->
+<!--        <ul>-->
+<!--            <li>-->
+<!--                <span>스탠다드 더블</span>-->
+<!--                <button>선택</button>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--                <span>디럭스 트윈</span>-->
+<!--                <button>선택</button>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--                <span>스위트 룸</span>-->
+<!--                <button>선택</button>-->
+<!--            </li>-->
+<!--        </ul>-->
+<!--    </div>-->
+<!--</div>-->
+<!--</body>-->
+<!--</html>-->

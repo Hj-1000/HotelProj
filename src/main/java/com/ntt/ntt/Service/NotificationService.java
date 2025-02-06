@@ -34,7 +34,7 @@ public class NotificationService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         return notificationRepository.findByMemberOrderByTimestampDesc(member)
                 .stream()
-                .map(NotificationDTO::dtoToEntity) // fromEntity 메서드를 사용하도록 수정
+                .map(NotificationDTO::fromEntity) // fromEntity 메서드를 사용하도록 수정
                 .collect(Collectors.toList());
     }
 
@@ -43,7 +43,7 @@ public class NotificationService {
     public void markAsRead(Integer notificationId) {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new IllegalArgumentException("알림을 찾을 수 없습니다."));
-        notification.setRead(true);
+        notification.setIsRead(true);
         notificationRepository.save(notification);
     }
 
@@ -58,7 +58,7 @@ public class NotificationService {
         Notification notification = new Notification();
         notification.setNotificationMessage(message);
         notification.setMember(member);  // 알림을 받을 멤버 (이 경우 관리자)
-        notification.setRead(false);   // 알림은 기본적으로 읽지 않은 상태
+        notification.setIsRead(false);   // 알림은 기본적으로 읽지 않은 상태
         notification.setTimestamp(LocalDateTime.now());
 
         notificationRepository.save(notification);
@@ -68,7 +68,7 @@ public class NotificationService {
     public List<NotificationDTO> getAllNotifications() {
         return notificationRepository.findAll()
                 .stream()
-                .map(NotificationDTO::dtoToEntity)
+                .map(NotificationDTO::fromEntity)
                 .collect(Collectors.toList());
     }
 }

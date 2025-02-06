@@ -1,6 +1,8 @@
 package com.ntt.ntt.Controller.hotel;
 
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ntt.ntt.DTO.LikeDTO;
 import com.ntt.ntt.Service.hotel.LikeService;
 import com.ntt.ntt.Util.PaginationUtil;
@@ -17,6 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @Log4j2
@@ -27,6 +30,7 @@ public class LikeController {
     private final LikeService likeService;
     private final PaginationUtil paginationUtil;
 
+    //장바구니목록
     @GetMapping("/list")
     public String likeList(Model model, Principal principal, RedirectAttributes redirectAttributes) {
         try {
@@ -46,8 +50,7 @@ public class LikeController {
         }
     }
 
-
-
+    //장바구니 등록
     @ResponseBody
     @PostMapping("/register")
     public ResponseEntity<String> likeHotel(@AuthenticationPrincipal UserDetails userDetails,
@@ -66,28 +69,27 @@ public class LikeController {
     }
 
 
-
-    @ResponseBody
+    //장바구니 제거
     @PostMapping("/delete")
-    public ResponseEntity likeDelete(@RequestBody LikeDTO likeDTO){
+    public ResponseEntity<?> likeDelete(@RequestBody Map<String, Integer> request) {
+        log.info("받은 요청 데이터: " + request);
 
-        log.info(likeDTO);
+        Integer likeHotelId = request.get("likeHotelId");
 
-        List<LikeDTO> likeDTOList = likeDTO.getLikeDTOList();
-
-        if (likeDTOList == null || likeDTOList.size() == 0){
-            return new ResponseEntity<String>("취소할 호텔을 선택해주세요", HttpStatus.FORBIDDEN);
+        if (likeHotelId == null) {
+            return new ResponseEntity<>("삭제할 즐겨찾기 ID가 없습니다.", HttpStatus.BAD_REQUEST);
         }
 
-        int num = likeDTOList.size();
+        log.info("삭제할 likeHotelId: " + likeHotelId);
 
-        for (LikeDTO l : likeDTOList){
-            likeService.likeDelete(l.getLikeHotelId());
-        }
+        likeService.delete(likeHotelId);
 
-
-        return new ResponseEntity(num,HttpStatus.OK);
+        return new ResponseEntity<>("즐겨찾기에서 삭제되었습니다.", HttpStatus.OK);
     }
+
+
+
+
 
 
 

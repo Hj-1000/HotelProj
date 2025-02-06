@@ -240,6 +240,7 @@
             border-color: #0056b3 !important;
         }
 
+
         /* 모달 */
 
         .modal {
@@ -346,6 +347,7 @@
                 transform: scale(1) translateY(20%);
             }
         }
+
 
     </style>
 </head>
@@ -480,12 +482,14 @@
                         <button th:classappend="${room.isExpired ? 'btn-danger' : (reservation != null ? 'btn-warning' : 'btn-primary')}"
                                 th:text="${room.isExpired ? '수정' : (reservation != null ? '수정' : '등록')}"
                                 th:attr="data-room-id=${room.roomId},
+
                                          data-reservation-id=${reservation != null ? reservation.reservationId : '-1'},
                                          data-member-id=${reservation != null ? reservation.memberId : ''},
                                          data-checkin=${reservation != null ? reservation.checkInDate : ''},
                                          data-checkout=${reservation != null ? reservation.checkOutDate : ''},
                                          data-reservationEnd=${room.reservationEnd},
                                          data-is-expired=${room.isExpired}"
+
                                                     onclick="
                                     if (this.getAttribute('data-is-expired') === 'true') {
                                         openEditModal(
@@ -523,7 +527,9 @@
 
     </div>
 
+
     <!-- 예약 수정 모달 -->
+
     <div id="editModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal()">&times;</span>
@@ -578,12 +584,14 @@
                 <label>예약마감 날짜:</label>
                 <input type="date" id="registerReservationEnd" name="reservationEnd" readonly disabled><br>
 
+
                 <button type="submit" class="btn btn-primary">등록</button>
             </form>
         </div>
     </div>
 
     <script>
+
 
         /* Tab */
 
@@ -851,6 +859,7 @@
                 .catch(error => console.error("예약 정보 불러오기 오류:", error));
         }
 
+
         /* 예약 등록 모달 열기 */
         function openRegisterModal(roomId, reservationEnd) {
             console.log("신규 예약 모달 열기!", { roomId, reservationEnd });
@@ -874,7 +883,9 @@
             registerReservationEnd.value = reservationEnd || '';
 
             modal.style.display = "block";
+
             document.body.style.overflow = "hidden";
+
         }
 
         /* 예약 등록 모달 닫기 */
@@ -882,9 +893,11 @@
             let modal = document.getElementById("registerModal");
             if (modal) {
                 modal.style.display = "none";
+
                 document.body.style.overflow = ""; // 스크롤 다시 활성화
             }
         }
+
 
         /* 예약 관리 */
 

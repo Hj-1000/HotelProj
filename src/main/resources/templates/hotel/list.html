@@ -17,12 +17,19 @@
 
     <script th:inline="javascript">
 
-        $(document).ready(function () {
-            $(".search").on("click", function (e) {
-                e.preventDefault();
-                page(0)
-            })
-        })
+        window.onload = function() {
+
+            // 세션에서 message 값을 가져옴
+            var message = [[${message}]];
+
+            // message가 null이 아니면 알림창을 띄우고 세션에서 삭제
+            if (message !== null && message !== '') {
+                alert(message);
+            }
+
+            $(".delBtn").hide();
+
+        }
 
         //찜 버튼을 클릭했을 때 실행 할 함수
         function addLike(event) {
@@ -43,7 +50,9 @@
                 data: JSON.stringify(param),
                 dataType: "json",
                 success: function (result, status) {
-                    alert("찜 완료 되었습니다~!");
+                    alert(result.responseText);
+                    $(".likeBtn").hide();
+                    $(".delBtn").show();
                 },
                 error: function (result, status, error) {
                     if (result.status == '401') {
@@ -51,6 +60,8 @@
                         location.href = '/login';
                     } else {
                         alert(result.responseText);
+                        $(".likeBtn").hide();
+                        $(".delBtn").show();
                     }
                 }
             });
@@ -85,7 +96,7 @@
                                 <th:block th:if="${data.hotelImgDTOList != 0}">
                                     <div class="room-image" th:each="data: ${data.hotelImgDTOList}">
                                         <!-- 이미지 경로(path) -->
-                                        <img th:src="@{'/upload/' + ${data.imagePath}}" alt="hotel Image" width="300px"/>
+                                        <img th:src="@{'/upload/' + ${data.imagePath}}" alt="hotel Image" width="100%"/>
                                     </div>
                                 </th:block>
 
@@ -107,11 +118,14 @@
                                         <div class="room-actions">
                                             <!--나중에 룸이랑 연결했을 때 사용-->
                                             <p class="room-price mb-0">300,000 KRW ~</p>
-                                            <div class="room-buttons">
-                                                <button class="btn btn-outline-secondary btn-heart likeBtn" onclick="addLike(event)">
+                                            <!--<div class="room-buttons">
+                                                <button class="btn btn-outline-danger  btn-heart likeBtn">
                                                     <i class="fa-regular fa-heart"></i>
                                                 </button>
-                                            </div>
+                                                <button class="btn btn-danger btn-heart delBtn">
+                                                    <i class="fa-regular fa-heart"></i>
+                                                </button>
+                                            </div>-->
                                         </div>
                                     </div>
                                 </div>

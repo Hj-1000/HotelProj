@@ -58,7 +58,7 @@ public class LikeService {
         LikeHotel likehotel = modelMapper.map(likeDTO, LikeHotel.class);
         likehotel.setLikes(like);
         likehotel.setHotel(hotel);
-        likehotel.setCreateBy(memberEmail);  // createBy에 memberEmail 설정
+        likehotel.setCreatedBy(memberEmail);  // createBy에 memberEmail 설정
 
         // 기존 찜 데이터가 존재하면 ID를 유지하여 업데이트
         likeHotelRepository.findByHotel_HotelId(likeDTO.getHotelId())
@@ -70,6 +70,8 @@ public class LikeService {
 
         return likehotel.getLikeHotelId();
     }
+
+    //이미 즐겨찾기가 되어있는지 확인하는 메소드
 
 
 
@@ -175,11 +177,13 @@ public class LikeService {
 //        return likeDTOS;
 //    }
 
-    //삭제
+    //즐겨찾기만 삭제
     @Transactional
-    public void likeDelete(int likeHotelId) {
+    public void delete(Integer likeHotelId) {
+        //이젠 좀 돼라
         likeHotelRepository.deleteById(likeHotelId);
     }
+
 
 
 

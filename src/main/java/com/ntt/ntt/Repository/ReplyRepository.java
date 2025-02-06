@@ -15,5 +15,8 @@ public interface ReplyRepository extends JpaRepository<Reply, Integer> {
 
     Optional<Reply> findById(Integer id);
 
+    // Qna에 해당하는 모든 댓글을 삭제
+    void deleteByQna(Qna qna);
+
 
 }
