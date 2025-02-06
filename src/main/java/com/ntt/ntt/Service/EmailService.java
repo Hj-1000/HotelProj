@@ -1,13 +1,18 @@
 package com.ntt.ntt.Service;
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
+import java.io.UnsupportedEncodingException;
 
 @Service
 public class EmailService {
@@ -20,11 +25,19 @@ public class EmailService {
 
     @Async  // 비동기 이메일 전송
     public void sendPasswordResetEmail(String toEmail, String resetCode) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(toEmail);
-        message.setSubject("비밀번호 찾기 코드");
-        message.setText("비밀번호 찾기 코드: " + resetCode);
+        try {
+            MimeMessage message = emailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-        emailSender.send(message);  // 비동기 실행 (별도 스레드에서 수행)
+            helper.setFrom("jung04251@gmail.com", "NTT호텔"); // 보내는 사람 이름 설정
+            helper.setTo(toEmail);
+            helper.setSubject("비밀번호 찾기 코드"); // 이메일 제목
+            helper.setText("비밀번호 찾기 코드: " + resetCode, false); // 이메일 내용
+
+            emailSender.send(message);  // 이메일 전송
+
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            e.printStackTrace(); // 로그 출력 (실제 서비스에서는 로깅 처리 필요)
+        }
     }
 }
