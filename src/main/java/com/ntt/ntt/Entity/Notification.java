@@ -28,4 +28,7 @@ public class Notification {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "memberId", nullable = false)
     private Member member; // 알림을 받을 사용자
+
+    public void setIsRead(boolean isRead) {
+    }
 }

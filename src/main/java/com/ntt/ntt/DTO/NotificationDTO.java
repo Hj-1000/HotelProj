@@ -14,11 +14,12 @@ public class NotificationDTO {
 
     private Integer notificationId;
     private String notificationMessage;
-    private boolean isRead;
+    private boolean isRead; // boolean 타입
+
     private LocalDateTime timestamp;
 
     // Notification 엔티티를 DTO로 변환하는 메서드
-    public static NotificationDTO dtoToEntity(Notification notification) {
+    public static NotificationDTO fromEntity(Notification notification) {
         NotificationDTO dto = new NotificationDTO();
         dto.setNotificationId(notification.getNotificationId());
         dto.setNotificationMessage(notification.getNotificationMessage());
@@ -32,7 +33,7 @@ public class NotificationDTO {
         Notification notification = new Notification();
         notification.setNotificationId(this.notificationId);
         notification.setNotificationMessage(this.notificationMessage);
-        notification.setRead(this.isRead);
+        notification.setIsRead(this.isRead);
         notification.setTimestamp(this.timestamp);
         return notification;
     }
