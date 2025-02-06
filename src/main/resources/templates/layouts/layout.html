@@ -74,21 +74,17 @@
                     <!-- Q&A와 알림 벨을 같은 라인에 배치 -->
                     <div class="d-flex align-items-center">
                         <a href="/qna" class="nav-link text-white">Q&A</a>
-                        <!-- 벨 아이콘 부분 -->
-                        <button class="notification-bell nav-link text-white" id="notification-bell" data-bs-toggle="dropdown" aria-expanded="false">
-                            🔔 <span id="unread-count" th:text="${unreadCount}">0</span>
+
+                        <!-- 알림 벨 -->
+                        <button id="notification-bell" class="btn">
+                            🔔 <span id="unread-count">0</span>
                         </button>
 
-                        <ul class="dropdown-menu" id="notification-list">
-                            <li th:if="${#lists.isEmpty(notifications)}"><span class="dropdown-item">알림이 없습니다.</span></li>
-                            <li th:each="notification : ${notifications}">
-                        <span class="dropdown-item">
-                            <p th:text="${notification.notificationMessage}"></p>
-                            <span th:text="${notification.timestamp}"></span>
-                            <span th:text="${memberId}"></span>
-                        </span>
-                            </li>
+                        <!-- 알림 목록 (처음에는 숨겨짐) -->
+                        <ul id="notification-list" style="display: none;">
+                            <li>알림이 없습니다.</li>
                         </ul>
+
                     </div>
 
                 </div>
@@ -151,6 +147,6 @@
     </div>
 </div>
 
-
+<script th:src="@{/js/notificationbell.js}"></script>
 </body>
 </html>
