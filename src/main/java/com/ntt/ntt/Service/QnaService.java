@@ -3,8 +3,10 @@ package com.ntt.ntt.Service;
 import com.ntt.ntt.DTO.QnaDTO;
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Entity.Qna;
+import com.ntt.ntt.Entity.Reply;
 import com.ntt.ntt.Repository.MemberRepository;
 import com.ntt.ntt.Repository.QnaRepository;
+import com.ntt.ntt.Repository.ReplyRepository;
 import groovy.util.logging.Log4j2;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -22,16 +24,14 @@ import java.time.LocalDateTime;
 @Service
 @Transactional
 @Log4j2
+@RequiredArgsConstructor
 public class QnaService {
 
     private final QnaRepository qnaRepository;
     private final MemberRepository memberRepository;
+    private final ReplyRepository replyRepository;
 
-    @Autowired
-    public QnaService(QnaRepository qnaRepository, MemberRepository memberRepository) {
-        this.qnaRepository = qnaRepository;
-        this.memberRepository = memberRepository;
-    }
+
 
     public Page<Qna> getQnaPage(int page, String keyword, String qnaCategory, String memberNameKeyword) {
         Pageable pageable = PageRequest.of(page - 1, 10, Sort.by(Sort.Order.desc("regDate")));  // 페이지 번호는 1부터 시작하지만, Pageable은 0부터 시작하므로 -1 해줌
@@ -102,8 +102,15 @@ public class QnaService {
         return qnaRepository.save(qna);
     }
 
+
+
     public void deleteQna(Integer id) {
         Qna qna = findById(id);
+
+        // 해당 Qna와 연관된 댓글을 먼저 삭제
+        replyRepository.deleteByQna(qna);
+
+        // Qna 삭제
         qnaRepository.delete(qna);
     }
 }
