@@ -79,19 +79,21 @@ public class ReservationService {
 
 
     // 4. 방 예약 수정
-    public void updateReservation(Integer reservationId, ReservationDTO reservationDTO) {
+    public void updateReservation(Integer reservationId, ReservationDTO reservationDTO, Integer memberId) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 예약을 찾을 수 없습니다."));
 
         // 체크인/체크아웃 날짜 업데이트
         reservation.setCheckInDate(reservationDTO.getCheckInDate());
         reservation.setCheckOutDate(reservationDTO.getCheckOutDate());
-        reservation.setTotalPrice(reservationDTO.getTotalPrice());
 
-        // 예약 상태가 비어있지 않은 경우 업데이트
-        if (reservationDTO.getReservationStatus() != null && !reservationDTO.getReservationStatus().isEmpty()) {
-            reservation.setReservationStatus(reservationDTO.getReservationStatus());
-        }
+        // 예약 마감 날짜 업데이트
+        reservation.getRoom().setReservationEnd(reservationDTO.getReservationEnd());
+
+        // 예약자 정보 업데이트
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다."));
+        reservation.setMember(member);
 
         reservationRepository.save(reservation);
     }
