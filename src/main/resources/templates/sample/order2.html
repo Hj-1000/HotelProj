@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,7 +14,6 @@
     <title>주문 메뉴 시스템</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -24,18 +23,20 @@
         }
         .container {
             width: 800px;
+            height: 500px;
             border: 2px solid black;
             padding: 20px;
             display: flex;
             flex-direction: column;
             background: white;
+            border-radius: 5%;
         }
         .menu-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 10px;
-            border-bottom: 1px solid #ddd;
+            /*border-bottom: 1px solid #ddd;*/
             border: 1px solid orange;
         }
         .menu-info {
@@ -63,15 +64,17 @@
             border: 1px solid orange;
         }
         .quantity-button {
-            background-color: #FFD86E;
+            background-color: slateblue;
             border: 1px solid black;
             padding: 5px 10px;
             cursor: pointer;
+            border-radius: 15%;
         }
         .price {
             font-weight: bold;
             color: #4A90E2;
             border: 1px solid orange;
+
         }
         .total {
             margin-top: 20px;
@@ -83,7 +86,8 @@
             background-color: #4A90E2;
             color: white;
             padding: 15px;
-            border: 1px solid orange;
+            border: 1px solid black;
+            border-radius: 4%;
         }
         .buttons {
             display: flex;
@@ -99,7 +103,8 @@
             cursor: pointer;
             text-align: center;
             width: 200px;
-            border: 1px solid orange;
+            border-radius: 4%;
+            /*border: 1px solid orange;*/
         }
     </style>
 </head>
@@ -114,9 +119,13 @@
             </div>
         </div>
         <div class="quantity-controls">
-            <button class="quantity-button">-</button>
-            <div>수량</div>
-            <button class="quantity-button">+</button>
+            <input type='button' class="quantity-button"
+                   onclick='count("plus")'
+                   value='+'/><div>수량</div>
+            <input type='button' class="quantity-button"
+                   onclick='count("minus")'
+                   value='- '/>
+            <div id='result'>0</div>
             <div class="price">₩가격</div>
         </div>
         <button type="button" class="btn btn-danger">취소</button>
@@ -130,9 +139,13 @@
             </div>
         </div>
         <div class="quantity-controls">
-            <button class="quantity-button">-</button>
-            <div>수량</div>
-            <button class="quantity-button">+</button>
+        <input type='button' class="quantity-button"
+               onclick='count1("plus")'
+               value='+'/><div>수량</div>
+        <input type='button' class="quantity-button"
+               onclick='count1("minus")'
+               value='- '/>
+        <div id='result1'>0</div>
             <div class="price">₩가격</div>
         </div>
         <button type="button" class="btn btn-danger">취소</button>
@@ -146,9 +159,13 @@
             </div>
         </div>
         <div class="quantity-controls">
-            <button class="quantity-button">-</button>
-            <div>수량</div>
-            <button class="quantity-button">+</button>
+            <input type='button' class="quantity-button"
+                   onclick='count2("plus")'
+                   value='+'/><div>수량</div>
+            <input type='button' class="quantity-button"
+                   onclick='count2("minus")'
+                   value='- '/>
+            <div id='result2'>0</div>
             <div class="price">₩가격</div>
         </div>
         <button type="button" class="btn btn-danger">취소</button>
@@ -163,5 +180,61 @@
         <button class="button">처음으로</button>
     </div>
 </div>
+<script>
+    function count(type)  {
+        // 결과를 표시할 element
+        const resultElement = document.getElementById('result');
+
+
+        // 현재 화면에 표시된 값
+        let number = resultElement.innerText;
+
+        // 더하기/빼기
+        if(type === 'plus') {
+            number = parseInt(number) + 1;
+        }else if(type === 'minus')  {
+            number = parseInt(number) - 1;
+        }
+
+        // 결과 출력
+        resultElement.innerText = number;
+    }
+    function count1(type)  {
+        // 결과를 표시할 element
+        const resultElement = document.getElementById('result1');
+
+
+        // 현재 화면에 표시된 값
+        let number = resultElement.innerText;
+
+        // 더하기/빼기
+        if(type === 'plus') {
+            number = parseInt(number) + 1;
+        }else if(type === 'minus')  {
+            number = parseInt(number) - 1;
+        }
+
+        // 결과 출력
+        resultElement.innerText = number;
+    } function count2(type)  {
+        // 결과를 표시할 element
+        const resultElement = document.getElementById('result2');
+
+
+        // 현재 화면에 표시된 값
+        let number = resultElement.innerText;
+
+        // 더하기/빼기
+        if(type === 'plus') {
+            number = parseInt(number) + 1;
+        }else if(type === 'minus')  {
+            number = parseInt(number) - 1;
+        }
+
+        // 결과 출력
+        resultElement.innerText = number;
+    }
+</script>
+
 </body>
 </html>

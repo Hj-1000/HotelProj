@@ -66,6 +66,27 @@
                 </table>
                 <!--      <a th:href="@{/notice/register}" class="btn btn-primary">등록</a>-->
             </div><!--listColumn-->
+            <div th:if="${not #lists.isEmpty(noticeDTOList)}">
+                <div class="pagination d-flex justify-content-center">
+                    <ul class="pagination">
+                        <!-- 이전 버튼 -->
+                        <li th:classappend="${pagination['currentPage'] == 1} ? 'disabled'" class="page-item">
+                            <a class="page-link" th:href="@{/notice/userlist(page=${pagination['prevPage']}, size=10)}">이전</a>
+                        </li>
+
+                        <!-- 페이지 번호 버튼 -->
+                        <li th:each="i : ${#numbers.sequence(pagination['startPage'], pagination['endPage'])}"
+                            th:classappend="${i == pagination['currentPage']} ? 'active'" class="page-item">
+                            <a class="page-link" th:href="@{/notice/userlist(page=${i-1}, size=10)}" th:text="${i}">0</a>
+                        </li>
+
+                        <!-- 다음 버튼 -->
+                        <li th:classappend="${pagination['currentPage'] == pagination['lastPage']}" class="page-item">
+                            <a class="page-link" th:href="@{/notice/userlist(page=${pagination['nextPage']}, size=10)}">다음</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
             <div class="col-1"></div><!--우측여백-->
         </div><!--row 행 끝-->
     </div><!--container 끝-->
