@@ -39,5 +39,5 @@ public interface HotelRepository extends JpaRepository<Hotel, Integer> {
     // 회사 ID에 해당하는 호텔 조회 (별점 포함)
     Page<Hotel> findByCompany_CompanyIdAndHotelRating(Integer companyId, Integer rating, Pageable pageable);
 
-    Page<Hotel> findByCompany_CompanyId(Integer companyCompanyId, Pageable pageable);
+    Page<Hotel> findByCompany_CompanyId(Integer companyId, Pageable pageable);
 }

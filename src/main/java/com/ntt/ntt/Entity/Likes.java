@@ -15,6 +15,7 @@ import java.util.List;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Likes extends BaseEntity {
 
     @Id
@@ -27,7 +28,7 @@ public class Likes extends BaseEntity {
 
     @OneToMany(mappedBy = "likes" , cascade = CascadeType.ALL, orphanRemoval = true
             , fetch = FetchType.LAZY)
-    private List<LikeHotel> likeQuests = new ArrayList<>();
+    private List<LikeHotel> LikeHotels = new ArrayList<>();
 
     //장바구니 만들기
     public static Likes createLike(Member member) {

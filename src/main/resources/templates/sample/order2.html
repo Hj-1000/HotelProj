@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">-->
+      <title>Order</title>
+      <!--반응형웹-->
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <!--부트스트랩-->
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <title>주문 메뉴 시스템</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f8f8;
+            border: 1px solid orange;
+        }
+        .container {
+            width: 800px;
+            border: 2px solid black;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            border: 1px solid orange;
+        }
+        .menu-info {
+            display: flex;
+            gap: 20px;
+            border: 1px solid orange;
+        }
+        .menu-img {
+            width: 60px;
+            height: 60px;
+            background-color: #ddd;
+            display: inline-block;
+            border: 1px solid orange;
+        }
+        .menu-description {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border: 1px solid orange;
+        }
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid orange;
+        }
+        .quantity-button {
+            background-color: #FFD86E;
+            border: 1px solid black;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .price {
+            font-weight: bold;
+            color: #4A90E2;
+            border: 1px solid orange;
+        }
+        .total {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #4A90E2;
+            color: white;
+            padding: 15px;
+            border: 1px solid orange;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            border: 1px solid orange;
+        }
+        .button {
+            background-color: #FFD86E;
+            padding: 15px;
+            border: 1px solid black;
+            cursor: pointer;
+            text-align: center;
+            width: 200px;
+            border: 1px solid orange;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="menu-item">
+        <div class="menu-info">
+            <div class="menu-img"></div>
+            <div class="menu-description">
+                <div>메뉴이름 </div>
+                <div>메뉴설명</div>
+            </div>
+        </div>
+        <div class="quantity-controls">
+            <button class="quantity-button">-</button>
+            <div>수량</div>
+            <button class="quantity-button">+</button>
+            <div class="price">₩가격</div>
+        </div>
+        <button type="button" class="btn btn-danger">취소</button>
+    </div>
+    <div class="menu-item">
+        <div class="menu-info">
+            <div class="menu-img"></div>
+            <div class="menu-description">
+                <div>메뉴이름 </div>
+                <div>메뉴설명</div>
+            </div>
+        </div>
+        <div class="quantity-controls">
+            <button class="quantity-button">-</button>
+            <div>수량</div>
+            <button class="quantity-button">+</button>
+            <div class="price">₩가격</div>
+        </div>
+        <button type="button" class="btn btn-danger">취소</button>
+    </div>
+    <div class="menu-item">
+        <div class="menu-info">
+            <div class="menu-img"></div>
+            <div class="menu-description">
+                <div>메뉴이름 </div>
+                <div>메뉴설명</div>
+            </div>
+        </div>
+        <div class="quantity-controls">
+            <button class="quantity-button">-</button>
+            <div>수량</div>
+            <button class="quantity-button">+</button>
+            <div class="price">₩가격</div>
+        </div>
+        <button type="button" class="btn btn-danger">취소</button>
+    </div>
+    <div class="total">
+        <div>합계</div>
+        <div>₩0,000</div>
+    </div>
+    <div class="buttons">
+        <button class="button">추가주문</button>
+        <button class="button">주문완료</button>
+        <button class="button">처음으로</button>
+    </div>
+</div>
+</body>
+</html>

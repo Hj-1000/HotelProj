@@ -1,55 +1,49 @@
-/* 알림 벨 스타일 */
 .notification-bell {
     background: none;
     border: none;
     font-size: 1.5rem;
     cursor: pointer;
     position: relative;
-    margin-left: 10px; /* Q&A와 알림 벨 사이에 간격을 둡니다 */
+    z-index: 1001; /* 벨 아이콘이 다른 요소 위에 오도록 설정 */
 }
 
-.notification-bell #unread-count {
+.notification-bell span {
     position: absolute;
-    top: -5px;
-    right: 3px;
-    background-color: red;
+    top: -5px; /* 배지를 벨 아이콘 위로 조금 올리기 */
+    right: -5px; /* 배지를 벨 아이콘 오른쪽으로 이동 */
+    background: red;
     color: white;
-    border-radius: 20%;
-    padding: 5px;
     font-size: 0.8rem;
+    border-radius: 50%;
+    padding: 3px 7px;
+    min-width: 18px; /* 숫자가 한 자리일 때도 크기 유지 */
+    text-align: center;
+    font-weight: bold;
 }
 
-/* 알림 목록 스타일 */
 .notification-list {
     position: absolute;
-    top: 50px; /* 벨 아이콘 아래에 위치 */
-    right: 0;
-    background-color: white;
+    top: 40px;
+    right: 10px;
+    background: white;
     border: 1px solid #ddd;
-    border-radius: 5px;
     width: 250px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    display: none;
     max-height: 300px;
     overflow-y: auto;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    display: none !important; /* 강제로 display를 none으로 설정 */
 }
 
-.notification-list .notification-item {
+.notification-item {
     padding: 10px;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
 }
 
-.notification-list .notification-item:last-child {
-    border-bottom: none;
+.notification-item.unread {
+    background: #f8d7da;
 }
 
-.notification-list .notification-item p {
-    margin: 0;
-    font-size: 0.9rem;
-}
-
-/* 알림 목록이 보일 때 */
-.notification-bell:active + .notification-list,
-.notification-bell:hover + .notification-list {
-    display: block;
+.notification-item.read {
+    background: #d4edda;
 }

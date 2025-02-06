@@ -9,7 +9,6 @@ import java.util.List;
 @Repository
 public interface ServiceOrderItemRepository extends JpaRepository<ServiceOrderItem, Integer> {
 
-    // 특정 서비스 오더 아이템을 조회
-    List<ServiceOrderItem> findByServiceOrder_ServiceOrderId(Integer serviceOrderID);
-
+    //구매이력
+    List<ServiceOrderItem> findByServiceOrder_ServiceOrderId(Integer serviceOrderId);
 }

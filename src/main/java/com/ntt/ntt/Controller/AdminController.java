@@ -4,6 +4,7 @@ import com.ntt.ntt.Constant.Role;
 import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.MemberDTO;
 import com.ntt.ntt.Service.MemberService;
+import com.ntt.ntt.Service.NotificationService;
 import com.ntt.ntt.Service.hotel.HotelService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -93,6 +94,7 @@ public class AdminController {
         return "admin/hotelHeadquartersRegister";
     }
 
+    // 설정한 주소가 지도로 잘 나오는지 테스트용으로 만듦, 기능 구현 완성 이후에는 삭제하기
     @GetMapping("/admin/mapTest")
     public String read(@RequestParam Integer hotelId, Model model, RedirectAttributes redirectAttributes) {
         try {

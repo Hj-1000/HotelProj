@@ -142,6 +142,7 @@
                     var ps = new kakao.maps.services.Places();
                     var myLocationMarker = null;
 
+                    // 지도 타입 일반지도, 스카이뷰 선택 기능
                     function setMapType(maptype) {
                         var roadmapControl = document.getElementById('btnRoadmap');
                         var skyviewControl = document.getElementById('btnSkyview');
@@ -156,14 +157,17 @@
                         }
                     }
 
+                    // 지도 확대 기능
                     function zoomIn() {
                         map.setLevel(map.getLevel() - 1);
                     }
 
+                    // 지도 축소 기능
                     function zoomOut() {
                         map.setLevel(map.getLevel() + 1);
                     }
 
+                    // 검색 결과 마커 표시 기능
                     function displayMarker(place) {
                         var marker = new kakao.maps.Marker({
                             map: map,
@@ -186,6 +190,7 @@
                         });
                     }
 
+                    // 내 위치 표시 기능
                     function showMyLocation() {
                         if (navigator.geolocation) {
                             navigator.geolocation.getCurrentPosition(function(position) {
@@ -203,14 +208,15 @@
                                     image: new kakao.maps.MarkerImage(
                                         'https://t1.daumcdn.net/localimg/localimages/07/2018/mw/m640/ico_marker.png',
                                         new kakao.maps.Size(30, 30),
-                                        { offset: new kakao.maps.Point(30, 30) }
+                                        { offset: new kakao.maps.Point(0, 0) }
                                     )
                                 });
 
                                 map.setCenter(myPosition);
 
-                                // 내 위치에서 반경 5km 내 검색 실행
-                                searchNearbyPlaces(lat, lng);
+                                // 내 위치를 기준으로 검색 실행
+                                searchNearbyPlaces1(lat, lng);
+                                searchNearbyPlaces2(lat, lng);
 
                             }, function(error) {
                                 alert('위치 정보를 가져올 수 없습니다.');
@@ -220,15 +226,26 @@
                         }
                     }
 
-                    function searchNearbyPlaces(lat, lng) {
+                    // 내 위치를 기반으로 검색 기능 1
+                    function searchNearbyPlaces1(lat, lng) {
                         var searchOption = {
                             location: new kakao.maps.LatLng(lat, lng),
-                            radius: 5000 // 반경 5km
+                            radius: 5000 // 내 위치에서 반경 5km 범위 검색(미터단위)
                         };
 
                         ps.keywordSearch('호텔', placesSearchCB, searchOption);
                     }
 
+                    function searchNearbyPlaces2(lat, lng) {
+                        var searchOption = {
+                            location: new kakao.maps.LatLng(lat, lng),
+                            radius: 5000 // 내 위치에서 반경 5km 범위 검색(미터단위)
+                        };
+
+                        ps.keywordSearch('모텔', placesSearchCB, searchOption);
+                    }
+
+                    // 내 위치를 기반으로 검색 기능 2
                     function placesSearchCB(data, status, pagination) {
                         if (status === kakao.maps.services.Status.OK) {
                             var bounds = new kakao.maps.LatLngBounds();
@@ -240,7 +257,7 @@
                         }
                     }
 
-                    // 페이지 로드 시 내 위치 자동 표시 및 반경 5km 검색
+                    // 페이지 로드 시 내 위치 표시
                     showMyLocation();
                 </script>
             </div>

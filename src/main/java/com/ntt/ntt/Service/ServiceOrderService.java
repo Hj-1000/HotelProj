@@ -2,129 +2,199 @@ package com.ntt.ntt.Service;
 
 import com.ntt.ntt.Constant.ServiceOrderStatus;
 import com.ntt.ntt.DTO.ServiceOrderDTO;
+import com.ntt.ntt.DTO.ServiceOrderHistoryDTO;
 import com.ntt.ntt.DTO.ServiceOrderItemDTO;
 import com.ntt.ntt.Entity.*;
-import com.ntt.ntt.Repository.*;
+import com.ntt.ntt.Repository.MemberRepository;
+import com.ntt.ntt.Repository.ServiceMenuRepository;
+import com.ntt.ntt.Repository.ServiceOrderRepository;
+import groovy.util.logging.Log4j2;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 @Log4j2
+@Transactional
 public class ServiceOrderService {
+
     private final ServiceOrderRepository serviceOrderRepository;
     private final ServiceMenuRepository serviceMenuRepository;
     private final MemberRepository memberRepository;
-    private final RoomRepository roomRepository;
-    private final ModelMapper modelMapper;
 
-    // 특정 회원의 주문 목록 조회
-    public List<ServiceOrderDTO> getOrdersByMemberId(Integer memberId) {
-        List<ServiceOrder> serviceOrders = serviceOrderRepository.findByMember_MemberId(memberId);
-        if (serviceOrders.isEmpty()) {
-            throw new RuntimeException("주문 목록이 비어 있습니다.");
+
+    //주문 ServiceOrder, ServiceOrderItem
+    //위의 내용이 있는 주문 리스트 필요
+    //단 주문 목록이 들어있는 경우 누구의 주문인지 알기 위해 memberId를 받는다.
+
+    //내 주문이 맞는지 체크부터 함
+    public boolean validateOrder(Integer serviceOrderId, Integer memberId) {
+
+        Member member =
+                memberRepository.findById(memberId).
+                        orElseThrow(EntityNotFoundException::new);
+
+        ServiceOrder serviceOrder =
+                serviceOrderRepository.findById(serviceOrderId)
+                        .orElseThrow(EntityNotFoundException::new);
+
+        // 주문 id로 찾은 주문테이블의 회원 참조 memberId와 현재 로그인 한 사람을 비교
+        if (!StringUtils.equals(member.getMemberId(), serviceOrder.getServiceOrderId())) {
+            return false;
         }
-        return serviceOrders.stream()
-                .map(serviceOrder -> modelMapper.map(serviceOrder, ServiceOrderDTO.class))
-                .collect(Collectors.toList());
+        return true;
     }
 
-    // 주문 생성
-    public ServiceOrderDTO createOrder(Integer memberId, Integer roomId, List<ServiceOrderItemDTO> orderItems) {
-        //  회원 및 방 정보 조회
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다: " + memberId));
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new RuntimeException("방 정보를 찾을 수 없습니다: " + roomId));
-
-        //  주문 생성
-        ServiceOrder serviceOrder = ServiceOrder.builder()
-                .member(member)
-                .room(room)
-                .serviceOrderStatus(ServiceOrderStatus.PENDING) // 기본 주문 상태
-                .build();
-
-        List<ServiceOrderItem> orderItemList = new ArrayList<>();
-        int totalPrice = 0;
-
-        for (ServiceOrderItemDTO itemDTO : orderItems) {
-            ServiceMenu menu = serviceMenuRepository.findById(itemDTO.getServiceMenuId())
-                    .orElseThrow(() -> new RuntimeException("메뉴를 찾을 수 없습니다: " + itemDTO.getServiceMenuId()));
-
-            if (menu.getServiceMenuPrice() == null) {
-                throw new RuntimeException("메뉴 가격이 설정되지 않았습니다: " + menu.getServiceMenuName());
-            }
-
-            //  주문 아이템 생성
-            ServiceOrderItem orderItem = ServiceOrderItem.builder()
-                    .serviceOrder(serviceOrder)
-                    .serviceMenu(menu)
-                    .orderCount(itemDTO.getOrderCount())
-                    .orderPrice(menu.getServiceMenuPrice() * itemDTO.getOrderCount())
-                    .build();
-
-            totalPrice += orderItem.getOrderPrice();
-            orderItemList.add(orderItem);
-        }
-
-        // 주문 정보 저장
-        serviceOrder.setServiceOrderItemList(orderItemList);
-        serviceOrder.calculateTotalPrice(); // 총 금액 계산
-        serviceOrderRepository.save(serviceOrder);
-
-        //  DTO 변환 후 반환
-        return ServiceOrderDTO.fromEntity(serviceOrder);
-    }
-
-    // 주문 상태 변경
-    public ServiceOrderDTO updateOrderStatus(Integer serviceOrderId, ServiceOrderStatus status) {
-        ServiceOrder serviceOrder = serviceOrderRepository.findById(serviceOrderId)
-                .orElseThrow(() -> new RuntimeException("주문을 찾을 수 없습니다."));
-        serviceOrder.setServiceOrderStatus(status); // 상태 변경
-        serviceOrderRepository.save(serviceOrder);
-        return modelMapper.map(serviceOrder, ServiceOrderDTO.class);
-    }
-
-    //2025.02.03 추가한 기능들
-    // 주문 취소 기능
+    //주문을 취소
     public void cancelOrder(Integer serviceOrderId) {
-        ServiceOrder serviceOrder = serviceOrderRepository.findById(serviceOrderId)
-                .orElseThrow(() -> new RuntimeException("주문을 찾을 수 없습니다."));
+        // 삭제할 번호를 받아서 삭제
+        ServiceOrder serviceOrder =
+                serviceOrderRepository.findById(serviceOrderId)
+                        .orElseThrow(EntityNotFoundException::new);
+        //주문상태인 orderStatus를 주문 취소 상태로 변경
         serviceOrder.setServiceOrderStatus(ServiceOrderStatus.CANCELED);
+        //주문의 자식인 주문아이템들의 주문 수량을 가지고 serviceMenu의 주문수량에 더한다.
+
+        for (ServiceOrderItem serviceOrderItem : serviceOrder.getServiceOrderItemList()) {
+            serviceOrderItem.getServiceMenu().setServiceMenuQuantity(
+                    serviceOrderItem.getServiceMenu().getServiceMenuQuantity() + serviceOrderItem.getCount()
+            );
+        }
+    }
+
+    public Integer createOrder(ServiceOrderDTO serviceOrderDTO, Integer memberId) {
+        //현재 선택한 serviceMenuId 는 serviceOrderDTO로 들어온다. 이 값으로 판매중인 serviceMenu Entity를 가져온다.
+        ServiceMenu serviceMenu =
+                serviceMenuRepository.findById(serviceOrderDTO.getServiceMenuId()).orElseThrow(EntityNotFoundException::new);
+        //사려는 메뉴를 찾지 못했다면 예외처리
+
+        //email을 통해서 현재 로그인한 사용자를 가져옴
+        Member member =
+                memberRepository.findById(memberId).orElseThrow(EntityNotFoundException::new);
+
+        //조건 : 현재 판매중인 item의 수량이 구매하려는 수량보다 크거나 같아야 함
+        if (serviceMenu.getServiceMenuQuantity() >= serviceOrderDTO.getCount()) {
+            //serviceOrderItem은 구매하려는 아이템들이고 구매하이템을은 구매목록을 참조
+            //serviceOrderItem을 생성
+            ServiceOrderItem serviceOrderItem = new ServiceOrderItem();
+            serviceOrderItem.setServiceMenu(serviceMenu); //구매한 메뉴
+            serviceOrderItem.setCount(serviceOrderDTO.getCount()); //수량
+            serviceOrderItem.setOrderPrice(serviceMenu.getServiceMenuPrice()); //구매한 메뉴의 금액
+
+            //판매하는 아이템의 수량은 구매수량을 뺀 수량으로 변경해야함
+            serviceMenu.setServiceMenuQuantity(serviceMenu.getServiceMenuQuantity() - serviceOrderDTO.getCount());
+
+            //주문 아이템들이 들어갈 주문 테이블을 만든다. 주문 아이템들이 참조하는 주문
+            ServiceOrder serviceOrder = new ServiceOrder();
+            serviceOrder.setMember(member); //구매한 사람의 id로 찾아온 entity객체
+
+            serviceOrder.setServiceOrderItemList(serviceOrderItem); //주문목록 이건 새로 만든 setOrderItemList이다.
+
+            serviceOrder.setServiceOrderStatus(ServiceOrderStatus.COMPLETED); //주문상태
+            serviceOrder.setRegDate(LocalDateTime.now()); //주문시간
+            //이렇게 만들어진 order 주문 객체를 저장하기전에
+            //serviceOrderItem에서 private ServiceOrder serviceOrder; 를 set 해줌으로써
+            //양방향이기에 같이 등록되며 같이 등록될 때 pk값도 같이 참조
+            serviceOrderItem.setServiceOrder(serviceOrder);
+
+            //실제 저장은 serviceOrder만 하지만 serviceOrder에
+            //    @OneToMany(mappedBy = "serviceOrder", cascade = CascadeType.ALL,
+            //            orphanRemoval = true, fetch = FetchType.LAZY)
+            //    private List<ServiceOrderItem> serviceOrderItemList = new ArrayList<>();
+            // 이렇게 List를 만들어주었고 set해줬기 때문에 둘다 저장이 된다.
+            serviceOrder =
+                    serviceOrderRepository.save(serviceOrder);
+
+            return serviceOrder.getServiceOrderId();
+        } else {
+            return null;
+        }
+
+    }
+
+    public Integer orders(List<ServiceOrderDTO> serviceOrderDTOList, Integer memberId) {
+        //주문을 했다면 판매하고 있는 상품의 수량을 변경
+
+        Member member = memberRepository.findById(memberId).orElseThrow(EntityNotFoundException::new);
+        List<ServiceOrderItem> serviceOrderItemList = new ArrayList<>();
+        ServiceOrder serviceOrder = new ServiceOrder();
+
+        for (ServiceOrderDTO serviceOrderDTO : serviceOrderDTOList) {
+            ServiceMenu serviceMenu =
+                    serviceMenuRepository.findById(serviceOrderDTO.getServiceMenuId())
+                            .orElseThrow(EntityNotFoundException::new);
+
+            ServiceOrderItem serviceOrderItem = new ServiceOrderItem();
+            serviceOrderItem.setServiceMenu(serviceMenu);
+            serviceOrderItem.setCount(serviceOrderDTO.getCount());
+            serviceOrderItem.setOrderPrice(serviceMenu.getServiceMenuPrice());
+            serviceOrderItem.setServiceOrder(serviceOrder);
+
+            serviceMenu.setServiceMenuQuantity(serviceMenu.getServiceMenuQuantity() - serviceOrderDTO.getCount());
+
+            serviceOrderItemList.add(serviceOrderItem);
+        }
+        serviceOrder.setMember(member);
+        serviceOrder.setServiceOrderStatus(ServiceOrderStatus.COMPLETED);
+        serviceOrder.setRegDate(LocalDateTime.now());
+        serviceOrder.setServiceOrderItemList(serviceOrderItemList);
+
         serviceOrderRepository.save(serviceOrder);
+
+        return serviceOrder.getServiceOrderId();
     }
 
-    // 특정 주문 상세 조회 (사용자 & 관리자용 공통)
-    public ServiceOrderDTO getOrderDetails(Integer serviceOrderId) {
-        ServiceOrder serviceOrder = serviceOrderRepository.findById(serviceOrderId)
-                .orElseThrow(() -> new RuntimeException("주문을 찾을 수 없습니다."));
-        return modelMapper.map(serviceOrder, ServiceOrderDTO.class);
-    }
+    // 구매이력 불러오기
+    public Page<ServiceOrderHistoryDTO> getOrderList(Integer memberId, Pageable pageable) {
+        //repository에서 필요한 memberId
 
-    // 모든 주문 목록 조회 (관리자용)
-    public List<ServiceOrderDTO> getAllOrders() {
-        List<ServiceOrder> serviceOrders = serviceOrderRepository.findAll();
-        return serviceOrders.stream()
-                .map(order -> modelMapper.map(order, ServiceOrderDTO.class))
-                .collect(Collectors.toList());
-    }
+        //구매목록
+        List<ServiceOrder> serviceOrderList = serviceOrderRepository.findServiceOrders(memberId, pageable);
 
-    // 주문 처리 기능 (예: 조리 중, 배달 중 등 상태 변경)
-    public ServiceOrderDTO processOrder(Integer serviceOrderId, ServiceOrderStatus status) {
-        ServiceOrder serviceOrder = serviceOrderRepository.findById(serviceOrderId)
-                .orElseThrow(() -> new RuntimeException("주문을 찾을 수 없습니다."));
-        serviceOrder.setServiceOrderStatus(status);
-        serviceOrderRepository.save(serviceOrder);
-        return modelMapper.map(serviceOrder, ServiceOrderDTO.class);
-    }
+        //페이징처리를 위한 총 구매목록의 수
+        Integer totalCount = serviceOrderRepository.totalCount(memberId);
 
+        //구매목록의 구매아이템들을 만들어주기 위한 List
+        List<ServiceOrderHistoryDTO> serviceOrderHistoryDTOList = new ArrayList<>();
+
+        //EntityToDTO // 주문, 주문아이템들, 주문아이템들의 이미지
+        for (ServiceOrder serviceOrder : serviceOrderList) {
+            ServiceOrderHistoryDTO serviceOrderHistoryDTO = new ServiceOrderHistoryDTO();
+
+            serviceOrderHistoryDTO.setServiceOrderId(serviceOrder.getServiceOrderId());
+            serviceOrderHistoryDTO.setRegDate(serviceOrder.getRegDate());
+            serviceOrderHistoryDTO.setServiceOrderStatus(serviceOrder.getServiceOrderStatus());
+
+            List<ServiceOrderItem> serviceOrderItemList = serviceOrder.getServiceOrderItemList();
+
+            for (ServiceOrderItem serviceOrderItem : serviceOrderItemList) {
+
+                ServiceOrderItemDTO serviceOrderItemDTO = new ServiceOrderItemDTO();
+                serviceOrderItemDTO.setServiceOrderItemId(serviceOrder.getServiceOrderId());
+                serviceOrderItemDTO.setServiceMenuName(serviceOrderItem.getServiceMenu().getServiceMenuName());
+                serviceOrderItemDTO.setOrderPrice(serviceOrderItem.getOrderPrice());
+                serviceOrderItemDTO.setCount(serviceOrderItem.getCount());
+
+                // 아이템 주문아이템들중 1개
+                List<Image> serviceMenuImageList = serviceOrderItem.getServiceMenu().getServiceMenuImageList();
+                //메뉴에 달려있는 이미지
+                for (Image image : serviceMenuImageList) {
+                    serviceOrderItemDTO.setImagePath(image.getImagePath());
+                }
+                serviceOrderHistoryDTO.addServiceOrderItemDTO(serviceOrderItemDTO);
+            }
+            serviceOrderHistoryDTOList.add(serviceOrderHistoryDTO);
+        }
+        return new PageImpl<ServiceOrderHistoryDTO>(serviceOrderHistoryDTOList, pageable, totalCount);
+    }
 }
-
