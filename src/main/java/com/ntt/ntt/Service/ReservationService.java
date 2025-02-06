@@ -89,7 +89,6 @@ public class ReservationService {
         reservation.setCheckOutDate(reservationDTO.getCheckOutDate());
 
         // 예약 마감 날짜 업데이트
-
         RoomDTO roomDTO = reservationDTO.getRoom(); // RoomDTO 객체에서 예약 마감 날짜 가져오기
         if (roomDTO != null) {
             reservation.getRoom().setReservationEnd(roomDTO.getReservationEnd()); // Room 엔티티에 반영
