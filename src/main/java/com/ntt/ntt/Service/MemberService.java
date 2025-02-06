@@ -4,7 +4,9 @@ import com.ntt.ntt.Constant.Role;
 import com.ntt.ntt.DTO.MemberDTO;
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Repository.MemberRepository;
+import com.ntt.ntt.Repository.NotificationRepository;
 import com.ntt.ntt.Repository.QnaRepository;
+import com.ntt.ntt.Repository.ReplyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
@@ -33,6 +35,8 @@ public class MemberService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
     private final QnaRepository qnaRepository;
+    private final ReplyRepository replyRepository;
+    private final NotificationRepository notificationRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -173,8 +177,14 @@ public class MemberService implements UserDetailsService {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
+        // 비밀번호가 일치하면 회원이 작성한 Reply 데이터를 먼저 삭제
+        replyRepository.deleteByMember(member);
+
         // 비밀번호가 일치하면 회원이 작성한 QNA 데이터를 먼저 삭제
         qnaRepository.deleteByMember(member);
+
+        // 비밀번호가 일치하면 회원에게 온 알림 데이터를 먼저 삭제
+        notificationRepository.deleteByMember(member);
 
         // 비밀번호가 일치하면 회원 삭제
         memberRepository.delete(member);
