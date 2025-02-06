@@ -1,8 +1,10 @@
 package com.ntt.ntt.Controller;
 
 import com.ntt.ntt.DTO.MemberDTO;
+import com.ntt.ntt.DTO.NotificationDTO;
 import com.ntt.ntt.DTO.QnaDTO;
 import com.ntt.ntt.Entity.Member;
+import com.ntt.ntt.Entity.Notification;
 import com.ntt.ntt.Entity.Qna;
 import com.ntt.ntt.Entity.Reply;
 import com.ntt.ntt.Repository.QnaRepository;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -87,6 +90,12 @@ public class QnaController {
         model.addAttribute("keyword", keyword);
         model.addAttribute("qnaCategory", qnaCategory);
 
+        // 알림 목록 추가
+        if (userDetails != null) {
+            List<NotificationDTO> notifications = notificationService.getAllNotifications();
+            model.addAttribute("notifications", notifications);
+        }
+
         if (userDetails != null) {
             MemberDTO memberDTO = memberService.read(userDetails.getUsername());
             Member currentMember = dtoToEntity(memberDTO);
@@ -138,8 +147,6 @@ public class QnaController {
             qnaDTO.setQnaCategory(qnaCategory);  // 카테고리 설정
             qnaService.registerQna(qnaDTO, member);
 
-            // QnaService를 사용하여 질문 저장
-            qnaService.registerQna(qnaDTO, member);
 
             // 🔹 알림 생성 (관리자에게 알림 보내기)
             notificationService.createNotification(member, "새로운 Q&A가 등록되었습니다.");
