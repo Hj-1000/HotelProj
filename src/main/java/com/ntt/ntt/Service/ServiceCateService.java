@@ -83,7 +83,7 @@ public class ServiceCateService{
         // 1. 페이지정보를 재가공
         int currentPage = page.getPageNumber() - 1; // 0-based index
         int pageSize = 10;
-        Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.DESC, "serviceCateId"));
+        Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.ASC, "serviceCateId"));
 
         // 2. 조회
         Page<ServiceCate> serviceCatePage;

@@ -69,7 +69,7 @@
                     <div class="mb-3 mt-3">
                         <label for="serviceMenuName" class="form-label">메뉴이름:</label>
                         <input type="text" class="form-control" id="serviceMenuName" name="serviceMenuName"
-                               placeholder="메뉴설명을 입력하세요."
+                               placeholder="메뉴이름을 입력하세요."
                                minlength="2" required
                                title="최소 2글자 이상 작성해주세요.">
                     </div>
@@ -87,6 +87,10 @@
                             <option value="PREPARE">준비중</option>
                             <option value="SOLD_OUT">매진</option>
                         </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="serviceMenuQuantity" class="form-label">재고수량:</label>
+                        <input type="number" class="form-control" id="serviceMenuQuantity" name="serviceMenuQuantity">
                     </div>
                     <div class="mb-3">
                         <label for="serviceMenuPrice" class="form-label">메뉴가격:</label>

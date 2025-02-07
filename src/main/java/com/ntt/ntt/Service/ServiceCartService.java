@@ -118,6 +118,7 @@ public class ServiceCartService {
         return serviceCartDetailDTOList;
     }
 
+    //장바구니 아이템이 내 장바구니인지 유효성 검사 하는 메서드
     public boolean validateServiceCartItem(Integer serviceCartItemId, Integer memberId) {
         log.info("서비스로 들어온 serviceCartItemId" +serviceCartItemId);
         log.info("서비스로 들어온 memberId" +memberId);
@@ -143,7 +144,7 @@ public class ServiceCartService {
     }
 
     //장바구니에서 들어온 주문
-    public Integer serviceCartItem(List<ServiceCartOrderDTO> serviceCartOrderDTOList, Integer memberId) {
+    public Integer orderServiceCartItem(List<ServiceCartOrderDTO> serviceCartOrderDTOList, Integer memberId) {
         //serviceCartOrderDTOList에는 serviceCartItemId가 들어있음
 
         List<ServiceOrderDTO> serviceOrderDTOList = new ArrayList<>();
