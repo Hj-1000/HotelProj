@@ -28,7 +28,6 @@
                 alert(message);
             }
 
-            $(".likeBtn").hide();
             $(".delBtn").show();
 
             function page(page) {
@@ -67,46 +66,6 @@
                 }
             });
         }
-
-
-
-
-
-
-        /*function addLike(event) {
-            console.log("아구찜"); // 한 번만 실행되도록 유지
-
-            // 클릭된 버튼에 가까운 .room-card 내에서 .likeotelId 클래스를 가진 input의 value 값을 가져옴
-            var likeHotelId = $(event.target).closest('.room-card').find('.likeHotelId').val();
-            console.log("머함 대체? "+ likeHotelId);
-
-            var param = {
-                likeHotelId: likeHotelId
-            };
-
-            $.ajax({
-                url: "/like/register",
-                type: "post",
-                contentType: "application/json; charset=utf-8",
-                data: JSON.stringify(param),
-                dataType: "json",
-                success: function (result, status) {
-                    alert(result.responseText);
-                    $(".likeBtn").hide();
-                    $(".delBtn").show();
-                },
-                error: function (result, status, error) {
-                    if (result.status == '401') {
-                        alert('로그인 후 이용해주세요');
-                        location.href = '/login';
-                    } else {
-                        alert(result.responseText);
-                        $(".likeBtn").hide();
-                        $(".delBtn").show();
-                    }
-                }
-            });
-        }*/
 
     </script>
 
@@ -156,7 +115,7 @@
                                                     <div class="room-buttons">
                                                         <button class="btn btn-outline-danger btn-heart-fill delBtn"
                                                                 onclick="delLike(event)">
-                                                            <i class="fa-regular fa-heart"></i>
+                                                            즐겨찾기 <i class="fa-regular fa-heart">
                                                         </button>
                                                     </div>
                                                 </div>

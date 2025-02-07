@@ -14,6 +14,7 @@
     <link rel ="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/roomList.css}">
+
     <script th:inline="javascript">
 
         window.onload = function() {
@@ -26,8 +27,34 @@
                 alert(message);
             }
 
-            $(".likeBtn").show();
-            $(".delBtn").hide();
+            var hotelId = $(".likeBtn").data("hotel-id"); // HTML에서 안전하게 hotelId 가져오기
+            console.log("hotelId from data attribute:", hotelId); // ✅ 값이 숫자로 나오는지 확인
+
+            if (!hotelId || isNaN(hotelId)) {
+                console.error("잘못된 hotelId:", hotelId);
+                return;
+            }
+
+            var url = "/like/check/" + hotelId
+
+            $.ajax({
+                url: url,
+                type: "GET",
+                data: { hotelId: hotelId },
+                success: function (isLiked) {
+                    console.log("찜 여부 확인 결과:", isLiked); // ✅ true 또는 false 확인
+                    if (isLiked) {
+                        $(".likeBtn").hide();
+                        $(".delBtn").show();
+                    } else {
+                        $(".likeBtn").show();
+                        $(".delBtn").hide();
+                    }
+                },
+                error: function () {
+                    console.error("찜 여부 확인 AJAX 요청 실패");
+                }
+            });
 
         }
 
@@ -37,7 +64,7 @@
 
         //찜 버튼을 클릭했을 때 실행 할 함수
         function addLike() {
-            console.log("아구찜"); // 한 번만 실행되도록 유지
+            console.log("찜하기 실행");
 
             var hotelId = [[${hotelDTO.hotelId}]];
             var param = {
@@ -46,49 +73,48 @@
 
             $.ajax({
                 url: "/like/register",
-                type: "post",
+                type: "POST",
                 contentType: "application/json; charset=utf-8",
                 data: JSON.stringify(param),
                 dataType: "json",
                 success: function (result, status) {
-                    alert(result.responseText);
+                    alert("스크랩 되었습니다.");
                     $(".likeBtn").hide();
                     $(".delBtn").show();
-                    window.location.href = "/like/list"; // ✅ 성공 후 페이지 이동
+                    location.reload();
+
                 },
                 error: function (result, status, error) {
-                    if (result.status == '401') {
-                        alert('로그인 후 이용해주세요');
-                        location.href = '/login';
+                    if (result.status == 401) {
+                        alert("로그인 후 이용해주세요.");
+                        location.href = "/login";
                     } else {
-                        alert(result.responseText)
+                        alert(result.responseText);
+                        location.reload();
                     }
                 }
             });
         }
 
+
         function delLike() {
-            var likeHotelId = $('.likeHotelId').val()?.trim(); // 값 가져오기 + 공백 제거
+            console.log("찜 삭제 실행");
 
-            if (!likeHotelId || isNaN(likeHotelId)) {
-                console.warn("삭제할 likeHotelId가 없습니다.");
-                return;
-            }
-
+            var hotelId = [[${hotelDTO.hotelId}]]; // 호텔 ID 가져오기
             var paramData = {
-                "likeHotelId": Number(likeHotelId) // `parseInt` 대신 `Number` 사용
+                hotelId: hotelId
             };
-
-            console.log("보내는 데이터:", JSON.stringify(paramData)); // JSON 확인
 
             $.ajax({
                 url: "/like/delete",
                 type: "POST",
-                data: JSON.stringify(paramData), // ✅ JSON 형식으로 변환하여 전송
                 contentType: "application/json; charset=utf-8",
-                success: function (result) { // ✅ `dataType: "json"` 제거
-                    alert("삭제 완료");
-                    location.reload();
+                data: JSON.stringify(paramData),
+                success: function (result) {
+                    alert("스크랩이 취소 되었습니다.");
+                    $(".likeBtn").show();
+                    $(".delBtn").hide();
+                    location.reload();  // ✅ 페이지 새로고침
                 },
                 error: function (xhr) {
                     console.error("삭제 실패:", xhr.responseText);
@@ -98,7 +124,9 @@
         }
 
 
+
     </script>
+
 </head>
 <body>
 <div th:replace="~{fragments/header::header}"></div>
@@ -143,12 +171,16 @@
                         </div>
 
                         <div>
-                            <button class="btn btn-outline-danger likeBtn" onclick="addLike()" style="width: 110px">
-                                즐겨찾기<i class="fa-regular fa-heart"></i>
+                            <!-- 찜 추가 버튼 (처음에는 보이게 설정) -->
+                            <button class="btn btn-outline-danger likeBtn" th:data-hotel-id="${hotelDTO.hotelId}" onclick="addLike()" style="width: 120px; display: none;">
+                                즐겨찾기 <i class="fa-regular fa-heart"></i>
                             </button>
-                            <button class="btn btn-danger delBtn" style="width: 110px">
-                                완료<i class="fa-regular fa-heart"></i>
+
+                            <!-- 찜 삭제 버튼 (처음에는 숨김) -->
+                            <button class="btn btn-danger delBtn" th:data-hotel-id="${hotelDTO.hotelId}" onclick="delLike()" style="width: 120px; display: none;">
+                                즐겨찾기 <i class="fa-solid fa-heart"></i>
                             </button>
+
                         </div>
 
                     </div>
