@@ -1,10 +1,13 @@
 package com.ntt.ntt.Controller;
 
 import com.ntt.ntt.Constant.Role;
+import com.ntt.ntt.DTO.CompanyDTO;
 import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.MemberDTO;
+import com.ntt.ntt.Entity.Member;
+import com.ntt.ntt.Repository.MemberRepository;
 import com.ntt.ntt.Service.MemberService;
-import com.ntt.ntt.Service.NotificationService;
+import com.ntt.ntt.Service.company.CompanyService;
 import com.ntt.ntt.Service.hotel.HotelService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -23,6 +27,8 @@ public class AdminController {
 
     private final HotelService hotelService;
     private final MemberService memberService;
+    private final CompanyService companyService;
+    private final MemberRepository memberRepository;
 
     @Operation(summary = "전체회원목록", description = "전체회원목록 페이지로 이동한다.")
     @GetMapping("/admin/memberList")
@@ -75,8 +81,21 @@ public class AdminController {
     }
 
     @GetMapping("/admin/executive")
-    public String a(){
-        return "admin/executive";
+    public String showRegisterCompanyPage(Model model, Principal principal) {
+        // 로그인한 사용자의 이메일 가져오기
+        String email = principal.getName();
+
+        // 이메일로 회원 정보 조회
+        Member member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다."));
+
+        // 사용자가 등록한 본사 목록 가져오기
+        List<CompanyDTO> companyList = companyService.getFilteredCompany(member.getMemberId());
+
+        // 모델에 companyList를 추가
+        model.addAttribute("companyList", companyList);
+
+        return "admin/executive"; // Thymeleaf 템플릿 이름
     }
 
     @GetMapping("/admin/executiveRegister")

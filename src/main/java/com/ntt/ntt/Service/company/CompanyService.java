@@ -250,4 +250,13 @@ public class CompanyService {
 //        companyRepository.deleteById(companyId);
 //    }
 
+    // 현재 로그인한 사용자가 등록한 본사 목록 가져오기
+    public List<CompanyDTO> getFilteredCompany(Integer memberId) {
+        List<Company> companies = companyRepository.findByMember_MemberId(memberId);
+
+        return companies.stream()
+                .map(company -> modelMapper.map(company, CompanyDTO.class))
+                .collect(Collectors.toList());
+    }
+
 }
