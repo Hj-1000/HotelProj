@@ -17,13 +17,27 @@
         </div>
         <div>
             <nav class="nav">
-                <a href="/user/findHotel" class="nav-link">호텔찾기</a>
+                <a href="/hotel/list" class="nav-link">호텔찾기</a>
                 <a href="/notice/userlist" class="nav-link">공지사항</a>
                 <a href="/qna" class="nav-link">Q&A</a>
                 <!-- 로그인 여부에 따라 버튼 표시 -->
                 <a th:if="${#authentication.name == 'anonymousUser'}" href="/login" id="btn-add" class="nav-link login-link" data-bs-toggle="modal" data-bs-target="#addModal">로그인</a>
-                <a th:unless="${#authentication.name == 'anonymousUser'}" href="/logout" class="nav-link login-link">로그아웃</a>
-                <a th:unless="${#authentication.name == 'anonymousUser'}" href="/myPage/update" class="nav-link">마이페이지</a>
+                <div th:unless="${#authentication.name == 'anonymousUser'}" class="dropdown text-end nav-item" >
+                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        마이메뉴
+                    </a>
+                    <ul class="dropdown-menu text-small">
+                        <li>
+                            <a class="dropdown-item" href="/myPage/update">내 정보</a>
+                        </li>
+                        <li><a class="dropdown-item" href="/like/list">즐겨찾기</a></li>
+                        <li><a class="dropdown-item" href="/#">예약 내역</a></li>
+                        <li><a class="dropdown-item" href="/#">주문 내역</a></li>
+                        <li><hr class="dropdown-divider"></li>
+
+                        <li><a class="dropdown-item" href="/logout" >로그아웃</a></li>
+                    </ul>
+                </div>
                 <!-- 어드민 권한이 있을 경우에만 표시 -->
                 <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/admin/memberList" class="nav-link text-danger">관리자페이지</a>
             </nav>
