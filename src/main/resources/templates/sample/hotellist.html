@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hotelread</title>
+    <!--반응형웹-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--부트스트랩-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <title>hotellist</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 90%;
+            margin: auto;
+            text-align: center;
+        }
+        .container1{
+            margin: 20px auto;
+            width: 800px;
+            height: 150px;
+            border:1px solid orange;
+            border-radius: 10px;
+        }
+        .container2{
+            margin: 20px auto;
+            width: 800px;
+            height: 600px;
+            border:1px solid orange;
+            border-radius: 10px;
+        }
+
+        .search-bar select {
+            padding: 10px;
+            margin-left: 10px;
+        }
+        .hotel-list {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .hotel-card {
+            margin-top: 50px;
+            width: 250px;
+            height: 400px;
+            border: 1px solid orange;
+            border-radius: 10px;
+            overflow: hidden;
+            text-align: left;
+        }
+        .hotel-card img {
+            width: 100%;
+        }
+        .hotel-info {
+            padding: 10px;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .pagination span {
+            padding: 10px 15px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+        }
+        .pagination .active {
+            background-color: blue;
+            color: white;
+        }
+        .form-control{
+            align-items: center;
+            align-content: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="container1">
+        <br>
+    <h2 style="bold">어디로 갈까요?</h2>
+        <form class="d-flex justify-content-center" role="search">
+            <input class="form-control w-50 me-1" type="search" placeholder="지역선택" aria-label="Search">
+            <button class="btn btn-outline-success" type="submit" >Click</button>
+        </form>
+    </div>
+    <div class="container2">
+    <div class="hotel-list">
+        <!-- 첫 번째 호텔 -->
+        <div class="hotel-card">
+            <img src="hotel1.jpg" alt="제주 해변리조트">
+            <div class="hotel-info">
+                <h3>제주 해변리조트</h3>
+                <p>⭐ 4.8 (892 리뷰)</p>
+                <p>이벤트가: <strong>95,000원~</strong></p>
+            </div>
+        </div>
+
+        <!-- 두 번째 호텔 -->
+        <div class="hotel-card">
+            <img src="hotel1.jpg" alt="제주 해변리조트">
+            <div class="hotel-info">
+                <h3>제주 해변리조트</h3>
+                <p>⭐ 4.8 (892 리뷰)</p>
+                <p>이벤트가: <strong>95,000원~</strong></p>
+            </div>
+        </div>
+
+        <!-- 세 번째 호텔 -->
+        <div class="hotel-card">
+            <img src="hotel2.jpg" alt="베니키아 제주">
+            <div class="hotel-info">
+                <h3>베니키아 호텔 제주</h3>
+                <p>⭐ 4.2 (269 리뷰)</p>
+                <p>이벤트가: <strong>47,000원~</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 페이지네이션 -->
+    <div class="pagination">
+        <span class="active">1</span>
+        <span>2</span>
+        <span>3</span>
+        <span>4</span>
+        <span>5</span>
+    </div>
+    </div>
+</div>
+
+</body>
+</html>
