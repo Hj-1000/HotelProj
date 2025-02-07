@@ -17,19 +17,18 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="매장유저권한" class="form-label">임원권한</label>
+                                <label for="매장유저권한" class="form-label">권한</label>
                                 <select class="form-select" id="매장유저권한">
-                                    <option selected>선택</option>
-                                    <option value="1">호텔장</option>
-                                    <option value="2">매니저</option>
+                                    <option selected>전체</option>
+                                    <option value="CHIEF">CHIEF</option>
+                                    <option value="MANAGER">MANAGER</option>
                                 </select>
                             </div>
                             <div class="mb-3">
                                 <label for="지사" class="form-label">지사</label>
                                 <select class="form-select" id="지사">
                                     <option selected>전체</option>
-                                    <option value="1">지사 1</option>
-                                    <option value="2">지사 2</option>
+                                    <option value="1">본사를 먼저 선택해주세요.</option>
                                 </select>
                             </div>
                             <div class="mb-3">
@@ -63,11 +62,10 @@
 
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="총괄조직" class="form-label">총괄조직</label>
-                                <select class="form-select" id="총괄조직">
-                                    <option selected>NNT호텔</option>
-                                    <option value="1">조직 1</option>
-                                    <option value="2">조직 2</option>
+                                <label for="company" class="form-label">본사</label>
+                                <select class="form-select" id="company" name="company">
+                                    <option value="">전체</option>
+                                    <option th:each="company : ${companyList}" th:value="${company.companyId}" th:text="${company.companyName}"></option>
                                 </select>
                             </div>
                             <div class="mb-3">
