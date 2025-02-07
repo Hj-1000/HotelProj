@@ -3,10 +3,13 @@ package com.ntt.ntt.Service.hotel;
 import com.ntt.ntt.DTO.CompanyDTO;
 import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.ImageDTO;
+import com.ntt.ntt.DTO.RoomDTO;
 import com.ntt.ntt.Entity.Company;
 import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.Image;
+import com.ntt.ntt.Entity.Room;
 import com.ntt.ntt.Repository.ImageRepository;
+import com.ntt.ntt.Repository.RoomRepository;
 import com.ntt.ntt.Repository.company.CompanyRepository;
 import com.ntt.ntt.Repository.hotel.HotelRepository;
 import com.ntt.ntt.Service.ImageService;
@@ -15,10 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,6 +38,7 @@ public class HotelService {
     private final ImageRepository imageRepository;
 
     private final CompanyRepository companyRepository;
+    private final RoomRepository roomRepository;
 
     private final ModelMapper modelMapper;
 
@@ -192,7 +193,6 @@ public class HotelService {
 //    }
 
     //일반회원 목록
-
     @Transactional(readOnly = true)
     public Page<HotelDTO> list(Pageable page, String keyword, String searchType, boolean exactMatch) {
 
@@ -304,8 +304,21 @@ public class HotelService {
         hotelDTO.setHotelImgDTOList(imgDTOList);
 
         return hotelDTO;
-
     }
+
+    // hotelId에 맞는 방들을 가져오는 메서드
+    public Page<RoomDTO> getRoomsByHotelId(Integer hotelId, Pageable pageable) {
+        // 호텔 ID에 맞는 Room 데이터 조회 (페이징 처리)
+        Page<Room> roomsPage = roomRepository.findByHotelId_HotelId(hotelId, pageable);
+
+        // 각 Room 객체를 RoomDTO로 변환하여 리스트에 추가
+        List<RoomDTO> roomDTOs = roomsPage.getContent().stream()
+                .map(room -> modelMapper.map(room, RoomDTO.class))
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(roomDTOs, pageable, roomsPage.getTotalElements());
+    }
+
 
     // 정보 수정 (이미지 수정 포함)
     @Transactional

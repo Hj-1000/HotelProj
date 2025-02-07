@@ -12,8 +12,25 @@
     <link rel ="stylesheet" href="/assets/fonts/fontawesome-all.min.css">
     <link rel ="stylesheet" href="/assets/css/bootstrap.min.css">
     <link rel ="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
+
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/roomList.css}">
+
+    <style>
+        .image-box {
+            width:100%;
+            height:230px;
+            overflow:hidden;
+            margin:0 auto;
+        }
+
+        .hotelImg {
+            width:100%;
+            height:100%;
+            object-fit:cover;
+        }
+    </style>
+
 
     <script th:inline="javascript">
 
@@ -29,42 +46,71 @@
 
             $(".delBtn").hide();
 
-        }
+            // 찜 여부 확인 후 버튼 상태 변경
+            $(".room-card").each(function () {
+                var hotelId = $(this).find(".hotelId").val();
 
-        //찜 버튼을 클릭했을 때 실행 할 함수
-        function addLike(event) {
-            console.log("아구찜"); // 한 번만 실행되도록 유지
+                $.ajax({
+                    url: "/like/check/" + hotelId,
+                    type: "GET",
+                    success: function (isLiked) {
+                        var likeBtn = $(".likeBtn[data-hotel-id='" + hotelId + "']");
+                        var delBtn = $(".delBtn[data-hotel-id='" + hotelId + "']");
 
-            // 클릭된 버튼에 가까운 .room-card 내에서 .hotelId 클래스를 가진 input의 value 값을 가져옴
-            var hotelId = $(event.target).closest('.room-card').find('.hotelId').val();
-            console.log("머함 대체? "+ hotelId);
-
-            var param = {
-                hotelId: hotelId
-            };
-
-            $.ajax({
-                url: "/like/register",
-                type: "post",
-                contentType: "application/json; charset=utf-8",
-                data: JSON.stringify(param),
-                dataType: "json",
-                success: function (result, status) {
-                    alert(result.responseText);
-                    $(".likeBtn").hide();
-                    $(".delBtn").show();
-                },
-                error: function (result, status, error) {
-                    if (result.status == '401') {
-                        alert('로그인 후 이용해주세요');
-                        location.href = '/login';
-                    } else {
-                        alert(result.responseText);
-                        $(".likeBtn").hide();
-                        $(".delBtn").show();
+                        if (isLiked) {
+                            likeBtn.hide();
+                            delBtn.show();
+                        } else {
+                            likeBtn.show();
+                            delBtn.hide();
+                        }
+                    },
+                    error: function () {
+                        console.error("찜 여부 확인 실패 (호텔 ID: " + hotelId + ")");
                     }
-                }
+                });
             });
+
+            // 찜 추가 (이벤트 위임 방식)
+            $(document).on("click", ".likeBtn", function (event) {
+                var hotelId = $(this).data("hotel-id");
+
+                $.ajax({
+                    url: "/like/register",
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({ hotelId: hotelId }),
+                    success: function () {
+                        alert("호텔이 즐겨찾기에 추가되었습니다.");
+                        location.reload();
+                    },
+                    error: function (xhr) {
+                        console.error("찜 등록 실패:", xhr.responseText);
+                        alert("찜 등록 실패: " + xhr.responseText);
+                    }
+                });
+            });
+
+            // 찜 삭제 (이벤트 위임 방식)
+            $(document).on("click", ".delBtn", function (event) {
+                var hotelId = $(this).data("hotel-id");
+
+                $.ajax({
+                    url: "/like/delete",
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({ hotelId: hotelId }),
+                    success: function () {
+                        alert("즐겨찾기에서 삭제되었습니다.");
+                        location.reload();
+                    },
+                    error: function (xhr) {
+                        console.error("삭제 실패:", xhr.responseText);
+                        alert("삭제 실패: " + xhr.responseText);
+                    }
+                });
+            });
+
         }
 
 
@@ -94,16 +140,16 @@
                             <div class="room-card ">
                                 <!--등록한 사진이 있을 때-->
                                 <th:block th:if="${data.hotelImgDTOList != 0}">
-                                    <div class="room-image" th:each="data: ${data.hotelImgDTOList}">
+                                    <div class="room-image image-box" th:each="data: ${data.hotelImgDTOList}">
                                         <!-- 이미지 경로(path) -->
-                                        <img th:src="@{'/upload/' + ${data.imagePath}}" alt="hotel Image" width="100%"/>
+                                        <img th:src="@{'/upload/' + ${data.imagePath}}" class="hotelImg" alt="hotel Image" width="100%"/>
                                     </div>
                                 </th:block>
 
                                 <!--등록한 사진이 없을 때-->
                                 <th:block th:unless="${data.hotelImgDTOList.size() != 0}">
-                                    <div class="room-image">
-                                        <img src="/img/default_img.jpg" alt="noImage" style="width: 300px"/>
+                                    <div class="room-image image-box">
+                                        <img src="/img/default_img.jpg" alt="noImage" class="hotelImg" style="width: 300px"/>
                                     </div>
                                 </th:block>
                                 <div class="room-text">
@@ -118,14 +164,14 @@
                                         <div class="room-actions">
                                             <!--나중에 룸이랑 연결했을 때 사용-->
                                             <p class="room-price mb-0">300,000 KRW ~</p>
-                                            <!--<div class="room-buttons">
-                                                <button class="btn btn-outline-danger  btn-heart likeBtn">
+                                            <div class="room-buttons">
+                                                <button class="btn btn-outline-danger likeBtn"  th:data-hotel-id="${data.hotelId}" onclick="addLike()">
                                                     <i class="fa-regular fa-heart"></i>
                                                 </button>
-                                                <button class="btn btn-danger btn-heart delBtn">
-                                                    <i class="fa-regular fa-heart"></i>
+                                                <button class="btn btn-outline-danger delBtn"  th:data-hotel-id="${data.hotelId}" onclick="addLike()">
+                                                    <i class="fa fa-heart" aria-hidden="true"></i>
                                                 </button>
-                                            </div>-->
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

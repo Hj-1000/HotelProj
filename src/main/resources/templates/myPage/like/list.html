@@ -15,167 +15,179 @@
     <script src="https://kit.fontawesome.com/b17b1596b8.js" crossorigin="anonymous"></script>
     <link rel ="stylesheet" href="/assets/fonts/fontawesome-all.min.css">
 
-    <!-- Custom CSS -->
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/roomList.css}">
 
+    <style>
+        .image-box {
+            width:100%;
+            height:230px;
+            overflow:hidden;
+            margin:0 auto;
+        }
+
+        .hotelImg {
+            width:100%;
+            height:100%;
+            object-fit:cover;
+        }
+    </style>
+
     <!-- JavaScript inline -->
     <script th:inline="javascript">
+
         $(document).ready(function () {
+
+            // 세션에서 message 값을 가져옴
             var message = [[${message}]];
 
-            if (message) {
+            // message가 null이 아니면 알림창을 띄우고 세션에서 삭제
+            if (message !== null && message !== '') {
                 alert(message);
             }
 
-            $(".likeBtn").hide();
-            $(".delBtn").show();
 
-            function page(page) {
-                location.href = "/" + page;
-            }
+
+            $(".delBtn").on("click", function () {
+                var likeHotelId = $(this).data("hotel-id"); // 버튼에 저장된 likeHotelId 가져오기
+
+                console.log(likeHotelId)
+
+
+                if (!likeHotelId) {
+                    alert("호텔 ID를 찾을 수 없습니다.");
+                    return;
+                }
+
+                // 찜 여부 확인 후 버튼 상태 변경
+                $(".room-card").each(function () {
+                    var hotelId = $(this).find(".hotelId").val();
+
+                    $.ajax({
+                        url: "/like/check/" + hotelId,
+                        type: "GET",
+                        success: function (isLiked) {
+
+                            var delBtn = $(".delBtn[data-hotel-id='" + hotelId + "']");
+
+                            if (isLiked) {
+                                delBtn.show();
+                            } else {
+                                delBtn.hide();
+                            }
+                        },
+                        error: function () {
+                            console.error("찜 여부 확인 실패 (호텔 ID: " + hotelId + ")");
+                        }
+                    });
+                });
+
+
+                $.ajax({
+                    url: "/like/deleteList",
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({ likeHotelId: likeHotelId }),  // 변경된 부분
+                    success: function () {
+                        alert("즐겨찾기에서 삭제되었습니다.");
+                        location.reload(); // 페이지 새로고침
+                    },
+                    error: function (xhr) {
+                        console.error("삭제 실패:", xhr.responseText);
+                        alert("삭제 실패: " + xhr.responseText);
+                    }
+                });
+            });
 
         });
 
-
-        function delLike() {
-            var likeHotelId = $('.likeHotelId').val()?.trim(); // 값 가져오기 + 공백 제거
-
-            if (!likeHotelId || isNaN(likeHotelId)) {
-                console.warn("삭제할 likeHotelId가 없습니다.");
-                return;
-            }
-
-            var paramData = {
-                "likeHotelId": Number(likeHotelId) // `parseInt` 대신 `Number` 사용
-            };
-
-            console.log("보내는 데이터:", JSON.stringify(paramData)); // JSON 확인
-
-            $.ajax({
-                url: "/like/delete",
-                type: "POST",
-                data: JSON.stringify(paramData), // ✅ JSON 형식으로 변환하여 전송
-                contentType: "application/json; charset=utf-8",
-                success: function (result) { // ✅ `dataType: "json"` 제거
-                    alert("삭제 완료");
-                    location.reload();
-                },
-                error: function (xhr) {
-                    console.error("삭제 실패:", xhr.responseText);
-                    alert("삭제 실패: " + xhr.responseText);
-                }
-            });
-        }
-
-
-
-
-
-
-        /*function addLike(event) {
-            console.log("아구찜"); // 한 번만 실행되도록 유지
-
-            // 클릭된 버튼에 가까운 .room-card 내에서 .likeotelId 클래스를 가진 input의 value 값을 가져옴
-            var likeHotelId = $(event.target).closest('.room-card').find('.likeHotelId').val();
-            console.log("머함 대체? "+ likeHotelId);
-
-            var param = {
-                likeHotelId: likeHotelId
-            };
-
-            $.ajax({
-                url: "/like/register",
-                type: "post",
-                contentType: "application/json; charset=utf-8",
-                data: JSON.stringify(param),
-                dataType: "json",
-                success: function (result, status) {
-                    alert(result.responseText);
-                    $(".likeBtn").hide();
-                    $(".delBtn").show();
-                },
-                error: function (result, status, error) {
-                    if (result.status == '401') {
-                        alert('로그인 후 이용해주세요');
-                        location.href = '/login';
-                    } else {
-                        alert(result.responseText);
-                        $(".likeBtn").hide();
-                        $(".delBtn").show();
-                    }
-                }
-            });
-        }*/
-
     </script>
+
 
 </head>
 <body>
 <div th:replace="~{fragments/header::header}"></div>
+
 <div layout:fragment="content">
-    <div class="mt-3 mb-5" style="width: 1300px; margin-left: auto; margin-right: auto">
+    <!-- 룸 배너 이미지 -->
+    <section class="banner-container room-bnr ">
+        <img src="/img/bg_membership.jpg" alt="Hotel Banner">
+    </section>
 
-        <section class="py-5">
-            <h2 class="text-center mb-5">나의 즐겨찾기</h2>
-            <div class="container">
-                <div id="room-list" class="row">
+    <!-- Room List Section -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">스크랩한 호텔</h2>
+            <div id="room-list" class="row">
 
-                    <th:block th:if="${likeDTO == null || #lists.isEmpty(likeDTO)}">
-                        <div style="text-align: center">
-                            <img src="/img/empty.png" alt="No likes available" width="400px">
-                            <p>목록이 비어있습니다!</p>
-                        </div>
-                    </th:block>
+                <th:block th:if="${likeDTO == null || #lists.isEmpty(likeDTO)}">
+                    <div style="text-align: center">
+                        <img src="/img/empty.png" alt="No likes available" width="400px">
+                        <p>목록이 비어있습니다!</p>
+                    </div>
+                </th:block>
 
-                    <th:block th:unless="${likeDTO == null}">
-                        <th:block th:each="data : ${likeDTO}">
-                            <div class="col-md-4">
-                                <a th:href="@{/hotel/read(hotelId=${data.hotelDTO.hotelId})}">
-                                    <div class="room-card">
-                                        <th:block th:if="${data.hotelDTO.hotelImgDTOList != 0}">
-                                            <div class="hotel-image" th:each="data: ${data.hotelDTO.hotelImgDTOList}">
-                                                <!-- 이미지 경로(path) -->
-                                                <img th:src="@{'/upload/' + ${data.imagePath}}" alt="hotel Image" width="100%"/>
-                                            </div>
-                                        </th:block>
-                                        <th:block th:unless="${data.hotelDTO.hotelImgDTOList != 0}">
-                                            <div class="hotel-image">
-                                                <img src="/img/default_img.jpg" alt="noImage" style="width: 300px"/>
-                                            </div>
-                                        </th:block>
-                                        <div class="room-text">
-                                            <a th:href="@{'/hotel/list?searchType=location&keyword=' + ${data.hotelDTO.hotelLocation}}" style="text-decoration: none">
-                                                <div class="badge bg-secondary" th:text="${data.hotelDTO.hotelLocation}">지역</div>
-                                            </a>
-                                            <div class="room-details">
-                                                <h4 th:text="${data.hotelDTO.hotelName}">호텔 이름</h4>
-                                                <p> 숙박: <span th:text="${data.hotelDTO.hotelCheckIn}"></span>:00 ~ <span th:text="${data.hotelDTO.hotelCheckOut}"></span>:00</p>
-                                                <input type="text" class="likeHotelId" th:value="${data.likeHotelId}">
-                                                <div style="text-align: left">
-                                                    <div class="room-buttons">
-                                                        <button class="btn btn-outline-danger btn-heart-fill delBtn"
-                                                                onclick="delLike(event)">
-                                                            <i class="fa-regular fa-heart"></i>
-                                                        </button>
-                                                    </div>
+                <th:block th:unless="${likeDTO == null}">
+                    <!--반복문-->
+                    <th:block th:each="data : ${likeDTO}">
+                        <!-- Room Card -->
+                        <div class="col-md-4">
+                            <a th:href="@{/hotel/read(hotelId=${data.hotelDTO.hotelId})}">
+                                <div class="room-card ">
+                                    <!--등록한 사진이 있을 때-->
+                                    <th:block th:if="${data.hotelDTO.hotelImgDTOList != 0}">
+                                        <div class="room-image image-box" th:each="data: ${data.hotelDTO.hotelImgDTOList}">
+                                            <!-- 이미지 경로(path) -->
+                                            <img th:src="@{'/upload/' + ${data.imagePath}}" class="hotelImg" alt="hotel Image" width="100%"/>
+                                        </div>
+                                    </th:block>
+
+                                    <!--등록한 사진이 없을 때-->
+                                    <th:block th:unless="${data.hotelDTO.hotelImgDTOList.size() != 0}">
+                                        <div class="room-image image-box">
+                                            <img src="/img/default_img.jpg" alt="noImage" class="hotelImg" style="width: 300px"/>
+                                        </div>
+                                    </th:block>
+                                    <div class="room-text">
+                                        <a th:href="@{'/hotel/list?searchType=location&keyword=' + ${data.hotelDTO.hotelLocation}}" style="text-decoration: none">
+                                            <div class="badge bg-secondary" th:text="${data.hotelDTO.hotelLocation}">지역</div>
+                                        </a>
+                                        <div class="room-details">
+                                            <h4 th:text="${data.hotelDTO.hotelName}">호텔 이름</h4>
+                                            <!--                                    <p th:text="${data.hotelInfo}">호텔 설명</p>-->
+                                            <p> 체크인-체크아웃: <span th:text="${data.hotelDTO.hotelCheckIn}"></span>시 - <span th:text="${data.hotelDTO.hotelCheckOut}"></span>시</p>
+                                            <input type="hidden" class="hotelId" th:value="${data.likeHotelId}">
+                                            <div class="room-actions">
+                                                <!--나중에 룸이랑 연결했을 때 사용-->
+                                                <p class="room-price mb-0">300,000 KRW ~</p>
+                                                <div class="room-buttons">
+                                                    <button class="btn btn-outline-danger delBtn"  th:data-hotel-id="${data.likeHotelId}">
+                                                        <i class="fa fa-heart" aria-hidden="true"></i>
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </a>
-                            </div>
-                        </th:block>
+                                </div>
 
-
-
+                            </a>
+                        </div>
                     </th:block>
 
-                </div>
+                </th:block>
+
+
+
+
+
+
+
             </div>
-        </section>
-    </div>
+        </div>
+    </section>
+
 </div>
+
 <div th:replace="~{fragments/footer::footer}"></div>
 </body>
 </html>
