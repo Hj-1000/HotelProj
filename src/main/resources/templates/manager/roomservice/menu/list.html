@@ -128,6 +128,7 @@
                         <th>메뉴 이름</th>
                         <th>메뉴 설명</th>
                         <th>메뉴 상태</th>
+                        <th>재고수량</th>
                         <th>메뉴 가격</th>
                         <th>삭제여부</th>
                     </tr>
@@ -149,6 +150,7 @@
                             </td>
                             <td th:text="${data.serviceMenuInfo}">설명</td>
                             <td th:text="${data.serviceMenuStatus.description}">상태</td>
+                            <td th:text="${data.serviceMenuQuantity}">재고수량</td>
                             <td th:text="${data.serviceMenuPrice}">가격</td>
                             <td>
                                 <a th:href="@{/roomService/menu/delete(serviceMenuId=${data.serviceMenuId})}" class="badge bg-danger delBtn">삭제</a>
@@ -160,6 +162,7 @@
 
                 <!-- 추가 버튼 -->
                 <div class="text-end mt-3">
+                    <a class="btn btn-primary" th:href="@{/roomService/category/list}">카테고리 관리</a>
                     <button class="btn btn-primary" style="background-color: black" onclick="location.href='/roomService/menu/register'">등록</button>
                     <button type="button" class="btn btn-primary modalBtn">간편 등록</button>
                 </div>
@@ -231,6 +234,10 @@
                                 <option value="PREPARE">준비중</option>
                                 <option value="SOLD_OUT">매진</option>
                             </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="serviceMenuQuantity" class="form-label">재고수량:</label>
+                            <input type="number" class="form-control" id="serviceMenuQuantity" name="serviceMenuQuantity">
                         </div>
                         <div class="mb-3">
                             <label for="serviceMenuPrice" class="form-label">메뉴 가격:</label>

@@ -95,7 +95,7 @@ public class ServiceMenuService {
     public Page<ServiceMenuDTO> list(Pageable page, String keyword, String searchType, Integer serviceCateId, String status) {
         int currentPage = page.getPageNumber() - 1;
         int pageSize = 10;
-        Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.DESC, "serviceMenuId"));
+        Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.ASC, "serviceMenuId"));
 
         Page<ServiceMenu> serviceMenu = null;
 
@@ -220,6 +220,7 @@ public class ServiceMenuService {
             serviceMenu.setServiceMenuName(serviceMenuDTO.getServiceMenuName());
             serviceMenu.setServiceMenuInfo(serviceMenuDTO.getServiceMenuInfo());
             serviceMenu.setServiceMenuPrice(serviceMenuDTO.getServiceMenuPrice());
+            serviceMenu.setServiceMenuQuantity(serviceMenuDTO.getServiceMenuQuantity());
             serviceMenu.setServiceMenuStatus(serviceMenuDTO.getServiceMenuStatus());
             serviceMenuRepository.save(serviceMenu); // 메뉴 정보 업데이트
 
