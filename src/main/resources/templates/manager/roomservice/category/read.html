@@ -65,7 +65,7 @@
                     <th:block th:if="${serviceCateDTO.serviceCateImageDTOList != 0}">
                         <div th:each="img : ${serviceCateDTO.serviceCateImageDTOList}">
                             <!-- 이미지 경로(path) -->
-                            <img th:src="@{'/upload/' + ${img.imagePath}}" alt="hotel Image" width="300px"/>
+                            <img th:src="@{'/upload/' + ${img.imagePath}}" alt="category Image" width="300px"/>
                         </div>
                     </th:block>
 
@@ -119,6 +119,10 @@
                                 <option value="PREPARE">준비중</option>
                                 <option value="SOLD_OUT">매진</option>
                             </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="serviceMenuQuantity" class="form-label">재고수량:</label>
+                            <input type="number" class="form-control" id="serviceMenuQuantity" name="serviceMenuQuantity">
                         </div>
                         <div class="mb-3 mt-3">
                             <label for="serviceMenuPrice" class="form-label">메뉴가격:</label>
