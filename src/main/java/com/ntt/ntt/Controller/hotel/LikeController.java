@@ -145,22 +145,22 @@ public class LikeController {
     }
 
 
-//    @PostMapping("/delete")
-//    public ResponseEntity<?> likeDelete(@RequestBody Map<String, Integer> request) {
-//        log.info("받은 요청 데이터: " + request);
-//
-//        Integer likeHotelId = request.get("likeHotelId");
-//
-//        if (likeHotelId == null) {
-//            return new ResponseEntity<>("삭제할 즐겨찾기 ID가 없습니다.", HttpStatus.BAD_REQUEST);
-//        }
-//
-//        log.info("삭제할 likeHotelId: " + likeHotelId);
-//
-//        likeService.delete(likeHotelId);
-//
-//        return new ResponseEntity<>("즐겨찾기에서 삭제되었습니다.", HttpStatus.OK);
-//    }
+    @PostMapping("/deleteList")
+    public ResponseEntity<?> likeDeleteList(@RequestBody Map<String, Integer> request) {
+        log.info("받은 요청 데이터: " + request);
+
+        Integer likeHotelId = request.get("likeHotelId");
+
+        if (likeHotelId == null) {
+            return new ResponseEntity<>("삭제할 즐겨찾기 ID가 없습니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        log.info("삭제할 likeHotelId: " + likeHotelId);
+
+        likeService.delete(likeHotelId);
+
+        return new ResponseEntity<>("즐겨찾기에서 삭제되었습니다.", HttpStatus.OK);
+    }
 
 
 
