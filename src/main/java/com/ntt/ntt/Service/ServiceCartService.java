@@ -46,13 +46,13 @@ public class ServiceCartService {
     //장바구니 등록
     //장바구니를 따로 만들지 않고 장바구니에 넣을 아이템이 컨트롤러로 들어오면
     //그 값을 가지고 넣을것이고 컨트롤러에서 들어오는 memberId를 통해서 멤버를 찾는다.
-    public Integer registerServiceCart(ServiceCartItemDTO serviceCartItemDTO, Integer memberId) {
-        log.info("장바구니 서비스로 들어온 멤버의 id" + memberId);
+    public Integer registerServiceCart(ServiceCartItemDTO serviceCartItemDTO, String memberEmail) {
+        log.info("장바구니 서비스로 들어온 멤버의 email" + memberEmail);
         log.info("장바구니 서비스로 들어온 cartItemDTO"+ serviceCartItemDTO);
 
         //회원찾기
         Member member =
-                memberRepository.findById(memberId).orElseThrow(EntityNotFoundException::new);
+                memberRepository.findByEmail(memberEmail);
         log.info("장바구니 서비스에서 찾은 member" + member);
 
         //내가 산려고 하는 장바구니 아이템을 장바구니에 넣는다.
@@ -94,15 +94,15 @@ public class ServiceCartService {
         }
     }
 
-    public List<ServiceCartDetailDTO> listServiceCart(Integer memberId) {
+    public List<ServiceCartDetailDTO> listServiceCart(String memberEmail) {
         // 장바구니의 pk는 1:1 관계이기 때문에 그리고 memberId는 유니크임
         // 멤버 1 장바구니의 pk도 1
 
         List<ServiceCartDetailDTO> serviceCartDetailDTOList = new ArrayList<>();
 
         Member member =
-                memberRepository.findById(memberId)
-                        .orElseThrow(EntityNotFoundException::new);
+                memberRepository.findByEmail(memberEmail);
+
 
         ServiceCart serviceCart =
                 serviceCartRepository.findByMember_MemberId(member.getMemberId());
@@ -119,11 +119,11 @@ public class ServiceCartService {
     }
 
     //장바구니 아이템이 내 장바구니인지 유효성 검사 하는 메서드
-    public boolean validateServiceCartItem(Integer serviceCartItemId, Integer memberId) {
+    public boolean validateServiceCartItem(Integer serviceCartItemId, String memberEmail) {
         log.info("서비스로 들어온 serviceCartItemId" +serviceCartItemId);
-        log.info("서비스로 들어온 memberId" +memberId);
+        log.info("서비스로 들어온 memberEmail" +memberEmail);
         Member member =
-                memberRepository.findById(memberId).orElseThrow(EntityNotFoundException::new);
+                memberRepository.findByEmail(memberEmail);
 
         ServiceCartItem serviceCartItem =
                 serviceCartItemRepository.findById(serviceCartItemId).orElseThrow(EntityNotFoundException::new);
@@ -144,7 +144,7 @@ public class ServiceCartService {
     }
 
     //장바구니에서 들어온 주문
-    public Integer orderServiceCartItem(List<ServiceCartOrderDTO> serviceCartOrderDTOList, Integer memberId) {
+    public Integer orderServiceCartItem(List<ServiceCartOrderDTO> serviceCartOrderDTOList, String memberEmail) {
         //serviceCartOrderDTOList에는 serviceCartItemId가 들어있음
 
         List<ServiceOrderDTO> serviceOrderDTOList = new ArrayList<>();
@@ -162,11 +162,12 @@ public class ServiceCartService {
             serviceOrderDTOList.add(serviceOrderDTO);
         }
         Integer serviceOrderId =
-                serviceOrderService.orders(serviceOrderDTOList, memberId); //장바구니 아이템을 저장
+                serviceOrderService.orders(serviceOrderDTOList, memberEmail); //장바구니 아이템을 저장
 
         for (ServiceCartOrderDTO serviceCartOrderDTO : serviceCartOrderDTOList) {
             ServiceCartItem serviceCartItem =
-                    serviceCartItemRepository.findById(serviceCartOrderDTO.getServiceCartItemId()).orElseThrow(EntityNotFoundException::new);
+                    serviceCartItemRepository.findById(serviceCartOrderDTO.getServiceCartItemId())
+                            .orElseThrow(EntityNotFoundException::new);
 
             //장바구니로 주문을 완료했다면 더이상 장바구니 안에 장바구니 아이템이 있으면 안된다
             //그렇지 않으면 계속 장바구니에 아이템이 누적될 것임
