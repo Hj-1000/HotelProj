@@ -1,4 +1,4 @@
-package com.ntt.ntt.Controller.room;
+package com.ntt.ntt.Controller.Room;
 
 
 import com.ntt.ntt.DTO.HotelDTO;
@@ -8,6 +8,7 @@ import com.ntt.ntt.Util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
@@ -60,10 +61,17 @@ public class RoomManagerController {
     // 2. 모든 객실 조회
     @GetMapping("/list")
     public String listForm(
-            @PageableDefault(size = 5, page = 0) Pageable pageable,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @PageableDefault(size = 5) Pageable pageable,
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "category", required = false) String category,
             Model model) {
+
+        // 현재 페이지 정보를 Pageable에 반영
+        Pageable updatedPageable = PageRequest.of(page, pageable.getPageSize());
+
+        // 검색 조건과 페이징 정보를 이용하여 데이터 가져오기
+        Page<RoomDTO> roomDTOS = roomService.searchRooms(keyword, category, pageable);
 
         // 유효성 검사: 상태(category가 roomStatus일 경우)
         if ("roomStatus".equals(category)) {
@@ -73,10 +81,6 @@ public class RoomManagerController {
                 return "manager/room/list"; // 에러 메시지를 추가한 리스트 페이지로 리다이렉트
             }
         }
-
-        // 검색 조건과 페이징 정보를 이용하여 데이터 가져오기
-        Page<RoomDTO> roomDTOS = roomService.searchRooms(keyword, category, pageable);
-
 
         // 로그로 이미지 확인
         for (RoomDTO room : roomDTOS) {
@@ -89,6 +93,7 @@ public class RoomManagerController {
 
         // 페이지네이션 정보 생성
         Map<String, Integer> pageInfo = PaginationUtil.pagination(roomDTOS);
+
 
 
         // 전체 페이지 수
@@ -107,6 +112,7 @@ public class RoomManagerController {
 
 
         // 모델에 데이터 추가
+        model.addAttribute("currentPage", page);
         model.addAttribute("list", roomDTOS); // 페이징된 RoomDTO 리스트
         model.addAttribute("keyword", keyword); // 검색 키워드 전달
         model.addAttribute("category", category); // 검색 카테고리 전달

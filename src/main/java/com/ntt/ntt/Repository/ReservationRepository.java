@@ -2,6 +2,8 @@ package com.ntt.ntt.Repository;
 
 
 import com.ntt.ntt.Entity.Reservation;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -22,5 +24,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
 
     // 특정 방의 예약을 삭제 (예약 취소 기능)
     void deleteByRoom_RoomId(Integer roomId);
+
+    // 페이징 처리
+    Page<Reservation> findAll(Pageable pageable);
 
 }

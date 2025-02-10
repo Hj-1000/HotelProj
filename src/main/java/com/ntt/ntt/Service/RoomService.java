@@ -150,7 +150,6 @@ public class RoomService {
         return hotelDTOS;
     }
 
-
     // 1. 등록 register
     public Integer registerRoom(RoomDTO roomDTO, List<MultipartFile> multipartFile) {
 
@@ -255,6 +254,11 @@ public class RoomService {
 
     // 삭제 delete
     public void deleteRoom(Integer roomId) {
+
+        if (reservationRepository.existsByRoom_RoomId(roomId)) {
+            throw new IllegalStateException("이 방은 현재 예약이 존재하므로 삭제할 수 없습니다.");
+        }
+
         Optional<Room> roomOptional = roomRepository.findById(roomId);
         if (roomOptional.isPresent()) {
             Room room = roomOptional.get();
@@ -270,22 +274,6 @@ public class RoomService {
         } else {
             throw new RuntimeException("회사를 찾을 수 없습니다.");
         }
-    }
-
-    // 페이지 네이션
-
-    public Page<RoomDTO> a(Pageable page) {
-        int currentPage = page.getPageNumber(); // 현재 페이지 번호
-        int pageLimit = page.getPageSize(); // 한 페이지당 데이터 개수
-
-        // 페이지 요청을 생성 (기본 정렬: roomId로 내림차순)
-        Pageable pageable = PageRequest.of(currentPage, pageLimit, Sort.by(Sort.Direction.DESC, "roomId"));
-
-        // 페이지 정보에 해당하는 모든 데이터를 읽어옴
-        Page<Room> roomEntities = roomRepository.findAll(pageable);
-
-        // Room Entity를 RoomDTO로 변환
-        return roomEntities.map(data -> modelMapper.map(data, RoomDTO.class));
     }
 
     @Transactional(readOnly = true)
@@ -371,4 +359,20 @@ public class RoomService {
     }
 
 
+    public void updateRoomStatusBasedOnReservationEnd(Integer roomId) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 방을 찾을 수 없습니다."));
+
+        // 오늘 날짜와 비교하여 객실 상태 업데이트
+        LocalDate today = LocalDate.now();
+        LocalDate reservationEndDate = LocalDate.parse(room.getReservationEnd());
+
+        if (reservationEndDate.isBefore(today)) {
+            room.setRoomStatus(false); // 예약 불가
+        } else {
+            room.setRoomStatus(true); // 예약 가능
+        }
+
+        roomRepository.save(room);
+    }
 }

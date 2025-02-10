@@ -50,6 +50,7 @@ public class RoomDTO {
     // 숙박 종료일
     private String stayEnd;
 
+    // 예약 기간 만료여부
     private boolean isExpired;
 
     //Room엔티티 > RoomDTO로 변환 메서드

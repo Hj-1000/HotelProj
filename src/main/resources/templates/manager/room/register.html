@@ -41,118 +41,161 @@
     </style>
 </head>
 <body>
-    <div layout:fragment="content">
-        <div class="container py-4">
-            <h1 class="text-center mb-5">객실 등록</h1>
-            <!-- Room Registration Form -->
-            <form th:action="@{/manager/room/register}" th:object="${room}" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
-                <!-- 지사(호텔) -->
-                <div class="mb-3 mt-3">
-                    <label for="hotelId" class="form-label">지사명:</label>
-                    <select id="hotelId" name="hotelId" class="form-select">
-                        <th:block th:each="hotelDTOS : ${hotelDTOS}">
-                            <option th:value="${hotelDTOS.hotelId}" th:text="${hotelDTOS.hotelName}">뒤에바</option>
-                        </th:block>
-                    </select>
+<div layout:fragment="content">
+    <div class="container py-4">
+        <h1 class="text-center mb-5">객실 등록</h1>
+        <!-- Room Registration Form -->
+        <form th:action="@{/manager/room/register}" th:object="${room}" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+            <!-- 지사(호텔) -->
+            <div class="mb-3 mt-3">
+                <label for="hotelId" class="form-label">지사명:</label>
+                <select id="hotelId" name="hotelId" class="form-select">
+                    <th:block th:each="hotelDTOS : ${hotelDTOS}">
+                        <option th:value="${hotelDTOS.hotelId}" th:text="${hotelDTOS.hotelName}">뒤에바</option>
+                    </th:block>
+                </select>
+            </div>
+            <!-- 객실 이름 -->
+            <div class="mb-3">
+                <label for="roomName" class="form-label">객실 이름</label>
+                <input type="text" class="form-control" id="roomName" th:field="*{roomName}" placeholder="객실 이름을 입력하세요" required>
+                <div class="invalid-feedback">
+                    객실 이름을 입력해야 합니다.
                 </div>
-                <!-- 객실 이름 -->
-                <div class="mb-3">
-                    <label for="roomName" class="form-label">객실 이름</label>
-                    <input type="text" class="form-control" id="roomName" th:field="*{roomName}" placeholder="객실 이름을 입력하세요" required>
-                    <div class="invalid-feedback">
-                        객실 이름을 입력해야 합니다.
+            </div>
+
+            <!-- 객실 타입 -->
+            <div class="mb-3">
+                <label for="roomType" class="form-label">객실 타입</label>
+                <select class="form-select" id="roomType" th:field="*{roomType}" required>
+                    <option value="" disabled selected>객실 타입을 선택하세요</option>
+                    <option value="Single">Single Room</option>
+                    <option value="Double">Double Room</option>
+                    <option value="Suite">Suite Room</option>
+                </select>
+                <div class="invalid-feedback">
+                    객실 타입을 선택해야 합니다.
+                </div>
+            </div>
+
+            <!-- 객실 가격 -->
+            <div class="mb-3">
+                <label for="roomPrice" class="form-label">객실 가격 (KRW)</label>
+                <input type="number" class="form-control" id="roomPrice" th:field="*{roomPrice}" placeholder="가격을 입력하세요" required>
+                <div class="invalid-feedback">
+                    가격을 입력해야 합니다.
+                </div>
+            </div>
+
+            <!-- 객실 정보 -->
+            <div class="mb-3">
+                <label for="roomInfo" class="form-label">객실 설명</label>
+                <textarea class="form-control" id="roomInfo" th:field="*{roomInfo}" placeholder="객실 설명을 입력하세요" rows="3"></textarea>
+            </div>
+
+            <!-- 예약 기간 및 숙박 기간 -->
+            <div class="date-container">
+                <div class="date-group">
+                    <label class="form-label">예약 기간</label>
+                    <div class="date-fields">
+                        <input type="date" class="form-control" id="reservationStart" th:field="*{reservationStart}" required>
+                        ~
+                        <input type="date" class="form-control" id="reservationEnd" th:field="*{reservationEnd}" required>
                     </div>
                 </div>
-
-                <!-- 객실 타입 -->
-                <div class="mb-3">
-                    <label for="roomType" class="form-label">객실 타입</label>
-                    <select class="form-select" id="roomType" th:field="*{roomType}" required>
-                        <option value="" disabled selected>객실 타입을 선택하세요</option>
-                        <option value="Single">Single Room</option>
-                        <option value="Double">Double Room</option>
-                        <option value="Suite">Suite Room</option>
-                    </select>
-                    <div class="invalid-feedback">
-                        객실 타입을 선택해야 합니다.
+                <div class="date-group">
+                    <label class="form-label">숙박 기간</label>
+                    <div class="date-fields">
+                        <input type="date" class="form-control" id="stayStart" th:field="*{stayStart}" required>
+                        ~
+                        <input type="date" class="form-control" id="stayEnd" th:field="*{stayEnd}" required>
                     </div>
                 </div>
+            </div>
 
-                <!-- 객실 가격 -->
-                <div class="mb-3">
-                    <label for="roomPrice" class="form-label">객실 가격 (KRW)</label>
-                    <input type="number" class="form-control" id="roomPrice" th:field="*{roomPrice}" placeholder="가격을 입력하세요" required>
-                    <div class="invalid-feedback">
-                        가격을 입력해야 합니다.
-                    </div>
+            <!-- 객실 상태 -->
+            <div class="mb-3">
+                <label class="form-label">객실 상태</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" id="statusAvailable" th:field="*{roomStatus}" value="true">
+                    <label class="form-check-label" for="statusAvailable">예약 가능</label>
                 </div>
-
-                <!-- 객실 상태 -->
-                <div class="mb-3">
-                    <label class="form-label">객실 상태</label>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" id="statusAvailable" th:field="*{roomStatus}" value="true">
-                        <label class="form-check-label" for="statusAvailable">예약 가능</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" id="statusUnavailable" th:field="*{roomStatus}" value="false">
-                        <label class="form-check-label" for="statusUnavailable">예약 불가</label>
-                    </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" id="statusUnavailable" th:field="*{roomStatus}" value="false">
+                    <label class="form-check-label" for="statusUnavailable">예약 불가</label>
                 </div>
+            </div>
 
-                <!-- 객실 정보 -->
-                <div class="mb-3">
-                    <label for="roomInfo" class="form-label">객실 설명</label>
-                    <textarea class="form-control" id="roomInfo" th:field="*{roomInfo}" placeholder="객실 설명을 입력하세요" rows="3"></textarea>
-                </div>
+            <!-- 객실 이미지 업로드 -->
+            <div class="mb-3">
+                <label for="imageFile" class="form-label">객실 이미지 업로드</label>
+                <input type="file" class="form-control" id="imageFile" name="imageFile" multiple>
+                <small class="form-text text-muted">여러 이미지를 선택하려면 Ctrl(또는 Cmd) 키를 누른 상태로 이미지를 선택하세요.</small>
+            </div>
 
-                <!-- 예약 기간 및 숙박 기간 -->
-                <div class="date-container">
-                    <div class="date-group">
-                        <label class="form-label">예약 기간</label>
-                        <div class="date-fields">
-                            <input type="date" class="form-control" id="reservationStart" th:field="*{reservationStart}" required>
-                            ~
-                            <input type="date" class="form-control" id="reservationEnd" th:field="*{reservationEnd}" required>
-                        </div>
-                    </div>
-                    <div class="date-group">
-                        <label class="form-label">숙박 기간</label>
-                        <div class="date-fields">
-                            <input type="date" class="form-control" id="stayStart" th:field="*{stayStart}" required>
-                            ~
-                            <input type="date" class="form-control" id="stayEnd" th:field="*{stayEnd}" required>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 객실 이미지 업로드 -->
-                <div class="mb-3">
-                    <label for="imageFile" class="form-label">객실 이미지 업로드</label>
-                    <input type="file" class="form-control" id="imageFile" name="imageFile" multiple>
-                    <small class="form-text text-muted">여러 이미지를 선택하려면 Ctrl(또는 Cmd) 키를 누른 상태로 이미지를 선택하세요.</small>
-                </div>
-
-                <!-- Submit Button -->
-                <button type="submit" class="btn btn-primary">등록</button>
-            </form>
-        </div>
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary">등록</button>
+        </form>
     </div>
-<script>
-    // Bootstrap form validation
-    (() => {
-        'use strict';
-        const forms = document.querySelectorAll('.needs-validation');
-        Array.prototype.slice.call(forms).forEach(form => {
-            form.addEventListener('submit', event => {
-                if (!form.checkValidity()) {
-                    event.preventDefault();
-                    event.stopPropagation();
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const reservationEndInput = document.getElementById("reservationEnd");
+            const statusAvailable = document.getElementById("statusAvailable");
+            const statusUnavailable = document.getElementById("statusUnavailable");
+            const form = document.querySelector("form");
+
+            function updateRoomStatus() {
+                const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD 형식의 오늘 날짜
+                const reservationEnd = reservationEndInput.value; // 사용자가 선택한 예약 종료 날짜
+
+                if (reservationEnd) {
+                    if (reservationEnd > today) {
+                        // 예약 종료일이 오늘 이후면 예약 가능
+                        statusAvailable.checked = true;
+                        statusUnavailable.checked = false;
+                    } else {
+                        // 예약 종료일이 오늘 이전이면 예약 불가
+                        statusAvailable.checked = false;
+                        statusUnavailable.checked = true;
+                    }
                 }
-                form.classList.add('was-validated');
-            }, false);
+
+                // 사용자가 직접 변경하지 못하도록 비활성화
+                statusAvailable.disabled = true;
+                statusUnavailable.disabled = true;
+            }
+
+            // 페이지 로드 시 상태 업데이트 (값이 있을 경우)
+            window.onload = updateRoomStatus;
+
+            // 예약 종료일이 변경될 때마다 상태 업데이트
+            reservationEndInput.addEventListener("change", updateRoomStatus);
+            reservationEndInput.addEventListener("input", updateRoomStatus);
+
+            // 폼 제출 시 roomStatus 값이 서버로 정상적으로 전송되도록 disabled 해제
+            form.addEventListener("submit", function () {
+                statusAvailable.removeAttribute("disabled");
+                statusUnavailable.removeAttribute("disabled");
+            });
         });
-    })();
-</script>
+
+        // Bootstrap form validation
+        (() => {
+            'use strict';
+            const forms = document.querySelectorAll('.needs-validation');
+            Array.prototype.slice.call(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        })();
+    </script>
+</div>
+
 </body>
 </html>
