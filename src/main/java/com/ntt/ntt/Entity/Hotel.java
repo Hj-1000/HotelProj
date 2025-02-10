@@ -61,7 +61,11 @@ public class Hotel extends BaseEntity {
     //회사와 연결
     //2025-01-22 추가
     @ManyToOne
-    @JoinColumn(name = "companyId")
+    @JoinColumn(name = "companyId", nullable = false)
     private Company company;
+
+    //2024-02-10 양방향 삭제를 위해 추가
+    @OneToMany(mappedBy = "hotelId", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Room> rooms;
 
 }
