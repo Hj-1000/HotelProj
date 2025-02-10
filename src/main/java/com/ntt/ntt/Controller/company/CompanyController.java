@@ -131,7 +131,7 @@ public class CompanyController {
             // 본사 ID에 맞는 호텔(지사) 목록을 페이징 처리하여 가져옵니다.
             Page<HotelDTO> hotelDTOS = companyService.hotelListBycompany(companyId, pageable);
 
-            // 호텔(지사) 목록에 관련된 이미지와 가격 포맷팅 처리
+            // 호텔(지사) 목록에 관련된 이미지 포맷팅 처리
             for (HotelDTO hotelDTO : hotelDTOS) {
                 if (hotelDTO.getHotelImgDTOList() != null && !hotelDTO.getHotelImgDTOList().isEmpty()) {
                     log.info("Room ID: {} - 이미지 개수: {}", hotelDTO.getHotelId(), hotelDTO.getHotelImgDTOList().size());
