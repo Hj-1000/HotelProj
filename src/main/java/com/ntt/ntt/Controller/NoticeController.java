@@ -168,6 +168,14 @@ public class NoticeController {
         model.addAttribute("noticeDTO", noticeDTO);
         return "notice/userread";
     }
+    @GetMapping("/sample/hotellist")
+    public String hotellistForm() {
+        return "sample/hotellist";
+    }
+    @GetMapping("/sample/hotelread")
+    public String hotelreadForm() {
+        return "sample/hotelread";
+    }
 }
 
 
