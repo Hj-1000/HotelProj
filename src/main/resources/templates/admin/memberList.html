@@ -127,7 +127,7 @@
                     </th:block>
                     </tbody>
                 </table>
-                <div class="pagination d-flex justify-content-center">
+                <div th:if="${totalPages > 1}" class="pagination d-flex justify-content-center">
                     <ul class="pagination">
                         <!-- 이전 버튼 -->
                         <li th:classappend="${pageNumber == 0} ? 'disabled'" class="page-item">

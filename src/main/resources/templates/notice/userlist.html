@@ -81,7 +81,7 @@
                         </li>
 
                         <!-- 다음 버튼 -->
-                        <li th:classappend="${pagination['currentPage'] == pagination['lastPage']}" class="page-item">
+                        <li th:classappend="${pagination['currentPage'] == pagination['lastPage']} ? 'disabled'" class="page-item">
                             <a class="page-link" th:href="@{/notice/userlist(page=${pagination['nextPage']}, size=10)}">다음</a>
                         </li>
                     </ul>

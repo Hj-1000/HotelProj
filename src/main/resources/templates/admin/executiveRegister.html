@@ -5,39 +5,39 @@
       layout:decorate="~{layouts/layout}">
 <head>
     <meta charset="UTF-8">
-    <title>임원등록</title>
+    <title>매니저 등록</title>
 </head>
 <body>
     <div id="wrapper" layout:fragment="content">
         <div class="container-fluid mt-4">
-            <h2 class="mb-3">임원등록</h2>
+            <h2 class="mb-3">매니저 등록</h2>
             <div class="card p-4">
-                <h5 class="mb-3">임원 정보 등록</h5>
-                <form>
+                <h5 class="mb-3">매니저 정보 등록</h5>
+                <form action="/admin/executiveRegister" method="post" onsubmit="return registerCheck();">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label for="id" class="form-label fw-bold">아이디</label>
-                            <input type="email" class="form-control" id="id" placeholder="이메일">
-                        </div>
-                        <div class="col-md-6">
-                            <label for="name" class="form-label fw-bold">이름</label>
+                            <label for="name" class="form-label fw-bold">*이름</label>
                             <input type="text" class="form-control" id="name" placeholder="이름">
                         </div>
                         <div class="col-md-6">
-                            <label for="password" class="form-label fw-bold">비밀번호</label>
-                            <input type="password" class="form-control" id="password" placeholder="비밀번호는 6~12자의 영문, 숫자, 기호">
+                            <label for="memberEmailInput" class="form-label fw-bold">*이메일 :</label>
+                            <div class="input-group">
+                                <input type="email" class="form-control" id="memberEmailInput" name="memberEmail">
+                                <button type="button" class="btn btn-secondary" onclick="emailCheck()">중복확인</button>
+                            </div>
+                            <small id="emailCheckMessage" style="display: none;"></small>
                         </div>
                         <div class="col-md-6">
-                            <label for="confirm-password" class="form-label fw-bold">비밀번호 확인</label>
-                            <input type="password" class="form-control" id="confirm-password" placeholder="비밀번호는 6~12자의 영문, 숫자, 기호">
+                            <label for="memberPassword" class="form-label fw-bold">*비밀번호</label>
+                            <input type="password" class="form-control" id="memberPassword" placeholder="비밀번호는 6~12자의 영문, 숫자, 기호">
                         </div>
                         <div class="col-md-6">
-                            <label for="role" class="form-label fw-bold">임원권한</label>
-                            <select class="form-select" id="role">
-                                <option selected>전체관리자</option>
-                                <option value="1">호텔장</option>
-                                <option value="2">매니저</option>
-                            </select>
+                            <label for="memberPasswordCheck" class="form-label fw-bold">*비밀번호 확인</label>
+                            <input type="password" class="form-control" id="memberPasswordCheck" placeholder="비밀번호는 6~12자의 영문, 숫자, 기호">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="contact" class="form-label fw-bold">연락처</label>
+                            <input type="text" class="form-control" id="contact" placeholder="연락처">
                         </div>
                         <div class="col-md-6">
                             <label for="branch" class="form-label fw-bold">지사</label>
@@ -47,32 +47,83 @@
                                 <option value="2">지사 2</option>
                             </select>
                         </div>
-                        <div class="col-md-6">
-                            <label for="group" class="form-label fw-bold">호텔조직</label>
-                            <select class="form-select" id="group">
-                                <option selected>선택</option>
-                                <option value="1">조직 1</option>
-                                <option value="2">조직 2</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="store" class="form-label fw-bold">매장</label>
-                            <select class="form-select" id="store">
-                                <option selected>선택</option>
-                                <option value="1">매장 1</option>
-                                <option value="2">매장 2</option>
-                            </select>
-                        </div>
-                        <div class="col-md-12">
-                            <label for="contact" class="form-label fw-bold">연락처</label>
-                            <input type="text" class="form-control" id="contact" placeholder="연락처">
-                        </div>
                     </div>
                     <div class="text-end mt-4">
+                        <p>* 표시는 필수 입력 항목입니다.</p>
                         <button type="submit" class="btn btn-primary me-2" style="background-color: black">등록</button>
                         <button type="reset" class="btn btn-secondary">취소</button>
                     </div>
                 </form>
+
+                <script type="text/javascript">
+
+                    // 이메일 중복확인
+                    function emailCheck() {
+                        var email = document.getElementById('memberEmailInput').value;
+                        var messageElement = document.getElementById('emailCheckMessage');
+
+                        if (!email) {
+                            messageElement.style.display = "block";
+                            messageElement.style.color = "red";
+                            messageElement.innerText = "이메일을 입력하세요.";
+                            return;
+                        }
+
+                        fetch('/checkEmail?email=' + encodeURIComponent(email), {
+                            method: 'GET',
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                messageElement.style.display = "block";
+                                if (data.exists) {
+                                    messageElement.style.color = "red";
+                                    messageElement.innerText = "이미 사용 중인 이메일입니다.";
+                                } else {
+                                    messageElement.style.color = "green";
+                                    messageElement.innerText = "사용 가능한 이메일입니다.";
+                                }
+                            })
+                            .catch(error => {
+                                console.error("에러 발생:", error);
+                                messageElement.style.display = "block";
+                                messageElement.style.color = "red";
+                                messageElement.innerText = "중복 확인 중 오류가 발생했습니다.";
+                            });
+                    }
+
+                    // 비밀번호 및 인증코드, 이메일 체크
+                    function registerCheck() {
+                        var email = document.getElementById('memberEmailInput').value;
+                        var p1 = document.getElementById('memberPassword').value;
+                        var p2 = document.getElementById('memberPasswordCheck').value;
+
+                        // 비밀번호 길이 체크
+                        if (p1.length < 6) {
+                            alert('비밀번호는 6글자 이상이어야 합니다.');
+                            return false;
+                        }
+
+                        // 비밀번호 확인
+                        if (p1 != p2) {
+                            alert("비밀번호가 일치하지 않습니다.");
+                            return false;
+                        } else {
+                            fetch('/checkEmail?email=' + encodeURIComponent(email), {
+                                method: 'GET',
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.exists) {
+                                        // 이메일이 이미 존재하는 경우 alert 띄우기
+                                        alert("이미 가입된 회원입니다.");
+                                        return false; // 회원가입 제출 막기
+                                    }
+                                    alert("회원가입에 성공하였습니다. 로그인 페이지로 이동합니다.");
+                                })
+                        }
+                    }
+                </script>
+
             </div>
         </div>
     </div>
