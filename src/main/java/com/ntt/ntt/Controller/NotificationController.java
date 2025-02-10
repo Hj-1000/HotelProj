@@ -33,7 +33,7 @@ public class NotificationController {
                 model.addAttribute("notifications", notifications);
             }
         }
-        return "admin/executive"; // 관리자가 볼 수 있는 페이지
+        return "admin/executiveList"; // 관리자가 볼 수 있는 페이지
     }
 
     // 🔹 로그인한 사용자의 알림 목록 조회

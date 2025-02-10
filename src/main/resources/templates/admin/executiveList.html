@@ -87,7 +87,7 @@
 
             <div class="card mt-4">
                 <div class="card-body">
-                    <h5 class="card-title">회원 목록</h5>
+                    <h5 class="card-title">임원 목록</h5>
                     <table class="table table-bordered text-center">
                         <thead>
                         <tr>
@@ -102,28 +102,61 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>호텔장</td>
-                            <td>test1@ggg.com</td>
-                            <td>홍길동</td>
-                            <td>010-1234-5678</td>
-                            <td>5</td>
-                            <td>2</td>
-                            <td><button class="btn btn-success btn-sm">활성</button></td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>매니저</td>
-                            <td>test2@ggg.com</td>
-                            <td>신짱구</td>
-                            <td>010-2345-6789</td>
-                            <td>3</td>
-                            <td>1</td>
-                            <td><button class="btn btn-danger btn-sm">비활성</button></td>
-                        </tr>
+                        <th:block th:each="memberDTO : ${memberDTOList}">
+                            <tr style="vertical-align: middle;">
+                                <td th:text="${memberDTO.memberId}">1</td>
+                                <td>
+                                    <form th:action="@{/admin/update}" method="post">
+                                        <input type="hidden" th:value="${memberDTO.memberId}" name="memberId" />
+                                        <select class="form-select" name="role">
+                                            <option th:each="role : ${roles}"
+                                                    th:value="${role}"
+                                                    th:text="${role}"
+                                                    th:selected="${memberDTO.role == role}"></option>
+                                        </select>
+                                </td>
+                                <td th:text="${memberDTO.memberEmail}">test2@ggg.com</td>
+                                <td th:text="${memberDTO.memberName}">신짱구</td>
+                                <td th:text="${memberDTO.memberPhone}">010-2345-6789</td>
+                                <td th:text="${#temporals.format(memberDTO.regDate, 'yyyy-MM-dd HH:mm:ss')}">2023-01-01</td>
+                                <td>
+                                    <select class="form-select" name="memberStatus">
+                                        <option value="활성" th:selected="${memberDTO.memberStatus == '활성'}">활성</option>
+                                        <option value="비활성" th:selected="${memberDTO.memberStatus == '비활성'}">비활성</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <button type="submit" class="btn btn-primary">수정</button>
+                                </td>
+                                </form>
+                            </tr>
+                        </th:block>
                         </tbody>
                     </table>
+                    </table>
+                    <div th:if="${totalPages > 1}" class="pagination d-flex justify-content-center">
+                        <ul class="pagination">
+                            <!-- 이전 버튼 -->
+                            <li th:classappend="${pageNumber == 0} ? 'disabled'" class="page-item">
+                                <a class="page-link" th:href="@{/admin/memberList(page=${pageNumber - 1}, size=${size}, role=${param.role}, email=${param.email}, status=${param.status}, name=${param.name}, phone=${param.phone}, startDate=${param.startDate}, endDate=${param.endDate})}">이전</a>
+                            </li>
+
+                            <!-- 페이지 번호 버튼 -->
+                            <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                th:classappend="${i == pageNumber} ? 'active'"
+                                class="page-item">
+                                <a class="page-link"
+                                   th:href="@{/admin/memberList(page=${i}, size=${size}, role=${param.role}, email=${param.email}, status=${param.status}, name=${param.name}, phone=${param.phone}, startDate=${param.startDate}, endDate=${param.endDate})}"
+                                   th:text="${i + 1}">
+                                </a>
+                            </li>
+
+                            <!-- 다음 버튼 -->
+                            <li th:classappend="${pageNumber + 1 == totalPages} ? 'disabled'" class="page-item">
+                                <a class="page-link" th:href="@{/admin/memberList(page=${pageNumber + 1}, size=${size}, role=${param.role}, email=${param.email}, status=${param.status}, name=${param.name}, phone=${param.phone}, startDate=${param.startDate}, endDate=${param.endDate})}">다음</a>
+                            </li>
+                        </ul>
+                    </div>
                     <!-- 추가 버튼 -->
                     <div class="text-end">
                         <button class="btn btn-primary" style="background-color: black" onclick="location.href='/admin/executiveRegister' ">추가</button>
@@ -132,5 +165,8 @@
             </div>
         </div>
     </div>
+
+
+
 </body>
 </html>

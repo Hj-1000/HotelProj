@@ -3,6 +3,7 @@ package com.ntt.ntt.Controller;
 import com.ntt.ntt.DTO.MemberDTO;
 import com.ntt.ntt.Service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,6 +18,7 @@ import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
+@Tag(name = "memberController", description = "유저 정보 관리 컨트롤러")
 public class MemberController {
 
     private final MemberService memberService;
@@ -61,7 +63,7 @@ public class MemberController {
     @PostMapping("/admin/register")
     public String adminregisterProc(MemberDTO memberDTO) {
         try {
-            memberService.saveManager(memberDTO);
+            memberService.saveAdmin(memberDTO);
             return "redirect:/login"; // 회원가입 성공 시 로그인 페이지로 리다이렉트
         } catch (IllegalStateException e) {
             // 예외가 발생한 경우 회원가입 페이지로 리다이렉트

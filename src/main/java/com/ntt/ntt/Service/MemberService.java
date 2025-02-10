@@ -82,7 +82,7 @@ public class MemberService implements UserDetailsService {
     }
 
     // 관리자 회원가입
-    public void saveManager(MemberDTO memberDTO) {
+    public void saveAdmin(MemberDTO memberDTO) {
         // 회원가입시 입력한 이메일이 존재하는지 조회
         Optional<Member> read = memberRepository.findByMemberEmail(memberDTO.getMemberEmail());
 
@@ -99,6 +99,27 @@ public class MemberService implements UserDetailsService {
         member.setMemberPassword(password);
         member.setMemberStatus("활성");
         member.setRole(memberDTO.getRole()); // 관리자는 회원가입시 선택한 권한으로 가입
+        memberRepository.save(member);
+    }
+
+    // 매니저 회원가입
+    public void saveManager(MemberDTO memberDTO) {
+        // 회원가입시 입력한 이메일이 존재하는지 조회
+        Optional<Member> read = memberRepository.findByMemberEmail(memberDTO.getMemberEmail());
+
+        // 입력한 이메일이 이미 존재하면 회원가입 실패
+        if (read.isPresent()) {
+            throw new IllegalStateException("이미 가입된 회원입니다");
+        }
+
+        // 입력한 이메일이 존재하지 않으면 회원가입 성공
+        String password = passwordEncoder.encode(memberDTO.getMemberPassword());
+        Member member = modelMapper.map(memberDTO, Member.class);
+        member.setMemberName(memberDTO.getMemberName());
+        member.setMemberPhone(memberDTO.getMemberPhone());
+        member.setMemberPassword(password); // 암호화된 비밀번호 저장
+        member.setMemberStatus("활성"); // 회원가입시 memberStatus 는 기본적으로 '활성' 상태로 가입
+        member.setRole(Role.MANAGER); // MANAGER 권한으로 가입
         memberRepository.save(member);
     }
 
