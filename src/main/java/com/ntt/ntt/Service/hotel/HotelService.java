@@ -123,7 +123,22 @@ public class HotelService {
         }
 
         // 3. Hotel -> HotelDTO 변환
-        Page<HotelDTO> hotelDTOS = hotels.map(entity -> modelMapper.map(entity, HotelDTO.class));
+        // Hotel -> HotelDTO 변환
+        Page<HotelDTO> hotelDTOS = hotels.map(entity -> {
+            HotelDTO hotelDTO = modelMapper.map(entity, HotelDTO.class);
+
+            // 호텔에 대한 이미지 리스트 가져오기
+            List<ImageDTO> imgDTOList = imageRepository.findByHotel_HotelId(entity.getHotelId())
+                    .stream()
+                    .map(imagefile -> {
+                        imagefile.setImagePath(imagefile.getImagePath().replace("c:/data/", "")); // 경로 수정
+                        return modelMapper.map(imagefile, ImageDTO.class);
+                    })
+                    .collect(Collectors.toList());
+
+            hotelDTO.setHotelImgDTOList(imgDTOList); // 이미지 DTO 리스트 설정
+            return hotelDTO;
+        });
 
         return hotelDTOS;
     }

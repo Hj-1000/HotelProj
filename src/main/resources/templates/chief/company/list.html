@@ -137,8 +137,8 @@
                 <table class="table table-bordered text-center">
                     <thead>
                     <tr>
-                        <th style="width: 10%">No</th>
-                        <th style="width: 30%">본사명</th>
+                        <th style="width: 13%">이미지</th>
+                        <th style="width: 27%">본사명</th>
                         <th style="width: 20%">관리자명</th>
                         <th style="width: 10%">지사수</th>
                         <th style="width: 10%">매장수</th>
@@ -149,17 +149,29 @@
 
                     <th:block th:unless="${#lists.isEmpty(companyDTOS)}"><!--값이 없으면이 아니면(있으면)-->
                         <tr th:each="data:${companyDTOS}">
-                            <td th:text="${data.companyId}">1</td>
-                            <td >
+<!--                            <td th:text="${data.companyId}">1</td>-->
+                            <td class="align-middle text-center" style="height: 100px">
+                                <img th:if="${data.companyImgDTOList != null and !data.companyImgDTOList.isEmpty()}"
+                                     th:src="@{'/upload/' + ${data.companyImgDTOList[0].imagePath}}"
+                                     alt="Room Image"
+                                     class="room-image" width="100px" >
+                                <span th:if="${data.companyImgDTOList == null or data.companyImgDTOList.isEmpty()}">
+                                    <img src="/img/default_img.jpg" width="100px">
+                                </span>
+                            </td>
+                            <td class="align-middle text-center">
                                 <a th:href="@{/company/read(companyId=${data.companyId})}" style="text-decoration: none" th:text="${data.companyName}">NTT호텔</a>
                             </td>
-                            <td th:text="${data.companyManager}">우리</td>
+                            <td th:text="${data.companyManager}" class="align-middle text-center">우리</td>
                             <!--나중에 지사수, 매장수 업데이트할거임~!-->
-                            <td th:text="${data.hotelCount}">2</td>
-                            <td >2</td>
-                            <td>
+                            <td th:text="${data.hotelCount}" class="align-middle text-center">2</td>
+                            <td class="align-middle text-center">2</td>
+                            <td class="align-middle text-center">
+                                <a th:href="@{company/read(hotelId=${data.companyId})}" class="btn btn-info btn-sm">보기</a>
+                                <a th:href="@{company/update(hotelId=${data.companyId})}"  class="btn btn-warning btn-sm">수정</a>
+
                                 <!--삭제 버튼 누르면 해당 본사 삭제됨-->
-                                <a th:href="@{/company/delete(companyId=${data.companyId})}" style="text-decoration: none" class="badge bg-danger delBtn">삭제</a>
+                                <a th:href="@{/company/delete(companyId=${data.companyId})}" style="text-decoration: none" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')">삭제</a>
                             </td>
                         </tr>
                     </th:block>
