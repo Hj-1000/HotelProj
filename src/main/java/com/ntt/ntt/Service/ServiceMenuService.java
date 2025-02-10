@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -131,7 +132,22 @@ public class ServiceMenuService {
             }
         }
 
-        return serviceMenu.map(entity -> modelMapper.map(entity, ServiceMenuDTO.class));
+        return serviceMenu.map(entity -> {
+            ServiceMenuDTO serviceMenuDTO = modelMapper.map(entity, ServiceMenuDTO.class);
+
+            // 이미지 추가 (serviceMenuId를 기준으로 이미지 리스트를 조회)
+            List<ImageDTO> imageDTOList = imageRepository.findByServiceMenu_ServiceMenuId(serviceMenuDTO.getServiceMenuId())
+                    .stream().map(imagefile -> {
+                        imagefile.setImagePath(imagefile.getImagePath().replace("c:/data/", ""));  // 이미지 경로 수정
+                        return modelMapper.map(imagefile, ImageDTO.class);
+                    })
+                    .collect(Collectors.toList());
+
+            // DTO에 이미지 리스트 설정
+            serviceMenuDTO.setServiceMenuImageDTOList(imageDTOList);
+
+            return serviceMenuDTO;
+        });
     }
 
 
@@ -148,16 +164,46 @@ public class ServiceMenuService {
 
         // 엔티티를 DTO로 변환
         return serviceMenuList.stream()
-                .map(menu -> ServiceMenuDTO.builder()
-                        .serviceMenuId(menu.getServiceMenuId())
-                        .serviceCateName(menu.getServiceCate().getServiceCateName())
-                        .serviceMenuName(menu.getServiceMenuName())
-                        .serviceMenuInfo(menu.getServiceMenuInfo())
-                        .serviceMenuStatus(menu.getServiceMenuStatus())
-                        .serviceMenuPrice(menu.getServiceMenuPrice())
-                        .build())
+                .map(menu -> {
+                    ServiceMenuDTO serviceMenuDTO = ServiceMenuDTO.builder()
+                            .serviceMenuId(menu.getServiceMenuId())
+                            .serviceCateName(menu.getServiceCate().getServiceCateName())
+                            .serviceMenuName(menu.getServiceMenuName())
+                            .serviceMenuInfo(menu.getServiceMenuInfo())
+                            .serviceMenuStatus(menu.getServiceMenuStatus())
+                            .serviceMenuPrice(menu.getServiceMenuPrice())
+                            .build();
+                    List<ImageDTO> imageDTOList = imageRepository.findByServiceMenu_ServiceMenuId(serviceMenuDTO.getServiceMenuId())
+                            .stream().map(imagefile -> {
+                                imagefile.setImagePath(imagefile.getImagePath().replace("c:data/" ,"")); //이미지 경로 수정
+                                return modelMapper.map(imagefile, ImageDTO.class);
+                            }).collect(Collectors.toList());
+                    //DTO에 이미지 리스트 설정
+                    serviceMenuDTO.setServiceMenuImageDTOList(imageDTOList);
+                    return serviceMenuDTO;
+                })
                 .collect(Collectors.toList());
     }
+    //일반 유저용 메뉴목록 가져오기
+    public List<ServiceMenuDTO> listUserMenu(){
+        List<ServiceMenu> serviceMenuList =
+                serviceMenuRepository.findAll();
+
+        List<ServiceMenuDTO> serviceMenuDTOList =
+                serviceMenuList.stream().map(serviceMenu -> {
+                    ServiceMenuDTO serviceMenuDTO = modelMapper.map(serviceMenu, ServiceMenuDTO.class);
+                    List<ImageDTO> serviceMenuImageDTOList = imageRepository.findByServiceMenu_ServiceMenuId(serviceMenu.getServiceMenuId())
+                            .stream().map(menuImage -> modelMapper.map(menuImage, ImageDTO.class)).collect(Collectors.toList());
+                    if (serviceMenuDTO != null) {
+                        serviceMenuDTO.setServiceMenuImageDTOList(serviceMenuImageDTOList);
+                    }
+                    return serviceMenuDTO;
+                }).collect(Collectors.toList());
+        return serviceMenuDTOList;
+    }
+
+
+
 
 
     //서비스 메뉴 상세보기

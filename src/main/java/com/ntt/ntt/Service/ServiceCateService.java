@@ -105,9 +105,18 @@ public class ServiceCateService{
         }
 
         // 3. 변환
-        Page<ServiceCateDTO> serviceCateDTOS = serviceCatePage.map(entity -> modelMapper.map(entity, ServiceCateDTO.class));
-
-        return serviceCateDTOS;
+        return  serviceCatePage.map(entity ->{
+            ServiceCateDTO serviceCateDTO = modelMapper.map(entity, ServiceCateDTO.class);
+            List<ImageDTO> imageDTOList = imageRepository.findByServiceCate_ServiceCateId(serviceCateDTO.getServiceCateId())
+                    .stream().map(imagefile -> {
+                        imagefile.setImagePath(imagefile.getImagePath().replace("c:/data/", ""));  // 이미지 경로 수정
+                        return modelMapper.map(imagefile, ImageDTO.class);
+                    })
+                    .collect(Collectors.toList());
+            //DTO에 이미리 리스트 설정
+            serviceCateDTO.setServiceCateImageDTOList(imageDTOList);
+            return serviceCateDTO;
+        });
     }
 
     //존재하는 카테고리 목록 가져오기
