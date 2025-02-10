@@ -26,13 +26,14 @@
     </script>
 </head>
 <body>
+<!--gg-->
 <div id="wrapper" layout:fragment="content">
     <div class="container-fluid mt-4">
         <h2 class="mb-3">지사 수정</h2>
         <!-- 폼 -->
         <div class="card p-4 mb-4">
             <div class="row g-3 align-items-center">
-                <form action="/manager/hotel/modify" method="post" enctype="multipart/form-data" th:object="${hotelDTO}">
+                <form action="/manager/hotel/update" method="post" enctype="multipart/form-data" th:object="${hotelDTO}">
                     <input type="hidden" class="form-control hotelId" id="hotelId" name="hotelId" th:field="*{hotelId}">
                     <div class="mb-3 mt-3">
                         <label class="form-label">본사명:</label>

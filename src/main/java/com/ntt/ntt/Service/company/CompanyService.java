@@ -1,9 +1,13 @@
 package com.ntt.ntt.Service.company;
 
 import com.ntt.ntt.DTO.CompanyDTO;
+import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.ImageDTO;
+import com.ntt.ntt.DTO.RoomDTO;
 import com.ntt.ntt.Entity.Company;
+import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.Image;
+import com.ntt.ntt.Entity.Room;
 import com.ntt.ntt.Repository.ImageRepository;
 import com.ntt.ntt.Repository.company.CompanyRepository;
 import com.ntt.ntt.Repository.hotel.HotelRepository;
@@ -146,6 +150,43 @@ public class CompanyService {
         return companyDTO;
 
     }
+
+
+    // companyId에 맞는 방들을 가져오는 메서드
+    public Page<HotelDTO> hotelListBycompany(Integer companyId, Pageable page) {
+
+        // 1. 페이지 정보 재가공
+        int currentPage = page.getPageNumber(); // 기존 페이지 번호 그대로 사용
+        int pageSize = page.getPageSize(); // 페이지 사이즈 그대로 사용
+        Pageable pageable = PageRequest.of(
+                currentPage, pageSize,
+                Sort.by(Sort.Direction.ASC, "hotelId") // 등록순 정렬
+        );
+
+        // 2. 검색타입에 따른 호텔 조회
+        Page<Hotel> hotels = null;
+        hotels = hotelRepository.findByCompany_CompanyId(companyId, pageable);
+
+        // 3. Hotel -> HotelDTO 변환
+        Page<HotelDTO> hotelDTOS = hotels.map(entity -> {
+            HotelDTO hotelDTO = modelMapper.map(entity, HotelDTO.class);
+
+            // 호텔에 대한 이미지 리스트 가져오기
+            List<ImageDTO> imgDTOList = imageRepository.findByHotel_HotelId(entity.getHotelId())
+                    .stream()
+                    .map(imagefile -> {
+                        imagefile.setImagePath(imagefile.getImagePath().replace("c:/data/", "")); // 경로 수정
+                        return modelMapper.map(imagefile, ImageDTO.class);
+                    })
+                    .collect(Collectors.toList());
+
+            hotelDTO.setHotelImgDTOList(imgDTOList); // 이미지 DTO 리스트 설정
+            return hotelDTO;
+        });
+
+        return hotelDTOS;
+    }
+
 
     // 회사 정보 수정 (이미지 수정 포함)
     // 새로운 이미지 추가 안할때도 기존이미지가 자꾸 삭제됨 이건 추후 수정 예정 :2025-01-22
