@@ -4,6 +4,7 @@ import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Repository.MemberRepository;
 import com.ntt.ntt.Service.EmailService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Controller
+@Tag(name = "passwordResetController", description = "비밀번호 재설정 컨트롤러")
 public class PasswordResetController {
 
     @Autowired

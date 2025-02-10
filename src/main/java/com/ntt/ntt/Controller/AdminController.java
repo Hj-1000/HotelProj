@@ -10,6 +10,7 @@ import com.ntt.ntt.Service.MemberService;
 import com.ntt.ntt.Service.company.CompanyService;
 import com.ntt.ntt.Service.hotel.HotelService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,9 +21,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
+@Tag(name = "adminController", description = "사이트 회원 관리 컨트롤러")
 public class AdminController {
 
     private final HotelService hotelService;
@@ -39,8 +42,8 @@ public class AdminController {
                                 @RequestParam(required = false) String phone,
                                 @RequestParam(required = false) String startDate,
                                 @RequestParam(required = false) String endDate,
-                                @RequestParam(defaultValue = "0") int page,  // 추가됨
-                                @RequestParam(defaultValue = "10") int size, // 추가됨
+                                @RequestParam(defaultValue = "0") int page,
+                                @RequestParam(defaultValue = "10") int size,
                                 Model model) {
         try {
             if ("전체".equals(role)) role = null;
@@ -67,7 +70,7 @@ public class AdminController {
         return "admin/memberList";
     }
 
-    @Operation(summary = "회원정보 수정", description = "모든 사용자의 회원정보를 새로 입력한 값으로 업데이트한다.")
+    @Operation(summary = "회원정보 수정", description = "사용자의 회원정보를 새로 입력한 값으로 업데이트한다.")
     @PostMapping("/admin/update")
     public String adminUpdate(MemberDTO memberDTO, RedirectAttributes redirectAttributes) {
         try {
@@ -80,27 +83,74 @@ public class AdminController {
         }
     }
 
-    @GetMapping("/admin/executive")
-    public String showRegisterCompanyPage(Model model, Principal principal) {
-        // 로그인한 사용자의 이메일 가져오기
-        String email = principal.getName();
+    @Operation(summary = "임원관리", description = "임원관리 페이지로 이동한다.")
+    @GetMapping("/admin/executiveList")
+    public String getExecutives(@RequestParam(required = false) String role,
+                                @RequestParam(required = false) String email,
+                                @RequestParam(required = false) String status,
+                                @RequestParam(required = false) String name,
+                                @RequestParam(required = false) String phone,
+                                @RequestParam(required = false) String startDate,
+                                @RequestParam(required = false) String endDate,
+                                @RequestParam(defaultValue = "0") int page,
+                                @RequestParam(defaultValue = "10") int size,
+                                Model model,
+                                Principal principal) {
+        try {
+            // "전체" 선택시 검색 필터링 null 처리
+            if ("전체".equals(role)) role = null;
+            if ("전체".equals(status)) status = null;
 
-        // 이메일로 회원 정보 조회
-        Member member = memberRepository.findByMemberEmail(email)
-                .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다."));
+            // 필터링된 회원 리스트 가져오기
+            List<MemberDTO> filteredMembers = memberService.getFilteredMembers(role, email, status, name, phone, startDate, endDate);
 
-        // 사용자가 등록한 본사 목록 가져오기
-        List<CompanyDTO> companyList = companyService.getFilteredCompany(member.getMemberId());
+            // 페이징 처리
+            int startIdx = page * size;
+            int endIdx = Math.min(startIdx + size, filteredMembers.size());
+            List<MemberDTO> pagedMembers = filteredMembers.subList(startIdx, endIdx);
 
-        // 모델에 companyList를 추가
-        model.addAttribute("companyList", companyList);
+            // 모델에 회원 리스트 추가
+            model.addAttribute("memberDTOList", pagedMembers);
+            model.addAttribute("roles", Role.values());
+            model.addAttribute("pageNumber", page);
+            model.addAttribute("totalPages", (int) Math.ceil((double) filteredMembers.size() / size));
+            model.addAttribute("size", size);
 
-        return "admin/executive"; // Thymeleaf 템플릿 이름
+            // 로그인한 사용자의 이메일 가져오기
+            String userEmail = principal.getName();
+
+            // 이메일로 회원 정보 조회
+            Member member = memberRepository.findByMemberEmail(userEmail)
+                    .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다."));
+
+            // 현재 로그인한 사용자가 등록한 본사 목록 가져오기
+            List<CompanyDTO> companyList = companyService.getFilteredCompany(member.getMemberId());
+
+            // 모델에 companyList 추가
+            model.addAttribute("companyList", companyList);
+
+        } catch (Exception e) {
+            model.addAttribute("error", "회원 목록을 가져오는 중 오류가 발생했습니다.");
+            e.printStackTrace();
+        }
+        return "admin/executiveList";
     }
 
     @GetMapping("/admin/executiveRegister")
-    public String b(){
+    public String executiveRegisterForm(){
         return "admin/executiveRegister";
+    }
+
+    @Operation(summary = "매니저 회원가입 요청", description = "입력한 유저 정보를 데이터에 저장하고 로그인 페이지로 이동한다.")
+    @PostMapping("/admin/executiveRegister")
+    public String executiveRegisterProc(MemberDTO memberDTO) {
+        try {
+            memberService.saveManager(memberDTO);
+            return "redirect:/admin/executiveRegister"; // 회원가입 성공 시 현재 페이지로 리다이렉트
+        } catch (IllegalStateException e) {
+            // 예외가 발생한 경우 회원가입 페이지로 리다이렉트
+            return "redirect:/admin/executiveRegister"; // 회원가입 페이지로 리다이렉트
+        }
     }
 
     @GetMapping("/admin/hotelHeadquarters")
