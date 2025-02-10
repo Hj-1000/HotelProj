@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>hotelread</title>
-    <!--반응형웹-->
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <!--부트스트랩-->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -78,6 +76,41 @@
             align-items: center;
             align-content: center;
         }
+        .modal {
+            width: 450px;
+            height: 800px;
+            background: white;
+            border: 1px solid #ddd;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 10px;
+        }
+        .region-list {
+            list-style: none;
+            padding: 0;
+        }
+        .region-list li {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .region-list li:hover {
+            background-color: #f0f0f0;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: center; /* 가로 가운데 정렬 */
+            align-items: center; /* 세로 중앙 정렬 */
+            width: 100%; /* 전체 너비 사용 */
+        }
+        .modal-title {
+            flex: 1; /* 제목을 가운데 정렬하도록 유연하게 확장 */
+            text-align: center; /* 텍스트 가운데 정렬 */
+        }
+
     </style>
 </head>
 <body>
@@ -85,7 +118,7 @@
 <div class="container">
     <div class="container1">
         <br>
-    <h2 style="bold">어디로 갈까요?</h2>
+    <h2 >어디로 갈까요?</h2>
         <form class="d-flex justify-content-center" role="search">
             <input class="form-control w-50 me-1" type="search" placeholder="지역선택" aria-label="Search">
             <button class="btn btn-outline-success" type="submit" >Click</button>
@@ -105,7 +138,7 @@
 
         <!-- 두 번째 호텔 -->
         <div class="hotel-card" data-bs-toggle="modal" data-bs-target="#myModal">
-            <img src="hotel1.jpg" alt="제주 해변리조트">
+            <img src="hotel2.jpg" alt="제주 해변리조트">
             <div class="hotel-info">
                 <h3>제주 해변리조트</h3>
                 <p>⭐ 4.8 (892 리뷰)</p>
@@ -117,7 +150,7 @@
 
         <div class="hotel-card" data-bs-toggle="modal" data-bs-target="#myModal">
 
-            <img src="hotel2.jpg" alt="베니키아 제주">
+            <img src="hotel3.jpg" alt="베니키아 제주">
             <div class="hotel-info">
                 <h3>베니키아 호텔 제주</h3>
                 <p>⭐ 4.2 (269 리뷰)</p>
@@ -126,53 +159,79 @@
         </div>
 
     </div>
-        <div class="modal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Modal </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Modal</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Save changes</button>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <div class="modal" tabindex="-1" id="myModal">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Modal title</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <h4 class="modal-title">지역 선택</h4>
+
                     </div>
                     <div class="modal-body">
-                        <p>Modal body text goes here.</p>
+                        <div class="row">
+                            <div class="col-3">
+                             <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
+                               <button type="button" class="btn btn-secondary">서울</button>
+                               <button type="button" class="btn btn-secondary">부산</button>
+                               <button type="button" class="btn btn-secondary">제주</button>
+                               <button type="button" class="btn btn-secondary">경기</button>
+                               <button type="button" class="btn btn-secondary">인천</button>
+                               <button type="button" class="btn btn-secondary">강원</button>
+                               <button type="button" class="btn btn-secondary">경상</button>
+                               <button type="button" class="btn btn-secondary">전라</button>
+                               <button type="button" class="btn btn-secondary">충청</button>
+                             </div>
+                            </div>
+                           <div class="col-9">
+                            <form class="d-flex justify-content-center" role="search">
+                            <input type="search" placeholder="지역선택" aria-label="Search">
+                            <button class="btn btn-outline-success" type="submit" >Click</button>
+                            </form>
+                             <ul class="region-list">
+                              <li onclick="selectRegion('강남/역삼/삼성')">강남/역삼/삼성</li>
+                              <li onclick="selectRegion('신사/청담/압구정')">신사/청담/압구정</li>
+                              <li onclick="selectRegion('서초/교대/사당')">서초/교대/사당</li>
+                              <li onclick="selectRegion('잠실/송파/강동')">잠실/송파/강동</li>
+                              <li onclick="selectRegion('홍대/합정/마포/서대문')">홍대/합정/마포/서대문</li>
+                              <li onclick="selectRegion('여의도')">여의도</li>
+                              <li onclick="selectRegion('영등포역')">영등포역</li>
+                              <li onclick="selectRegion('구로/신도림/금천')">구로/신도림/금천</li>
+                              <li onclick="selectRegion('김포공항/강서')">김포공항/강서</li>
+                              <li onclick="selectRegion('건대입구/성수여의도')">건대입구/성수여의도</li>
+                             </ul>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Save changes</button>
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" aria-label="Close">닫기</button>
                     </div>
                 </div>
             </div>
         </div>
     <!-- 페이지네이션 -->
-    <div class="pagination">
-        <span class="active">1</span>
-        <span>2</span>
-        <span>3</span>
-        <span>4</span>
-        <span>5</span>
-    </div>
+        <div th:if="${not #lists.isEmpty(hotelDTOList)}">
+            <div class="pagination d-flex justify-content-center">
+                <ul class="pagination">
+                    <!-- 이전 버튼 -->
+                    <li th:classappend="${pagination['currentPage'] == 1} ? 'disabled'" class="page-item">
+                        <a class="page-link" th:href="@{/hotel/hotellist(page=${pagination['prevPage']}, size=10)}">이전</a>
+                    </li>
+
+                    <!-- 페이지 번호 버튼 -->
+                    <li th:each="i : ${#numbers.sequence(pagination['startPage'], pagination['endPage'])}"
+                        th:classappend="${i == pagination['currentPage']} ? 'active'" class="page-item">
+                        <a class="page-link" th:href="@{/hotel/hotellist(page=${i-1}, size=10)}" th:text="${i}">0</a>
+                    </li>
+
+                    <!-- 다음 버튼 -->
+                    <li th:classappend="${pagination['currentPage'] == pagination['lastPage']}" class="page-item">
+                        <a class="page-link" th:href="@{/hotel/hotellist(page=${pagination['nextPage']}, size=10)}">다음</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
 
 </body>
 </html>
