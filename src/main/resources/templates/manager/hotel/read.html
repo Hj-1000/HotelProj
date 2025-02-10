@@ -84,7 +84,7 @@
             <div class="text-end mt-3">
                 <a class="btn btn-primary" style="background-color: black" th:href="@{/manager/hotel/list(companyId=${hotelDTO.companyId.companyId})}">목록</a>
                 <button type="button" class="btn btn-success modalBtn">객실 등록</button>
-                <a class="btn btn-primary" th:href="@{/manager/hotel/modify(hotelId=${hotelDTO.hotelId})}">수정</a>
+                <a class="btn btn-primary" th:href="@{/manager/hotel/update(hotelId=${hotelDTO.hotelId})}">수정</a>
                 <a class="btn btn-danger" th:href="@{/manager/hotel/delete(hotelId=${hotelDTO.hotelId})}">삭제</a>
             </div>
 

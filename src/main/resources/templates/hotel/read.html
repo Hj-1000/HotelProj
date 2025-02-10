@@ -273,7 +273,7 @@
                <div class="card border-light-shadow" style="width: 950px; margin: auto; padding-top: 17px; padding-bottom: 20px;">
                    <div style="width: 950px; margin: auto">
                        <div style="margin-bottom: -20px">
-                           <h4 style="margin-bottom: -24px">&ensp;객실 리뷰</h4> <span>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;평점 4.9점</span>
+                           <h4 style="margin-bottom: -24px">&ensp;객실 리뷰</h4> <span>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;평점 <span class="hotelRating">4.9</span>점</span>
                        </div>
                        <div style="text-align: right; margin-bottom: 15px; margin-top: -10px; font-size: small">
                            전체보기>&emsp;
@@ -340,51 +340,62 @@
                             <section class="py-5">
                                 <div class="container">
                                     <h4 class="mb-5">객실 선택</h4>
-                                    <div id="room-list" class="row">
-                                        <div class="col-md-4" th:each="room : ${rooms}">
-                                            <div class="room-card"
-                                                 th:data-room-id="${room.roomId}"
-                                                 th:data-stay-start="${room.stayStart}"
-                                                 th:data-stay-end="${room.stayEnd}">
-                                                <!-- 수정된 부분: sold-out-overlay 추가 -->
-                                                <div class="room-image">
-                                                    <img th:if="${!#lists.isEmpty(room.roomImageDTOList)}"
-                                                         th:src="@{'/upload/' + ${room.roomImageDTOList[0].imagePath}}"
-                                                         class="card-img-top"
-                                                         th:alt="${room.roomName}" width="100%">
-                                                    <img th:if="${#lists.isEmpty(room.roomImageDTOList)}"
-                                                         src="/img/default_img.jpg"
-                                                         class="card-img-top"
-                                                         alt="Default Room Image" width="100%">
-                                                    <!-- 예약 종료-->
-                                                    <div class="sold-out-overlay" th:if="${!room.roomStatus}">
-                                                        예약 종료
+
+                                    <th:block th:if="${rooms == null || #lists.isEmpty(rooms)}">
+                                        <div style="text-align: center">
+                                            <img src="/img/empty.png" alt="No likes available" width="400px">
+                                            <p>목록이 비어있습니다!</p>
+                                        </div>
+                                    </th:block>
+
+                                    <th:block th:unless="${rooms == null || #lists.isEmpty(rooms)}">
+                                        <div id="room-list" class="row">
+                                            <div class="col-md-4" th:each="room : ${rooms}">
+                                                <div class="room-card"
+                                                     th:data-room-id="${room.roomId}"
+                                                     th:data-stay-start="${room.stayStart}"
+                                                     th:data-stay-end="${room.stayEnd}">
+                                                    <!-- 수정된 부분: sold-out-overlay 추가 -->
+                                                    <div class="room-image">
+                                                        <img th:if="${!#lists.isEmpty(room.roomImageDTOList)}"
+                                                             th:src="@{'/upload/' + ${room.roomImageDTOList[0].imagePath}}"
+                                                             class="card-img-top"
+                                                             th:alt="${room.roomName}" width="100%">
+                                                        <img th:if="${#lists.isEmpty(room.roomImageDTOList)}"
+                                                             src="/img/default_img.jpg"
+                                                             class="card-img-top"
+                                                             alt="Default Room Image" width="100%">
+                                                        <!-- 예약 종료-->
+                                                        <div class="sold-out-overlay" th:if="${!room.roomStatus}">
+                                                            예약 종료
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="room-text">
-                                                    <div class="d-flex justify-content-start gap-2 mb-3">
-                                                        <!-- 예약 가능 여부 -->
-                                                        <span th:text="(${room.roomStatus} ? '예약 가능' : '예약 불가')"
-                                                              class="badge"
-                                                              th:classappend="${room.roomStatus} ? 'bg-success text-white' : 'bg-danger text-white'">
+                                                    <div class="room-text">
+                                                        <div class="d-flex justify-content-start gap-2 mb-3">
+                                                            <!-- 예약 가능 여부 -->
+                                                            <span th:text="(${room.roomStatus} ? '예약 가능' : '예약 불가')"
+                                                                  class="badge"
+                                                                  th:classappend="${room.roomStatus} ? 'bg-success text-white' : 'bg-danger text-white'">
                                 </span>
-                                                        <span th:text="${room.roomType}" class="badge bg-dark text-white"></span>
-                                                    </div>
-                                                    <h5 th:text="${room.roomName}" class="card-title"></h5>
-                                                    <span>체크인 : <span th:text="${hotelDTO.hotelCheckIn}">체크인</span>시 - </span> <span>체크아웃 : <span th:text="${hotelDTO.hotelCheckOut}">체크아웃</span>시</span>
-                                                    <div class="room-actions">
-                                                        <p class="room-price mb-0"
-                                                           th:text="${room.formattedRoomPrice != null ? room.formattedRoomPrice + ' ' + '~' : '가격 미정'}"></p>
-                                                        <button class="btn btn-book"
-                                                                th:text="${room.roomStatus ? '예약하기' : '예약 불가'}"
-                                                                th:classappend="${room.roomStatus ? 'btn-dark' : 'btn-danger text-bold'}"
-                                                                th:disabled="${!room.roomStatus}">
-                                                        </button>
+                                                            <span th:text="${room.roomType}" class="badge bg-dark text-white"></span>
+                                                        </div>
+                                                        <h5 th:text="${room.roomName}" class="card-title"></h5>
+                                                        <span>체크인 : <span th:text="${hotelDTO.hotelCheckIn}">체크인</span>시 - </span> <span>체크아웃 : <span th:text="${hotelDTO.hotelCheckOut}">체크아웃</span>시</span>
+                                                        <div class="room-actions">
+                                                            <p class="room-price mb-0"
+                                                               th:text="${room.formattedRoomPrice != null ? room.formattedRoomPrice + ' ' + '~' : '가격 미정'}"></p>
+                                                            <button class="btn btn-book" style="width: 100px"
+                                                                    th:text="${room.roomStatus ? '예약하기' : '예약 불가'}"
+                                                                    th:classappend="${room.roomStatus ? 'btn-dark' : 'btn-danger text-bold'}"
+                                                                    th:disabled="${!room.roomStatus}">
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+
+                                    </th:block>
 
                                     <!-- 버튼 -->
                                     <div class="text-end mt-3">

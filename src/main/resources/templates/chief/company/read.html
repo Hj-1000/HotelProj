@@ -72,7 +72,7 @@
             </div>
             <!-- 버튼 -->
             <div class="text-end mt-3">
-                <a class="btn btn-primary" th:href="@{/company/modify(companyId=${companyDTO.companyId})}">수정</a>
+                <a class="btn btn-primary" th:href="@{/company/update(companyId=${companyDTO.companyId})}">수정</a>
                 <button type="button" class="btn btn-success modalBtn">지사 등록</button>
                 <a class="btn btn-dark" th:href="@{/manager/hotel/list(companyId=${companyDTO.companyId})}">지사 관리</a>
                 <button class="btn btn-light" onclick="location.href='/company/list' ">본사 관리</button> <!--admin만 보이도록-->

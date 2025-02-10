@@ -6,6 +6,7 @@ import com.ntt.ntt.DTO.RoomDTO;
 import com.ntt.ntt.Service.RoomService;
 import com.ntt.ntt.Service.hotel.HotelService;
 import com.ntt.ntt.Util.PaginationUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -35,6 +36,7 @@ public class HotelManagerController {
 
 
     //등록폼
+    @Operation(summary = "관리자용 호텔 등록 폼", description = "호텔 등록 페이지로 이동한다.")
     @GetMapping("/register")
     public String registerForm(Model model) {
         //검증처리가 필요하면 빈 companyDTO를 생성해서 전달한다.
@@ -44,6 +46,7 @@ public class HotelManagerController {
         return "/manager/hotel/register";
     }
     //등록처리
+    @Operation(summary = "관리자용 호텔 등록 처리", description = "호텔을 등록 처리한다.")
     @PostMapping("/register")
     public String registerProc(@ModelAttribute HotelDTO hotelDTO, List<MultipartFile> imageFiles, RedirectAttributes redirectAttributes) {
         log.info("본사 등록 진입");
@@ -64,6 +67,7 @@ public class HotelManagerController {
 
 
     //호텔본사관리자 전용
+    @Operation(summary = "관리자용 호텔 목록", description = "전체 호텔 목록 페이지로 이동한다.")
     @GetMapping("/list")
     public String list(@RequestParam(required = false) Integer companyId,
                        @RequestParam(required = false) String keyword,
@@ -147,6 +151,7 @@ public class HotelManagerController {
 
 
     //읽기
+    @Operation(summary = "관리자용 호텔 상세", description = "hotelId에 맞는 호텔 상세 페이지로 이동한다.")
     @GetMapping("/read")
     public String read(@RequestParam Integer hotelId,
                        @RequestParam(defaultValue = "0") int page,
@@ -163,7 +168,7 @@ public class HotelManagerController {
             Pageable pageable = PageRequest.of(page, 10);  // 10개씩 표시
 
             // 호텔 ID에 맞는 방 목록을 페이징 처리하여 가져옵니다.
-            Page<RoomDTO> roomsForHotel = roomService.getRoomsByHotelId(hotelId, pageable);
+            Page<RoomDTO> roomsForHotel = hotelService.roomListByHotel(hotelId, pageable);
 
             // 방 목록에 관련된 이미지와 가격 포맷팅 처리
             for (RoomDTO room : roomsForHotel) {
@@ -194,6 +199,7 @@ public class HotelManagerController {
 
 
     //수정폼
+    @Operation(summary = "관리자용 호텔 수정폼", description = "hotelId에 맞는 호텔 수정폼 페이지로 이동한다.")
     @GetMapping("/update")
     public String updateForm(Integer hotelId, Model model) {
         HotelDTO hotelDTO = hotelService.read(hotelId);
@@ -204,6 +210,7 @@ public class HotelManagerController {
         return "/manager/hotel/update";
     }
     //수정처리
+    @Operation(summary = "관리자용 호텔 수정 처리", description = "hotelId에 맞는 호텔 수정 처리한다.")
     @PostMapping("/update")
     public String updateProc(HotelDTO hotelDTO, List<MultipartFile> newImageFiles, RedirectAttributes redirectAttributes) {
         hotelService.update(hotelDTO, newImageFiles);
@@ -212,6 +219,7 @@ public class HotelManagerController {
     }
 
     //삭제
+    @Operation(summary = "관리자용 호텔 삭제", description = "hotelId에 맞는 호텔을 삭제 한다.")
     @GetMapping("/delete")
     public String delete(Integer hotelId, RedirectAttributes redirectAttributes) {
         hotelService.delete(hotelId);
