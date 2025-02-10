@@ -32,6 +32,11 @@ public class Company extends BaseEntity {
             orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Image> companyImageList;
 
+    //2024-02-10 양방향 삭제를 위해 추가
+    @OneToMany(mappedBy = "company", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Hotel> hotels;
+
+
     public Company(Integer companyId) {
         this.companyId = companyId;
     }
