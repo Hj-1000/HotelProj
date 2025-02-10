@@ -7,6 +7,7 @@ import com.ntt.ntt.DTO.RoomDTO;
 import com.ntt.ntt.Service.RoomService;
 import com.ntt.ntt.Service.hotel.HotelService;
 import com.ntt.ntt.Util.PaginationUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -34,6 +35,7 @@ public class HotelController {
 
 
     //호텔목록
+    @Operation(summary = "사용자용 호텔 목록", description = "전체 호텔 목록 페이지로 이동한다.")
     @GetMapping("/list")
     public String list(@RequestParam(required = false) String keyword,
                        @RequestParam(required = false) String searchType,
@@ -140,6 +142,8 @@ public class HotelController {
 //    }
 
 
+    //읽기
+    @Operation(summary = "사용자용 호텔 상세", description = "hotelId에 맞는 호텔 목록 페이지로 이동한다.")
     @GetMapping("/read")
     public String read(@RequestParam Integer hotelId,
                        @RequestParam(defaultValue = "0") int page,
@@ -156,7 +160,7 @@ public class HotelController {
             Pageable pageable = PageRequest.of(page, 10);  // 10개씩 표시
 
             // 호텔 ID에 맞는 방 목록을 페이징 처리하여 가져옵니다.
-            Page<RoomDTO> roomsForHotel = roomService.getRoomsByHotelId(hotelId, pageable);
+            Page<RoomDTO> roomsForHotel = hotelService.roomListByHotel(hotelId, pageable);
 
             // 방 목록에 관련된 이미지와 가격 포맷팅 처리
             for (RoomDTO room : roomsForHotel) {

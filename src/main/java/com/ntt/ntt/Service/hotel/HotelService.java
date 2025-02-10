@@ -307,17 +307,52 @@ public class HotelService {
     }
 
     // hotelId에 맞는 방들을 가져오는 메서드
-    public Page<RoomDTO> getRoomsByHotelId(Integer hotelId, Pageable pageable) {
-        // 호텔 ID에 맞는 Room 데이터 조회 (페이징 처리)
-        Page<Room> roomsPage = roomRepository.findByHotelId_HotelId(hotelId, pageable);
+    public Page<RoomDTO> roomListByHotel(Integer hotelId, Pageable page) {
 
-        // 각 Room 객체를 RoomDTO로 변환하여 리스트에 추가
-        List<RoomDTO> roomDTOs = roomsPage.getContent().stream()
-                .map(room -> modelMapper.map(room, RoomDTO.class))
-                .collect(Collectors.toList());
+        // 1. 페이지 정보 재가공
+        int currentPage = page.getPageNumber(); // 기존 페이지 번호 그대로 사용
+        int pageSize = page.getPageSize(); // 페이지 사이즈 그대로 사용
+        Pageable pageable = PageRequest.of(
+                currentPage, pageSize,
+                Sort.by(Sort.Direction.ASC, "hotelId") // 등록순 정렬
+        );
 
-        return new PageImpl<>(roomDTOs, pageable, roomsPage.getTotalElements());
+        // 2. 검색타입에 따른 호텔 조회
+        Page<Room> rooms = null;
+        rooms = roomRepository.findByHotelId_HotelId(hotelId, pageable);
+
+        // 3. Hotel -> HotelDTO 변환
+        Page<RoomDTO> roomDTOS = rooms.map(entity -> {
+            RoomDTO roomDTO = modelMapper.map(entity, RoomDTO.class);
+
+            // 호텔에 대한 이미지 리스트 가져오기
+            List<ImageDTO> imgDTOList = imageRepository.findByRoom_RoomId(entity.getRoomId())
+                    .stream()
+                    .map(imagefile -> {
+                        imagefile.setImagePath(imagefile.getImagePath().replace("c:/data/", "")); // 경로 수정
+                        return modelMapper.map(imagefile, ImageDTO.class);
+                    })
+                    .collect(Collectors.toList());
+
+            roomDTO.setRoomImageDTOList(imgDTOList); // 이미지 DTO 리스트 설정
+            return roomDTO;
+        });
+
+        return roomDTOS;
     }
+
+//    public Page<RoomDTO> getRoomsByHotelId(Integer hotelId, Pageable pageable) {
+//        // 호텔 ID에 맞는 Room 데이터 조회 (페이징 처리)
+//        Page<Room> roomsPage = roomRepository.findByHotelId_HotelId(hotelId, pageable);
+//
+//        // 각 Room 객체를 RoomDTO로 변환하여 리스트에 추가
+//        List<RoomDTO> roomDTOs = roomsPage.getContent().stream()
+//                .map(room -> modelMapper.map(room, RoomDTO.class))
+//                .collect(Collectors.toList());
+//
+//        return new PageImpl<>(roomDTOs, pageable, roomsPage.getTotalElements());
+//    }
+
 
 
     // 정보 수정 (이미지 수정 포함)

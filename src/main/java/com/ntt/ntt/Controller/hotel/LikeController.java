@@ -12,6 +12,7 @@ import com.ntt.ntt.Repository.hotel.LikeHotelRepository;
 import com.ntt.ntt.Repository.hotel.LikeRepository;
 import com.ntt.ntt.Service.hotel.LikeService;
 import com.ntt.ntt.Util.PaginationUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -37,12 +38,12 @@ import java.util.NoSuchElementException;
 public class LikeController {
 
     private final LikeService likeService;
-    private final PaginationUtil paginationUtil;
     private final MemberRepository memberRepository;
     private final LikeRepository likeRepository;
     private final LikeHotelRepository likeHotelRepository;
 
     //장바구니목록
+    @Operation(summary = "사용자 호텔 즐겨찾기 목록", description = "호텔 즐겨찾기 목록 페이지로 이동한다.")
     @GetMapping("/list")
     public String likeList(Model model, Principal principal, RedirectAttributes redirectAttributes) {
         try {
@@ -62,7 +63,8 @@ public class LikeController {
         }
     }
 
-    //장바구니 등록
+    //즐겨찾기 등록
+    @Operation(summary = "사용자 즐겨찾기 등록", description = "원하는 호텔을 즐겨찾기에 등록한다.")
     @ResponseBody
     @PostMapping("/register")
     public ResponseEntity<String> likeHotel(@AuthenticationPrincipal UserDetails userDetails,
@@ -79,7 +81,8 @@ public class LikeController {
         return ResponseEntity.ok(resultMessage);  // 성공/실패 메시지를 반환
     }
 
-    //해당 호텔이 이미 담겨있나 확인하는 API
+    //해당 호텔이 이미 담겨있나 확인하는 API -> 버튼 변경을 위해
+    @Operation(summary = "즐겨찾기 유무 체크", description = "해당 호텔을 즐겨찾기에 등록되었는지 확인한다.")
     @GetMapping("/check/{hotelId}")
     public ResponseEntity<Boolean> checkIfLiked(@AuthenticationPrincipal UserDetails userDetails,
                                                 @PathVariable Integer hotelId) {
@@ -122,7 +125,8 @@ public class LikeController {
 //    }
 
 
-    //장바구니 제거
+    //즐겨찾기 제거
+    @Operation(summary = "사용자 즐겨찾기 삭제", description = "해당하는 호텔을 즐겨찾기에서 제거한다.")
     @PostMapping("/delete")
     public ResponseEntity<?> likeDelete(@RequestBody Map<String, Integer> request) {
         Integer hotelId = request.get("hotelId");
@@ -161,10 +165,6 @@ public class LikeController {
 
         return new ResponseEntity<>("즐겨찾기에서 삭제되었습니다.", HttpStatus.OK);
     }
-
-
-
-
 
 
 
