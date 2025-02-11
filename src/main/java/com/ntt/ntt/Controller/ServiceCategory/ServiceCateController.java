@@ -1,5 +1,6 @@
 package com.ntt.ntt.Controller.ServiceCategory;
 
+import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.ServiceCateDTO;
 import com.ntt.ntt.Service.ServiceCateService;
 import com.ntt.ntt.Util.PaginationUtil;
@@ -37,6 +38,12 @@ public class ServiceCateController {
     public String registerForm(Model model){
         //검증처리가 필요하면 빈 CateDTO를 생성해서 전달한다.
         model.addAttribute("serviceCateDTO", new ServiceCateDTO());
+
+        //hotelDTO hotelName 전달하기
+        List<HotelDTO> hotelDTOS = serviceCateService.getAllHotel();
+        model.addAttribute("hotelDTOS", hotelDTOS);
+        model.addAttribute("hotelDTO", new HotelDTO());
+
         return "/manager/roomservice/category/register";
     }
 

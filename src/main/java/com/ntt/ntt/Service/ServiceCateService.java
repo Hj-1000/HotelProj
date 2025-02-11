@@ -1,13 +1,16 @@
 package com.ntt.ntt.Service;
 
+import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.ImageDTO;
 import com.ntt.ntt.DTO.ServiceCateDTO;
+import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.Image;
 import com.ntt.ntt.Entity.ServiceCate;
 import com.ntt.ntt.Entity.ServiceMenu;
 import com.ntt.ntt.Repository.ImageRepository;
 import com.ntt.ntt.Repository.ServiceCateRepository;
 import com.ntt.ntt.Repository.ServiceMenuRepository;
+import com.ntt.ntt.Repository.hotel.HotelRepository;
 import com.ntt.ntt.Util.FileUpload;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +41,8 @@ public class ServiceCateService{
     private final ImageRepository imageRepository;
     private final ServiceCateRepository serviceCateRepository;
     private final ServiceMenuRepository serviceMenuRepository;
+    private final HotelRepository hotelRepository;
+
     private final ModelMapper modelMapper;
 
     // 이미지 등록할 ImageService 의존성 추가
@@ -46,6 +51,24 @@ public class ServiceCateService{
 
     @Value("${dataUploadPath}")
     private String IMG_LOCATION;
+
+
+    //호텔DTOS
+    /*--------------------------------
+    함수명 : List getAllHotel()
+    인수 : 없음
+    출력 : DB에 저장된 호텔 출력
+    설명 : DB에 저장된 호텔을 목록형식으로 출력
+    --------------------------------*/
+    public List<HotelDTO> getAllHotel() {
+        List<Hotel> hotels = hotelRepository.findAll();
+
+        List<HotelDTO> hotelDTOS = hotels.stream()
+                .map(a -> new HotelDTO(a.getHotelId(), a.getHotelName())).collect(Collectors.toList());
+
+        return hotelDTOS;
+    }
+
 
     //서비스 카테고리 등록
     /*--------------------------------

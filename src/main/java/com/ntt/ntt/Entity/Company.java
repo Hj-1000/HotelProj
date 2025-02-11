@@ -34,6 +34,7 @@ public class Company extends BaseEntity {
 
     //2024-02-10 양방향 삭제를 위해 추가
     @OneToMany(mappedBy = "company", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @ToString.Exclude  // hotels 리스트를 toString()에서 제외
     private List<Hotel> hotels;
 
 
