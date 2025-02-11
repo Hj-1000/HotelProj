@@ -23,10 +23,6 @@ public interface HotelRepository extends JpaRepository<Hotel, Integer> {
     // 주어진 회사 ID에 해당하는 호텔 수를 카운트하는 메서드
     Integer countByCompany_CompanyId(Integer companyId);
 
-    //회사 ID를 토대로 회사명을 가져오는 메서드
-    @Query("SELECT h FROM Hotel h JOIN h.company c WHERE h.company.companyId = :companyId")
-    Page<Hotel> findByCompany_CompanyIdWithCompanyName(Integer companyId, Pageable pageable);
-
     // 회사 ID에 해당하는 호텔 조회 (이름 포함)
     Page<Hotel> findByCompany_CompanyIdAndHotelNameLike(Integer companyId, String keyword, Pageable pageable);
 
