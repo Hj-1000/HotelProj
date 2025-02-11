@@ -6,6 +6,7 @@ import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.MemberDTO;
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Repository.MemberRepository;
+import com.ntt.ntt.Repository.NotificationRepository;
 import com.ntt.ntt.Service.MemberService;
 import com.ntt.ntt.Service.company.CompanyService;
 import com.ntt.ntt.Service.hotel.HotelService;
@@ -32,6 +33,7 @@ public class AdminController {
     private final MemberService memberService;
     private final CompanyService companyService;
     private final MemberRepository memberRepository;
+    private final NotificationRepository notificationRepository;
 
     @Operation(summary = "전체회원목록", description = "전체회원목록 페이지로 이동한다.")
     @GetMapping("/admin/memberList")
@@ -179,6 +181,14 @@ public class AdminController {
             redirectAttributes.addFlashAttribute("message", "서버 오류가 있습니다!");
             return "redirect:/manager/hotel/list"; // 목록 페이지로 리다이렉트
         }
+    }
+
+    // 알림기능 구현
+    @GetMapping("/dashboard")
+    public String dashboard(Model model) {
+        int unreadCount = notificationRepository.countByIsReadFalse();
+        model.addAttribute("unreadCount", unreadCount);
+        return "layout"; // Thymeleaf 템플릿 이름
     }
 
 }

@@ -16,6 +16,10 @@ public interface NotificationRepository extends JpaRepository<Notification, Inte
     // 회원탈퇴시 해당 회원에게 온 알림을 삭제하기 위해 추가
     void deleteByMember(Member member);
 
+    int countByIsReadFalse(); // 읽지 않은 알림 개수 조회
+
+
+
 }
 
 
