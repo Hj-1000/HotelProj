@@ -54,35 +54,42 @@ public class ServiceCateController {
                                RedirectAttributes redirectAttributes) {
         log.info("post에서 등록할 serviceCateDTO" + serviceCateDTO);
         serviceCateService.register(serviceCateDTO, imageFiles);
+
+        // 등록된 지사의 hotelId 가져오기
+        Integer hotelId = serviceCateDTO.getHotelId().getHotelId();  // 2025-02-11 추가
+
         redirectAttributes.addFlashAttribute("message", "카테고리 등록이 완료되었습니다.");
-        return "redirect:/roomService/category/list";
+        return "redirect:/roomService/category/list?hotelId=" + hotelId;  // hotelId를 쿼리 파라미터로 전달 2025-02-11 추가
     }
 
     @Operation(summary = "전체목록", description = "전체목록을 조회한다.")
     @GetMapping("/list")
     public String listSearch(@RequestParam(required = false) String keyword,
                              @RequestParam(required = false) String searchType,
-                             @PageableDefault(page=1) Pageable page, Model model) {
-        Page<ServiceCateDTO> serviceCateDTOS =
-                serviceCateService.list(page, keyword, searchType);
+                             @RequestParam(required = false) Integer hotelId, // hotelId 2024-02-11 추가
+                             @PageableDefault(page = 1) Pageable page, Model model) {
 
-        //페이지 정보 계산
+        Page<ServiceCateDTO> serviceCateDTOS = serviceCateService.list(page, keyword, searchType, hotelId); // hotelId 전달 2024-02-11 추가
+
+        // 페이지 정보 계산
         Map<String, Integer> pageInfo = paginationUtil.pagination(serviceCateDTOS);
 
-        //만약 글이 10개 이하라면, 페이지 2는 표시되지 않도록 수정
+        // 만약 글이 10개 이하라면, 페이지 2는 표시되지 않도록 수정
         if (serviceCateDTOS.getTotalPages() <= 1) {
             pageInfo.put("startPage", 1);
             pageInfo.put("endPage", 1);
         }
+
+        // 모델에 데이터 추가
         model.addAttribute("serviceCateDTOS", serviceCateDTOS);
         model.addAttribute("pageInfo", pageInfo);
-
-        // 검색어, 검색타입 폼 전달
         model.addAttribute("keyword", keyword);
         model.addAttribute("searchType", searchType);
+        model.addAttribute("hotelId", hotelId); // 2024-02-11 추가
 
         return "/manager/roomservice/category/list";
     }
+
 
     @Operation(summary = "개별조회", description = "해당번호의 데이터를 조회한다.")
     @GetMapping("/read")
