@@ -3,10 +3,12 @@ package com.ntt.ntt.Controller.ServiceMenu;
 import com.ntt.ntt.Constant.ServiceMenuStatus;
 import com.ntt.ntt.DTO.ServiceCateDTO;
 import com.ntt.ntt.DTO.ServiceMenuDTO;
+import com.ntt.ntt.Entity.ServiceMenu;
 import com.ntt.ntt.Service.ServiceCateService;
 import com.ntt.ntt.Service.ServiceMenuService;
 import com.ntt.ntt.Util.PaginationUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Map;
@@ -26,10 +29,39 @@ import java.util.Map;
 @Controller
 @RequiredArgsConstructor
 @Log4j2
+@Tag(name = "ServiceMenuUserController", description = "유저가 보는 메뉴 목록창")
 public class ServiceMenuUserController {
-//    private final ServiceMenuService serviceMenuService;
-//    private final ServiceCateService serviceCateService;
-//    private final PaginationUtil paginationUtil;
+    private final ServiceMenuService serviceMenuService;
+    private final ServiceCateService serviceCateService;
+    private final PaginationUtil paginationUtil;
+
+
+
+//    @Operation(summary = "유저의 메뉴 목록", description = "등록되어 있는 메뉴를 조회한다.")
+//    @GetMapping("/myPage/menu/list")
+//    public String list(@RequestParam(required = false) Integer serviceCateId,
+//                       Model model) {
+//
+//        List<ServiceMenuDTO> serviceMenuDTOS = serviceMenuService.getMenusByCategory(serviceCateId);
+//        List<ServiceCateDTO> serviceCateDTOS = serviceCateService.getAllServiceCate();
+//        model.addAttribute("serviceCateDTOS", serviceCateDTOS);
+//        model.addAttribute("serviceMenuDTOS", serviceMenuDTOS);
+//
+//    return "/myPage/menu/list";
+//    }
+
+    @Operation(summary = "유저의 메뉴 목록", description = "등록되어 있는 메뉴를 조회한다.")
+    @GetMapping("/myPage/menu/list")
+    public String list(Model model) {
+
+        List<ServiceMenuDTO> serviceMenuDTOS = serviceMenuService.listUserMenu();
+        List<ServiceCateDTO> serviceCateDTOS = serviceCateService.getAllServiceCate();
+        model.addAttribute("serviceCateDTOS", serviceCateDTOS);
+        model.addAttribute("serviceMenuDTOS", serviceMenuDTOS);
+
+        return "/myPage/menu/list";
+    }
+
 
 //    @Operation(summary = "유저의 메뉴 목록", description = "등록되어 있는 메뉴를 조회한다.")
 //    @GetMapping("/myPage/menu/list")
@@ -65,14 +97,14 @@ public class ServiceMenuUserController {
 //
 //        return "/myPage/menu/list";
 //    }
-//
-//    @ResponseBody
-////    @GetMapping("/api/user/menus")
-////    public ResponseEntity<List<ServiceMenuDTO>> getMenusByCategory(@RequestParam Integer serviceCateId) {
-////        List<ServiceMenuDTO> menus = serviceMenuService.getMenusByCategory(serviceCateId);
-////        return ResponseEntity.ok(menus);
-////    }
-//
+
+    //    @ResponseBody
+//    @GetMapping("/api/user/menus")
+//    public ResponseEntity<List<ServiceMenuDTO>> getMenusByCategory(@RequestParam Integer serviceCateId) {
+//        List<ServiceMenuDTO> menus = serviceMenuService.getMenusByCategory(serviceCateId);
+//        return ResponseEntity.ok(menus);
+//    }
+
 //    @GetMapping("/api/user/menus")
 //    public List<ServiceMenuDTO> getMenus(@RequestParam Integer serviceCateId) {
 //        return serviceMenuService.getMenusByCategory(serviceCateId); // JSON으로 자동 변환되어 반환됨

@@ -13,8 +13,7 @@
 
         // 이미지 미리보기 함수
         function previewImage(event) {
-
-            console.log("수정 진입")
+            console.log("수정 진입");
 
             const previewContainer = document.getElementById('imagePreviewContainer');
             previewContainer.innerHTML = '';  // 기존 미리보기 이미지 제거
@@ -38,6 +37,17 @@
                 });
             }
         }
+
+        // 폼 제출 전 이미지 첨부 확인 함수
+        function validateForm(event) {
+            const imageFiles = document.getElementById('newImageFiles').files;
+
+            // 이미지 파일이 첨부되지 않으면 제출을 막고 메시지를 띄운다
+            if (imageFiles.length === 0) {
+                event.preventDefault();  // 폼 제출을 막는다
+                alert('이미지를 첨부해 주세요!');
+            }
+        }
     </script>
 
 </head>
@@ -50,7 +60,7 @@
             <h2 class="mb-3">카테고리 등록</h2>
             <div class="card">
                 <div class="card-body">
-                    <form th:action="@{/roomService/category/register}" method="post" enctype="multipart/form-data">
+                    <form th:action="@{/roomService/category/register}" method="post" enctype="multipart/form-data" onsubmit="validateForm(event)">
                         <div class="mb-3 mt-3">
                             <label for="serviceCateName" class="form-label">카테고리 명:</label>
                             <input type="text" class="form-control" style="width: 300px"
