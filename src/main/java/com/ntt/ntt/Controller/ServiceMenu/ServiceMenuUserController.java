@@ -37,18 +37,31 @@ public class ServiceMenuUserController {
 
 
 
+//    @Operation(summary = "유저의 메뉴 목록", description = "등록되어 있는 메뉴를 조회한다.")
+//    @GetMapping("/myPage/menu/list")
+//    public String list(@RequestParam(required = false) Integer serviceCateId,
+//                       Model model) {
+//
+//        List<ServiceMenuDTO> serviceMenuDTOS = serviceMenuService.getMenusByCategory(serviceCateId);
+//        List<ServiceCateDTO> serviceCateDTOS = serviceCateService.getAllServiceCate();
+//        model.addAttribute("serviceCateDTOS", serviceCateDTOS);
+//        model.addAttribute("serviceMenuDTOS", serviceMenuDTOS);
+//
+//    return "/myPage/menu/list";
+//    }
+
     @Operation(summary = "유저의 메뉴 목록", description = "등록되어 있는 메뉴를 조회한다.")
     @GetMapping("/myPage/menu/list")
-    public String list(@RequestParam(required = false) Integer serviceCateId,
-                       Model model) {
+    public String list(Model model) {
 
-        List<ServiceMenuDTO> serviceMenuDTOS = serviceMenuService.getMenusByCategory(serviceCateId);
+        List<ServiceMenuDTO> serviceMenuDTOS = serviceMenuService.listUserMenu();
         List<ServiceCateDTO> serviceCateDTOS = serviceCateService.getAllServiceCate();
         model.addAttribute("serviceCateDTOS", serviceCateDTOS);
         model.addAttribute("serviceMenuDTOS", serviceMenuDTOS);
 
-    return "/myPage/menu/list";
+        return "/myPage/menu/list";
     }
+
 
 //    @Operation(summary = "유저의 메뉴 목록", description = "등록되어 있는 메뉴를 조회한다.")
 //    @GetMapping("/myPage/menu/list")
