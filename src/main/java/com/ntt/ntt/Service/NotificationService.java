@@ -3,6 +3,7 @@ package com.ntt.ntt.Service;
 import com.ntt.ntt.DTO.NotificationDTO;
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Entity.Notification;
+import com.ntt.ntt.Entity.Qna;
 import com.ntt.ntt.Repository.MemberRepository;
 import com.ntt.ntt.Repository.NotificationRepository;
 import groovy.util.logging.Log4j2;
@@ -43,8 +44,17 @@ public class NotificationService {
     public void markAsRead(Integer notificationId) {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new IllegalArgumentException("알림을 찾을 수 없습니다."));
-        notification.setIsRead(true);
-        notificationRepository.save(notification);
+        notification.setRead(true);  // 읽음 상태로 변경
+        notificationRepository.save(notification);  // DB에 반영
+    }
+
+    public List<NotificationDTO> getUnreadNotificationsForMember(String memberEmail) {
+        Member member = memberRepository.findByMemberEmail(memberEmail)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        return notificationRepository.findByMemberOrderByTimestampDesc(member)
+                .stream()
+                .map(NotificationDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 
     // 알림 삭제
@@ -54,12 +64,18 @@ public class NotificationService {
     }
 
     // 새로운 알림 생성
-    public void createNotification(Member member, String message) {
+    public void createNotification(Member member, String message, Qna qna) {
         Notification notification = new Notification();
         notification.setNotificationMessage(message);
-        notification.setMember(member);  // 알림을 받을 멤버 (이 경우 관리자)
-        notification.setIsRead(false);   // 알림은 기본적으로 읽지 않은 상태
+        notification.setMember(member); // 알림을 받을 멤버 설정
+        notification.setRead(false);    // 기본적으로 읽지 않은 상태로 설정
         notification.setTimestamp(LocalDateTime.now());
+
+        if (qna != null) {
+            notification.setQna(qna); // Qna 객체가 존재하면 설정
+        } else {
+            notification.setQna(null); // Qna가 null인 경우 처리
+        }
 
         notificationRepository.save(notification);
         System.out.println("🔔 알림 생성됨: " + message);
@@ -71,4 +87,6 @@ public class NotificationService {
                 .map(NotificationDTO::fromEntity)
                 .collect(Collectors.toList());
     }
+
+
 }

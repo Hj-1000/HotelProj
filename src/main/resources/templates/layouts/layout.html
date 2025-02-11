@@ -75,15 +75,16 @@
                     <div class="d-flex align-items-center">
                         <a href="/qna" class="nav-link text-white">Q&A</a>
 
-                        <!-- 알림 벨 -->
-                        <button id="notification-bell" class="btn">
-                            🔔 <span id="unread-count">0</span>
-                        </button>
+                        <div id="notification-container">
+                            <span id="notification-bell">🔔</span>
+                            <span id="unread-count">0</span>
+                        </div>
 
                         <!-- 알림 목록 (처음에는 숨겨짐) -->
                         <ul id="notification-list" style="display: none;">
-                            <li>알림이 없습니다.</li>
+                            <!-- 알림을 동적으로 렌더링 -->
                         </ul>
+
 
                     </div>
 
@@ -147,6 +148,8 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script th:src="@{/js/notificationbell.js}"></script>
+
 </body>
 </html>

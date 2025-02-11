@@ -21,6 +21,24 @@
     font-weight: bold;
 }
 
+#notification-container {
+    position: relative;
+    display: inline-block;
+}
+
+#unread-count {
+    color: white; /* 글자 색상 */
+    font-weight: bold;
+    position: absolute;
+    top: -5px;  /* 벨 아이콘과의 거리 조정 */
+    background-color: red; /* 배경색 */
+    border-radius: 50%;
+    padding: 3px 6px;
+    font-size: 12px;
+    min-width: 18px;
+    text-align: center;
+}
+
 .notification-list {
     position: absolute;
     top: 40px;

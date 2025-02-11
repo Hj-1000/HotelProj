@@ -1,6 +1,8 @@
 package com.ntt.ntt.DTO;
 
 import com.ntt.ntt.Entity.Notification;
+import com.ntt.ntt.Entity.Qna;
+import com.ntt.ntt.Repository.QnaRepository;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -14,9 +16,9 @@ public class NotificationDTO {
 
     private Integer notificationId;
     private String notificationMessage;
-    private boolean isRead; // boolean 타입
-
+    private boolean isRead;
     private LocalDateTime timestamp;
+    private Integer qnaId;
 
     // Notification 엔티티를 DTO로 변환하는 메서드
     public static NotificationDTO fromEntity(Notification notification) {
@@ -25,16 +27,12 @@ public class NotificationDTO {
         dto.setNotificationMessage(notification.getNotificationMessage());
         dto.setRead(notification.isRead());
         dto.setTimestamp(notification.getTimestamp());
-        return dto;
-    }
 
-    // DTO를 Notification 엔티티로 변환하는 메서드
-    public Notification toEntity() {
-        Notification notification = new Notification();
-        notification.setNotificationId(this.notificationId);
-        notification.setNotificationMessage(this.notificationMessage);
-        notification.setIsRead(this.isRead);
-        notification.setTimestamp(this.timestamp);
-        return notification;
+        // Qna 객체가 null이 아니면 qnaId 설정
+        if (notification.getQna() != null) {
+            dto.setQnaId(notification.getQna().getQnaId());
+        }
+
+        return dto;
     }
 }
