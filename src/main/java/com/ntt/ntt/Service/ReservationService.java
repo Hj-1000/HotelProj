@@ -11,13 +11,13 @@ import com.ntt.ntt.Repository.ReservationRepository;
 import com.ntt.ntt.Repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.time.format.DateTimeParseException;
 
 @Service
 @Transactional
@@ -27,48 +27,71 @@ public class ReservationService {
 
     private final RoomRepository roomRepository;
     private final ReservationRepository reservationRepository;
-    private final ModelMapper modelMapper;
     private final MemberRepository memberRepository;
 
-
     // 1. 방 예약 추가
-    public ReservationDTO registerReservation(Integer roomId, Integer memberId) {
+    public ReservationDTO registerReservation(Integer roomId, Integer memberId , String checkInDate , String checkOutDate) {
+
+        // 방 정보 확인
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 방을 찾을 수 없습니다."));
 
+        // 이미 예약된 방인지 확인
         if (!room.getRoomStatus()) {
-            throw new IllegalStateException("이미 예약된 방입니다.");
+            throw new IllegalStateException("이미 예약된 방입니다. roomId : " + roomId);
         }
 
+        // 회원 정보 확인
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 회원 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원 정보를 찾을 수 없습니다. memberId : " + memberId));
 
-        Reservation reservation = Reservation.builder()
-                .checkInDate(String.valueOf(LocalDate.now()))
-                .checkOutDate(String.valueOf(LocalDate.now().plusDays(1)))
-                .totalPrice(room.getRoomPrice())
-                .reservationStatus("예약됨")
-                .room(room)
-                .member(member)
-                .build();
 
-        reservationRepository.save(reservation);
+        // 날짜 검증
+        if (!isValidDateRange(checkInDate, checkOutDate)) {
+            throw new IllegalArgumentException("체크인 날짜는 체크아웃 날짜보다 이전이어야 합니다.");
+        }
 
-        // 예약 완료 후 상태 변경
-        room.setRoomStatus(false);
-        roomRepository.save(room);
+        try {
+            // 예약 생성
+            Reservation reservation = Reservation.builder()
+                    .checkInDate(checkInDate)
+                    .checkOutDate(checkOutDate)
+                    .totalPrice(room.getRoomPrice())
+                    .reservationStatus("예약됨")
+                    .room(room)
+                    .member(member)
+                    .build();
 
-        System.out.println("예약된 방 ID: " + room.getRoomId() + ", 상태: " + room.getRoomStatus()); // 디버깅 로그
+            reservationRepository.save(reservation);
 
-        return ReservationDTO.fromEntity(reservation);
+            // 방 상태 변경 (예약 완료 후)
+            room.setRoomStatus(false);
+            roomRepository.save(room);
+
+            return ReservationDTO.fromEntity(reservation);
+
+        } catch (Exception e) {
+            throw new RuntimeException("예약 처리 중 오류가 발생했습니다.", e);
+        }
+
+    }
+
+    /* 체크인 날짜가 체크아웃 날짜보다 이전인지 검증하는 메서드 */
+
+    private boolean isValidDateRange(String checkInDate, String checkOutDate) {
+        try {
+            LocalDate checkIn = LocalDate.parse(checkInDate);
+            LocalDate checkOut = LocalDate.parse(checkOutDate);
+            return checkIn.isBefore(checkOut); // 체크인 날짜가 체크아웃 날짜보다 이전이면 true 반환
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("날짜 형식이 올바르지 않습니다. (yyyy-MM-dd 형식이어야 합니다.)");
+        }
     }
 
     // 2. 모든 예약 목록 가져오기
-    public List<ReservationDTO> getAllReservations() {
-        return reservationRepository.findAll()
-                .stream()
-                .map(ReservationDTO::fromEntity) // memberName, memberEmail 자동 포함
-                .collect(Collectors.toList());
+    public Page<ReservationDTO> getAllReservations(Pageable pageable) {
+        return reservationRepository.findAll(pageable)
+                .map(ReservationDTO::fromEntity);
     }
 
     // 3. 특정 방의 예약 정보 조회

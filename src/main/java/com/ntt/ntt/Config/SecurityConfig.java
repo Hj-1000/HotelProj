@@ -2,11 +2,8 @@ package com.ntt.ntt.Config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -20,6 +17,7 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 //2. 보안권한 설정, 암호화, 로그인, 로그아웃, csrf
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     // Spring Security 로그인시 발생하는 에러들을 별도의 Exception 으로 처리하기 위해 추가
@@ -79,7 +77,7 @@ public class SecurityConfig {
             }
             response.sendRedirect("/login?error"); // 로그인 실패 시 로그인 페이지로 리다이렉트
         };
-        
+
         //로그인 정보
         http.formLogin(login->login
             .loginPage("/login") //로그인은 /login맵핑으로

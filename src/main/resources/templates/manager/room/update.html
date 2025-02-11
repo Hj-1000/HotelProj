@@ -79,19 +79,6 @@
                 </div>
             </div>
 
-            <!-- 객실 상태 -->
-            <div class="mb-3">
-                <label class="form-label">객실 상태</label>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" id="statusAvailable" th:field="*{roomStatus}" value="true">
-                    <label class="form-check-label" for="statusAvailable">예약 가능</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" id="statusUnavailable" th:field="*{roomStatus}" value="false">
-                    <label class="form-check-label" for="statusUnavailable">예약 불가</label>
-                </div>
-            </div>
-
             <!-- 객실 설명 -->
             <div class="mb-3">
                 <label for="roomInfo" class="form-label">객실 설명</label>
@@ -118,6 +105,19 @@
                 </div>
             </div>
 
+            <!-- 객실 상태 -->
+            <div class="mb-3">
+                <label class="form-label">객실 상태</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" id="statusAvailable" th:field="*{roomStatus}" value="true">
+                    <label class="form-check-label" for="statusAvailable">예약 가능</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" id="statusUnavailable" th:field="*{roomStatus}" value="false">
+                    <label class="form-check-label" for="statusUnavailable">예약 불가</label>
+                </div>
+            </div>
+
 
             <div class="mb-3">
                 <label for="imageFile" class="form-label">객실 이미지 업로드</label>
@@ -129,21 +129,64 @@
             <button type="submit" class="btn btn-primary">수정</button>
         </form>
     </div>
-</div>
-<script>
-    (() => {
-        'use strict';
-        const forms = document.querySelectorAll('.needs-validation');
-        Array.prototype.slice.call(forms).forEach(form => {
-            form.addEventListener('submit', event => {
-                if (!form.checkValidity()) {
-                    event.preventDefault();
-                    event.stopPropagation();
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const reservationEndInput = document.getElementById("reservationEnd");
+            const statusAvailable = document.getElementById("statusAvailable");
+            const statusUnavailable = document.getElementById("statusUnavailable");
+            const form = document.querySelector("form");
+
+            function updateRoomStatus() {
+                const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD 형식의 오늘 날짜
+                const reservationEnd = reservationEndInput.value; // 사용자가 선택한 예약 종료 날짜
+
+                if (reservationEnd) {
+                    if (reservationEnd > today) {
+                        // 예약 종료일이 오늘 이후면 예약 가능
+                        statusAvailable.checked = true;
+                        statusUnavailable.checked = false;
+                    } else {
+                        // 예약 종료일이 오늘 이전이면 예약 불가
+                        statusAvailable.checked = false;
+                        statusUnavailable.checked = true;
+                    }
                 }
-                form.classList.add('was-validated');
-            }, false);
+
+                // 사용자가 직접 변경하지 못하도록 비활성화
+                statusAvailable.disabled = true;
+                statusUnavailable.disabled = true;
+            }
+
+            // 페이지 로드 시 상태 업데이트 (값이 있을 경우)
+            window.onload = updateRoomStatus;
+
+            // 예약 종료일이 변경될 때마다 상태 업데이트
+            reservationEndInput.addEventListener("change", updateRoomStatus);
+            reservationEndInput.addEventListener("input", updateRoomStatus);
+
+            // 폼 제출 시 roomStatus 값이 서버로 정상적으로 전송되도록 disabled 해제
+            form.addEventListener("submit", function () {
+                statusAvailable.removeAttribute("disabled");
+                statusUnavailable.removeAttribute("disabled");
+            });
         });
-    })();
-</script>
+
+        (() => {
+            'use strict';
+            const forms = document.querySelectorAll('.needs-validation');
+            Array.prototype.slice.call(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        })();
+    </script>
+</div>
+
 </body>
 </html>

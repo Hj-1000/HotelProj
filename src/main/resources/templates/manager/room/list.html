@@ -8,10 +8,6 @@
     <title>객실 목록</title>
     <style>
 
-        .list-wrapper {
-
-        }
-
         .room-image {
             width: 100%;
             height: 100px;
@@ -38,6 +34,10 @@
             margin: 0 auto;
         }
 
+        .search-bar {
+            margin-top: 1.5rem;
+        }
+
         /* 버튼을 세로 정렬 */
         .button-group {
             display: flex;
@@ -45,8 +45,6 @@
             align-items: center;
             gap: .5rem;
         }
-
-
 
         .register-btn {
             text-align: right;
@@ -67,6 +65,37 @@
             border: 1px solid #000000;
             color: #000000;
 
+        }
+
+        /* 공통 페이징 스타일 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 1rem;
+            gap: 8px;
+        }
+
+        .pagination a {
+            padding: 10px 14px;
+            text-decoration: none;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            color: black;
+            font-size: 16px;
+            transition: 0.2s;
+        }
+
+        .pagination a:hover {
+            background: #000;
+            color: white;
+        }
+
+        .active>.page-link {
+            background: #000000;
+            color: white;
+            font-weight: bold;
+            border: 1px solid #ddd;
         }
 
     </style>
@@ -134,7 +163,7 @@
     </div>
 
     <!-- 검색 바 -->
-    <div class="search-bar text-center mb-4">
+    <div class="search-bar text-center">
         <form id="searchForm" th:action="@{/manager/room/list}" method="get">
             <select name="category" id="category">
                 <option value="">-- 검색선택 --</option>
@@ -148,7 +177,7 @@
     </div>
 
     <!-- 페이지네이션 -->
-    <div class="mt-3 d-flex justify-content-center">
+    <div class="d-flex justify-content-center">
         <ul class="pagination">
             <!-- 처음 페이지 -->
             <li class="page-item" th:if="${currentPage > 1}">
@@ -161,11 +190,11 @@
             </li>
 
             <!-- 페이지 번호 -->
-            <span th:each="page : ${#numbers.sequence(startPage, endPage)}">
+            <th:block th:each="page : ${#numbers.sequence(startPage, endPage)}">
                 <li class="page-item" th:classappend="${currentPage == page} ? 'active'">
                     <a class="page-link" th:href="@{/manager/room/list(page=${page - 1}, keyword=${keyword}, category=${category})}" th:text="${page}"></a>
                 </li>
-            </span>
+            </th:block>
 
             <!-- 다음 페이지 -->
             <li class="page-item" th:if="${currentPage < lastPage}">
@@ -187,7 +216,7 @@
         console.log("Category:", category);
         console.log("Keyword:", keyword);
 
-        if (category === "roomStatus" && keyword !== "Available" && keyword !== "Unavailable") {
+        if (category === "roomStatus" && keyword !== "예약가능" && keyword !== "예약불가") {
             alert("유효하지 않은 텍스트입니다. 'Available' or 'Unavailable' 입력해주세요.");
             event.preventDefault();
         }
