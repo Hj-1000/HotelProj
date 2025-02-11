@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
-@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Notification {
@@ -21,14 +20,24 @@ public class Notification {
 
     private String notificationMessage; // 알림 내용
 
-    private boolean isRead = false; // 읽음 여부 (기본값: false)
+    private boolean isRead; // 읽음 여부 (기본값: false)
+
+    private LocalDateTime createdAt;
 
     private LocalDateTime timestamp = LocalDateTime.now(); // 생성 시간
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "memberId", nullable = false)
     private Member member; // 알림을 받을 사용자
 
-    public void setIsRead(boolean isRead) {
+    @ManyToOne
+    @JoinColumn(name = "qnaId", nullable = false)
+    private Qna qna;
+
+
+    public Notification() {
+        this.createdAt = LocalDateTime.now();
+        this.isRead = false;
     }
 }

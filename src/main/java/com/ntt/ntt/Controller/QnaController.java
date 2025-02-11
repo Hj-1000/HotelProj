@@ -7,6 +7,7 @@ import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Entity.Notification;
 import com.ntt.ntt.Entity.Qna;
 import com.ntt.ntt.Entity.Reply;
+import com.ntt.ntt.Repository.NotificationRepository;
 import com.ntt.ntt.Repository.QnaRepository;
 import com.ntt.ntt.Service.MemberService;
 import com.ntt.ntt.Service.NotificationService;
@@ -22,10 +23,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -45,6 +43,7 @@ public class QnaController {
     private final PaginationUtil paginationUtil;
     private final ReplyService replyService;
     private final NotificationService notificationService;
+    private final NotificationRepository notificationRepository;
 
 
     // Q&A 페이지 이동
@@ -54,10 +53,21 @@ public class QnaController {
         return null;
     }
 
+    @PostMapping("/add")
+    public String addQnaProc(@ModelAttribute Qna qna, @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails != null) {
+            // 로그인된 사용자의 정보를 얻어옴
+            MemberDTO memberDTO = memberService.read(userDetails.getUsername());
+            Member member = dtoToEntity(memberDTO);
 
+            // Qna 객체에 회원 정보 설정
+            qna.setMember(member);  // 반드시 Member 정보가 설정되었는지 확인
+            qnaService.save(qna);  // Q&A 저장
+        }
+        return "redirect:/qna/list";
+    }
 
-    // 질문 목록 페이지로 이동
-    @Operation(summary = "목록", description = "Q&A 목록 페이지로 이동한다.")
+    // Qna 목록 조회
     @GetMapping("/qna/list")
     public String qnaListPage(
             @RequestParam(defaultValue = "1") int page,
@@ -66,25 +76,20 @@ public class QnaController {
             @AuthenticationPrincipal UserDetails userDetails,
             Model model) {
 
-        // 서비스 메서드를 호출하여 QnA 목록을 가져옴
+        // 모든 Q&A 게시글 가져오기 (role 상관없이)
         Page<Qna> qnaPage = qnaService.getQnaPage(page, keyword, qnaCategory, keyword);
 
         // 페이지네이션 정보 계산
         Map<String, Integer> pagination = paginationUtil.pagination(qnaPage);
-
-        // 전체 페이지 수
         int totalPages = qnaPage.getTotalPages();
         int currentPage = pagination.get("currentPage");
 
-        // 시작 페이지와 끝 페이지 계산
         int startPage = Math.max(1, currentPage - 4);
         int endPage = Math.min(startPage + 9, totalPages);
 
-        // 페이지 정보 업데이트
         pagination.put("startPage", startPage);
         pagination.put("endPage", endPage);
 
-        // 모델에 데이터 추가
         model.addAttribute("qnaList", qnaPage.getContent());
         model.addAttribute("pagination", pagination);
         model.addAttribute("keyword", keyword);
@@ -96,6 +101,7 @@ public class QnaController {
             model.addAttribute("notifications", notifications);
         }
 
+        // 로그인된 사용자 정보 추가
         if (userDetails != null) {
             MemberDTO memberDTO = memberService.read(userDetails.getUsername());
             Member currentMember = dtoToEntity(memberDTO);
@@ -106,7 +112,6 @@ public class QnaController {
 
         return "qna/list";
     }
-
 
     // 질문 작성 페이지로 이동
     @Operation(summary = "등록폼", description = "등록폼 페이지로 이동한다.")
@@ -127,7 +132,7 @@ public class QnaController {
     @PostMapping("/qna/register")
     public String submitQuestionProc(@RequestParam String title,
                                      @RequestParam String content,
-                                     @RequestParam String qnaCategory,  // 질문 유형 추가
+                                     @RequestParam String qnaCategory,
                                      @AuthenticationPrincipal UserDetails userDetails,
                                      Model model) {
         if (userDetails != null) {
@@ -145,11 +150,10 @@ public class QnaController {
             qnaDTO.setQnaTitle(title);
             qnaDTO.setQnaContent(content);
             qnaDTO.setQnaCategory(qnaCategory);  // 카테고리 설정
-            qnaService.registerQna(qnaDTO, member);
-
+            Qna qna = qnaService.registerQna(qnaDTO, member); // Qna 객체 생성
 
             // 🔹 알림 생성 (관리자에게 알림 보내기)
-            notificationService.createNotification(member, "새로운 Q&A가 등록되었습니다.");
+            notificationService.createNotification(member, "새로운 Q&A가 등록되었습니다.", qna);
 
             return "redirect:/qna/list";  // 질문 목록 페이지로 리다이렉트
         } else {
@@ -162,7 +166,18 @@ public class QnaController {
     @Operation(summary = "상세보기창", description = "상세보기창으로 이동한다.")
     @GetMapping("/qna/read/{id}")
     public String readQnaForm(@PathVariable Integer id, @AuthenticationPrincipal UserDetails userDetails, Model model) {
+        // id가 null이거나 유효하지 않으면 400 오류를 처리하거나 리다이렉트
+        if (id == null) {
+            return "redirect:/error"; // 예시로 에러 페이지로 리다이렉트
+        }
+
         Qna qna = qnaService.findById(id); // 이미 마스킹된 이름이 포함됨
+
+        // Qna가 null일 경우에도 에러 페이지로 리다이렉트 처리
+        if (qna == null) {
+            return "redirect:/error"; // Qna가 존재하지 않으면 에러 페이지로 리다이렉트
+        }
+
 
         // 날짜가 null인 경우 처리
         if (qna.getRegDate() == null) {
@@ -196,7 +211,6 @@ public class QnaController {
 
         return "qna/read"; // qna/read.html로 이동
     }
-
 
 
     // 질문 수정 페이지로 이동
