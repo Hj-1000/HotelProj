@@ -15,12 +15,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -43,10 +46,17 @@ public class CompanyController {
     //등록처리
     @Operation(summary = "관리자용 본사 등록 처리", description = "본사를 등록 처리 한다.")
     @PostMapping("/register")
-    public String registerProc(@ModelAttribute CompanyDTO companyDTO, List<MultipartFile> imageFiles, RedirectAttributes redirectAttributes) {
+    public String registerProc(@ModelAttribute CompanyDTO companyDTO,
+                               List<MultipartFile> imageFiles,
+                               RedirectAttributes redirectAttributes,
+                               Authentication authentication) {
         log.info("본사 등록 진입");
 
-        companyService.register(companyDTO, imageFiles);
+        // Authentication 객체에서 UserDetails를 가져와 이름을 추출
+        String memberName = ((UserDetails) authentication.getPrincipal()).getUsername();
+
+        // memberName을 companyService.register()에 전달
+        companyService.register(companyDTO, imageFiles, memberName);
         redirectAttributes.addFlashAttribute("message", "본사 등록이 완료되었습니다.");
         return "redirect:/company/list";
     }

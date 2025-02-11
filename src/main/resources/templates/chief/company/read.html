@@ -37,7 +37,39 @@
                 alert("글 작성이 완료되었습니다.")
             })
 
+
         })
+
+
+        //이미지파일 검사
+        function validateImage(event) {
+            var files = event.target.files;
+            var maxSize = 10 * 1024 * 1024; // 10MB 제한
+            var allowedExt = ["jpg", "jpeg", "gif", "png", "bmp"];
+
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                var fileName = file.name;
+                var fileSize = file.size;
+                var fileExt = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+
+                // 확장자 검사
+                if (!allowedExt.includes(fileExt)) {
+                    alert("이미지 파일(PNG, JPG, GIF, BMP)만 업로드 가능합니다.");
+                    event.target.value = ""; // 입력 필드 초기화
+                    return;
+                }
+
+                // 파일 크기 검사
+                if (fileSize > maxSize) {
+                    alert("파일 크기가 10MB를 초과할 수 없습니다.");
+                    event.target.value = ""; // 입력 필드 초기화
+                    return;
+                }
+            }
+        }
+
+
 
     </script>
 
@@ -217,10 +249,6 @@
                             <input type="text" class="form-control" id="hotelPhone" name="hotelPhone">
                         </div>
                         <div class="mb-3 mt-3">
-                            <label for="hotelEmail" class="form-label">호텔이메일:</label>
-                            <input type="email" class="form-control" id="hotelEmail" name="hotelEmail">
-                        </div>
-                        <div class="mb-3 mt-3">
                             <label for="hotelCheckIn" class="form-label">호텔 체크인:</label>
                             <select id="hotelCheckIn" name="hotelCheckIn" class="form-select">
                                 <option value="00">00:00</option>
@@ -281,8 +309,8 @@
                         <!-- 새 이미지 업로드 및 미리보기 -->
                         <div>
                             <label for="newImageFiles">본사이미지:</label>
-                            <input type="file" id="newImageFiles" name="imageFiles" multiple onchange="previewImage(event)">
-                            <small>이미지를 선택해 주세요.</small>
+                            <input type="file" id="newImageFiles" name="imageFiles" multiple accept="image/*" onchange="validateImage(event)">
+                            <small>이미지 파일(PNG, JPG, GIF, BMP)만 업로드 가능합니다.</small>
                         </div>
 
                         <!-- 미리보기 이미지 표시 -->

@@ -95,6 +95,34 @@
         //     //삭제버튼은 버튼자체의 태그를 갖는다.
         // }
 
+        //이미지파일 검사
+        function validateImage(event) {
+            var files = event.target.files;
+            var maxSize = 10 * 1024 * 1024; // 10MB 제한
+            var allowedExt = ["jpg", "jpeg", "gif", "png", "bmp"];
+
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                var fileName = file.name;
+                var fileSize = file.size;
+                var fileExt = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+
+                // 확장자 검사
+                if (!allowedExt.includes(fileExt)) {
+                    alert("이미지 파일(PNG, JPG, GIF, BMP)만 업로드 가능합니다.");
+                    event.target.value = ""; // 입력 필드 초기화
+                    return;
+                }
+
+                // 파일 크기 검사
+                if (fileSize > maxSize) {
+                    alert("파일 크기가 10MB를 초과할 수 없습니다.");
+                    event.target.value = ""; // 입력 필드 초기화
+                    return;
+                }
+            }
+        }
+
     </script>
 
 </head>
@@ -242,16 +270,16 @@
                             <label for="companyName" class="form-label">본사명:</label>
                             <input type="text" class="form-control" id="companyName" name="companyName">
                         </div>
-                        <div class="mb-3 mt-3">
-                            <!--나중에 자동으로 서비스에서 등록되도록 바꿀 것-->
-                            <label for="companyManager" class="form-label">본사 관리자명:</label>
-                            <input type="text" class="form-control" id="companyManager" name="companyManager">
-                        </div>
+<!--                        <div class="mb-3 mt-3">-->
+<!--                            &lt;!&ndash;나중에 자동으로 서비스에서 등록되도록 바꿀 것&ndash;&gt;-->
+<!--                            <label for="companyManager" class="form-label">본사 관리자명:</label>-->
+<!--                            <input type="text" class="form-control" id="companyManager" name="companyManager">-->
+<!--                        </div>-->
                         <!-- 새 이미지 업로드 및 미리보기 -->
                         <div>
                             <label for="newImageFiles">본사이미지:</label>
-                            <input type="file" id="newImageFiles" name="imageFiles" multiple onchange="previewImage(event)">
-                            <br><small>이미지를 선택해 주세요.</small>
+                            <input type="file" id="newImageFiles" name="imageFiles" multiple accept="image/*" onchange="validateImage(event)">
+                            <small>이미지 파일(PNG, JPG, GIF, BMP)만 업로드 가능합니다.</small>
                         </div>
 
                         <!-- 미리보기 이미지 표시 -->
