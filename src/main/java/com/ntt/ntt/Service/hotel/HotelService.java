@@ -4,11 +4,9 @@ import com.ntt.ntt.DTO.CompanyDTO;
 import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.ImageDTO;
 import com.ntt.ntt.DTO.RoomDTO;
-import com.ntt.ntt.Entity.Company;
-import com.ntt.ntt.Entity.Hotel;
-import com.ntt.ntt.Entity.Image;
-import com.ntt.ntt.Entity.Room;
+import com.ntt.ntt.Entity.*;
 import com.ntt.ntt.Repository.ImageRepository;
+import com.ntt.ntt.Repository.MemberRepository;
 import com.ntt.ntt.Repository.RoomRepository;
 import com.ntt.ntt.Repository.company.CompanyRepository;
 import com.ntt.ntt.Repository.hotel.HotelRepository;
@@ -39,6 +37,7 @@ public class HotelService {
 
     private final CompanyRepository companyRepository;
     private final RoomRepository roomRepository;
+    private final MemberRepository memberRepository;
 
     private final ModelMapper modelMapper;
 
@@ -63,7 +62,11 @@ public class HotelService {
 
 
     //등록
-    public void register(HotelDTO hotelDTO, List<MultipartFile> imageFiles) {
+    public void register(HotelDTO hotelDTO, List<MultipartFile> imageFiles, String memberEmail) {
+
+        // 로그인한 회원 정보 조회
+        Member member = memberRepository.findByMemberEmail(memberEmail)
+                .orElseThrow(() -> new RuntimeException("Member not found"));
 
         // modelMapper가 null이 아닌지 확인
         if (modelMapper == null) {
@@ -74,7 +77,8 @@ public class HotelService {
 
 //        hotel.setCompany(companyRepository.findById(hotelDTO.getHotelId()).orElseThrow());
 
-
+        //이메일 로그인된 회원의 이메일로
+        hotel.setHotelEmail(member.getMemberEmail());
 
         // 1. Hotel 먼저 저장
         hotelRepository.save(hotel);

@@ -4,11 +4,9 @@ import com.ntt.ntt.DTO.CompanyDTO;
 import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.ImageDTO;
 import com.ntt.ntt.DTO.RoomDTO;
-import com.ntt.ntt.Entity.Company;
-import com.ntt.ntt.Entity.Hotel;
-import com.ntt.ntt.Entity.Image;
-import com.ntt.ntt.Entity.Room;
+import com.ntt.ntt.Entity.*;
 import com.ntt.ntt.Repository.ImageRepository;
+import com.ntt.ntt.Repository.MemberRepository;
 import com.ntt.ntt.Repository.company.CompanyRepository;
 import com.ntt.ntt.Repository.hotel.HotelRepository;
 import com.ntt.ntt.Service.ImageService;
@@ -45,6 +43,8 @@ public class CompanyService {
     private final ImageRepository imageRepository;
     private final CompanyRepository companyRepository;
     private final HotelRepository hotelRepository;
+    private final MemberRepository memberRepository;
+
     private final ModelMapper modelMapper;
 
     @Autowired
@@ -53,7 +53,12 @@ public class CompanyService {
     private FileUpload fileUpload;
 
     //등록
-    public void register(CompanyDTO companyDTO, List<MultipartFile> imageFiles) {
+    public void register(CompanyDTO companyDTO, List<MultipartFile> imageFiles, String memberEmail) {
+
+        // 로그인한 회원 정보 조회
+        Member member = memberRepository.findByMemberEmail(memberEmail)
+                .orElseThrow(() -> new RuntimeException("Member not found"));
+
 
         // modelMapper가 null이 아닌지 확인
         if (modelMapper == null) {
@@ -61,6 +66,9 @@ public class CompanyService {
         }
 
         Company company = modelMapper.map(companyDTO, Company.class);
+
+        //관리자명 로그인된 회원 이름으로
+        company.setCompanyManager(member.getMemberName());
 
         // 1. Company 먼저 저장
         companyRepository.save(company);
