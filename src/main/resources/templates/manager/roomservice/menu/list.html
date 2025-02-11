@@ -7,18 +7,17 @@
     <meta charset="UTF-8">
     <title>NTT호텔 - 서비스 메뉴 관리</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <!-- Bootstrap 5 JS (bundle에 Popper.js 포함) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script th:inline="javascript">
         $(document).ready(function () {
             // 세션에서 message를 가져온다
-            var message = [[${message}]]
+            var message = [[${message}]];
 
-            //message가 null이 아니라면 알림창을 띄우고 세션에서 삭제한다.
+            // message가 null이 아니라면 알림창을 띄우고 세션에서 삭제한다.
             if (message != null && message != '') {
-                alert(message)
+                alert(message);
             }
 
             var moBtn = $(".modalBtn");
@@ -38,15 +37,34 @@
                 previewImage(event);
             });
 
-            // ✅ [폼 제출 시 이미지 검증]
+            // ✅ [폼 제출 시 이미지 검증 및 다른 유효성 검사]
             $("form").submit(function (event) {
-                // 폼이 간편 등록 모달 폼인지 확인
-                if ($(this).closest('form').attr('action') === "/roomService/category/register") {
+                // 간편 등록 모달 폼 유효성 검사
+                if ($(this).closest('form').attr('action') === "/roomService/menu/register") {
                     let imageFiles = $("#newImageFiles")[0].files;
+                    let serviceMenuName = $("#serviceMenuName").val();
+                    let serviceMenuInfo = $("#serviceMenuInfo").val();
+                    let serviceMenuQuantity = $("#serviceMenuQuantity").val();
+                    let serviceMenuPrice = $("#serviceMenuPrice").val();
+
+                    if (serviceMenuName === "" || serviceMenuInfo === "") {
+                        alert("빈칸은 등록할 수 없습니다.");
+                        event.preventDefault(); // 폼 제출 방지
+                        return false;
+                    }
+
                     if (imageFiles.length === 0) {
                         alert("이미지를 첨부해주세요!");
                         event.preventDefault(); // 폼 제출 방지
+                        return false;
                     }
+
+                    if (serviceMenuQuantity < 1 || serviceMenuPrice < 1) {
+                        alert("재고수량과 가격은 최소 1 이상이어야 합니다.");
+                        event.preventDefault(); // 폼 제출 방지
+                        return false;
+                    }
+
                 }
             });
         });

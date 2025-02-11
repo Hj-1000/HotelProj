@@ -14,11 +14,11 @@
             console.log("간편 등록 모달 진입!");
 
             // 세션에서 message를 가져온다
-            var message = [[${message}]]
+            var message = [[${message}]];
 
-            //message가 null이 아니라면 알림창을 띄우고 세션에서 삭제한다.
+            // message가 null이 아니라면 알림창을 띄우고 세션에서 삭제한다.
             if (message != null && message != '') {
-                alert(message)
+                alert(message);
             }
 
             var moBtn = $(".modalBtn");
@@ -31,7 +31,7 @@
                 modal.modal("show");
 
                 // 카테고리 ID를 hidden input에 설정
-                var serviceCateId = /*[[${serviceCateDTO.serviceCateId}]]*/ 'defaultId';  // 서버에서 넘겨받은 serviceCateId
+                var serviceCateId = 'defaultId';  // 서버에서 넘겨받은 serviceCateId
                 if (serviceCateId !== 'defaultId') {
                     $('#serviceCateId').val(serviceCateId);  // #serviceCateId에 값을 넣어줌
                     console.log("serviceCateId 값 설정:", serviceCateId);
@@ -46,6 +46,29 @@
 
             $(".submitBtn").off().on("click", function () {
                 alert("글 작성이 완료되었습니다.");
+            });
+
+            // 폼 제출 시 유효성 검사
+            $("form").submit(function (event) {
+                var serviceMenuQuantity = $("#serviceMenuQuantity").val();
+                var serviceMenuPrice = $("#serviceMenuPrice").val();
+                var newImageFiles = $("#newImageFiles")[0].files;
+
+                // 재고수량과 가격 유효성 검사
+                if (serviceMenuQuantity < 1 || serviceMenuPrice < 1) {
+                    event.preventDefault(); // 폼 제출 막기
+                    alert("재고수량과 가격은 최소 1 이상이어야 합니다..");
+                    return false;
+                }
+
+                // 이미지 첨부 여부 확인
+                if (newImageFiles.length === 0) {
+                    event.preventDefault(); // 폼 제출 막기
+                    alert("이미지를 첨부해주세요.");
+                    return false;
+                }
+
+                return true; // 유효성 검사 통과 시 제출
             });
         });
     </script>
