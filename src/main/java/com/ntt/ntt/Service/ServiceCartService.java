@@ -48,51 +48,46 @@ public class ServiceCartService {
     //그 값을 가지고 넣을것이고 컨트롤러에서 들어오는 memberId를 통해서 멤버를 찾는다.
     public Integer registerServiceCart(ServiceCartItemDTO serviceCartItemDTO, String memberEmail) {
         log.info("장바구니 서비스로 들어온 멤버의 email" + memberEmail);
-        log.info("장바구니 서비스로 들어온 cartItemDTO"+ serviceCartItemDTO);
+        log.info("장바구니 서비스로 들어온 cartItemDTO" + serviceCartItemDTO);
 
         //회원찾기
-        Member member =
-                memberRepository.findByEmail(memberEmail);
+        Member member = memberRepository.findByEmail(memberEmail);
         log.info("장바구니 서비스에서 찾은 member" + member);
 
         //내가 산려고 하는 장바구니 아이템을 장바구니에 넣는다.
-        //만약 없다면?
-        ServiceMenu serviceMenu =
-                serviceMenuRepository.findById(serviceCartItemDTO.getServiceMenuId())
-                        .orElseThrow(EntityNotFoundException::new);
-        log.info("장바구니서비스에서 찾은 serviceMenu" + serviceMenu);
+        ServiceMenu serviceMenu = serviceMenuRepository.findById(serviceCartItemDTO.getServiceMenuId())
+                .orElseThrow(EntityNotFoundException::new);
+        log.info("장바구니 서비스에서 찾은 serviceMenu" + serviceMenu);
 
-        ServiceCart serviceCart =
-                serviceCartRepository.findByMember_MemberId(member.getMemberId());
+        // 장바구니 찾기
+        ServiceCart serviceCart = serviceCartRepository.findByMember_MemberId(member.getMemberId());
         log.info("찾을려는 멤버를 불러온 녀석의 memberId " + member.getMemberId());
 
         if (serviceCart == null) {
             serviceCart = ServiceCart.createCart(member);
             serviceCartRepository.save(serviceCart);
         }
-        // 장바구니가 없으면 만들고 있다면 있는걸로
-        // 장바구니 아이템들을 만들어서 넣어주고 저장
-        // (매우중요) 이미 장바구니에 동일 상품이 이미 등록되어 있다면
-        // 해당 등록된 아이템의 수량증가
+
+        // 장바구니 아이템이 이미 존재하는지 확인
         ServiceCartItem savedServiceCartItem =
                 serviceCartItemRepository.findByServiceCart_ServiceCartIdAndServiceMenu_ServiceMenuId(serviceCart.getServiceCartId(), serviceMenu.getServiceMenuId());
 
-        // 장바구니에 이미 있다면
+        // 장바구니에 이미 해당 메뉴가 있다면
         if (savedServiceCartItem != null) {
-            //수량증가
+            // 수량 증가
             savedServiceCartItem.addCount(serviceCartItemDTO.getCount());
-            //저장된 장바구니에서 장바구니 아이템 pk를 반환한다.
+
+            // 변경된 장바구니 아이템을 DB에 저장
+            serviceCartItemRepository.save(savedServiceCartItem); // DB에 반영
+
             return savedServiceCartItem.getServiceCartItemId();
-        } else {//장바구니가 없다면
-            ServiceCartItem serviceCartItem =
-                    ServiceCartItem.createCartItem(serviceCart, serviceMenu, serviceCartItemDTO.getCount());
-
-            //장바구니에 장바구니 아이템을 저장
+        } else {  // 장바구니에 해당 메뉴가 없다면
+            ServiceCartItem serviceCartItem = ServiceCartItem.createCartItem(serviceCart, serviceMenu, serviceCartItemDTO.getCount());
             serviceCartItemRepository.save(serviceCartItem);
-
             return serviceCartItem.getServiceCartItemId();
         }
     }
+
 
     public List<ServiceCartDetailDTO> listServiceCart(String memberEmail) {
         // 장바구니의 pk는 1:1 관계이기 때문에 그리고 memberId는 유니크임
@@ -118,21 +113,29 @@ public class ServiceCartService {
         return serviceCartDetailDTOList;
     }
 
-    //장바구니 아이템이 내 장바구니인지 유효성 검사 하는 메서드
     public boolean validateServiceCartItem(Integer serviceCartItemId, String memberEmail) {
-        log.info("서비스로 들어온 serviceCartItemId" +serviceCartItemId);
-        log.info("서비스로 들어온 memberEmail" +memberEmail);
-        Member member =
-                memberRepository.findByEmail(memberEmail);
+        log.info("서비스로 들어온 serviceCartItemId: " + serviceCartItemId);
+        log.info("서비스로 들어온 memberEmail: " + memberEmail);
 
-        ServiceCartItem serviceCartItem =
-                serviceCartItemRepository.findById(serviceCartItemId).orElseThrow(EntityNotFoundException::new);
-        if (member != null && serviceCartItem != null) {
-            if (!member.getMemberId().equals(serviceCartItem.getServiceCart().getMember().getMemberId())) {
-                return false;
-            }
+        // 이메일을 통해 멤버 찾기
+        Member member = memberRepository.findByEmail(memberEmail);
+        if (member == null) {
+            log.info("해당 이메일을 가진 회원이 존재하지 않습니다: " + memberEmail);
+            return false;  // 회원이 존재하지 않으면 바로 false 반환
         }
-        return true;
+
+        // serviceCartItemId로 장바구니 아이템 찾기
+        ServiceCartItem serviceCartItem = serviceCartItemRepository.findById(serviceCartItemId)
+                .orElseThrow(() -> new EntityNotFoundException("장바구니 아이템을 찾을 수 없습니다. ID: " + serviceCartItemId));
+
+        // 멤버가 해당 장바구니 아이템을 소유하고 있는지 확인
+        if (!member.getMemberId().equals(serviceCartItem.getServiceCart().getMember().getMemberId())) {
+            log.info("회원이 해당 장바구니 아이템을 소유하고 있지 않습니다. memberId: " + member.getMemberId()
+                    + ", serviceCartItemId: " + serviceCartItemId);
+            return false;  // 소유하지 않으면 false 반환
+        }
+
+        return true;  // 모든 검사를 통과하면 true 반환
     }
     //장바구니에서 장바구니 아이템 삭제
 

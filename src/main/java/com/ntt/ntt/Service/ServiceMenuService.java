@@ -161,6 +161,7 @@ public class ServiceMenuService {
             throw new RuntimeException("메뉴가 존재하지 않습니다.");
         }
 
+        serviceMenuList.forEach(a->log.info("서비스로 들어온 값들 " + a));
 
         // 엔티티를 DTO로 변환
         return serviceMenuList.stream()
@@ -171,6 +172,7 @@ public class ServiceMenuService {
                             .serviceMenuName(menu.getServiceMenuName())
                             .serviceMenuInfo(menu.getServiceMenuInfo())
                             .serviceMenuStatus(menu.getServiceMenuStatus())
+                            .serviceMenuQuantity(menu.getServiceMenuQuantity())
                             .serviceMenuPrice(menu.getServiceMenuPrice())
                             .build();
                     List<ImageDTO> imageDTOList = imageRepository.findByServiceMenu_ServiceMenuId(serviceMenuDTO.getServiceMenuId())
