@@ -27,10 +27,10 @@ public class ServiceCartItem extends BaseEntity {
     private ServiceMenu serviceMenu;
 
     // 장바구니에 넣은 서비스의 수량
-    private int count;
+    private Integer count;
 
     // 카트에 담길 아이템을 참조하는 ServiceCartItem
-    public static ServiceCartItem createCartItem(ServiceCart serviceCart, ServiceMenu serviceMenu, int count) {
+    public static ServiceCartItem createCartItem(ServiceCart serviceCart, ServiceMenu serviceMenu, Integer count) {
         ServiceCartItem serviceCartItem = new ServiceCartItem();
         serviceCartItem.setServiceCart(serviceCart);
         serviceCartItem.setServiceMenu(serviceMenu);
@@ -40,7 +40,7 @@ public class ServiceCartItem extends BaseEntity {
     }
 
     //count의 증가
-    public void addCount(int count) {
+    public void addCount(Integer count) {
         this.count += count;
     }
 }

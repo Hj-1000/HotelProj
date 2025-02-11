@@ -28,36 +28,63 @@ public class ServiceCartController {
     private final ServiceCartItemService serviceCartItemService;
 
     //카트 컨트롤러 역시 데이터를받아 동적으로 만들것
+    // 장바구니 조회
+    @GetMapping("/api/cart")
+    public ResponseEntity<List<ServiceCartDetailDTO>> getCart(Principal principal) {
+        String memberEmail = principal.getName();
+        List<ServiceCartDetailDTO> cartDetails = serviceCartService.listServiceCart(memberEmail);
+        return new ResponseEntity<>(cartDetails, HttpStatus.OK);
+    }
+
 
     //장바구니 등록
+    // 장바구니 등록
     @PostMapping("/api/cart")
-    public ResponseEntity registerCart(@Valid ServiceCartItemDTO serviceCartItemDTO, BindingResult bindingResult, Principal principal) {
-        log.info("view에서 넘어온 값 : " + serviceCartItemDTO);
-        log.info("로그인 되었나?" + principal);
-        // 유효성 검사
+    public ResponseEntity<?> registerCart(@RequestBody @Valid ServiceCartItemDTO serviceCartItemDTO,
+                                          BindingResult bindingResult,
+                                          Principal principal) {
+        // 유효성 검사 실패시
         if (bindingResult.hasErrors()) {
             StringBuffer sb = new StringBuffer();
             List<FieldError> fieldErrors = bindingResult.getFieldErrors();
             for (FieldError fieldError : fieldErrors) {
-                log.info("필드 : " + fieldError.getField() + "메세지 : " + fieldError.getDefaultMessage());
-                sb.append(fieldError.getDefaultMessage());
+                sb.append(fieldError.getDefaultMessage()).append("\n");
             }
-            log.info(sb.toString());
-            return new ResponseEntity<String>(sb.toString(), HttpStatus.BAD_REQUEST);
+            // 오류 메시지를 JSON 형식으로 반환
+            return new ResponseEntity<>(new ErrorResponse(sb.toString()), HttpStatus.BAD_REQUEST);
         }
-        // 값이 잘 넘어왓다면
+
+        // 로그인한 멤버의 이메일을 이용해 등록할 장바구니 아이템 추가
         String memberEmail = principal.getName();
 
-        Integer serviceCartItemId = null; //저장된 serviceCartItemId
-
-
         try {
-            serviceCartItemId = serviceCartService.registerServiceCart(serviceCartItemDTO, memberEmail);
-            //저장이 잘 되었다면 브라우저로 다시 전송
-            return new ResponseEntity<Integer>(serviceCartItemId, HttpStatus.OK);
+            // 서비스 호출하여 장바구니 등록 처리
+            Integer cartItemId = serviceCartService.registerServiceCart(serviceCartItemDTO, memberEmail);
 
+            // 장바구니 등록 성공 시
+            return new ResponseEntity<>(cartItemId, HttpStatus.CREATED);
         } catch (Exception e) {
-            return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            // 예외 발생 시 처리
+            log.error("장바구니 등록 실패", e);
+            return new ResponseEntity<>(new ErrorResponse("장바구니 등록 중 오류가 발생했습니다."), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    // 오류 응답 객체
+    public static class ErrorResponse {
+        private String message;
+
+        public ErrorResponse(String message) {
+            this.message = message;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
         }
     }
     @GetMapping("/myPage/cart")
@@ -70,7 +97,7 @@ public class ServiceCartController {
        return "myPage/cart/history";
     }
 
-    @PostMapping("/api/cartItem")
+    @PutMapping("/api/updateCartItem/{serviceCartItemId}")
     public ResponseEntity updateCartItem(@Valid ServiceCartItemDTO serviceCartItemDTO,
                                          BindingResult bindingResult, Principal principal) {
         String memberEmail = principal.getName();

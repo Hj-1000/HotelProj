@@ -20,9 +20,9 @@ public class ServiceOrderItemDTO {
 
     private String serviceMenuName; // 주문메뉴 이름
 
-    private int orderPrice; //주문가격
+    private Integer orderPrice; //주문가격
 
-    private int count;
+    private Integer count;
 
     private String imagePath;
 
