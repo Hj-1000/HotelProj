@@ -3,15 +3,14 @@ package com.ntt.ntt.Service;
 import com.ntt.ntt.DTO.QnaDTO;
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Entity.Qna;
-import com.ntt.ntt.Entity.Reply;
 import com.ntt.ntt.Repository.MemberRepository;
+import com.ntt.ntt.Repository.NotificationRepository;
 import com.ntt.ntt.Repository.QnaRepository;
 import com.ntt.ntt.Repository.ReplyRepository;
 import groovy.util.logging.Log4j2;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +29,7 @@ public class QnaService {
     private final QnaRepository qnaRepository;
     private final MemberRepository memberRepository;
     private final ReplyRepository replyRepository;
+    private final NotificationRepository notificationRepository;
 
 
 
@@ -66,7 +66,7 @@ public class QnaService {
         return qna;
     }
 
-    public void registerQna(QnaDTO qnaDTO, Member member) {
+    public Qna registerQna(QnaDTO qnaDTO, Member member) {
         Qna qna = new Qna();
         qna.setQnaTitle(qnaDTO.getQnaTitle());
         qna.setQnaContent(qnaDTO.getQnaContent());
@@ -81,6 +81,7 @@ public class QnaService {
 
         qnaRepository.save(qna);
         qnaRepository.flush();
+        return qna;
     }
 
     private String applyNameMasking(String memberName) {
@@ -110,7 +111,11 @@ public class QnaService {
         // 해당 Qna와 연관된 댓글을 먼저 삭제
         replyRepository.deleteByQna(qna);
 
+
         // Qna 삭제
         qnaRepository.delete(qna);
+    }
+
+    public void save(Qna qna) {
     }
 }

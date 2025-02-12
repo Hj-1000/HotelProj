@@ -13,8 +13,7 @@
 
         // 이미지 미리보기 함수
         function previewImage(event) {
-
-            console.log("수정 진입")
+            console.log("수정 진입");
 
             const previewContainer = document.getElementById('imagePreviewContainer');
             previewContainer.innerHTML = '';  // 기존 미리보기 이미지 제거
@@ -38,6 +37,31 @@
                 });
             }
         }
+
+        // 폼 제출 전 이미지 첨부 확인 함수
+        function validateForm(event) {
+            const imageFiles = document.getElementById('newImageFiles').files;
+
+            // 이미지 파일이 첨부되지 않으면 제출을 막고 메시지를 띄운다
+            if (imageFiles.length === 0) {
+                event.preventDefault();  // 폼 제출을 막는다
+                alert('이미지를 첨부해 주세요!');
+                return false;
+            }
+
+            // 재고수량과 가격이 1 이상인지 확인
+            const quantity = document.getElementById('serviceMenuQuantity').value;
+            const price = document.getElementById('serviceMenuPrice').value;
+
+            if (quantity < 1 || price < 1) {
+                event.preventDefault();
+                alert('재고수량과 가격은 최소 1 이상이어야 합니다.');
+                return false;
+            }
+
+            return true;  // 유효성 검사 통과 시 폼을 제출
+        }
+
     </script>
 </head>
 <body>
@@ -54,14 +78,14 @@
 
                         <!--Controller에 multipart 선언 시 전송에서 multipart 지원-->
                         <form th:action="@{/roomService/menu/update}" method="post" enctype="multipart/form-data"
-                              th:object="${serviceMenuDTO}">
+                              th:object="${serviceMenuDTO}" onsubmit="return validateForm(event)">
                             <input type="hidden" name="serviceMenuId" th:field="*{serviceMenuId}">
 
                             <table class="table">
                                 <!--DTO를 참고해서-->
                                 <tbody>
                                 <tr>
-                                    <td style="width: 15%">메뉴 이름 :</td>
+                                    <td style="width: 15%">메뉴이름 :</td>
                                     <td style="width: 85%">
                                         <!-- 최소 2글자 이상 입력하도록 validation 추가 -->
                                         <input type="text" class="form-control" style="width: 300px"
@@ -72,7 +96,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td style="width: 15%">메뉴 설명 :</td>
+                                    <td style="width: 15%">메뉴설명 :</td>
                                     <td style="width: 85%">
                                         <!-- 최소 2글자 이상 입력하도록 validation 추가 -->
                                         <input type="text" class="form-control" style="width: 300px"
@@ -83,10 +107,9 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td style="width: 15%">메뉴 상태 :</td>
+                                    <td style="width: 15%">메뉴상태 :</td>
                                     <td style="width: 85%">
-                                        <!-- 최소 2글자 이상 입력하도록 validation 추가 -->
-                                        <label for="serviceMenuStatus" class="col-sm-3 col-form-label">메뉴 상태</label>
+                                        <label for="serviceMenuStatus" class="col-sm-3 col-form-label">메뉴상태</label>
                                         <select class="form-control" id="serviceMenuStatus" name="serviceMenuStatus" th:field="*{serviceMenuStatus}">
                                             <option value="SELL">판매중</option>
                                             <option value="PREPARE">준비중</option>
@@ -95,21 +118,27 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td style="width: 15%">메뉴 가격 :</td>
+                                    <td style="width: 15%">재고수량 :</td>
                                     <td style="width: 85%">
-                                        <!-- 최소 2글자 이상 입력하도록 validation 추가 -->
                                         <input type="number" class="form-control" style="width: 300px"
-                                               placeholder="메뉴 설명을 입력하세요."
-                                               name="serviceMenuPrice" th:field="*{serviceMenuPrice}"
-                                               >
+                                               placeholder="1이상 입력하세요."
+                                               name="serviceMenuQuantity" th:field="*{serviceMenuQuantity}">
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td style="width: 15%">메뉴 이미지 :</td>
+                                    <td style="width: 15%">메뉴가격 :</td>
+                                    <td style="width: 85%">
+                                        <input type="number" class="form-control" style="width: 300px"
+                                               placeholder="1이상 입력하세요."
+                                               name="serviceMenuPrice" th:field="*{serviceMenuPrice}">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 15%">메뉴이미지 :</td>
                                     <td style="width: 85%">
                                         <!-- 이미지 파일 업로드 -->
                                         <input type="file" class="form-control" style="width: 300px"
-                                               name="imageFiles">
+                                               name="imageFiles" id="newImageFiles">
                                     </td>
                                 </tr>
                                 </tbody>

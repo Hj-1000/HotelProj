@@ -1,13 +1,16 @@
 package com.ntt.ntt.Service;
 
+import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.ImageDTO;
 import com.ntt.ntt.DTO.ServiceCateDTO;
+import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.Image;
 import com.ntt.ntt.Entity.ServiceCate;
 import com.ntt.ntt.Entity.ServiceMenu;
 import com.ntt.ntt.Repository.ImageRepository;
 import com.ntt.ntt.Repository.ServiceCateRepository;
 import com.ntt.ntt.Repository.ServiceMenuRepository;
+import com.ntt.ntt.Repository.hotel.HotelRepository;
 import com.ntt.ntt.Util.FileUpload;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +41,8 @@ public class ServiceCateService{
     private final ImageRepository imageRepository;
     private final ServiceCateRepository serviceCateRepository;
     private final ServiceMenuRepository serviceMenuRepository;
+    private final HotelRepository hotelRepository;
+
     private final ModelMapper modelMapper;
 
     // 이미지 등록할 ImageService 의존성 추가
@@ -46,6 +51,24 @@ public class ServiceCateService{
 
     @Value("${dataUploadPath}")
     private String IMG_LOCATION;
+
+
+    //호텔DTOS
+    /*--------------------------------
+    함수명 : List getAllHotel()
+    인수 : 없음
+    출력 : DB에 저장된 호텔 출력
+    설명 : DB에 저장된 호텔을 목록형식으로 출력
+    --------------------------------*/
+    public List<HotelDTO> getAllHotel() {
+        List<Hotel> hotels = hotelRepository.findAll();
+
+        List<HotelDTO> hotelDTOS = hotels.stream()
+                .map(a -> new HotelDTO(a.getHotelId(), a.getHotelName())).collect(Collectors.toList());
+
+        return hotelDTOS;
+    }
+
 
     //서비스 카테고리 등록
     /*--------------------------------
@@ -69,8 +92,6 @@ public class ServiceCateService{
         log.info("컨트롤러에서 들어온 이미지 정보" + multipartFile);
         log.info("ServiceCate object after mapping: {}", serviceCate);
 
-
-
     }
     //서비스 카테고리 목록
     /*--------------------------------
@@ -79,45 +100,47 @@ public class ServiceCateService{
     출력 : 해당 데이터들(list)과 page 정보를 전달
     설명 : 요청한 페이지번호에 해당하는 데이터를 조회해서 전달
     --------------------------------*/
-    public Page<ServiceCateDTO> list(Pageable page, String keyword, String searchType) {
-        // 1. 페이지정보를 재가공
+    public Page<ServiceCateDTO> list(Pageable page, String keyword, String searchType, Integer hotelId) {
         int currentPage = page.getPageNumber() - 1; // 0-based index
         int pageSize = 10;
         Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.ASC, "serviceCateId"));
 
-        // 2. 조회
         Page<ServiceCate> serviceCatePage;
 
         if (keyword != null && !keyword.isEmpty()) {
-            // 검색어가 있을 경우
             String keywordLike = "%" + keyword + "%";
             if ("name".equals(searchType)) {
-                // 카테고리명에 검색어 포함된 경우 찾기
-                serviceCatePage = serviceCateRepository.findByServiceCateNameLike(keywordLike, pageable);
+                // 검색어 + hotelId 기준으로 필터링 2024-02-11 추가
+                if (hotelId != null) {
+                    serviceCatePage = serviceCateRepository.findByServiceCateNameLikeAndHotel_HotelId(keywordLike, hotelId, pageable);
+                } else {
+                    serviceCatePage = serviceCateRepository.findByServiceCateNameLike(keywordLike, pageable);
+                }
             } else {
-                // 다른 검색 조건이 있을 경우 처리
-                // 예시: 'searchType'에 따른 추가적인 로직 구현 가능
-                serviceCatePage = serviceCateRepository.findAll(pageable); // 예시: 모든 항목 조회
+                serviceCatePage = (hotelId != null)
+                        ? serviceCateRepository.findByHotel_HotelId(hotelId, pageable)
+                        : serviceCateRepository.findAll(pageable);
             }
         } else {
-            // 검색어가 없을 경우 모든 카테고리 조회
-            serviceCatePage = serviceCateRepository.findAll(pageable);
+            serviceCatePage = (hotelId != null)
+                    ? serviceCateRepository.findByHotel_HotelId(hotelId, pageable)
+                    : serviceCateRepository.findAll(pageable);
         }
 
-        // 3. 변환
-        return  serviceCatePage.map(entity ->{
+        // DTO 변환
+        return serviceCatePage.map(entity -> {
             ServiceCateDTO serviceCateDTO = modelMapper.map(entity, ServiceCateDTO.class);
             List<ImageDTO> imageDTOList = imageRepository.findByServiceCate_ServiceCateId(serviceCateDTO.getServiceCateId())
                     .stream().map(imagefile -> {
-                        imagefile.setImagePath(imagefile.getImagePath().replace("c:/data/", ""));  // 이미지 경로 수정
+                        imagefile.setImagePath(imagefile.getImagePath().replace("c:/data/", ""));
                         return modelMapper.map(imagefile, ImageDTO.class);
                     })
                     .collect(Collectors.toList());
-            //DTO에 이미리 리스트 설정
             serviceCateDTO.setServiceCateImageDTOList(imageDTOList);
             return serviceCateDTO;
         });
     }
+
 
     //존재하는 카테고리 목록 가져오기
     /*--------------------------------

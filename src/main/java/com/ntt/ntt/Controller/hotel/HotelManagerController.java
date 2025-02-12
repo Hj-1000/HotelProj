@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -48,11 +49,16 @@ public class HotelManagerController {
     //등록처리
     @Operation(summary = "관리자용 호텔 등록 처리", description = "호텔을 등록 처리한다.")
     @PostMapping("/register")
-    public String registerProc(@ModelAttribute HotelDTO hotelDTO, List<MultipartFile> imageFiles, RedirectAttributes redirectAttributes) {
+    public String registerProc(@ModelAttribute HotelDTO hotelDTO,
+                               List<MultipartFile> imageFiles,
+                               RedirectAttributes redirectAttributes,
+                               Principal principal) {
         log.info("본사 등록 진입");
 
+        String userEmail = principal.getName();
+
         // 지사 등록 서비스 호출
-        hotelService.register(hotelDTO, imageFiles);
+        hotelService.register(hotelDTO, imageFiles, userEmail);
 
         // 등록된 지사의 companyId 가져오기
         Integer companyId = hotelDTO.getCompanyId().getCompanyId();  // hotelDTO에 companyId가 포함되어 있다고 가정
@@ -224,6 +230,7 @@ public class HotelManagerController {
     public String delete(Integer hotelId, RedirectAttributes redirectAttributes) {
         hotelService.delete(hotelId);
         redirectAttributes.addFlashAttribute("message", "해당 지사 삭제가 완료되었습니다.");
+
         return "redirect:/manager/hotel/list";
     }
 

@@ -42,6 +42,35 @@
                 alert("글 작성이 완료되었습니다.");
             });
         });
+
+        //이미지파일 검사
+        function validateImage(event) {
+            var files = event.target.files;
+            var maxSize = 10 * 1024 * 1024; // 10MB 제한
+            var allowedExt = ["jpg", "jpeg", "gif", "png", "bmp"];
+
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                var fileName = file.name;
+                var fileSize = file.size;
+                var fileExt = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+
+                // 확장자 검사
+                if (!allowedExt.includes(fileExt)) {
+                    alert("이미지 파일(PNG, JPG, GIF, BMP)만 업로드 가능합니다.");
+                    event.target.value = ""; // 입력 필드 초기화
+                    return;
+                }
+
+                // 파일 크기 검사
+                if (fileSize > maxSize) {
+                    alert("파일 크기가 10MB를 초과할 수 없습니다.");
+                    event.target.value = ""; // 입력 필드 초기화
+                    return;
+                }
+            }
+        }
+
     </script>
 
 
@@ -83,6 +112,7 @@
             <!-- 버튼 -->
             <div class="text-end mt-3">
                 <a class="btn btn-primary" style="background-color: black" th:href="@{/manager/hotel/list(companyId=${hotelDTO.companyId.companyId})}">목록</a>
+                <a class="btn btn-warning" th:href="@{/roomService/category/list(hotelId=${hotelDTO.hotelId})}">룸서비스</a>
                 <button type="button" class="btn btn-success modalBtn">객실 등록</button>
                 <a class="btn btn-primary" th:href="@{/manager/hotel/update(hotelId=${hotelDTO.hotelId})}">수정</a>
                 <a class="btn btn-danger" th:href="@{/manager/hotel/delete(hotelId=${hotelDTO.hotelId})}">삭제</a>
@@ -94,26 +124,6 @@
         <!-- 본사에 속한 객실 목록 -->
         <div class="container-fluid mt-4">
             <h2 class="mb-3">객실 관리</h2>
-
-            <div class="card p-4 mb-4">
-                <form action="/manager/room/list" method="get" id="searchForm">
-                    <div class="row g-3 align-items-center">
-                        <h5 class="card-title">객실 찾기</h5>
-                        <div class="col-md-6">
-                            <select name="searchType" id="searchType" class="form-select">
-                                <option value="name">객실명</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <input type="text" id="keyword" class="form-control" placeholder="검색어를 입력하세요">
-                        </div>
-                    </div>
-                    <!-- 조회 버튼 -->
-                    <div class="text-center mt-4">
-                        <button type="button" id="searchBtn" class="btn btn-dark w-25">조회</button>
-                    </div>
-                </form>
-            </div>
 
             <!-- 목록 영역 -->
             <div class="card">
@@ -201,7 +211,7 @@
     </div>
 
 
-    <!-- 방 등록 모달 -->
+    <!-- 객실 등록 모달 -->
     <div class="modal" id="myModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -293,9 +303,9 @@
 
                         <!-- 객실 이미지 업로드 -->
                         <div class="mb-3">
-                            <label for="imageFile" class="form-label">객실 이미지 업로드</label>
-                            <input type="file" class="form-control" id="imageFile" name="imageFile" multiple>
-                            <small class="form-text text-muted">여러 이미지를 선택하려면 Ctrl(또는 Cmd) 키를 누른 상태로 이미지를 선택하세요.</small>
+                            <label for="newImageFiles" class="form-label">객실 이미지 업로드</label>
+                            <input type="file" id="newImageFiles" name="imageFiles" multiple accept="image/*" onchange="validateImage(event)">
+                            <small>이미지 파일(PNG, JPG, GIF, BMP)만 업로드 가능합니다.</small>
                         </div>
 
                         <!-- Submit Button -->
