@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     }
 
-    // 알림 목록을 업데이트하는 함수
+
     // 알림 목록을 업데이트하는 함수
     function updateNotificationList() {
         const unreadNotifications = notifications.filter(notification => !notification.isRead);
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function () {
     setInterval(function() {
         fetchUnreadNotifications();
         updateUnreadCount();
-    }, 5000);
+    }, 1000);
 
     // 새 알림 수 가져오는 함수
     function fetchUnreadNotifications() {

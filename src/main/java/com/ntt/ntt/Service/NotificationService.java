@@ -40,14 +40,6 @@ public class NotificationService {
     }
 
 
-    public List<NotificationDTO> getUnreadNotificationsForMember(String memberEmail) {
-        Member member = memberRepository.findByMemberEmail(memberEmail)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-        return notificationRepository.findByMemberOrderByTimestampDesc(member)
-                .stream()
-                .map(NotificationDTO::fromEntity)
-                .collect(Collectors.toList());
-    }
 
     // 알림 삭제
     @Transactional
