@@ -52,7 +52,14 @@
         function validateImage(event) {
             var files = event.target.files;
             var maxSize = 10 * 1024 * 1024; // 10MB 제한
-            var allowedExt = ["jpg", "jpeg", "gif", "png", "bmp", "jfif"];
+            var allowedExt = ["jpg", "jpeg", "gif", "png", "bmp", "jfif", "webp"];
+
+            // 파일 개수 검사: 최대 3개까지 허용
+            if (files.length > 3) {
+                alert("최대 3장까지만 업로드할 수 있습니다.");
+                event.target.value = ""; // 입력 필드 초기화
+                return;
+            }
 
             for (var i = 0; i < files.length; i++) {
                 var file = files[i];
@@ -62,7 +69,7 @@
 
                 // 확장자 검사
                 if (!allowedExt.includes(fileExt)) {
-                    alert("이미지 파일(PNG, JPG, GIF, BMP)만 업로드 가능합니다.");
+                    alert("이미지 파일(PNG, JPG, GIF, BMP, JFIF, WEBP)만 업로드 가능합니다.");
                     event.target.value = ""; // 입력 필드 초기화
                     return;
                 }
@@ -180,8 +187,8 @@
 
                 <!-- 추가 버튼 -->
                 <div class="text-end mt-3">
-                    <button class="btn btn-primary" onclick="location.href='/company/list' ">본사관리페이지</button> <!--only chief-->
-                    <button class="btn btn-primary" style="background-color: black" onclick="location.href='/manager/hotel/register' ">등록</button>
+                    <a class="btn btn-success" th:href="@{/company/read(companyId=${companyId})}">본사상세</a> <!--only chief-->
+                    <button class="btn btn-dark" onclick="location.href='/manager/hotel/register'">등록</button>
                     <button type="button" class="btn btn-primary modalBtn">간편 등록</button>
                 </div>
 
@@ -241,23 +248,23 @@
                         </div>
                         <div class="mb-3 mt-3">
                             <label for="hotelName" class="form-label">지사명:</label>
-                            <input type="text" class="form-control" id="hotelName" name="hotelName">
+                            <input type="text" class="form-control" id="hotelName" name="hotelName" required>
                         </div>
                         <div class="mb-3">
                             <label for="hotelLocation" class="form-label">호텔지역:</label>
-                            <input type="text" class="form-control" id="hotelLocation" name="hotelLocation">
+                            <input type="text" class="form-control" id="hotelLocation" name="hotelLocation required">
                         </div>
                         <div class="mb-3 mt-3">
                             <label for="hotelAddress" class="form-label">호텔주소:</label>
-                            <input type="text" class="form-control" id="hotelAddress" name="hotelAddress">
+                            <input type="text" class="form-control" id="hotelAddress" name="hotelAddress" required>
                         </div>
                         <div class="mb-3">
                             <label for="hotelInfo" class="form-label">호텔상세:</label>
-                            <textarea class="form-control" id="hotelInfo" name="hotelInfo"></textarea>
+                            <textarea class="form-control" id="hotelInfo" name="hotelInfo" required></textarea>
                         </div>
                         <div class="mb-3">
                             <label for="hotelPhone" class="form-label">호텔전화:</label>
-                            <input type="text" class="form-control" id="hotelPhone" name="hotelPhone">
+                            <input type="text" class="form-control" id="hotelPhone" name="hotelPhone" required>
                         </div>
                         <!--<div class="mb-3 mt-3">
                             <label for="hotelEmail" class="form-label">호텔이메일:</label>
@@ -324,8 +331,8 @@
                         <!-- 새 이미지 업로드 및 미리보기 -->
                         <div>
                             <label for="newImageFiles">지사이미지:</label>
-                            <input type="file" id="newImageFiles" name="imageFiles" multiple accept="image/*" onchange="validateImage(event)">
-                            <small>이미지 파일(PNG, JPG, GIF, BMP, JFIF)만 업로드 가능합니다.</small>
+                            <input type="file" id="newImageFiles" name="imageFiles" multiple accept="image/*" onchange="validateImage(event)" required>
+                            <small>이미지 파일(PNG, JPG, GIF, BMP, JFIF, WEBP)만 업로드 가능합니다.</small>
                         </div>
 
                         <!-- 미리보기 이미지 표시 -->

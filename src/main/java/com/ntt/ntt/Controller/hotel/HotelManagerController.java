@@ -55,9 +55,10 @@ public class HotelManagerController {
                                Principal principal) {
         log.info("본사 등록 진입");
 
+        // 현재 로그인한 사용자의 이메일 가져오기
         String userEmail = principal.getName();
 
-        // 지사 등록 서비스 호출
+        // 호텔 등록 서비스 호출 (memberEmail 전달)
         hotelService.register(hotelDTO, imageFiles, userEmail);
 
         // 등록된 지사의 companyId 가져오기
@@ -69,6 +70,7 @@ public class HotelManagerController {
 
         return "redirect:/manager/hotel/list?companyId=" + companyId;  // companyId를 쿼리 파라미터로 전달
     }
+
 
 
 

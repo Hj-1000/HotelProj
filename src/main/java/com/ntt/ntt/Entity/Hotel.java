@@ -15,6 +15,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Builder
 public class Hotel extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer hotelId;

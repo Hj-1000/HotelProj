@@ -99,7 +99,7 @@
         function validateImage(event) {
             var files = event.target.files;
             var maxSize = 10 * 1024 * 1024; // 10MB 제한
-            var allowedExt = ["jpg", "jpeg", "gif", "png", "bmp", "jfif"];
+            var allowedExt = ["jpg", "jpeg", "gif", "png", "bmp", "jfif", "webp"];
 
             for (var i = 0; i < files.length; i++) {
                 var file = files[i];
@@ -133,6 +133,7 @@
         <h2 class="mb-3">호텔 본사 관리</h2>
         <!-- 검색 영역 -->
         <div class="card p-4 mb-4">
+            <form action="/company/list" method="get">
                 <div class="row g-3 align-items-center">
                     <h5 class="card-title">본사 찾기</h5>
                     <div class="col-md-6">
@@ -168,9 +169,9 @@
                         <th style="width: 13%">이미지</th>
                         <th style="width: 27%">본사명</th>
                         <th style="width: 20%">관리자명</th>
-                        <th style="width: 10%">지사수</th>
-                        <th style="width: 10%">매장수</th>
-                        <th style="width: 8%">삭제</th>
+                        <th style="width: 13%">지사수</th>
+                        <!--<th style="width: 10%">매장수</th>-->
+                        <th style="width: 15%">삭제</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -193,7 +194,7 @@
                             <td th:text="${data.companyManager}" class="align-middle text-center">우리</td>
                             <!--나중에 지사수, 매장수 업데이트할거임~!-->
                             <td th:text="${data.hotelCount}" class="align-middle text-center">2</td>
-                            <td class="align-middle text-center">2</td>
+                            <!--<td class="align-middle text-center">2</td>-->
                             <td class="align-middle text-center">
                                 <a th:href="@{company/read(hotelId=${data.companyId})}" class="btn btn-info btn-sm">보기</a>
                                 <a th:href="@{company/update(hotelId=${data.companyId})}"  class="btn btn-warning btn-sm">수정</a>
@@ -279,7 +280,7 @@
                         <div>
                             <label for="newImageFiles">본사이미지:</label>
                             <input type="file" id="newImageFiles" name="imageFiles" multiple accept="image/*" onchange="validateImage(event)">
-                            <small>이미지 파일(PNG, JPG, GIF, BMP, JFIF)만 업로드 가능합니다.</small>
+                            <small>이미지 파일(PNG, JPG, GIF, BMP, JFIF, WEBP)만 업로드 가능합니다.</small>
                         </div>
 
                         <!-- 미리보기 이미지 표시 -->

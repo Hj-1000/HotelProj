@@ -70,6 +70,9 @@ public class CompanyService {
         //관리자명 로그인된 회원 이름으로
         company.setCompanyManager(member.getMemberName());
 
+        // 🔹 회원 정보 설정 -> memberId 추가를 위해
+        company.setMember(member);
+
         // 1. Company 먼저 저장
         companyRepository.save(company);
 

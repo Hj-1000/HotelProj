@@ -16,19 +16,54 @@
     <link rel="stylesheet" th:href="@{/css/roomList.css}">
 
     <style>
-        .image-box {
-            width:100%;
-            height:500px;
-            overflow:hidden;
-            margin:0 auto;
+
+        .hotel-images {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            grid-template-rows: repeat(2, 1fr);
+            gap: 10px;
+            padding: 10px;
+            height: 400px;
+            /*border: 1px solid purple;*/
+        }
+        .hotel-images img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 5px;
+            /*border:1px solid orange;*/
+        }
+        .hotel-images img:first-child {
+            grid-row: span 2;
+        }
+        /*!* 슬라이드 이미지의 컨테이너 *!
+        .carousel-inner {
+            position: relative;
+            width: 100%;
+            height: 500px; !* 고정된 높이 *!
         }
 
-        .hotelImg {
-            width:100%;
-            height:100%;
-            object-fit:cover;
+        .carousel-item {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
         }
+
+        !* 이미지 스타일 *!
+        .hotelImg {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; !* 이미지 비율 맞추기 *!
+            object-position: center; !* 이미지 중앙에 맞추기 *!
+        }
+
+        !* carousel-item을 고정하여 전환 시 크기 변화 방지 *!
+        .carousel-item-next, .carousel-item-prev, .carousel-item.active {
+            display: block;
+            transition: transform 0.5s ease-in-out;
+        }*/
     </style>
+
 
     <script th:inline="javascript">
 
@@ -158,60 +193,65 @@
         <div class="col">
             <div class="card border-light">
                 <!-- 호텔 상세부분 -->
-                <div class="row g-0">
+                <div class="row g-0 hotel-card">
                     <div >
-                        <div id="carouselExampleIndicators" class="carousel slide">
+
+                        <div class="hotel-images">
+                            <!-- 1. 호텔 메인 이미지 추가 (첫 번째 호텔 이미지) -->
+                            <th:block th:if="${hotelDTO.hotelImgDTOList.size() > 0}">
+                                <img th:src="@{'/upload/' + ${hotelDTO.hotelImgDTOList[0].imagePath}}" class="hotelmain" alt="호텔 메인">
+                            </th:block>
+
+                            <!-- 2. 나머지 호텔 이미지 추가 (2번째부터) -->
+                            <th:block th:each="img, iterStat : ${hotelDTO.hotelImgDTOList}" th:if="${iterStat.index > 0}">
+                                <img th:src="@{'/upload/' + ${img.imagePath}}" class="hotelroom" alt="호텔 이미지">
+                            </th:block>
+
+                            <!-- 3. 호텔 이미지가 5개보다 적다면 객실 이미지로 부족한 칸을 채우기 -->
+                            <th:block th:if="${hotelDTO.hotelImgDTOList.size() < 5}">
+                                <th:block th:each="room : ${rooms}">
+                                    <th:block th:each="roomImg, imgStat : ${room.roomImageDTOList}" th:if="${hotelDTO.hotelImgDTOList.size() + imgStat.index < 5}">
+                                        <img th:src="@{'/upload/' + ${roomImg.imagePath}}" class="hotelroom" alt="객실 이미지">
+                                    </th:block>
+                                </th:block>
+                            </th:block>
+                        </div>
+
+
+                        <!--슬라이드였던것-->
+                        <!--<div id="carouselExampleIndicators" class="carousel slide">
                             <div class="carousel-indicators">
                                 <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
                                 <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
                                 <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
                             </div>
                             <div class="carousel-inner">
-                                <div class="carousel-item active image-box">
-                                    <!--등록한 사진이 있을 때-->
-                                    <th:block th:if="${hotelDTO.hotelImgDTOList != 0}">
-                                        <div th:each="img : ${hotelDTO.hotelImgDTOList}">
-                                            <!-- 이미지 경로(path) -->
-                                            <img th:src="@{'/upload/' + ${img.imagePath}}" class="hotelImg" alt="hotel Image" width="100%"/>
-                                        </div>
-                                    </th:block>
-                                    <!--등록한 사진이 없을 때-->
-                                    <th:block th:unless="${hotelDTO.hotelImgDTOList.size() != 0}">
-                                        <div>
-                                            <img src="/img/default_img.jpg" alt="noImage" class="hotelImg" style="width: 100%"/>
-                                        </div>
-                                    </th:block>
-                                </div>
-                                <div class="carousel-item image-box">
-                                    <!--등록한 사진이 있을 때-->
-                                    <th:block th:if="${hotelDTO.hotelImgDTOList != 0}">
-                                        <div th:each="img : ${hotelDTO.hotelImgDTOList}">
-                                            <!-- 이미지 경로(path) -->
-                                            <img th:src="@{'/upload/' + ${img.imagePath}}" class="hotelImg" alt="hotel Image" width="100%"/>
-                                        </div>
-                                    </th:block>
-                                    <!--등록한 사진이 없을 때-->
-                                    <th:block th:unless="${hotelDTO.hotelImgDTOList.size() != 0}">
-                                        <div>
-                                            <img src="/img/default_img.jpg" alt="noImage" class="hotelImg" style="width: 100%"/>
-                                        </div>
-                                    </th:block>
-                                </div>
-                                <div class="carousel-item image-box">
-                                    <!--등록한 사진이 있을 때-->
-                                    <th:block th:if="${hotelDTO.hotelImgDTOList != 0}">
-                                        <div th:each="img : ${hotelDTO.hotelImgDTOList}">
-                                            <!-- 이미지 경로(path) -->
-                                            <img th:src="@{'/upload/' + ${img.imagePath}}" class="hotelImg" alt="hotel Image" width="100%"/>
-                                        </div>
-                                    </th:block>
-                                    <!--등록한 사진이 없을 때-->
-                                    <th:block th:unless="${hotelDTO.hotelImgDTOList.size() != 0}">
-                                        <div>
-                                            <img src="/img/default_img.jpg" alt="noImage" class="hotelImg" style="width: 100%"/>
-                                        </div>
-                                    </th:block>
-                                </div>
+                                &lt;!&ndash; 이미지가 있는 슬라이드를 생성 &ndash;&gt;
+                                <th:block th:each="img, iterStat : ${hotelDTO.hotelImgDTOList}">
+                                    <div class="carousel-item image-box" th:classappend="${iterStat.index == 0 ? ' active' : ''}">
+                                        <img th:src="@{'/upload/' + ${img.imagePath}}" class="hotelImg" alt="hotel Image" width="100%" />
+                                    </div>
+                                </th:block>
+
+                                &lt;!&ndash; 기본 이미지를 채우기 위한 부분 (이미지가 부족할 때) &ndash;&gt;
+                                <th:block th:if="${hotelDTO.hotelImgDTOList.size() < 3}">
+                                    &lt;!&ndash; 1개의 기본 이미지 추가 &ndash;&gt;
+                                    <div class="carousel-item image-box" th:classappend="${hotelDTO.hotelImgDTOList.size() == 0 ? ' active' : ''}">
+                                        <img src="/img/default_img.jpg" class="hotelImg" alt="default Image" width="100%" />
+                                    </div>
+                                </th:block>
+                                <th:block th:if="${hotelDTO.hotelImgDTOList.size() == 1}">
+                                    &lt;!&ndash; 2개의 기본 이미지 추가 &ndash;&gt;
+                                    <div class="carousel-item image-box">
+                                        <img src="/img/default_img.jpg" class="hotelImg" alt="default Image" width="100%" />
+                                    </div>
+                                </th:block>
+                                <th:block th:if="${hotelDTO.hotelImgDTOList.size() == 2}">
+                                    &lt;!&ndash; 1개의 기본 이미지 추가 &ndash;&gt;
+                                    <div class="carousel-item image-box">
+                                        <img src="/img/default_img.jpg" class="hotelImg" alt="default Image" width="100%" />
+                                    </div>
+                                </th:block>
                             </div>
                             <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
                                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -221,7 +261,8 @@
                                 <span class="carousel-control-next-icon" aria-hidden="true"></span>
                                 <span class="visually-hidden">Next</span>
                             </button>
-                        </div>
+                        </div>-->
+
                         <div>
                             <!--등록한 사진이 없을 때-->
                             <th:block th:unless="${hotelDTO.hotelImgDTOList.size() != 0}">
@@ -288,7 +329,7 @@
                <div class="card border-light-shadow" style="width: 950px; margin: auto; padding-top: 17px; padding-bottom: 20px;">
                    <div style="width: 950px; margin: auto">
                        <div style="margin-bottom: -20px">
-                           <h4 style="margin-bottom: -24px">&ensp;객실 리뷰</h4> <span>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;평점 <span class="hotelRating">4.9</span>점</span>
+                           <h4 style="margin-bottom: -24px">&ensp;객실 리뷰</h4> <span>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;(<span class="roomReview">2,298</span>)&ensp; <i class="fa-solid fa-star"></i> <span class="hotelRating">4.9</span>점</span>
                        </div>
                        <div style="text-align: right; margin-bottom: 15px; margin-top: -10px; font-size: small">
                            전체보기>&emsp;
@@ -296,20 +337,64 @@
                        <div class="row" style="width: 950px; margin: auto">
                            <!--th:if 돌려서 최신리뷰 3개-->
                            <div class="col-4">
-                               <div class="card border-light-shadow review-card" style="margin: -3px; padding: 5px">
+                               <div class="card border-light-shadow review-card" style="margin: -3px; padding: 15px; height: 150px">
                                    <!-- 객실 리뷰 -->
+                                   <!--별점-->
+                                   <p> <i class="fa-solid fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-solid fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-solid fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-solid fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-solid fa-star"></i>
+                                   </p>
+                                   <!--th:if 별점이 i점 이라면~-->
+                                   <!--<p> <i class="fa-solid fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-solid fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-solid fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-solid fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-regular fa-star"></i>
+                                   </p>
+                                   <p> <i class="fa-solid fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-solid fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-solid fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-regular fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-regular fa-star"></i>
+                                   </p>
+                                   <p> <i class="fa-solid fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-solid fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-regular fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-regular fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-regular fa-star"></i>
+                                   </p>
+                                   <p> <i class="fa-solid fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-regular fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-regular fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-regular fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-regular fa-star"></i>
+                                   </p>-->
                                    좋아요
                                </div>
                            </div>
                            <div class="col-4">
-                               <div class="card border-light-shadow review-card" style="margin: -3px; padding: 5px">
+                               <div class="card border-light-shadow review-card" style="margin: -3px; padding: 15px; height: 150px">
+                                   <p> <i class="fa-solid fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-regular fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-regular fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-regular fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-regular fa-star"></i>
+                                   </p>
                                    <!-- 객실 리뷰 -->
                                    바퀴벌레나옴
                                </div>
                            </div>
                            <div class="col-4">
-                               <div class="card border-light-shadow review-card" style="margin: -3px; padding: 5px">
+                               <div class="card border-light-shadow review-card" style="margin: -3px; padding: 15px; height: 150px">
                                    <!-- 객실 리뷰 -->
+                                   <p> <i class="fa-solid fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-solid fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-solid fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-solid fa-star" style="margin-right: -3px"></i>
+                                       <i class="fa-regular fa-star"></i>
+                                   </p>
                                    좋네요
                                </div>
                            </div>
