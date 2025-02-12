@@ -1,6 +1,7 @@
 package com.ntt.ntt.DTO;
 
 import com.ntt.ntt.Entity.Company;
+import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.Member;
 import lombok.*;
 
@@ -45,11 +46,18 @@ public class HotelDTO {
     @Builder.Default
     private List<ImageDTO> hotelImgDTOList = new ArrayList<>(); //이미지 2025-01-21추가
 
-    private Company companyId; //회사 연결 (회사 안에 들어있는 호텔) 2025-01-22 추가
+    private Integer companyId; //회사 연결 (회사 안에 들어있는 호텔) 2025-01-22 추가
     private String companyName; //회사 연결 (회사 안에 들어있는 호텔) 2025-01-22 추가
 
     public HotelDTO(Integer hotelId, String hotelName) {
         this.hotelId = hotelId;
         this.hotelName = hotelName;
+    }
+
+    // Hotel 엔티티를 받는 생성자 추가
+    public HotelDTO(Hotel hotel) {
+        this.hotelId = hotel.getHotelId();
+        this.hotelName = hotel.getHotelName();
+        this.companyId = hotel.getCompany().getCompanyId(); // Company 엔티티를 DTO로 변환
     }
 }

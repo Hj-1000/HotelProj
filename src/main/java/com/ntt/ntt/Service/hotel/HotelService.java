@@ -432,6 +432,13 @@ public class HotelService {
             throw new RuntimeException("호텔을 찾을 수 없습니다.");
         }
     }
+
+    public HotelDTO findById(Integer hotelId) {
+        return hotelRepository.findById(hotelId)
+                .map(hotel -> new HotelDTO(hotel)) // 엔티티 -> DTO 변환
+                .orElse(null);
+    }
+
     // 삭제
     @Transactional
     public void delete(Integer hotelId) {
