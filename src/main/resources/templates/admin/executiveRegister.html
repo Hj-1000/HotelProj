@@ -5,7 +5,7 @@
       layout:decorate="~{layouts/layout}">
 <head>
     <meta charset="UTF-8">
-    <title>매니저 등록</title>
+    <title>NTT호텔 - 매니저 등록</title>
 </head>
 <body>
     <div id="wrapper" layout:fragment="content">
@@ -16,8 +16,8 @@
                 <form action="/admin/executiveRegister" method="post" onsubmit="return registerCheck();">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label for="name" class="form-label fw-bold">*이름</label>
-                            <input type="text" class="form-control" id="name" placeholder="이름">
+                            <label for="memberName" class="form-label fw-bold">*이름</label>
+                            <input type="text" class="form-control" id="memberName" name="memberName" placeholder="이름">
                         </div>
                         <div class="col-md-6">
                             <label for="memberEmailInput" class="form-label fw-bold">*이메일 :</label>
@@ -29,33 +29,79 @@
                         </div>
                         <div class="col-md-6">
                             <label for="memberPassword" class="form-label fw-bold">*비밀번호</label>
-                            <input type="password" class="form-control" id="memberPassword" placeholder="비밀번호는 6~12자의 영문, 숫자, 기호">
+                            <input type="password" class="form-control" id="memberPassword" name="memberPassword" placeholder="비밀번호는 6~12자의 영문, 숫자, 기호">
                         </div>
                         <div class="col-md-6">
                             <label for="memberPasswordCheck" class="form-label fw-bold">*비밀번호 확인</label>
-                            <input type="password" class="form-control" id="memberPasswordCheck" placeholder="비밀번호는 6~12자의 영문, 숫자, 기호">
+                            <input type="password" class="form-control" id="memberPasswordCheck" name="memberPasswordCheck" placeholder="비밀번호는 6~12자의 영문, 숫자, 기호">
                         </div>
                         <div class="col-md-6">
-                            <label for="contact" class="form-label fw-bold">연락처</label>
-                            <input type="text" class="form-control" id="contact" placeholder="연락처">
-                        </div>
-                        <div class="col-md-6">
-                            <label for="branch" class="form-label fw-bold">지사</label>
-                            <select class="form-select" id="branch">
-                                <option selected>선택</option>
-                                <option value="1">지사 1</option>
-                                <option value="2">지사 2</option>
+                            <label for="company" class="form-label fw-bold">본사</label>
+                            <select class="form-select" id="company" name="company">
+                                <option value="">전체</option>
+                                <option th:each="company : ${companyList}" th:value="${company.companyId}" th:text="${company.companyName}"></option>
                             </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="hotelSelect" class="form-label fw-bold">지사</label>
+                            <select id="hotelSelect" class="form-select" name="hotelId">
+                                <option value="">먼저 본사를 선택하세요</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label for="memberPhone" class="form-label fw-bold">전화번호</label>
+                            <input type="text" class="form-control" id="memberPhone" name="memberPhone" placeholder="연락처">
                         </div>
                     </div>
                     <div class="text-end mt-4">
                         <p>* 표시는 필수 입력 항목입니다.</p>
                         <button type="submit" class="btn btn-primary me-2" style="background-color: black">등록</button>
-                        <button type="reset" class="btn btn-secondary">취소</button>
+                        <button type="reset" class="btn btn-secondary" onclick="location.href='/admin/executiveList'">취소</button>
                     </div>
                 </form>
-
+                <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
                 <script type="text/javascript">
+                    $(document).ready(function() {
+                        // #company 선택 시 실행
+                        $("#company").change(function() {
+                            var companyId = $(this).val(); // 선택한 본사의 ID 가져오기
+
+                            // console.log으로 확인
+                            console.log("선택한 본사 ID:", companyId);
+
+                            // 회사 ID가 선택되지 않으면 지사 목록 초기화
+                            if (!companyId) {
+                                $("#hotelSelect").empty();  // 기존 옵션 제거
+                                $("#hotelSelect").append('<option value="">먼저 본사를 선택하세요</option>');
+                                return;  // 추가적으로 처리할 필요가 없으므로 종료
+                            }
+
+                            $.ajax({
+                                url: "/admin/hotels",  // 본사에 해당하는 지사를 가져오는 API
+                                type: "GET",
+                                data: { companyId: companyId },  // 선택한 회사 ID 전송
+                                success: function(hotels) {
+                                    var hotelSelect = $("#hotelSelect");
+                                    hotelSelect.empty();  // 기존 옵션 제거
+
+                                    if (hotels.length > 0) {
+                                        // 호텔 목록이 있을 경우
+                                        hotels.forEach(function(hotel) {
+                                            hotelSelect.append(
+                                                `<option value="${hotel.hotelId}">${hotel.hotelName}</option>`
+                                            );
+                                        });
+                                    } else {
+                                        // 지사가 없으면 '지사 목록이 없습니다' 메시지 추가
+                                        hotelSelect.append('<option value="">지사 목록이 없습니다</option>');
+                                    }
+                                },
+                                error: function() {
+                                    alert("지사 목록을 불러오는 중 오류가 발생했습니다.");
+                                }
+                            });
+                        });
+                    });
 
                     // 이메일 중복확인
                     function emailCheck() {
@@ -118,7 +164,7 @@
                                         alert("이미 가입된 회원입니다.");
                                         return false; // 회원가입 제출 막기
                                     }
-                                    alert("회원가입에 성공하였습니다. 로그인 페이지로 이동합니다.");
+                                    alert("회원가입에 성공하였습니다.");
                                 })
                         }
                     }

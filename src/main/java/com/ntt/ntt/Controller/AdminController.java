@@ -4,6 +4,7 @@ import com.ntt.ntt.Constant.Role;
 import com.ntt.ntt.DTO.CompanyDTO;
 import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.MemberDTO;
+import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Repository.MemberRepository;
 import com.ntt.ntt.Repository.NotificationRepository;
@@ -18,9 +19,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -139,8 +142,33 @@ public class AdminController {
     }
 
     @GetMapping("/admin/executiveRegister")
-    public String executiveRegisterForm(){
+    public String executiveRegisterForm(Model model, Principal principal) {
+        try {
+            // 로그인한 사용자의 이메일 가져오기
+            String userEmail = principal.getName();
+
+            // 이메일로 회원 정보 조회
+            Member member = memberRepository.findByMemberEmail(userEmail)
+                    .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다."));
+
+            // 현재 로그인한 사용자가 등록한 본사 목록 가져오기
+            List<CompanyDTO> companyList = companyService.getFilteredCompany(member.getMemberId());
+
+            // 모델에 companyList 추가
+            model.addAttribute("companyList", companyList);
+
+        } catch (Exception e) {
+            model.addAttribute("error", "회원 목록을 가져오는 중 오류가 발생했습니다.");
+            e.printStackTrace();
+        }
         return "admin/executiveRegister";
+    }
+
+    @Operation(summary = "특정 본사의 지사 목록 가져오기", description = "선택한 본사 ID에 해당하는 지사(호텔) 목록을 반환합니다.")
+    @GetMapping("/admin/hotels")
+    @ResponseBody
+    public List<HotelDTO> getHotelsByCompany(@RequestParam Integer companyId) {
+        return hotelService.getFilteredHotel(companyId);
     }
 
     @Operation(summary = "매니저 회원가입 요청", description = "입력한 유저 정보를 데이터에 저장하고 로그인 페이지로 이동한다.")
