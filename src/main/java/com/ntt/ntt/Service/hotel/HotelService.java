@@ -460,5 +460,13 @@ public class HotelService {
         }
     }
 
+    // 현재 선택된 본사의 지사 목록 가져오기
+    public List<HotelDTO> getFilteredHotel(Integer companyId) {
+        List<Hotel> hotels = hotelRepository.findByCompany_CompanyId(companyId);
+
+        return hotels.stream()
+                .map(hotel -> modelMapper.map(hotel, HotelDTO.class))
+                .collect(Collectors.toList());
+    }
 
 }
