@@ -12,7 +12,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -53,21 +52,36 @@ public class ReservationManagerController {
     // 2. 방 목록 가져오기
     @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER')")
     @GetMapping("/list")
-    public String listReservationForm(Model model,
-                                      @AuthenticationPrincipal UserDetails userDetails,
-                                      @PageableDefault(size = 10, page = 0) Pageable pageable) {
+    public String listReservationForm(
+            Model model,
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PageableDefault(size = 10, page = 0) Pageable pageable,
+            @RequestParam(value = "category", required = false) String category,
+            @RequestParam(value = "keyword", required = false) String keyword) {
 
-        // 객실 목록(박스)용 모든 방 리스트 (페이징 없이 가져오기)
+        log.info("검색 요청 - category: " + category + ", keyword: " + keyword);
+
+        // 객실 목록 (페이징 없이 전체 가져오기)
         List<RoomDTO> allRoomList = roomService.getRoomListWithReservations();
 
-        // 객실 관리 테이블용 페이징 (10개씩)
-        Page<ReservationDTO> reservationPage = reservationService.getAllReservations(
-                PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.ASC, "member.memberId"))
-        );
-        //  객실 관리용 페이징
-        Page<RoomDTO> roomPage = roomService.getPaginatedRooms(pageable);
+        // 예약된 방 검색
+        Page<ReservationDTO> reservationPage;
+        if (category != null && keyword != null && !keyword.trim().isEmpty() &&
+                (category.equals("roomName") || category.equals("memberId") || category.equals("memberName"))) {
+            reservationPage = reservationService.searchReservations(category, keyword, pageable);
+        } else {
+            reservationPage = reservationService.getAllReservations(pageable);
+        }
 
-        // 모든 예약된 방 가져와서 `reservationMap`에 저장
+        // 모든 방 검색 (객실 이름 + 상태 검색 가능)
+        Page<RoomDTO> roomPage;
+        if ("roomName".equals(category) || "status".equals(category)) {
+            roomPage = roomService.searchAllRooms(keyword, category, pageable);
+        } else {
+            roomPage = roomService.getPaginatedRooms(pageable);
+        }
+
+        // 예약된 방 매핑
         List<ReservationDTO> allReservations = reservationService.getAllReservations(Pageable.unpaged()).getContent();
         Map<Integer, ReservationDTO> reservationMap = new HashMap<>();
         for (ReservationDTO reservation : allReservations) {
@@ -87,13 +101,17 @@ public class ReservationManagerController {
         Map<String, Integer> roomPageInfo = paginationUtil.pagination(roomPage);
 
         // 모델에 데이터 추가
-        model.addAttribute("roomList", allRoomList); // 객실 목록(박스) 데이터 (페이징 없음)
-        model.addAttribute("reservationMap", reservationMap); // 모든 예약 정보 포함
-        model.addAttribute("reservationPage", reservationPage); // 페이징된 예약 정보
-        model.addAttribute("roomPage", roomPage); // 페이징된 객실 관리 리스트
-        model.addAttribute("reservationPageInfo", reservationPageInfo); // 예약 페이징 정보
-        model.addAttribute("roomPageInfo", roomPageInfo); // 객실 페이징 정보
-        model.addAttribute("currentPage", pageable.getPageNumber()); // 현재 페이지 번호 추가
+        model.addAttribute("roomList", allRoomList);
+        model.addAttribute("reservationMap", reservationMap);
+        model.addAttribute("reservationPage", reservationPage);
+        model.addAttribute("roomPage", roomPage);
+        model.addAttribute("reservationPageInfo", reservationPageInfo);
+        model.addAttribute("roomPageInfo", roomPageInfo);
+        model.addAttribute("currentPage", pageable.getPageNumber());
+
+        // 검색어 정보 유지
+        model.addAttribute("category", category);
+        model.addAttribute("keyword", keyword);
 
         return "manager/room/reservation/list";
     }

@@ -49,7 +49,6 @@ public class RoomDTO {
     private String stayStart;
     // 숙박 종료일
     private String stayEnd;
-
     // 예약 기간 만료여부
     private boolean isExpired;
 

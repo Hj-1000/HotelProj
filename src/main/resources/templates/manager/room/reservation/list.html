@@ -335,7 +335,25 @@
             height: 100vh;
         }
 
-        /* 페이지 네이션 */
+        /* 검색바 */
+
+        .search-bar {
+            margin: 15px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        .search-bar select, .search-bar input, .search-bar button {
+            padding: 8px 12px;
+            font-size: 16px;
+        }
+
+        .search-button {
+            margin-bottom:.25rem;
+        }
+
+        /* 페이지네이션 */
 
         .pagination {
             display: flex;
@@ -446,7 +464,7 @@
                     </thead>
                     <tbody>
                     <tr th:each="reservation, iterStat : ${reservationPage.content}">
-                        <td th:text="${currentPage * reservationPage.size + iterStat.index + 1}"></td> <!-- 연속된 번호 유지 -->
+                        <td th:text="${currentPage * reservationPage.size + iterStat.index + 1}"></td>
                         <td th:text="${reservation.room.roomName}"></td>
                         <td th:text="${reservation.memberId}"></td>
                         <td th:text="${reservation.memberName}"></td>
@@ -465,21 +483,33 @@
                     </tbody>
                 </table>
 
+                <!-- 예약된 방 검색바 -->
+                <div class="search-bar text-center mt-3">
+                    <form id="searchForm" th:action="@{/manager/room/reservation/list}" method="get">
+                        <select name="category">
+                            <option value="">-- 검색선택 --</option>
+                            <option value="roomName" th:selected="${category == 'roomName'}">객실 이름</option>
+                            <option value="memberId" th:selected="${category == 'memberId'}">예약자 ID</option>
+                            <option value="memberName" th:selected="${category == 'memberName'}">예약자 이름</option>
+                        </select>
+                        <input type="text" name="keyword" placeholder="검색어를 입력하세요" th:value="${keyword}">
+                        <button type="submit" class="btn btn-dark search-button">검색</button>
+                    </form>
+                </div>
+
                 <!-- 예약된 방 페이징 버튼 추가 -->
-                <div class="pagination-container">
-                    <div class="pagination">
-                        <a th:if="${reservationPage.hasPrevious()}"
-                           th:href="@{/manager/room/reservation/list(page=${reservationPage.number - 1}, size=${reservationPage.size})}">〈 이전</a>
+                <div class="pagination">
+                    <a th:if="${reservationPage.hasPrevious()}"
+                       th:href="@{/manager/room/reservation/list(page=${reservationPage.number - 1}, size=${reservationPage.size}, category=${category}, keyword=${keyword})}">〈 이전</a>
 
-                        <th:block th:each="i : ${#numbers.sequence(0, reservationPage.totalPages - 1)}">
-                            <a th:href="@{/manager/room/reservation/list(page=${i}, size=${reservationPage.size})}"
-                               th:text="${i + 1}"
-                               th:class="${i == reservationPage.number} ? 'active' : ''"></a>
-                        </th:block>
+                    <th:block th:each="i : ${#numbers.sequence(0, reservationPage.totalPages - 1)}">
+                        <a th:href="@{/manager/room/reservation/list(page=${i}, size=${reservationPage.size}, category=${category}, keyword=${keyword})}"
+                           th:text="${i + 1}"
+                           th:class="${i == reservationPage.number} ? 'active' : ''"></a>
+                    </th:block>
 
-                        <a th:if="${reservationPage.hasNext()}"
-                           th:href="@{/manager/room/reservation/list(page=${reservationPage.number + 1}, size=${reservationPage.size})}">다음 〉</a>
-                    </div>
+                    <a th:if="${reservationPage.hasNext()}"
+                       th:href="@{/manager/room/reservation/list(page=${reservationPage.number + 1}, size=${reservationPage.size}, category=${category}, keyword=${keyword})}">다음 〉</a>
                 </div>
             </div>
 
@@ -501,7 +531,7 @@
                     </thead>
                     <tbody>
                     <tr th:each="room, iterStat : ${roomPage.content}" th:with="reservation=${reservationMap[room.roomId]}">
-                        <td th:text="${iterStat.index + 1}"></td>
+                        <td th:text="${roomPage.number * roomPage.size + iterStat.index + 1}"></td>
                         <td th:text="${room.roomName}"></td>
 
                         <!-- 예약자 ID (예약된 경우만 표시) -->
@@ -521,10 +551,10 @@
 
                         <!-- 예약 상태 -->
                         <td>
-                            <span th:if="${room.isExpired}">예약 기간 만료</span>
+                            <span th:if="${room.isExpired}">기간 만료</span>
                             <span th:unless="${room.isExpired}">
                                 <span th:if="${reservation != null}">예약됨</span>
-                                <span th:unless="${reservation != null}">예약 가능</span>
+                                <span th:unless="${reservation != null}">빈방</span>
                             </span>
                         </td>
 
@@ -572,23 +602,43 @@
                     </tr>
                     </tbody>
                 </table>
-                <!-- 전체방 페이지네이션-->
+
+                <!-- 모든 방 검색바 -->
+                <div class="search-bar text-center mt-3">
+                    <form id="allRoomSearchForm" th:action="@{/manager/room/reservation/list}" method="get">
+                        <select name="category">
+                            <option value="">-- 검색선택 --</option>
+                            <option value="roomName" th:selected="${category == 'roomName'}">객실 이름</option>
+                            <option value="status" th:selected="${category == 'status'}">상태</option>
+                        </select>
+                        <input type="text" name="keyword" placeholder="검색어를 입력하세요" th:value="${keyword}">
+                        <button type="submit" class="btn btn-dark search-button">검색</button>
+                    </form>
+                </div>
+
+                <!-- 모든 방 페이지네이션-->
                 <div class="pagination-container">
                     <div class="pagination">
                         <a th:if="${roomPage.hasPrevious()}"
-                           th:href="@{/manager/room/reservation/list(page=${roomPage.number - 1}, size=${roomPage.size})}">〈 이전</a>
+                           th:href="@{/manager/room/reservation/list(page=${roomPage.number - 1}, size=${roomPage.size}, category=${category}, keyword=${keyword})}">
+                            〈 이전
+                        </a>
 
                         <th:block th:each="i : ${#numbers.sequence(0, roomPage.totalPages - 1)}">
-                            <a th:href="@{/manager/room/reservation/list(page=${i}, size=${roomPage.size})}"
+                            <a th:href="@{/manager/room/reservation/list(page=${i}, size=${roomPage.size}, category=${category}, keyword=${keyword})}"
                                th:text="${i + 1}"
                                th:class="${i == roomPage.number} ? 'active' : ''"></a>
                         </th:block>
 
                         <a th:if="${roomPage.hasNext()}"
-                           th:href="@{/manager/room/reservation/list(page=${roomPage.number + 1}, size=${roomPage.size})}">다음 〉</a>
+                           th:href="@{/manager/room/reservation/list(page=${roomPage.number + 1}, size=${roomPage.size}, category=${category}, keyword=${keyword})}">
+                            다음 〉
+                        </a>
                     </div>
                 </div>
             </div>
+
+
         </div>
     </th:block>
 
@@ -794,22 +844,53 @@
 
         /* Tab */
 
-        function changeTab(tab) {
+        document.addEventListener("DOMContentLoaded", function () {
+            let savedTab = localStorage.getItem("selectedTab") || "reserved";
+            changeTab(savedTab, false); // 자동 초기화 방지
+        });
+
+        function changeTab(tab, shouldReset = true) {
+            console.log(`탭 변경: ${tab}, 검색 및 페이징 초기화: ${shouldReset}`);
+
             localStorage.setItem("selectedTab", tab);
+
             document.getElementById("reservedTable").classList.remove("active");
             document.getElementById("allTable").classList.remove("active");
             document.getElementById(tab + "Table").classList.add("active");
+
             document.getElementById("reservedTab").classList.remove("active");
             document.getElementById("allTab").classList.remove("active");
             document.getElementById(tab + "Tab").classList.add("active");
+
+            if (shouldReset) {
+                resetPaginationAndSearch(tab);
+            }
         }
 
-        document.addEventListener("DOMContentLoaded", function () {
+        /* Tab 버튼 클릭시 페이징 , 검색기능 초기화 */
 
-            let savedTab = localStorage.getItem("selectedTab") || "reserved";
-            changeTab(savedTab);
+        function resetPaginationAndSearch(tab) {
+            let url = new URL(window.location.href);
+            url.searchParams.set("tab", tab);
+            url.searchParams.set("page", "0"); //  페이지 초기화
+            url.searchParams.delete("keyword"); //  검색 초기화
+            url.searchParams.delete("category"); //  검색 카테고리 초기화
 
-        });
+            fetch(url.toString(), { method: "GET" })
+                .then(response => response.text())
+                .then(html => {
+                    let targetTable = document.getElementById(tab + "Table");
+                    if (targetTable) {
+                        let parser = new DOMParser();
+                        let doc = parser.parseFromString(html, "text/html");
+                        let newTableContent = doc.getElementById(tab + "Table");
+                        if (newTableContent) {
+                            targetTable.innerHTML = newTableContent.innerHTML;
+                        }
+                    }
+                })
+                .catch(error => console.error("탭 변경 중 오류 발생:", error));
+        }
 
         /* 체크인 날짜 변경 시 체크아웃 최소 날짜 설정 */
 

@@ -76,18 +76,6 @@ public class ReservationService {
 
     }
 
-    /* 체크인 날짜가 체크아웃 날짜보다 이전인지 검증하는 메서드 */
-
-    private boolean isValidDateRange(String checkInDate, String checkOutDate) {
-        try {
-            LocalDate checkIn = LocalDate.parse(checkInDate);
-            LocalDate checkOut = LocalDate.parse(checkOutDate);
-            return checkIn.isBefore(checkOut); // 체크인 날짜가 체크아웃 날짜보다 이전이면 true 반환
-        } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("날짜 형식이 올바르지 않습니다. (yyyy-MM-dd 형식이어야 합니다.)");
-        }
-    }
-
     // 2. 모든 예약 목록 가져오기
     public Page<ReservationDTO> getAllReservations(Pageable pageable) {
         return reservationRepository.findAll(pageable)
@@ -138,5 +126,49 @@ public class ReservationService {
         room.setRoomStatus(true);
         roomRepository.save(room);
     }
+
+    /* 체크인 날짜가 체크아웃 날짜보다 이전인지 검증하는 메서드 */
+
+    private boolean isValidDateRange(String checkInDate, String checkOutDate) {
+        try {
+            LocalDate checkIn = LocalDate.parse(checkInDate);
+            LocalDate checkOut = LocalDate.parse(checkOutDate);
+            return checkIn.isBefore(checkOut); // 체크인 날짜가 체크아웃 날짜보다 이전이면 true 반환
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("날짜 형식이 올바르지 않습니다. (yyyy-MM-dd 형식이어야 합니다.)");
+        }
+    }
+
+    public Page<ReservationDTO> searchReservations(String category, String keyword, Pageable pageable) {
+        Page<Reservation> reservations;
+
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return reservationRepository.findAll(pageable).map(ReservationDTO::fromEntity);
+        }
+
+        try {
+            switch (category) {
+                case "roomName":
+                    reservations = reservationRepository.findByRoom_RoomNameContaining(keyword, pageable);
+                    break;
+                case "memberId":
+                    Integer memberId = Integer.parseInt(keyword);
+                    reservations = reservationRepository.findByMember_MemberId(memberId, pageable);
+                    break;
+                case "memberName":
+                    reservations = reservationRepository.findByMember_MemberNameContaining(keyword, pageable);
+                    break;
+                default:
+                    log.warn(" 잘못된 검색 카테고리 입력: {}", category);
+                    return reservationRepository.findAll(pageable).map(ReservationDTO::fromEntity); // 기본값 전체 검색
+            }
+        } catch (NumberFormatException e) {
+            log.error(" 예약자 ID 검색 시 숫자가 아닌 값 입력: {}", keyword, e);
+            return reservationRepository.findAll(pageable).map(ReservationDTO::fromEntity);
+        }
+
+        return reservations.map(ReservationDTO::fromEntity);
+    }
+
 
 }

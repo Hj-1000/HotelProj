@@ -276,6 +276,8 @@ public class RoomService {
         }
     }
 
+    /* 룸 페이지 검색 메서드*/
+
     @Transactional(readOnly = true)
     public Page<RoomDTO> searchRooms(String keyword, String category, Pageable pageable) {
         Page<Room> rooms;
@@ -322,6 +324,58 @@ public class RoomService {
             return roomDTO;
         });
     }
+
+    /* 예약 페이지 검색 메서드*/
+    @Transactional(readOnly = true)
+    public Page<RoomDTO> searchAllRooms(String keyword, String category, Pageable pageable) {
+        Page<Room> rooms;
+
+        if (keyword == null || keyword.isEmpty()) {
+            rooms = roomRepository.findAll(pageable);
+        } else {
+            switch (category) {
+                case "roomName":
+                    rooms = roomRepository.findByRoomNameContaining(keyword, pageable);
+                    break;
+                case "status":
+                    if ("빈방".equalsIgnoreCase(keyword)) {
+                        rooms = roomRepository.findAvailableRooms(pageable); // 예약되지 않은 방만 검색
+                    } else if ("예약됨".equalsIgnoreCase(keyword)) {
+                        rooms = roomRepository.findReservedRooms(pageable); // 모든 예약된 방 검색
+                    } else if ("기간 만료".equalsIgnoreCase(keyword)) {
+                        rooms = roomRepository.findExpiredRooms(pageable); // 기간 만료 검색
+                    } else {
+                        throw new IllegalArgumentException("유효하지 않은 상태 키워드: 빈방, 예약됨, 기간 만료 중 선택하세요.");
+                    }
+                    break;
+                default:
+                    rooms = roomRepository.findAll(pageable);
+            }
+        }
+
+        return rooms.map(room -> {
+            RoomDTO roomDTO = modelMapper.map(room, RoomDTO.class);
+
+            // 예약 기간 만료 여부 계산
+            if (room.getReservationEnd() != null) {
+                LocalDate reservationEndDate = LocalDate.parse(room.getReservationEnd());
+                roomDTO.setExpired(reservationEndDate.isBefore(LocalDate.now()));
+            }
+
+            // 이미지 리스트 매핑
+            List<ImageDTO> imageDTOList = imageRepository.findByRoom_RoomId(room.getRoomId())
+                    .stream()
+                    .map(image -> {
+                        image.setImagePath(image.getImagePath().replace("c:/data/", ""));
+                        return modelMapper.map(image, ImageDTO.class);
+                    })
+                    .collect(Collectors.toList());
+
+            roomDTO.setRoomImageDTOList(imageDTOList);
+            return roomDTO;
+        });
+    }
+
 
     // 방 강제 사용 중지 (관리자 기능)
     public void disableRoom(Integer roomId) {
