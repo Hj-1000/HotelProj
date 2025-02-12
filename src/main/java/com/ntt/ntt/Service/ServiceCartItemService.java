@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 @Service
 @Log4j2
 @RequiredArgsConstructor
@@ -36,9 +38,10 @@ public class ServiceCartItemService {
                 serviceCartItemRepository.findById(serviceCartItemDTO.getServiceCartItemId())
                         .orElseThrow(EntityNotFoundException::new);
 
-        if (serviceCartItem.getServiceCart() != null && member != null && serviceCartItem.getServiceCart().getMember().getMemberId() != member.getMemberId()) {
+        if (serviceCartItem.getServiceCart() != null && member != null && !Objects.equals(serviceCartItem.getServiceCart().getMember().getMemberEmail(), member.getMemberEmail())) {
             throw new Exception();
         }
+
         serviceCartItem.setCount(serviceCartItemDTO.getCount());
         return serviceCartItem.getServiceCartItemId();
     }
