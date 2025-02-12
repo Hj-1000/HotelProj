@@ -28,4 +28,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
     // 페이징 처리
     Page<Reservation> findAll(Pageable pageable);
 
+    // 객실 이름으로 검색
+    Page<Reservation> findByRoom_RoomNameContaining(String roomName, Pageable pageable);
+
+    // 예약자 ID로 검색
+    Page<Reservation> findByMember_MemberId(Integer memberId, Pageable pageable);
+
+    // 예약자 이름으로 검색
+    Page<Reservation> findByMember_MemberNameContaining(String memberName, Pageable pageable);
+
 }

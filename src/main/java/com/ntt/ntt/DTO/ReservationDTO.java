@@ -45,7 +45,6 @@ public class ReservationDTO {
     private String reservationEnd = "";
 
 
-
     // Entity -> DTO 변환 메서드
     public static ReservationDTO fromEntity(Reservation reservation) {
         RoomDTO roomDTO = RoomDTO.fromEntity(reservation.getRoom());
