@@ -1,5 +1,6 @@
 package com.ntt.ntt.Service;
 
+import com.ntt.ntt.Constant.Role;
 import com.ntt.ntt.DTO.NotificationDTO;
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Entity.Notification;
@@ -26,7 +27,9 @@ public class NotificationService {
 
     // 관리자가 볼 수 있는 알림 목록을 가져오는 메소드
     public List<Notification> getNotificationsForAdmin() {
-        return notificationRepository.findByIsReadFalse(); // 읽지 않은 알림들
+        Member admin = memberRepository.findByRole(Role.valueOf("ADMIN"))
+                .orElseThrow(() -> new RuntimeException("관리자 계정을 찾을 수 없습니다."));
+        return notificationRepository.findAllByOrderByTimestampDesc();
     }
 
     // 특정 사용자의 알림 목록 조회
@@ -49,21 +52,23 @@ public class NotificationService {
 
     // 새로운 알림 생성
     public void createNotification(Member member, String message, Qna qna) {
-        Notification notification = new Notification();
-        notification.setNotificationMessage(message);
-        notification.setMember(member); // 알림을 받을 멤버 설정
-        notification.setRead(false);    // 기본적으로 읽지 않은 상태로 설정
-        notification.setTimestamp(LocalDateTime.now());
+        // ✅ 기존에 같은 메시지와 Qna가 있는지 확인 (사용자 기준)
+        boolean exists = notificationRepository.existsByNotificationMessageAndQna(message, qna);
 
-        if (qna != null) {
-            notification.setQna(qna); // Qna 객체가 존재하면 설정
-        } else {
-            notification.setQna(null); // Qna가 null인 경우 처리
+        if (!exists) { // 중복이 없을 경우에만 저장
+            Notification notification = new Notification();
+            notification.setNotificationMessage(message);
+            notification.setMember(member); // 원래 글 작성자
+            notification.setRead(false);
+            notification.setTimestamp(LocalDateTime.now());
+            notification.setQna(qna);
+
+            notificationRepository.save(notification);
+            System.out.println("🔔 알림 생성됨: " + message);
         }
-
-        notificationRepository.save(notification);
-        System.out.println("🔔 알림 생성됨: " + message);
     }
+
+
 
     // 알림 읽음 처리
     @Transactional

@@ -19,6 +19,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/notifications")
@@ -47,16 +48,11 @@ public class NotificationController {
     }
 
     // 🔹 관리자용 알림 목록 조회
+    // ✅ 관리자 알림 목록 조회 (GET 요청 허용)
     @GetMapping("/admin")
-    public String getAdminNotifications(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-        if (userDetails != null && userDetails.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"))) {
-
-            List<Notification> notifications = notificationService.getNotificationsForAdmin();
-            System.out.println("📢 관리자 알림 개수: " + notifications.size()); // 디버깅 로그 추가
-            model.addAttribute("notifications", notifications);
-        }
-        return "admin/executiveList";
+    public ResponseEntity<List<NotificationDTO>> getNotificationsForAdmin() {
+        List<NotificationDTO> notifications = notificationService.getAllNotifications(); // DTO 변환 후 반환
+        return ResponseEntity.ok(notifications);
     }
 
     // 🔹 로그인한 사용자의 알림 목록 조회
