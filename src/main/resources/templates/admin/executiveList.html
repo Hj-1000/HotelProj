@@ -9,47 +9,21 @@
     <div class="container-fluid mt-4">
         <h2 class="mb-3">임원관리</h2>
         <div class="card p-4">
-            <form>
+            <form th:action="@{/admin/executiveList}" method="get">
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="매장유저권한" class="form-label">권한</label>
-                            <select class="form-select" id="매장유저권한">
+                            <label for="role" class="form-label">권한</label>
+                            <select class="form-select" id="role" name="role">
                                 <option selected>전체</option>
                                 <option value="CHIEF">CHIEF</option>
                                 <option value="MANAGER">MANAGER</option>
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label for="hotelSelect" class="form-label">지사</label>
-                            <select id="hotelSelect" class="form-select" name="hotelId">
-                                <option value="">먼저 본사를 선택하세요</option>
-                            </select>
+                            <label for="email" class="form-label">이메일</label>
+                            <input type="text" class="form-control" id="email" name="email">
                         </div>
-                        <div class="mb-3">
-                            <label for="아이디" class="form-label">아이디</label>
-                            <input type="email" class="form-control" id="아이디" placeholder="이메일">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">상태</label>
-                            <div class="d-flex flex-wrap gap-3">
-                                <div class="form-check form-check-card px-0">
-                                    <input class="form-check-input visually-hidden " type="radio" name="상태" id="상태전체" value="전체" checked>
-                                    <label class="form-check-label btn btn-outline-primary px-4 py-2" for="상태전체">전체</label>
-                                </div>
-                                <div class="form-check form-check-card">
-                                    <input class="form-check-input visually-hidden" type="radio" name="상태" id="상태활성" value="활성">
-                                    <label class="form-check-label btn btn-outline-success px-4 py-2" for="상태활성">활성</label>
-                                </div>
-                                <div class="form-check form-check-card">
-                                    <input class="form-check-input visually-hidden" type="radio" name="상태" id="상태비활성" value="비활성">
-                                    <label class="form-check-label btn btn-outline-danger px-4 py-2" for="상태비활성">비활성</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
                         <div class="mb-3">
                             <label for="company" class="form-label">본사</label>
                             <select class="form-select" id="company" name="company">
@@ -58,18 +32,55 @@
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label for="이름" class="form-label">이름</label>
-                            <input type="text" class="form-control" id="이름" placeholder="이름">
+                            <label class="form-label">가입일</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-group" style="flex: 1;">
+                                    <input type="date" class="form-control" id="시작일" name="startDate"th:value="${param.startDate}">
+                                </div> ~
+                                <div class="form-group" style="flex: 1;">
+                                    <input type="date" class="form-control" id="종료일" name="endDate" th:value="${param.endDate}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <div class="mb-3">
+                            <label for="name" class="form-label">이름</label>
+                            <input type="text" class="form-control" id="name" name="name" placeholder="이름">
                         </div>
                         <div class="mb-3">
-                            <label for="연락처" class="form-label">연락처</label>
-                            <input type="text" class="form-control" id="연락처" placeholder="연락처">
+                            <label for="phone" class="form-label">연락처</label>
+                            <input type="text" class="form-control" id="phone" name="phone" placeholder="연락처">
                         </div>
-
+                        <div class="mb-3">
+                            <label for="hotelSelect" class="form-label">지사</label>
+                            <select id="hotelSelect" class="form-select" name="hotel">
+                                <option value="">먼저 본사를 선택하세요.</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">상태</label>
+                            <div class="d-flex flex-wrap gap-3">
+                                <div class="form-check form-check-card px-0" style="margin-left: 30px; margin-top: 7px">
+                                    <input class="form-check-input" type="radio" name="status" id="상태전체" value="전체" checked>
+                                    <label class="form-check-label" for="상태전체">전체</label>
+                                </div>
+                                <div class="form-check form-check-card" style="margin-top: 7px">
+                                    <input class="form-check-input" type="radio" name="status" id="상태활성" value="활성">
+                                    <label class="form-check-label" for="상태활성">활성</label>
+                                </div>
+                                <div class="form-check form-check-card" style="margin-top: 7px">
+                                    <input class="form-check-input" type="radio" name="status" id="상태비활성" value="비활성">
+                                    <label class="form-check-label" for="상태비활성">비활성</label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="text-center mt-3">
-                    <button type="button" class="btn btn-primary" style="background-color: black">조회</button>
+                    <button type="submit" class="btn btn-primary" style="background-color: black">조회</button>
                 </div>
             </form>
         </div>
@@ -85,9 +96,9 @@
                         <th>아이디</th>
                         <th>이름</th>
                         <th>연락처</th>
-                        <th>매장수</th>
-                        <th>가맹점수</th>
+                        <th>가입일</th>
                         <th>상태</th>
+                        <th>수정</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -146,6 +157,33 @@
                         </li>
                     </ul>
                 </div>
+                <script>
+                    // 회원 검색 후 내가 검색 선택했던 권한과 상태 유지
+                    var urlParams = new URLSearchParams(window.location.search);
+
+                    // 상태 유지
+                    var status = urlParams.get('status');
+                    if (status) {
+                        var statusInput = document.querySelector("input[name='status'][value='" + status + "']");
+                        if (statusInput) {
+                            statusInput.checked = true;
+                        }
+                    }
+
+                    // 권한 유지
+                    var role = urlParams.get('role');
+                    if (role) {
+                        var selectElement = document.getElementById('role');
+                        if (selectElement) {
+                            for (var i = 0; i < selectElement.options.length; i++) {
+                                if (selectElement.options[i].value === role) {
+                                    selectElement.selectedIndex = i;
+                                    break;
+                                }
+                            }
+                        }
+                    };
+                </script>
                 <!-- 등록 버튼 -->
                 <div class="text-end">
                     <button class="btn btn-primary" style="background-color: black" onclick="location.href='/admin/executiveRegister'">등록</button>
@@ -181,7 +219,7 @@
                                     // 호텔 목록이 있을 경우
                                     hotels.forEach(function(hotel) {
                                         hotelSelect.append(
-                                            `<option value="${hotel.hotelId}">${hotel.hotelName}</option>`
+                                            `<option value="${hotel.hotel}">${hotel.hotelName}</option>`
                                         );
                                     });
                                 } else {

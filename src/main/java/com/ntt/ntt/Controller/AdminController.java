@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
-@Tag(name = "adminController", description = "사이트 회원 관리 컨트롤러")
+@Tag(name = "adminController", description = "사이트 관리, 회원 관리 컨트롤러")
 public class AdminController {
 
     private final HotelService hotelService;
@@ -141,6 +141,7 @@ public class AdminController {
         return "admin/executiveList";
     }
 
+    @Operation(summary = "매니저 회원가입 페이지", description = "매니저 회원가입 페이지로 이동한다.")
     @GetMapping("/admin/executiveRegister")
     public String executiveRegisterForm(Model model, Principal principal) {
         try {
@@ -164,7 +165,7 @@ public class AdminController {
         return "admin/executiveRegister";
     }
 
-    @Operation(summary = "특정 본사의 지사 목록 가져오기", description = "선택한 본사 ID에 해당하는 지사(호텔) 목록을 반환합니다.")
+    @Operation(summary = "특정 본사의 지사 목록 가져오기", description = "선택한 본사 companyId 에 해당하는 지사(호텔) 목록을 가져온다.")
     @GetMapping("/admin/hotels")
     @ResponseBody
     public List<HotelDTO> getHotelsByCompany(@RequestParam Integer companyId) {
@@ -181,16 +182,6 @@ public class AdminController {
             // 예외가 발생한 경우 회원가입 페이지로 리다이렉트
             return "redirect:/admin/executiveRegister"; // 회원가입 페이지로 리다이렉트
         }
-    }
-
-    @GetMapping("/admin/hotelHeadquarters")
-    public String c(){
-        return "admin/hotelHeadquarters";
-    }
-
-    @GetMapping("/admin/hotelHeadquartersRegister")
-    public String d(){
-        return "admin/hotelHeadquartersRegister";
     }
 
     // 설정한 주소가 지도로 잘 나오는지 테스트용으로 만듦, 기능 구현 완성 이후에는 삭제하기
