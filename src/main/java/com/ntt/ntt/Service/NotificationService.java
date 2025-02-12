@@ -39,23 +39,7 @@ public class NotificationService {
                 .collect(Collectors.toList());
     }
 
-    // 알림 읽음 처리
-    @Transactional
-    public void markAsRead(Integer notificationId) {
-        Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new IllegalArgumentException("알림을 찾을 수 없습니다."));
-        notification.setRead(true);  // 읽음 상태로 변경
-        notificationRepository.save(notification);  // DB에 반영
-    }
 
-    public List<NotificationDTO> getUnreadNotificationsForMember(String memberEmail) {
-        Member member = memberRepository.findByMemberEmail(memberEmail)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-        return notificationRepository.findByMemberOrderByTimestampDesc(member)
-                .stream()
-                .map(NotificationDTO::fromEntity)
-                .collect(Collectors.toList());
-    }
 
     // 알림 삭제
     @Transactional
@@ -80,6 +64,16 @@ public class NotificationService {
         notificationRepository.save(notification);
         System.out.println("🔔 알림 생성됨: " + message);
     }
+
+    // 알림 읽음 처리
+    @Transactional
+    public void markAsRead(Integer notificationId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new IllegalArgumentException("알림을 찾을 수 없습니다."));
+        notification.setRead(true);  // 읽음 상태로 변경
+        notificationRepository.save(notification);  // DB에 반영
+    }
+
 
     public List<NotificationDTO> getAllNotifications() {
         return notificationRepository.findAll()
