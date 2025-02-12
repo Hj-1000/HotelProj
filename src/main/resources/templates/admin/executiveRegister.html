@@ -45,7 +45,7 @@
                         <div class="col-md-6">
                             <label for="hotelSelect" class="form-label fw-bold">지사</label>
                             <select id="hotelSelect" class="form-select" name="hotelId">
-                                <option value="">먼저 본사를 선택하세요</option>
+                                <option value="">먼저 본사를 선택하세요.</option>
                             </select>
                         </div>
                         <div class="col-md-12">
@@ -53,6 +53,7 @@
                             <input type="text" class="form-control" id="memberPhone" name="memberPhone" placeholder="연락처">
                         </div>
                     </div>
+                    <input type="hidden" id="memberId" name="memberId" value="">
                     <div class="text-end mt-4">
                         <p>* 표시는 필수 입력 항목입니다.</p>
                         <button type="submit" class="btn btn-primary me-2" style="background-color: black">등록</button>
@@ -100,6 +101,22 @@
                                     alert("지사 목록을 불러오는 중 오류가 발생했습니다.");
                                 }
                             });
+                        });
+                    });
+
+                    $(document).ready(function() {
+                        $("#company").change(function() {
+                            var companyId = $(this).val();
+                            // 멤버 ID를 hidden 필드에 설정 (예: 세션에서 가져오기)
+                            var memberId = "멤버의 실제 ID"; // 이 값을 서버에서 받아올 필요가 있음
+                            $("#memberId").val(memberId);
+                        });
+
+                        // 지사 선택 후 서버로 보내기
+                        $("form").submit(function() {
+                            var hotelId = $("#hotelSelect").val();
+                            var memberId = $("#memberId").val();
+                            // 서버로 보내는 로직 추가
                         });
                     });
 
