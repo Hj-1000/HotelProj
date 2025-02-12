@@ -18,7 +18,9 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -96,8 +98,8 @@ public class ServiceCartController {
     }
 
     @PutMapping("/api/updateCartItem")
-    public ResponseEntity updateCartItem(@RequestBody @Valid ServiceCartItemDTO serviceCartItemDTO,
-                                         BindingResult bindingResult, Principal principal) {
+    public ResponseEntity<?> updateCartItem(@RequestBody @Valid ServiceCartItemDTO serviceCartItemDTO,
+                                            BindingResult bindingResult, Principal principal) {
         String memberEmail = principal.getName();
 
         log.info("수량변경을 위해서 넘어온 값 : " + serviceCartItemDTO);
@@ -108,18 +110,28 @@ public class ServiceCartController {
             for (FieldError fieldError : fieldErrorList) {
                 sb.append(fieldError.getDefaultMessage());
             }
-            return new ResponseEntity<String>(sb.toString(), HttpStatus.BAD_REQUEST);
+            // 오류 메시지를 JSON 형식으로 반환 (Map 사용)
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("errorMessage", sb.toString());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
 
         try {
-            // 서비스에서 카트아이템 아이디를 통해서 카트아이템을 찾아온다
-            // 카트아이템의 수량을 현재 받은 cartItemDTO의 count로 변경
+            // 카트 아이템의 수량을 변경
             serviceCartItemService.updateServiceCartItemCount(serviceCartItemDTO, memberEmail);
-            return new ResponseEntity<String>(HttpStatus.OK);
+
+            // 성공적인 업데이트 후 응답 (Map 사용)
+            Map<String, String> successResponse = new HashMap<>();
+            successResponse.put("message", "수량 업데이트 성공");
+            return new ResponseEntity<>(successResponse, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<String>("장바구니 수량변경이 잘못되었습니다. Q&A게시판으로 요청 바랍니다.", HttpStatus.BAD_REQUEST);
+            // 예외 처리 시 오류 메시지 JSON으로 반환
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("errorMessage", "장바구니 수량변경이 잘못되었습니다. Q&A게시판으로 요청 바랍니다.");
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
     }
+
 
 
     @DeleteMapping("/api/cartItem/{serviceCartItemId}")

@@ -11,6 +11,7 @@ import lombok.*;
 public class ServiceCartDetailDTO {
 
     private Integer serviceCartItemId; // 장바구니 상품의 아이디
+    private Integer serviceMenuId;  // 메뉴 ID 추가 2025-02-12
     private String serviceMenuName;  // 장바구니에 담길 메뉴 이름
     private Integer serviceMenuPrice;; // 메뉴의 금액
     private Integer count; //수량

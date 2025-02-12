@@ -4,6 +4,7 @@ import com.ntt.ntt.DTO.ServiceCartDetailDTO;
 import com.ntt.ntt.Entity.ServiceCartItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -20,10 +21,12 @@ public interface ServiceCartItemRepository extends JpaRepository<ServiceCartItem
     //장바구니 id를 받아와서
     //dto로 sql결과를 받아내는 쿼리문
     //serviceCartDetailDTO 에 담을 것임
-    @Query("select new com.ntt.ntt.DTO.ServiceCartDetailDTO(sci.serviceCartItemId, sm.serviceMenuName, sm.serviceMenuPrice, sci.count, i.imagePath) " +
-            "from ServiceCartItem  sci, Image i " +
-            "join sci.serviceMenu sm where sci.serviceCart.serviceCartId = :serviceCartId " +
-            "and i.serviceMenu.serviceMenuId = sci.serviceMenu.serviceMenuId " +
-            "order by sci.serviceCartItemId asc")
-    public List<ServiceCartDetailDTO> findByServiceCartDetailDTOList(Integer serviceCartId);
+    @Query("SELECT new com.ntt.ntt.DTO.ServiceCartDetailDTO(sci.serviceCartItemId, sm.serviceMenuId, sm.serviceMenuName, sm.serviceMenuPrice, sci.count, i.imagePath) " +
+            "FROM ServiceCartItem sci " +
+            "JOIN sci.serviceMenu sm " +
+            "LEFT JOIN Image i ON i.serviceMenu.serviceMenuId = sm.serviceMenuId " +
+            "WHERE sci.serviceCart.serviceCartId = :serviceCartId " +
+            "ORDER BY sci.serviceCartItemId ASC")
+    List<ServiceCartDetailDTO> findByServiceCartDetailDTOList(@Param("serviceCartId") Integer serviceCartId);
+
 }
