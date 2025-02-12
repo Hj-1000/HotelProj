@@ -4,11 +4,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const unreadCount = document.getElementById('unread-count');
 
     let notifications = [];
-    let isNotificationsFetched = false;  // 알림 목록을 가져왔는지 여부
+    let isNotificationsFetched = false;
 
     // 알림 목록을 가져오는 함수
     function fetchNotifications() {
-        if (isNotificationsFetched) return;  // 알림이 이미 불러와졌다면 중복 호출 방지
+        if (isNotificationsFetched) return;
         axios.get('/notifications')
             .then(response => {
                 console.log("알림 데이터:", response.data);
@@ -21,50 +21,80 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     }
 
+
     // 알림 목록을 업데이트하는 함수
     function updateNotificationList() {
-        const unreadNotifications = notifications.filter(notification => !notification.isRead); // 읽지 않은 알림만 필터링
-        notificationList.innerHTML = '';  // 기존 목록 초기화
+        const unreadNotifications = notifications.filter(notification => !notification.isRead);
+        notificationList.innerHTML = ''; // 기존 목록 초기화
 
         if (unreadNotifications.length === 0) {
-            notificationList.innerHTML = '<li><span class="dropdown-item">알림이 없습니다.</span></li>';
+            notificationList.style.display = "none"; // 알림이 없으면 숨김
         } else {
             unreadNotifications.forEach(notification => {
                 const notificationItem = document.createElement('li');
                 notificationItem.classList.add('dropdown-item');
 
-                // 알림을 클릭했을 때 Q&A로 이동하는 링크 추가
                 const link = document.createElement('a');
-                if (notification.qnaId) {
-                    link.href = `/qna/read/${notification.qnaId}`;  // Q&A의 ID로 링크 설정
-                } else {
-                    link.href = '#';  // qnaId가 없으면 링크를 '#'
-                }
+                link.href = notification.qnaId ? `/qna/read/${notification.qnaId}` : '#';
                 link.textContent = notification.notificationMessage;
-                link.classList.add('text-decoration-none', notification.isRead ? 'text-muted' : 'text-dark');
+                link.classList.add('text-decoration-none', notification.isRead ? 'text-muted' : 'text-yellow');
+
+                // ✅ 알림 클릭 시 삭제 처리
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    deleteNotification(notification, notificationItem);
+                });
+
+                // ✅ 알림을 삭제하는 함수
+                function deleteNotification(notification, notificationItem) {
+                    axios.delete(`/notifications/${notification.notificationId}`)
+                        .then(() => {
+                            // UI에서 해당 알림 제거
+                            notificationItem.remove();
+
+                            // 배열에서도 삭제
+                            notifications = notifications.filter(n => n.notificationId !== notification.notificationId);
+
+                            // 모든 알림을 읽으면 UI에서 숨김
+                            if (notifications.length === 0) {
+                                notificationList.style.display = "none";
+                            }
+
+                            updateUnreadCount(); // 새 알림 수 업데이트
+
+                            // 해당 QnA 페이지로 이동
+                            if (notification.qnaId) {
+                                window.location.href = `/qna/read/${notification.qnaId}`;
+                            }
+                        })
+                        .catch(error => {
+                            console.error("알림 삭제 중 오류 발생:", error);
+                        });
+                }
 
                 // 알림 클릭 시 읽음 처리
                 link.addEventListener('click', (e) => {
-                    e.preventDefault();  // 기본 링크 동작 방지
+                    e.preventDefault();
 
-                    // 알림 읽음 처리 요청
                     axios.patch(`/notifications/${notification.notificationId}/read`)
                         .then(() => {
-                            // 서버에서 처리된 후 읽은 알림 상태로 변경
                             notification.isRead = true;
 
-                            // UI 업데이트
-                            updateNotificationList();  // UI 갱신
-                            link.classList.remove('text-dark');  // 읽은 알림 스타일로 변경
-                            link.classList.add('text-muted');   // 읽은 알림 스타일 변경
+                            // 알림 목록에서 제거
+                            notificationItem.remove();
 
-                            // Q&A 페이지로 이동
-                            if (notification.qnaId) {
-                                window.location.href = link.href;  // Q&A 페이지로 이동
+                            // 배열에서도 삭제
+                            notifications = notifications.filter(n => n.notificationId !== notification.notificationId);
+
+                            // 모든 알림을 읽으면 UI에서 사라지도록 설정
+                            if (notifications.filter(n => !n.isRead).length === 0) {
+                                notificationList.style.display = "none";
                             }
 
-                            // 알림 수 감소 처리
-                            updateUnreadCount();  // 새 알림 수 업데이트
+                            updateUnreadCount(); // 새 알림 수 업데이트
+                            if (notification.qnaId) {
+                                window.location.href = link.href; // 해당 QnA로 이동
+                            }
                         })
                         .catch(error => {
                             console.error("알림을 읽음 처리 중 오류 발생:", error);
@@ -77,30 +107,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // 읽지 않은 알림 갯수를 업데이트하는 함수
-    function updateUnreadCount() {
-        const unreadNotifications = notifications.filter(notification => !notification.isRead); // 읽지 않은 알림만 필터링
-        unreadCount.textContent = unreadNotifications.length;  // 새 알림 수 업데이트
-    }
-
-    // 알림 벨 클릭 시 알림 목록 토글
-    bell.addEventListener('click', function () {
-        if (notificationList.style.display === 'none' || notificationList.style.display === '') {
-            notificationList.style.display = 'block';  // 알림 목록을 보이도록 설정
-            fetchNotifications();  // 알림 목록을 불러오기
-        } else {
-            notificationList.style.display = 'none';  // 알림 목록 숨기기
-        }
-    });
-
-    // 페이지 로드 시 알림 목록을 불러오기
-    fetchNotifications();
 
     // 새 알림 수 1초마다 확인
     setInterval(function() {
         fetchUnreadNotifications();
         updateUnreadCount();
-    }, 5000);
+    }, 1000);
 
     // 새 알림 수 가져오는 함수
     function fetchUnreadNotifications() {
@@ -111,4 +123,23 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .catch(error => console.error('Error fetching notifications:', error));
     }
+
+    // 읽지 않은 알림 갯수를 업데이트하는 함수
+    function updateUnreadCount() {
+        const unreadNotifications = notifications.filter(notification => !notification.isRead); // 읽지 않은 알림만 필터링
+        unreadCount.textContent = unreadNotifications.length; // 새 알림 수 업데이트
+    }
+
+    // 알림 벨 클릭 시 알림 목록 토글
+    bell.addEventListener('click', function () {
+        if (notificationList.style.display === 'none' || notificationList.style.display === '') {
+            notificationList.style.display = 'block';
+            fetchNotifications();
+        } else {
+            notificationList.style.display = 'none';
+        }
+    });
+
+    // 페이지 로드 시 알림 목록을 불러오기
+    fetchNotifications();
 });

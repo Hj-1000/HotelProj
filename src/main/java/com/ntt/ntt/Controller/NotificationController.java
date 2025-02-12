@@ -81,7 +81,14 @@ public class NotificationController {
     @Operation(summary = "알림 삭제", description = "특정 알림을 삭제합니다.")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteNotification(@PathVariable Integer id) {
-        notificationService.deleteNotification(id);
-        return ResponseEntity.ok().build();
+        try {
+            notificationService.deleteNotification(id);  // 알림 삭제
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            logger.error("알림 삭제 중 오류 발생", e);
+            return ResponseEntity.status(500).build();
+        }
     }
+
+
 }

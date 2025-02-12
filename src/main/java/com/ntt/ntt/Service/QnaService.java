@@ -111,6 +111,7 @@ public class QnaService {
         // 해당 Qna와 연관된 댓글을 먼저 삭제
         replyRepository.deleteByQna(qna);
 
+        notificationRepository.deleteById(qna.getQnaId());
 
         // Qna 삭제
         qnaRepository.delete(qna);
