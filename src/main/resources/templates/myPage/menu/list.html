@@ -134,7 +134,6 @@
 
     // 장바구니에 메뉴 추가하는 함수
     function addToCart(menuId, menuName, price) {
-        console.log('메뉴 아이디:', menuId);  // menuId 값이 제대로 전달되는지 확인
         fetch("/api/cart", {
             method: "POST",
             headers: {
@@ -144,7 +143,7 @@
                 serviceMenuId: menuId,
                 serviceMenuName: menuName,
                 serviceMenuPrice: price,
-                count: 1  // 수량을 count로 명확히 지정
+                count: 1 // 수량을 count로 명확히 지정
             })
         })
             .then(response => {
@@ -175,15 +174,12 @@
             .then(cartData => {
                 console.log("장바구니 데이터:", cartData);
 
-                // cartData가 올바른 구조를 가지고 있는지 확인
                 const cartItems = Array.isArray(cartData) ? cartData : cartData.items || [];
 
                 const cartContainer = document.getElementById("cartItems");
                 cartContainer.innerHTML = "";
 
                 cartItems.forEach(item => {
-                    console.log(item);
-
                     const itemRow = document.createElement("tr");
 
                     // 수량 입력 필드 추가
@@ -193,6 +189,7 @@
                         <input type="number" class="form-control" min="1" value="${item.count}"
                             onchange="updateQuantity(${item.serviceCartItemId}, this.value)">
                     </td>
+
                     <td>${item.serviceMenuPrice * item.count}원</td>
                     <td>
                         <button class="btn btn-danger btn-sm" onclick="removeFromCart(${item.serviceCartItemId})">삭제</button>
@@ -212,25 +209,25 @@
     }
 
     // 장바구니에서 수량 업데이트
-    function updateQuantity(serviceCartItemId, newQuantity) {
-        if (newQuantity <= 0) {
-            alert("수량은 1 이상이어야 합니다.");
-            return;
-        }
+    function updateQuantity(serviceCartItemId, count , serviceMenuId ) {
+        console.log(serviceCartItemId)
+        console.log(count)
+        console.log(serviceMenuId)
+
 
         // 요청을 보낼 때 반드시 serviceCartItemId와 count를 포함
-        fetch(`/api/updateCartItem/${serviceCartItemId}`, {
+        fetch(`/api/updateCartItem`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                serviceCartItemId: serviceCartItemId,  // 아이디를 명시적으로 포함
-                count: newQuantity                     // 수량을 포함
+                serviceCartItemId: serviceCartItemId,  // 카트 아이템 아이템
+                count: count        ,         // 수량
+                ServiceMenuId: serviceMenuId
             })
         })
             .then(response => {
-                console.log("응답 상태 코드:", response.status);  // 응답 상태 코드 출력
                 if (!response.ok) {
                     return response.text().then(errorMessage => {
                         console.error("서버 오류:", errorMessage);
@@ -238,7 +235,6 @@
                     });
                 }
 
-                // 응답을 JSON으로 변환
                 return response.json().then(data => {
                     console.log("서버에서 받은 데이터:", data);
                     if (data) {
@@ -253,6 +249,7 @@
                 console.error("수량 업데이트 오류:", error);
                 alert('수량 업데이트 중 오류가 발생했습니다.');
             });
+
     }
 
 

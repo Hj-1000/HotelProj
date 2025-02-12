@@ -36,8 +36,6 @@ public class ServiceCartController {
         return new ResponseEntity<>(cartDetails, HttpStatus.OK);
     }
 
-
-    //장바구니 등록
     // 장바구니 등록
     @PostMapping("/api/cart")
     public ResponseEntity<?> registerCart(@RequestBody @Valid ServiceCartItemDTO serviceCartItemDTO,
@@ -94,34 +92,35 @@ public class ServiceCartController {
 
         //사용자에게 보여줄 장바구니 목록중에 CartDetailDTO(꼭 필요한 정보만 가공한 DTO)로 담은 lIST
         model.addAttribute("serviceCartDetailDTOList", serviceCartDetailDTOList);
-       return "myPage/cart/history";
+        return "myPage/cart/history";
     }
 
-    @PutMapping("/api/updateCartItem/{serviceCartItemId}")
-    public ResponseEntity updateCartItem(@Valid ServiceCartItemDTO serviceCartItemDTO,
+    @PutMapping("/api/updateCartItem")
+    public ResponseEntity updateCartItem(@RequestBody @Valid ServiceCartItemDTO serviceCartItemDTO,
                                          BindingResult bindingResult, Principal principal) {
         String memberEmail = principal.getName();
 
         log.info("수량변경을 위해서 넘어온 값 : " + serviceCartItemDTO);
         if (bindingResult.hasErrors()) {
             StringBuffer sb = new StringBuffer();
-            List<FieldError> fieldErrorList
-                    = bindingResult.getFieldErrors();
+            List<FieldError> fieldErrorList = bindingResult.getFieldErrors();
 
             for (FieldError fieldError : fieldErrorList) {
                 sb.append(fieldError.getDefaultMessage());
             }
             return new ResponseEntity<String>(sb.toString(), HttpStatus.BAD_REQUEST);
         }
-        //service에서 카트아이템 아이디를 통해서 카트아이템을 찾아온다
-        //카트아이템의 수량을 현재 받은 cartItemDTO의 count로 변경
+
         try {
+            // 서비스에서 카트아이템 아이디를 통해서 카트아이템을 찾아온다
+            // 카트아이템의 수량을 현재 받은 cartItemDTO의 count로 변경
             serviceCartItemService.updateServiceCartItemCount(serviceCartItemDTO, memberEmail);
             return new ResponseEntity<String>(HttpStatus.OK);
-        }catch (Exception e) {
-            return new ResponseEntity<String>("장바구니 수량변경이 잘못되었습니다. Q&A게시판으로 요청 바랍니다." , HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<String>("장바구니 수량변경이 잘못되었습니다. Q&A게시판으로 요청 바랍니다.", HttpStatus.BAD_REQUEST);
         }
     }
+
 
     @DeleteMapping("/api/cartItem/{serviceCartItemId}")
     public ResponseEntity deleteCartItem(@PathVariable("serviceCartItemId") Integer serviceCartItemId,
