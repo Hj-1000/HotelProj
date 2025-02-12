@@ -75,10 +75,11 @@ public class HotelService {
 
         Hotel hotel = modelMapper.map(hotelDTO, Hotel.class);
 
-//        hotel.setCompany(companyRepository.findById(hotelDTO.getHotelId()).orElseThrow());
-
-        //이메일 로그인된 회원의 이메일로
+        // 이메일 로그인된 회원의 이메일로 설정
         hotel.setHotelEmail(member.getMemberEmail());
+
+        // 🔹 회원 정보 설정 -> memberId 추가를 위해
+        hotel.setMember(member);
 
         // 1. Hotel 먼저 저장
         hotelRepository.save(hotel);
@@ -86,6 +87,7 @@ public class HotelService {
         // 2. imageFiles를 ImageService를 통해 저장
         imageService.registerHotelImage(hotel.getHotelId(), imageFiles);
     }
+
 
 
     //본사관리자용목록

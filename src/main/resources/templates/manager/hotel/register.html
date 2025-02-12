@@ -39,11 +39,18 @@
             }
         }
 
-        //이미지파일 검사
+        // 이미지 파일 검사
         function validateImage(event) {
             var files = event.target.files;
             var maxSize = 10 * 1024 * 1024; // 10MB 제한
-            var allowedExt = ["jpg", "jpeg", "gif", "png", "bmp", "jfif"];
+            var allowedExt = ["jpg", "jpeg", "gif", "png", "bmp", "jfif", "webp"];
+
+            // 파일 개수 검사: 최대 3개까지 허용
+            if (files.length > 3) {
+                alert("최대 3장까지만 업로드할 수 있습니다.");
+                event.target.value = ""; // 입력 필드 초기화
+                return;
+            }
 
             for (var i = 0; i < files.length; i++) {
                 var file = files[i];
@@ -53,7 +60,7 @@
 
                 // 확장자 검사
                 if (!allowedExt.includes(fileExt)) {
-                    alert("이미지 파일(PNG, JPG, GIF, BMP)만 업로드 가능합니다.");
+                    alert("이미지 파일(PNG, JPG, GIF, BMP, JFIF, WEBP)만 업로드 가능합니다.");
                     event.target.value = ""; // 입력 필드 초기화
                     return;
                 }
@@ -66,6 +73,7 @@
                 }
             }
         }
+
 
 
     </script>
@@ -92,26 +100,26 @@
                     </div>
                     <div class="mb-3 mt-3">
                         <label for="hotelName" class="form-label">지사명:</label>
-                        <input type="text" class="form-control" id="hotelName" name="hotelName">
+                        <input type="text" class="form-control" id="hotelName" name="hotelName" required>
                     </div>
                     <div class="mb-3">
                         <label for="hotelLocation" class="form-label">호텔지역:</label>
-                        <input type="text" class="form-control" id="hotelLocation" name="hotelLocation">
+                        <input type="text" class="form-control" id="hotelLocation" name="hotelLocation" required>
                     </div>
                     <div class="mb-3 mt-3">
                         <label for="hotelAddress" class="form-label">호텔주소:</label>
                         <div class="input-group">
-                            <input type="text" class="form-control" id="hotelAddress" name="hotelAddress">
+                            <input type="text" class="form-control" id="hotelAddress" name="hotelAddress" required>
                             <button type="button" class="btn btn-secondary" onclick="execDaumPostcode()">주소찾기</button>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label for="hotelInfo" class="form-label">호텔상세:</label>
-                        <textarea class="form-control" id="hotelInfo" name="hotelInfo"></textarea>
+                        <textarea class="form-control" id="hotelInfo" name="hotelInfo" required></textarea>
                     </div>
                     <div class="mb-3">
                         <label for="hotelPhone" class="form-label">호텔전화:</label>
-                        <input type="text" class="form-control" id="hotelPhone" name="hotelPhone">
+                        <input type="text" class="form-control" id="hotelPhone" name="hotelPhone" required>
                     </div>
                     <!--<div class="mb-3 mt-3">
                         <label for="hotelEmail" class="form-label">호텔이메일:</label>
@@ -177,11 +185,11 @@
                     </div>
                     <!-- 새 이미지 업로드 및 미리보기 -->
                     <div>
-                        <!--5장 필수-->
                         <label for="newImageFiles">지사이미지:</label>
-                        <input type="file" id="newImageFiles" name="imageFiles" multiple accept="image/*" onchange="validateImage(event)">
-                        <small>이미지 파일(PNG, JPG, GIF, BMP, JFIF)만 업로드 가능합니다.</small>
+                        <input type="file" id="newImageFiles" name="imageFiles" multiple accept="image/*" onchange="validateImage(event)" required>
+                        <small>PNG, JPG, GIF, BMP, JFIF, WEBP만 업로드 가능합니다. 최대 3장까지 선택할 수 있습니다.</small>
                     </div>
+
 
                     <!-- 미리보기 이미지 표시 -->
                     <div id="imagePreviewContainer">

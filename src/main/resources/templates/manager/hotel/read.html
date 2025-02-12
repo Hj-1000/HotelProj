@@ -47,7 +47,7 @@
         function validateImage(event) {
             var files = event.target.files;
             var maxSize = 10 * 1024 * 1024; // 10MB 제한
-            var allowedExt = ["jpg", "jpeg", "gif", "png", "bmp"];
+            var allowedExt = ["jpg", "jpeg", "gif", "png", "bmp", "jfif", "webp"];
 
             for (var i = 0; i < files.length; i++) {
                 var file = files[i];
@@ -111,7 +111,7 @@
 
             <!-- 버튼 -->
             <div class="text-end mt-3">
-                <a class="btn btn-primary" style="background-color: black" th:href="@{/manager/hotel/list(companyId=${hotelDTO.companyId.companyId})}">목록</a>
+                <a class="btn btn-primary" style="background-color: black" th:href="@{/manager/hotel/list(companyId=${hotelDTO.companyId})}">목록</a>
                 <a class="btn btn-warning" th:href="@{/roomService/category/list(hotelId=${hotelDTO.hotelId})}">룸서비스</a>
                 <button type="button" class="btn btn-success modalBtn">객실 등록</button>
                 <a class="btn btn-primary" th:href="@{/manager/hotel/update(hotelId=${hotelDTO.hotelId})}">수정</a>
@@ -303,9 +303,9 @@
 
                         <!-- 객실 이미지 업로드 -->
                         <div class="mb-3">
-                            <label for="newImageFiles" class="form-label">객실 이미지 업로드</label>
-                            <input type="file" id="newImageFiles" name="imageFiles" multiple accept="image/*" onchange="validateImage(event)">
-                            <small>이미지 파일(PNG, JPG, GIF, BMP)만 업로드 가능합니다.</small>
+                            <label for="imageFile" class="form-label">객실 이미지 업로드</label>
+                            <input type="file" class="form-control" id="imageFile" name="imageFile" multiple>
+                            <small class="form-text text-muted">여러 이미지를 선택하려면 Ctrl(또는 Cmd) 키를 누른 상태로 이미지를 선택하세요.</small>
                         </div>
 
                         <!-- Submit Button -->

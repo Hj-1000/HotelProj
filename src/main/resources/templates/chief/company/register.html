@@ -11,6 +11,22 @@
 
   <script th:inline="javascript">
 
+    // 폼 제출 시 커스터마이즈된 오류 메시지 처리
+    document.addEventListener('DOMContentLoaded', function () {
+      const form = document.querySelector('form');
+      const companyNameInput = document.getElementById('companyName');
+
+      form.addEventListener('submit', function(event) {
+        // 'companyName' 필드가 비어있으면 오류 메시지 표시
+        if (!companyNameInput.value.trim()) {
+          companyNameInput.setCustomValidity('본사명을 입력해주세요.');
+        } else {
+          companyNameInput.setCustomValidity('');  // 유효성 검사 통과
+        }
+      });
+
+    })
+
     // 이미지 미리보기 함수
     function previewImage(event) {
 
@@ -43,7 +59,7 @@
     function validateImage(event) {
       var files = event.target.files;
       var maxSize = 10 * 1024 * 1024; // 10MB 제한
-      var allowedExt = ["jpg", "jpeg", "gif", "png", "bmp", "jfif"];
+      var allowedExt = ["jpg", "jpeg", "gif", "png", "bmp", "jfif", "webp"];
 
       for (var i = 0; i < files.length; i++) {
         var file = files[i];
@@ -83,7 +99,7 @@
         <form action="/company/register" method="post" enctype="multipart/form-data">
           <div class="mb-3 mt-3">
             <label for="companyName" class="form-label">본사명:</label>
-            <input type="text" class="form-control" id="companyName" name="companyName">
+            <input type="text" class="form-control" id="companyName" name="companyName" required>
           </div>
 <!--          <div class="mb-3 mt-3">-->
 <!--            &lt;!&ndash;나중에 자동으로 서비스에서 등록되도록 바꿀 것&ndash;&gt;-->
@@ -93,8 +109,8 @@
           <!-- 새 이미지 업로드 및 미리보기 -->
           <div>
             <label for="newImageFiles">본사이미지:</label>
-            <input type="file" id="newImageFiles" name="imageFiles" multiple accept="image/*" onchange="validateImage(event)">
-            <small>이미지 파일(PNG, JPG, GIF, BMP, JFIF)만 업로드 가능합니다.</small>
+            <input type="file" id="newImageFiles" name="imageFiles" multiple accept="image/*" onchange="validateImage(event)"  required>
+            <small>이미지 파일(PNG, JPG, GIF, BMP, JFIF, WEBP)만 업로드 가능합니다.</small>
           </div>
 
           <!-- 미리보기 이미지 표시 -->

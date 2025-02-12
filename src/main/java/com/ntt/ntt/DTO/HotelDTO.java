@@ -3,6 +3,7 @@ package com.ntt.ntt.DTO;
 import com.ntt.ntt.Entity.Company;
 import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.Member;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -19,22 +20,29 @@ public class HotelDTO {
 
     private Integer hotelId;
 
+    @NotBlank(message = "호텔 이름은 필수 입력값입니다.")
     private String hotelName;
 
+    @NotBlank(message = "호텔 지역은 필수 입력값입니다.")
     private String hotelLocation;
 
+    @NotBlank(message = "호텔 주소는 필수 입력값입니다.")
     private String hotelAddress;
 
+    @NotBlank(message = "호텔 설명은 필수 입력값입니다.")
     private String hotelInfo;
 
     private Integer hotelRating;
 
+    @NotBlank(message = "호텔 전화는 필수 입력값입니다.")
     private String hotelPhone;
 
     private String hotelEmail;
 
+    @NotBlank(message = "호텔 체크인 시간은 필수 입력값입니다.")
     private String hotelCheckIn;
 
+    @NotBlank(message = "호텔 체크아웃 시간은 필수 입력값입니다.")
     private String hotelCheckOut;
 
     private Member memberId;

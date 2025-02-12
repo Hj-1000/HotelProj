@@ -14,21 +14,63 @@
     <link rel ="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
 
     <link rel="stylesheet" th:href="@{/css/style.css}">
-    <link rel="stylesheet" th:href="@{/css/roomList.css}">
+    <link rel="stylesheet" th:href="@{/css/hotelList.css}">
 
     <style>
-        .image-box {
+        .banner-container {
             width:100%;
-            height:230px;
+            height:400px;
             overflow:hidden;
             margin:0 auto;
         }
-
+        .bannerImg {
+            width:100%;
+            height:100%;
+            object-fit:cover;
+        }
+        .image-box {
+            width:100%;
+            height:180px;
+            overflow:hidden;
+            margin:0 auto 5px auto;
+        }
         .hotelImg {
             width:100%;
             height:100%;
             object-fit:cover;
         }
+        .container1{
+            margin: 20px auto 100px auto;
+            width: 1000px;
+            height: 250px;
+            border:1px solid lightgray;
+            border-radius: 10px;
+            padding: 30px;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: center; /* 가로 가운데 정렬 */
+            align-items: center; /* 세로 중앙 정렬 */
+            width: 100%; /* 전체 너비 사용 */
+        }
+        .modal-title {
+            flex: 1; /* 제목을 가운데 정렬하도록 유연하게 확장 */
+            text-align: center; /* 텍스트 가운데 정렬 */
+        }
+        .mapBtn {
+            width: 100px;
+        }
+
+        .hotel-card {
+            border:1px solid lightgray;
+            padding: 10px;
+            margin: 10px;
+        }
+
+        .hotel-buttons {
+            text-align: right;
+        }
+
     </style>
 
 
@@ -47,7 +89,7 @@
             $(".delBtn").hide();
 
             // 찜 여부 확인 후 버튼 상태 변경
-            $(".room-card").each(function () {
+            $(".hotel-card").each(function () {
                 var hotelId = $(this).find(".hotelId").val();
 
                 $.ajax({
@@ -122,49 +164,68 @@
 <div th:replace="~{fragments/header::header}"></div>
 <div layout:fragment="content">
     <!-- 룸 배너 이미지 -->
-    <section class="banner-container room-bnr ">
-        <img src="/img/bg_membership.jpg" alt="Hotel Banner">
+    <section class="banner-container hotel-bnr ">
+        <img src="/img/bg_membership.jpg" alt="Hotel Banner" class="bannerImg">
     </section>
 
-    <!-- Room List Section -->
+    <!-- hotel List Section -->
     <section class="py-5">
         <div class="container">
-            <h2 class="text-center mb-5">NTT 호텔 모아보기</h2>
-            <div id="room-list" class="row">
+            <div class="container1">
+                <br>
+                <h2 class="d-flex justify-content-center mb-2">어디로 갈까요?</h2>
+                <div class="d-flex justify-content-center" role="search">
+                    <button type="button" class="form-control w-60 me-1 modalBtn" style="text-align: left;" aria-label="Search">
+                        <i class="fa-solid fa-location-dot"></i>
+                        지역 선택
+                    </button>
+                    <button class="btn btn-outline-success mapBtn" type="button">
+                        <i class="fa-solid fa-location-arrow"></i> <br>
+                        <span style="font-size: small">내 주변</span>
+                    </button>
+                </div>
+
+            </div>
+
+
+            <div id="hotel-list" class="row hotel-list">
 
                 <!--반복문-->
                 <th:block th:each="data : ${hotelDTOS}">
-                    <!-- Room Card -->
+                    <!-- Card -->
                     <div class="col-md-4">
                         <a th:href="@{/hotel/read(hotelId=${data.hotelId})}">
-                            <div class="room-card ">
+                            <div class="hotel-card">
                                 <!--등록한 사진이 있을 때-->
                                 <th:block th:if="${data.hotelImgDTOList != 0}">
-                                    <div class="room-image image-box" th:each="data: ${data.hotelImgDTOList}">
+                                    <div class="image-box">
                                         <!-- 이미지 경로(path) -->
-                                        <img th:src="@{'/upload/' + ${data.imagePath}}" class="hotelImg" alt="hotel Image" width="100%"/>
+                                        <img th:if="${data.hotelImgDTOList != null and !data.hotelImgDTOList.isEmpty()}"
+                                             th:src="@{'/upload/' + ${data.hotelImgDTOList[0].imagePath}}"
+                                             alt="hotel Image"
+                                             class="hotel-image" width="100%" >
                                     </div>
                                 </th:block>
 
                                 <!--등록한 사진이 없을 때-->
                                 <th:block th:unless="${data.hotelImgDTOList.size() != 0}">
-                                    <div class="room-image image-box">
+                                    <div class="image-box">
                                         <img src="/img/default_img.jpg" alt="noImage" class="hotelImg" style="width: 300px"/>
                                     </div>
                                 </th:block>
-                                <div class="room-text">
+                                <div class="hotel-text">
                                     <a th:href="@{'/hotel/list?searchType=location&keyword=' + ${data.hotelLocation}}" style="text-decoration: none">
                                         <div class="badge bg-secondary" th:text="${data.hotelLocation}">지역</div>
                                     </a>
-                                    <div class="room-details">
+                                    <div class="hotel-details">
                                         <h4 th:text="${data.hotelName}">호텔 이름</h4>
                                         <!--                                    <p th:text="${data.hotelInfo}">호텔 설명</p>-->
                                         <p> 체크인-체크아웃: <span th:text="${data.hotelCheckIn}"></span>시 - <span th:text="${data.hotelCheckOut}"></span>시</p>
                                         <input type="hidden" class="hotelId" th:value="${data.hotelId}">
-                                        <div class="room-actions">
+                                        <div class="hotel-actions">
                                             <!--나중에 룸이랑 연결했을 때 사용-->
-                                            <p class="room-price mb-0">300,000 KRW ~</p>
-                                            <div class="room-buttons">
+                                            <p class="hotel-price mb-0">300,000 KRW ~</p>
+                                            <div class="hotel-buttons">
                                                 <button class="btn btn-outline-danger likeBtn"  th:data-hotel-id="${data.hotelId}" onclick="addLike()">
                                                     <i class="fa-regular fa-heart"></i>
                                                 </button>
@@ -179,7 +240,10 @@
 
                         </a>
                     </div>
+
+
                 </th:block>
+
 
 
                 <!-- 페이지네이션 -->
@@ -223,7 +287,89 @@
 
             </div>
         </div>
+
+
+
     </section>
+
+
+
+    <div class="row">
+        <div class="col-3"></div>
+        <div class="col-6">
+            <form action="/hotel/list" method="get">
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-3">
+                        <select name="searchType" class="form-select">
+                            <option value="name" th:selected="${searchType == 'name'}">호텔명</option>
+                            <option value="location" th:selected="${searchType == 'location'}">지역</option>
+                            <option value="address" th:selected="${searchType == 'address'}">주소</option>
+                            <option value="rating" th:selected="${searchType == 'rating'}">별점</option>
+                        </select>
+                    </div>
+                    <div class="col-md-7">
+                        <input type="text" name="keyword" class="form-control" placeholder="검색어를 입력하세요">
+                    </div>
+                    <!-- 조회 버튼 -->
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-dark w-25">조회</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-3"></div>
+    </div>
+
+
+
+    <div class="modal" tabindex="-1" id="myModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">지역 선택</h4>
+
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-3">
+                            <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
+                                <button type="button" class="btn btn-secondary">서울</button>
+                                <button type="button" class="btn btn-secondary">부산</button>
+                                <button type="button" class="btn btn-secondary">제주</button>
+                                <button type="button" class="btn btn-secondary">경기</button>
+                                <button type="button" class="btn btn-secondary">인천</button>
+                                <button type="button" class="btn btn-secondary">강원</button>
+                                <button type="button" class="btn btn-secondary">경상</button>
+                                <button type="button" class="btn btn-secondary">전라</button>
+                                <button type="button" class="btn btn-secondary">충청</button>
+                            </div>
+                        </div>
+                        <div class="col-9">
+                            <form class="d-flex justify-content-center" role="search">
+                                <input type="search" placeholder="지역선택" aria-label="Search">
+                                <button class="btn btn-outline-success" type="submit" >Click</button>
+                            </form>
+                            <ul class="region-list">
+                                <li onclick="selectRegion('강남/역삼/삼성')">강남/역삼/삼성</li>
+                                <li onclick="selectRegion('신사/청담/압구정')">신사/청담/압구정</li>
+                                <li onclick="selectRegion('서초/교대/사당')">서초/교대/사당</li>
+                                <li onclick="selectRegion('잠실/송파/강동')">잠실/송파/강동</li>
+                                <li onclick="selectRegion('홍대/합정/마포/서대문')">홍대/합정/마포/서대문</li>
+                                <li onclick="selectRegion('여의도')">여의도</li>
+                                <li onclick="selectRegion('영등포역')">영등포역</li>
+                                <li onclick="selectRegion('구로/신도림/금천')">구로/신도림/금천</li>
+                                <li onclick="selectRegion('김포공항/강서')">김포공항/강서</li>
+                                <li onclick="selectRegion('건대입구/성수여의도')">건대입구/성수여의도</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" aria-label="Close">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
 <div th:replace="~{fragments/footer::footer}"></div>

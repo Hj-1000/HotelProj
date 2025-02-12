@@ -1,6 +1,7 @@
 package com.ntt.ntt.DTO;
 
 import com.ntt.ntt.Entity.Member;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -17,6 +18,7 @@ public class CompanyDTO {
 
     private Integer companyId;
 
+    @NotBlank(message = "본사명은 필수 입력값입니다.")
     private String companyName;
 
     private String companyManager;
