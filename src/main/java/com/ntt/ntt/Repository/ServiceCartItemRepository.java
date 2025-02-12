@@ -24,6 +24,6 @@ public interface ServiceCartItemRepository extends JpaRepository<ServiceCartItem
             "from ServiceCartItem  sci, Image i " +
             "join sci.serviceMenu sm where sci.serviceCart.serviceCartId = :serviceCartId " +
             "and i.serviceMenu.serviceMenuId = sci.serviceMenu.serviceMenuId " +
-            "order by sci.serviceCartItemId desc")
+            "order by sci.serviceCartItemId asc")
     public List<ServiceCartDetailDTO> findByServiceCartDetailDTOList(Integer serviceCartId);
 }

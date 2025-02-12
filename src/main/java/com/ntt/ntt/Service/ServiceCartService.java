@@ -100,7 +100,7 @@ public class ServiceCartService {
 
 
         ServiceCart serviceCart =
-                serviceCartRepository.findByMember_MemberId(member.getMemberId());
+                serviceCartRepository.findByMember_MemberEmail(memberEmail);
 
         if (serviceCart == null) {
             //카트가 존재하지 않으면
@@ -129,8 +129,8 @@ public class ServiceCartService {
                 .orElseThrow(() -> new EntityNotFoundException("장바구니 아이템을 찾을 수 없습니다. ID: " + serviceCartItemId));
 
         // 멤버가 해당 장바구니 아이템을 소유하고 있는지 확인
-        if (!member.getMemberId().equals(serviceCartItem.getServiceCart().getMember().getMemberId())) {
-            log.info("회원이 해당 장바구니 아이템을 소유하고 있지 않습니다. memberId: " + member.getMemberId()
+        if (!member.getMemberEmail().equals(serviceCartItem.getServiceCart().getMember().getMemberEmail())) {
+            log.info("회원이 해당 장바구니 아이템을 소유하고 있지 않습니다. memberEmail: " + member.getMemberEmail()
                     + ", serviceCartItemId: " + serviceCartItemId);
             return false;  // 소유하지 않으면 false 반환
         }
