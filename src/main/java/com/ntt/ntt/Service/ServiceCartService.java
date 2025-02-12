@@ -89,29 +89,46 @@ public class ServiceCartService {
     }
 
 
-    public List<ServiceCartDetailDTO> listServiceCart(String memberEmail) {
-        // 장바구니의 pk는 1:1 관계이기 때문에 그리고 memberId는 유니크임
-        // 멤버 1 장바구니의 pk도 1
+//    public List<ServiceCartDetailDTO> listServiceCart(String memberEmail) {
+//        // 장바구니의 pk는 1:1 관계이기 때문에 그리고 memberId는 유니크임
+//        // 멤버 1 장바구니의 pk도 1
+//
+//        List<ServiceCartDetailDTO> serviceCartDetailDTOList = new ArrayList<>();
+//
+//        Member member =
+//                memberRepository.findByEmail(memberEmail);
+//
+//
+//        ServiceCart serviceCart =
+//                serviceCartRepository.findByMember_MemberEmail(memberEmail);
+//
+//        if (serviceCart == null) {
+//            //카트가 존재하지 않으면
+//            //새로운 리스트인 serviceCartDetailDTOList를 불러온다
+//            return serviceCartDetailDTOList;
+//        }
+//        // 장바구니에 담겨있는 상품 정보를 조회한다
+//        serviceCartDetailDTOList = serviceCartItemRepository.findByServiceCartDetailDTOList(serviceCart.getServiceCartId());
+//
+//        return serviceCartDetailDTOList;
+//    }
 
+    public List<ServiceCartDetailDTO> listServiceCart(String memberEmail) {
         List<ServiceCartDetailDTO> serviceCartDetailDTOList = new ArrayList<>();
 
-        Member member =
-                memberRepository.findByEmail(memberEmail);
-
-
-        ServiceCart serviceCart =
-                serviceCartRepository.findByMember_MemberEmail(memberEmail);
+        Member member = memberRepository.findByEmail(memberEmail);
+        ServiceCart serviceCart = serviceCartRepository.findByMember_MemberEmail(memberEmail);
 
         if (serviceCart == null) {
-            //카트가 존재하지 않으면
-            //새로운 리스트인 serviceCartDetailDTOList를 불러온다
             return serviceCartDetailDTOList;
         }
-        // 장바구니에 담겨있는 상품 정보를 조회한다
+
+        // DTO에 serviceMenuId 포함하도록 수정된 쿼리 사용
         serviceCartDetailDTOList = serviceCartItemRepository.findByServiceCartDetailDTOList(serviceCart.getServiceCartId());
 
         return serviceCartDetailDTOList;
     }
+
 
     public boolean validateServiceCartItem(Integer serviceCartItemId, String memberEmail) {
         log.info("서비스로 들어온 serviceCartItemId: " + serviceCartItemId);
