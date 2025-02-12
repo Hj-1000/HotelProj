@@ -61,7 +61,7 @@ public class HotelManagerController {
         hotelService.register(hotelDTO, imageFiles, userEmail);
 
         // 등록된 지사의 companyId 가져오기
-        Integer companyId = hotelDTO.getCompanyId().getCompanyId();  // hotelDTO에 companyId가 포함되어 있다고 가정
+        Integer companyId = hotelDTO.getCompanyId();  // hotelDTO에 companyId가 포함되어 있다고 가정
 
         // 성공 메시지와 함께 companyId도 전달
         redirectAttributes.addFlashAttribute("message", "지사 등록이 완료되었습니다.");
@@ -225,13 +225,27 @@ public class HotelManagerController {
     }
 
     //삭제
-    @Operation(summary = "관리자용 호텔 삭제", description = "hotelId에 맞는 호텔을 삭제 한다.")
+    @Operation(summary = "관리자용 호텔 삭제", description = "hotelId에 맞는 호텔을 삭제한다.")
     @GetMapping("/delete")
     public String delete(Integer hotelId, RedirectAttributes redirectAttributes) {
+
+        // 삭제 전 호텔 정보 조회
+        HotelDTO hotelDTO = hotelService.findById(hotelId);  // 호텔 정보를 먼저 가져옴
+
+        if (hotelDTO == null) {
+            redirectAttributes.addFlashAttribute("error", "해당 호텔을 찾을 수 없습니다.");
+            return "redirect:/manager/hotel/list";
+        }
+
+        // 삭제 수행
         hotelService.delete(hotelId);
+
+        // 삭제한 지사의 companyId 가져오기
+        Integer companyId = hotelDTO.getCompanyId();
+
         redirectAttributes.addFlashAttribute("message", "해당 지사 삭제가 완료되었습니다.");
 
-        return "redirect:/manager/hotel/list";
+        return "redirect:/manager/hotel/list?companyId=" + companyId;  // companyId를 쿼리 파라미터로 전달
     }
 
 
