@@ -6,6 +6,8 @@ import com.ntt.ntt.Service.EmailService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -37,7 +39,10 @@ public class PasswordResetController {
 
     @Operation(summary = "비밀번호 찾기폼", description = "비밀번호 찾기 페이지로 이동한다.")
     @GetMapping("/user/findPassword")
-    public String findPasswordForm() {
+    public String findPasswordForm(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails != null) {
+            return "redirect:/";  // 로그인되어있으면 메인페이지로 리다이렉트
+        }
         return "user/findPassword";
     }
 

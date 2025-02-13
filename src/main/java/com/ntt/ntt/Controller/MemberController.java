@@ -83,7 +83,10 @@ public class MemberController {
 
     @Operation(summary = "로그인", description = "로그인 페이지로 이동한다.")
     @GetMapping("/login")
-    public String login() {
+    public String login(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails != null) {
+            return "redirect:/";  // 로그인되어있으면 메인페이지로 리다이렉트
+        }
         return "login";
     }
 
