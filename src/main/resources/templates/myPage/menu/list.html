@@ -7,291 +7,416 @@
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css"/>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
     <style>
-        .card-img-top {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-        }
-        .card-body {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .category-btn {
-            margin: 5px;
-        }
-        .card-text {
-            font-size: 1rem;
-        }
-        #cartItems td, #cartItems th {
-            text-align: center;
-        }
+        body { background-color: #f8f9fa; }
 
-        /* 장바구니 우측 고정 */
-        #cartContainer {
+        .category-container {
             position: fixed;
-            top: 150px;  /* 헤더 아래로 이동 */
-            right: 20px;
-            width: 300px;
-            max-height: 80vh;
+            top: 200px; /* 위치를 조금 더 아래로 조정 */
+            left: 20px;
+            width: 200px;
+            max-height: 60vh; /* 높이도 조금 줄임 */
             overflow-y: auto;
             background-color: white;
             border: 1px solid #ddd;
             border-radius: 8px;
             padding: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-        /* 테이블 스타일 */
-        #cartTable {
+        .category-btn { margin-bottom: 10px; width: 100%; }
+
+        .card {
+            width: 100%;  /* 카드의 가로 크기 100%로 설정 */
+            height: auto; /* 높이는 자동으로 설정 */
+        }
+        .card-body {
+            padding-left: 20px;  /* 기본 padding을 줄여서 공간 활용 */
+            padding-right: 20px;
+            width: 100%;         /* 부모 요소의 크기 100%를 차지하도록 설정 */
+            box-sizing: border-box;  /* padding 포함해서 크기 조정 */
+        }
+
+        .menu-slide-item {
+            width: 100%;  /* 메뉴 아이템이 화면 크기를 채우도록 */
+        }
+
+        #menuContainer {
+            margin-left: 380px;
+            margin-right: 220px;
+            min-height: 400px;  /* 최소 높이 설정 */
+        }
+
+        #menus {
+            display: flex;
+            justify-content: center;
+        }
+        /* slick-list 영역 넓히기 */
+        .slick-list {
+            width: 100%; /* 기본적으로 전체 너비로 설정 */
+            padding-left: 0; /* 왼쪽 여백 없애기 */
+            padding-right: 0; /* 오른쪽 여백 없애기 */
+        }
+
+        /* 슬라이드 항목 크기 조정 */
+        .menu-slide-item {
+            width: 25%;  /* 4개의 메뉴가 한 번에 보이도록 */
+            margin-right: 0px;  /* 각 메뉴 간 간격 */
+        }
+
+        /* 슬릭의 슬라이드 트랙 조정 (슬라이드의 위치를 중앙으로 조정) */
+        .slick-track {
+            display: flex;
+            justify-content: space-between; /* 슬라이드 간격을 일정하게 유지 */
+        }
+
+        .slick-slide {
+            padding: 10px;
+        }
+
+
+        .slick-prev {
+            left: -20px;
+            transform: rotate(90deg);  /* 각도 돌리기 (45도 예시) */
+        }
+
+        .slick-next {
+            right: -10px;
+            transform: rotate(-90deg); /* 각도 돌리기 (-45도 예시) */
+        }
+
+        /* 삼각형 모양 버튼 색상 변경 */
+        .slick-prev:before,
+        .slick-next:before {
+            content: '';
+            display: inline-block;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 15px solid #000;  /* 검은색으로 변경 */
+        }
+
+        /* 모바일 대응 */
+        @media (max-width: 768px) {
+            .slick-prev:before,
+            .slick-next:before {
+                border-top-width: 12px;
+            }
+        }
+
+
+        /* 카테고리 선택 카드 스타일 */
+        #loadingCard {
+            background-color: #f8f9fa;
+            border: 2px solid #007bff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        #loadingText {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        #loadingSpinner {
+            margin-top: 20px;
+            width: 3rem;
+            height: 3rem;
+        }
+
+        /* 애니메이션 효과 */
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        #loadingText {
+            animation: bounce 1s infinite;
+        }
+
+        /* 로딩 스피너 색상 */
+        .spinner-border.text-primary {
+            color: #007bff !important;
+        }
+
+        .card-img-top {
             width: 100%;
-            table-layout: fixed;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .card-body { text-align: center; }
+
+        #cartContainer {
+            margin-top: 30px;  /* 메뉴 선택 후 아래로 이동 */
+            width: 80%;  /* 크기 넓힘 */
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        #cartItems {
+            max-height: 300px;  /* 높이를 고정하여 스크롤 추가 */
+            overflow-y: auto;
+        }
+
+        #cartTable th, #cartTable td {
+            text-align: center;
         }
 
         .cart-header {
-            font-size: 1.2rem;
-            margin-bottom: 15px;
             text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
         }
+
+        .cart-footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        .cart-footer strong {
+            font-size: 1.2rem;
+        }
+
+        #cartItems td, #cartItems th { text-align: center; }
     </style>
 </head>
 <body>
-<!-- 헤더 -->
 <div th:replace="~{fragments/header::header}"></div>
 
-<!-- 본문 -->
-<div class="container mt-4">
-    <h2 class="text-center">유저 주문 페이지</h2>
+<div class="category-container">
+    <h5>카테고리</h5>
+    <div id="categoryButtons">
+        <!-- 카테고리 버튼 동적 생성 -->
+    </div>
+</div>
 
-    <!-- 카테고리 버튼 -->
-    <div class="mb-4 text-center">
-        <h5>카테고리 선택</h5>
-        <div id="categoryButtons" class="btn-group" role="group">
-            <!-- 카테고리 버튼 동적 생성 -->
+<div id="menuContainer" class="container mt-4">
+    <h5 class="text-center">유저 주문 페이지</h5>
+
+    <!-- 카테고리 선택 전 보여줄 안내 카드 -->
+    <div id="categorySelectionCard" class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card text-center" id="loadingCard">
+                <div class="card-body">
+                    <h5 class="card-title" id="loadingText">카테고리에서 메뉴를 선택해 주세요</h5>
+                    <p class="card-text">원하는 카테고리를 선택하면 해당하는 메뉴들이 나타납니다.</p>
+                    <div class="spinner-border text-primary" role="status" id="loadingSpinner">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- 메뉴 리스트 -->
-    <div id="menus" class="row row-cols-1 row-cols-md-3 g-4">
-        <!-- 메뉴 카드 동적 생성 -->
+    <!-- 메뉴가 로드될 곳 -->
+    <div id="menus" class="slick-carousel row row-cols-1 row-cols-md-3 g-4">
+        <!-- 메뉴 카드가 로드되면 이 자리에 채워짐 -->
     </div>
+</div>
 
-    <!-- 장바구니 (우측 고정) -->
-    <div id="cartContainer">
-        <h5 class="cart-header">장바구니</h5>
-        <table class="table table-bordered" id="cartTable">
-            <thead>
-            <tr>
-                <th>메뉴</th>
-                <th>수량</th>
-                <th>가격</th>
-                <th>삭제</th>
-            </tr>
-            </thead>
-            <tbody id="cartItems">
-            <!-- 장바구니 항목 동적 생성 -->
-            </tbody>
-        </table>
+<div id="cartContainer">
+    <h5 class="cart-header">장바구니</h5>
+    <table class="table table-bordered" id="cartTable">
+        <thead>
+        <tr>
+            <th>메뉴</th>
+            <th>수량</th>
+            <th>가격</th>
+            <th>삭제</th>
+        </tr>
+        </thead>
+        <tbody id="cartItems">
+        <!-- 장바구니 항목 동적 생성 -->
+        </tbody>
+    </table>
+    <div class="cart-footer">
+        <strong>총 수량: <span id="totalCount">0</span>개</strong>
+        <strong>총 가격: <span id="totalPrice">0원</span></strong>
     </div>
+</div>
 
-    <!-- 푸터 -->
-    <div th:replace="~{fragments/footer::footer}"></div>
+<div th:replace="~{fragments/footer::footer}"></div>
 
-    <!-- JavaScript -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            fetchCategories();
-            fetchCart();
-        });
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        fetchCategories();
+        fetchCart();
+    });
 
-        // 카테고리 불러오기
-        function fetchCategories() {
-            fetch("/api/categories")
-                .then(response => response.json())
-                .then(categories => {
-                    console.log("카테고리 데이터:", categories);
-                    const categoryContainer = document.getElementById("categoryButtons");
-                    categoryContainer.innerHTML = "";
-                    categories.forEach(category => {
-                        const button = document.createElement("button");
-                        button.textContent = category.serviceCateName;
-                        button.classList.add("btn", "btn-outline-primary", "category-btn");
-                        button.onclick = () => fetchMenus(category.serviceCateId);
-                        categoryContainer.appendChild(button);
-                    });
-                })
-                .catch(error => console.error("카테고리 불러오기 오류:", error));
+    function fetchCategories() {
+        fetch("/api/categories")
+            .then(response => response.json())
+            .then(categories => {
+                const categoryContainer = document.getElementById("categoryButtons");
+                categoryContainer.innerHTML = "";
+                categories.forEach(category => {
+                    const button = document.createElement("button");
+                    button.textContent = category.serviceCateName;
+                    button.classList.add("btn", "btn-outline-primary", "category-btn");
+                    button.onclick = () => fetchMenus(category.serviceCateId);
+                    categoryContainer.appendChild(button);
+                });
+            })
+            .catch(error => console.error("카테고리 불러오기 오류:", error));
+    }
+
+    function fetchMenus(categoryId) {
+        const categorySelectionCard = document.getElementById("categorySelectionCard");
+        categorySelectionCard.style.display = "none"; // 카테고리 선택 안내 카드 숨기기
+
+        const menuContainer = document.getElementById("menus");
+
+        // 메뉴를 새로 로드하기 전에 슬릭 초기화 해제
+        if ($(menuContainer).hasClass('slick-initialized')) {
+            $(menuContainer).slick('unslick');
         }
 
-        // 메뉴 불러오기
-        function fetchMenus(categoryId) {
-            fetch(`/api/menus?serviceCateId=${categoryId}`)
-                .then(response => response.json())
-                .then(menus => {
-                    console.log("메뉴 데이터:", menus);
-                    const menuContainer = document.getElementById("menus");
-                    menuContainer.innerHTML = "";
-                    menus.forEach(menu => {
-                        const menuItem = document.createElement("div");
-                        menuItem.classList.add("col");
+        // 메뉴 컨테이너를 비워서 중복을 방지
+        menuContainer.innerHTML = "";
 
+        // 메뉴 데이터를 가져오기
+        fetch(`/api/menus?serviceCateId=${categoryId}`)
+            .then(response => response.json())
+            .then(menus => {
+                if (menus.length === 0) {
+                    menuContainer.innerHTML = `<p>선택한 카테고리에 메뉴가 없습니다.</p>`;
+                } else {
+                    menus.forEach(menu => {
                         const imageUrl = (menu.serviceMenuImageDTOList.length > 0)
                             ? `/upload/${menu.serviceMenuImageDTOList[0].imagePath}`
-                            : "/images/default.jpg"; // 기본 이미지 설정
+                            : "/images/default.jpg";
 
-                        menuItem.innerHTML = `
-                    <div class="card">
-                        <img src="${imageUrl}" class="card-img-top" alt="${menu.serviceMenuName}">
-                        <div class="card-body text-center">
-                            <h5 class="card-title">${menu.serviceMenuName}</h5>
-                            <p class='card-text'>${menu.serviceMenuInfo}</p>
-                            <p class="card-text">${menu.serviceMenuPrice}원</p>
-                            <button class="btn btn-success" onclick="addToCart(${menu.serviceMenuId}, '${menu.serviceMenuName}', ${menu.serviceMenuPrice})">추가</button>
+                        const menuItem = `
+                        <div class="menu-slide-item">
+                            <div class="card">
+                                <img src="${imageUrl}" class="card-img-top" alt="${menu.serviceMenuName}">
+                                <div class="card-body">
+                                    <h5 class="card-title">${menu.serviceMenuName}</h5>
+                                    <p class="card-text">${menu.serviceMenuInfo}</p>
+                                    <p class="card-text">${menu.serviceMenuPrice}원</p>
+                                    <button class="btn btn-success" onclick="addToCart(${menu.serviceMenuId}, '${menu.serviceMenuName}', ${menu.serviceMenuPrice})">추가</button>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    `;
+                        menuContainer.innerHTML += menuItem;
+                    });
+
+                    $(document).ready(function(){
+                        // 메뉴를 새로 로드하기 전에 슬릭 초기화 해제
+                        if ($(menuContainer).hasClass('slick-initialized')) {
+                            $(menuContainer).slick('unslick');
+                        }
+
+                        // 슬릭 설정
+                        $(menuContainer).slick({
+                            slidesToShow: 4,  // 한 번에 4개의 메뉴 표시
+                            slidesToScroll: 1,
+                            arrows: true,
+                            dots: true,
+                            infinite: true,  // 무한 스크롤 활성화
+                            centerMode: false,  // 중앙 정렬 비활성화
+                            centerPadding: '0',  // 패딩을 0으로 설정하여 메뉴가 화면을 꽉 채우도록
+                            draggable: true,  // 드래그로 슬라이드 이동 활성화
+                            swipeToSlide: true,  // 드래그한 만큼 슬라이드 이동
+                            responsive: [
+                                {
+                                    breakpoint: 1024,
+                                    settings: { slidesToShow: 3 }
+                                },
+                                {
+                                    breakpoint: 768,
+                                    settings: { slidesToShow: 2 }
+                                }
+                            ]
+                        });
+                    });
+                }
+            })
+            .catch(error => console.error("메뉴 불러오기 오류:", error));
+    }
+
+    function addToCart(menuId, menuName, price) {
+        fetch("/api/cart", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                serviceMenuId: menuId,
+                serviceMenuName: menuName,
+                serviceMenuPrice: price,
+                count: 1
+            })
+        })
+            .then(response => response.json())
+            .then(data => fetchCart())
+            .catch(error => alert('장바구니 추가 중 오류가 발생했습니다.'));
+    }
+
+    function fetchCart() {
+        fetch("/api/cart")
+            .then(response => response.json())
+            .then(cartData => {
+                const cartItems = Array.isArray(cartData) ? cartData : cartData.items || [];
+                const cartContainer = document.getElementById("cartItems");
+                const totalCountDisplay = document.getElementById("totalCount");
+                const totalPriceDisplay = document.getElementById("totalPrice"); // 총 가격 표시 요소
+
+                cartContainer.innerHTML = "";
+                let totalCount = 0;
+                let totalPrice = 0; // 총 가격 변수
+
+                cartItems.forEach(item => {
+                    totalCount += parseInt(item.count);
+                    totalPrice += item.serviceMenuPrice * item.count; // 가격 계산
+                    const itemRow = document.createElement("tr");
+                    itemRow.innerHTML = `
+                    <td>${item.serviceMenuName}</td>
+                    <td><input type="number" class="form-control" min="1" value="${item.count}" onchange="updateQuantity(${item.serviceCartItemId}, this.value, ${item.serviceMenuId})"></td>
+                    <td>${item.serviceMenuPrice * item.count}원</td>
+                    <td><button class="btn btn-danger btn-sm" onclick="removeFromCart(${item.serviceCartItemId})">삭제</button></td>
                 `;
-                        menuContainer.appendChild(menuItem);
-                    });
-                })
-                .catch(error => console.error("메뉴 불러오기 오류:", error));
-        }
-
-        // 장바구니에 메뉴 추가하는 함수
-        function addToCart(menuId, menuName, price) {
-            fetch("/api/cart", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    serviceMenuId: menuId,
-                    serviceMenuName: menuName,
-                    serviceMenuPrice: price,
-                    count: 1 // 수량을 count로 명확히 지정
-                })
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(error => {
-                            console.error('장바구니 추가 실패:', error);
-                            alert(error.message || '장바구니 추가 오류');
-                        });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data) {
-                        console.log("장바구니 추가 성공:", data);
-                        fetchCart(); // 최신 장바구니 데이터 반영
-                    }
-                })
-                .catch(error => {
-                    console.error("장바구니 추가 오류:", error);
-                    alert('장바구니 추가 중 오류가 발생했습니다.');
+                    cartContainer.appendChild(itemRow);
                 });
-        }
 
-        // 장바구니 불러오기
-        function fetchCart() {
-            fetch("/api/cart")
-                .then(response => response.json())
-                .then(cartData => {
-                    console.log("장바구니 데이터:", cartData);
-
-                    const cartItems = Array.isArray(cartData) ? cartData : cartData.items || [];
-
-                    const cartContainer = document.getElementById("cartItems");
-                    cartContainer.innerHTML = "";
-
-                    cartItems.forEach(item => {
-                        const itemRow = document.createElement("tr");
-
-                        // `data-service-menu-id` 속성을 추가하여 보이지 않게 저장
-                        itemRow.setAttribute("data-service-menu-id", item.serviceMenuId);
-
-                        itemRow.innerHTML = `
-                <td>${item.serviceMenuName}</td>
-                <td>
-                    <input type="number" class="form-control" min="1" value="${item.count}"
-                        onchange="updateQuantity(${item.serviceCartItemId}, this.value, ${item.serviceMenuId})">
-                </td>
-                <td>${item.serviceMenuPrice * item.count}원</td>
-                <td>
-                    <button class="btn btn-danger btn-sm" onclick="removeFromCart(${item.serviceCartItemId})">삭제</button>
-                </td>
-            `;
-                        cartContainer.appendChild(itemRow);
-                    });
-
-                    // 수량이 0인 아이템 삭제
-                    cartItems.forEach(item => {
-                        if (item.count <= 0) {
-                            removeFromCart(item.serviceCartItemId);
-                        }
-                    });
-                })
-                .catch(error => console.error("장바구니 불러오기 오류:", error));
-        }
-        // 장바구니에서 수량 업데이트
-        function updateQuantity(serviceCartItemId, count, serviceMenuId) {
-            console.log(serviceCartItemId);
-            console.log(count);
-            console.log(serviceMenuId);
-
-            // 요청을 보낼 때 반드시 serviceCartItemId와 count를 포함
-            fetch(`/api/updateCartItem`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    serviceCartItemId: serviceCartItemId,  // 카트 아이템 아이디
-                    count: count,        // 수량
-                    serviceMenuId: serviceMenuId // serviceMenuId로 변수명 변경
-                })
+                totalCountDisplay.textContent = totalCount;
+                totalPriceDisplay.textContent = totalPrice.toLocaleString() + '원'; // 총 가격 표시
             })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.text().then(errorMessage => {
-                            console.error("서버 오류:", errorMessage);
-                            alert(errorMessage || '수량 업데이트 오류');
-                        });
-                    }
+            .catch(error => console.error("장바구니 불러오기 오류:", error));
+    }
 
-                    return response.json().then(data => {
-                        console.log("서버에서 받은 데이터:", data);
-                        if (data) {
-                            console.log("수량 업데이트 성공:", data);
-                            fetchCart(); // 최신 장바구니 데이터 반영
-                        } else {
-                            console.error("서버에서 예상한 데이터가 반환되지 않았습니다.");
-                        }
-                    });
-                })
-                .catch(error => {
-                    console.error("수량 업데이트 오류:", error);
-                    alert('수량 업데이트 중 오류가 발생했습니다.');
-                });
-        }
+    function updateQuantity(serviceCartItemId, count, serviceMenuId) {
+        fetch(`/api/updateCartItem`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ serviceCartItemId, count, serviceMenuId })
+        })
+            .then(response => response.json())
+            .then(data => fetchCart())
+            .catch(error => alert('수량 업데이트 중 오류가 발생했습니다.'));
+    }
 
-
-
-        // 장바구니에서 삭제
-        function removeFromCart(serviceCartItemId) {
-            console.log("삭제할 카트 아이템 아이디:", serviceCartItemId);  // 메뉴 ID가 제대로 전달되는지 확인
-
-            fetch(`/api/cartItem/${serviceCartItemId}`, {
-                method: "DELETE"
-            })
-                .then(response => response.json())
-                .then(data => {
-                    console.log("장바구니 삭제 성공:", data);
-                    fetchCart(); // 최신 장바구니 데이터 반영
-                })
-                .catch(error => console.error("장바구니 삭제 오류:", error));
-        }
-    </script>
+    function removeFromCart(serviceCartItemId) {
+        fetch(`/api/cartItem/${serviceCartItemId}`, { method: "DELETE" })
+            .then(response => response.json())
+            .then(data => fetchCart())
+            .catch(error => alert('장바구니 삭제 중 오류가 발생했습니다.'));
+    }
+</script>
 </body>
 </html>
