@@ -28,7 +28,7 @@
               <!--디자인-->
         <div class="card">
           <div class="card-header">
-            <h2>게시글 상세보기</h2></div>
+            <h2>공지사항 상세보기</h2></div>
           <div class="card-body">
             <!--Controller에서 model.addAttribute 명 :board-->
             <!--board.DTO 변수명-->
@@ -54,10 +54,11 @@
           <div class="card-footer">
             <form th:action="@{/notice/update}" method="post" enctype="multipart/form-data">
             <a th:href="@{/notice/update(noticeId=${noticeDTO.noticeId})}" class="btn btn-primary">수정</a>
-            </form>
+
             <button type="button" class="btn btn-danger"
                     th:onclick="|location.href='@{/notice/list}'|">취소</button>
             <!--@{주소}, 문자열+주소 |문자열@{주소}|-->
+            </form>
           </div>
         </div>
     </div>

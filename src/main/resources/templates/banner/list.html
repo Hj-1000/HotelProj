@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>배너 목록</title>
+</head>
+<body>
+<h1>배너 목록</h1>
+<a href="/banner/register">새 배너 등록</a>
+
+<table border="1">
+  <thead>
+  <tr>
+    <th>배너 ID</th>
+    <th>배너 제목</th>
+    <th>배너 상태</th>
+    <th>배너 순위</th>
+    <th>수정</th>
+    <th>삭제</th>
+  </tr>
+  </thead>
+  <tbody>
+  <th:block th:each="banner : ${banners}">
+    <tr>
+      <td th:text="${banner.bannerId}"></td>
+      <td th:text="${banner.bannerTitle}"></td>
+      <td th:text="${banner.bannerStatus ? '활성' : '비활성'}"></td>
+      <td th:text="${banner.bannerRank}"></td>
+      <td><a th:href="@{/banner/update/{id}(id=${banner.bannerId})}">수정</a></td>
+      <td><a th:href="@{/banner/delete/{id}(id=${banner.bannerId})}">삭제</a></td>
+    </tr>
+    <tr>
+
+        <td th:each="img : ${noticeDTO.noticeImageDTOList}"><!--그림파일이 존재하면-->
+          <img th:src="@{'/upload/' + ${img.imagePath}}">
+
+      </td>
+    </tr>
+  </th:block>
+  </tbody>
+</table>
+</body>
+</html>

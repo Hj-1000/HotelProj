@@ -37,9 +37,9 @@
                     <thead>
                     <tr>
                         <th style="width: 10%">번호</th>
-                        <th style="width: 30%">제목</th>
+                        <th style="width: 70%">제목</th>
                         <th style="width: 20%">작성일</th>
-                        <th style="width: 20%">수정일</th>
+<!--                        <th style="width: 20%">수정일</th>-->
                         <!--          <th style="width: 10%">작업</th>-->
                     </tr>
                     </thead>
@@ -47,8 +47,10 @@
                     <!--Controller에서 전달받은 리스트로 반복처리-->
                     <!--model.addAttribute("변수명",).DTO(변수명)-->
                     <!--boardDTOList, id;subject; content; author; regdate; modDate;-->
-                    <tr th:each="data:${noticeDTOList}"><!--더미값으로 채우기(가장 긴값)-->
-                        <td th:text="${data.noticeId}">0</td>
+<!--                    <tr th:each="data:${noticeDTOList}">&lt;!&ndash;더미값으로 채우기(가장 긴값)&ndash;&gt;-->
+<!--                        <td th:text="${data.noticeId}">0</td>-->
+                    <tr th:each="data, stat : ${noticeDTOList}">
+                        <td th:text="${stat.index + 1}"></td>
                         <td>
                             <a th:href="@{/notice/userread(noticeId=${data.noticeId})}" th:text="${data.noticeTitle}">
                                 sample
@@ -56,7 +58,7 @@
                         </td>
 
                         <td th:text="${#temporals.format(data.regDate,'yyyy-MM-dd hh:mm')}">2024-12-18 12:00:09</td>
-                        <td th:text="${#temporals.format(data.modDate,'yyyy-MM-dd hh:mm')}">2024-12-18 12:00:09</td>
+<!--                        <td th:text="${#temporals.format(data.modDate,'yyyy-MM-dd hh:mm')}">2024-12-18 12:00:09</td>-->
                         <!--          <td>-->
                         <!--            <a th:href="@{/notice/update(noticeId=${data.noticeId})}">수정</a>/-->
                         <!--            <a th:href="@{/notice/delete(noticeId=${data.noticeId})}">삭제</a>-->

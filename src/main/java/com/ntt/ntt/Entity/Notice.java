@@ -50,4 +50,8 @@ public class Notice extends BaseEntity {
                 .modDate(this.getModDate())
                 .build();
     }
+
+    //공지사항 알림벨 실험
+
+
 }

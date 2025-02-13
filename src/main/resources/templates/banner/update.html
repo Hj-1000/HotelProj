@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>배너 수정</title>
+</head>
+<body>
+<h1>배너 수정</h1>
+<form action="/banner/update/{{bannerId}}" method="post">
+  <input type="hidden" name="bannerId" th:value="${bannerDTO.bannerId}" />
+
+  <label for="bannerTitle">배너 제목:</label>
+  <input type="text" id="bannerTitle" name="bannerTitle" th:value="${bannerDTO.bannerTitle}" required/><br>
+
+  <label for="bannerStatus">배너 상태:</label>
+  <select id="bannerStatus" name="bannerStatus">
+    <option value="true" th:selected="${bannerDTO.bannerStatus}">활성</option>
+    <option value="false" th:selected="${!bannerDTO.bannerStatus}">비활성</option>
+  </select><br>
+
+  <label for="bannerRank">배너 순위:</label>
+  <input type="number" id="bannerRank" name="bannerRank" th:value="${bannerDTO.bannerRank}" required/><br>
+
+  <button type="submit">수정</button>
+</form>
+<a href="/banner/list">뒤로 가기</a>
+</body>
+</html>

@@ -29,9 +29,10 @@
 <div layout:fragment="content">
   <div  class="container-fluid mt-4"><!--브라우저 사용 범위-->
     <div id="row" class="row">
-      <div class="col-1"></div><!--좌측여백-->
-      <div id="listColumn" class="col-10"><!--작업디자인(표)-->
-        <h2 class="h2">공지사항</h2>
+<!--      <div class="col-1"></div>-->
+      <!--좌측여백-->
+      <div id="listColumn" class="col-12"><!--작업디자인(표)-->
+        <h2 class="mb-3">공지사항</h2>
         <div class="card p-4">
         <div>
         <table class="table">
@@ -49,8 +50,10 @@
           <tr th:if="${#lists.isEmpty(noticeDTOList)}">
             <td colspan="5" class="text-center">공지사항이 없습니다.</td>
           </tr>
-          <tr th:each="data : ${noticeDTOList}">
-            <td th:text="${data.noticeId}"></td>
+          <tr th:each="data, stat : ${noticeDTOList}">
+            <td th:text="${stat.index + 1}"></td>
+<!--          <tr th:each="data : ${noticeDTOList}">-->
+<!--            <td th:text="${data.noticeId}"></td>-->
             <td>
               <a th:href="@{/notice/read(noticeId=${data.noticeId})}" th:text="${data.noticeTitle}">sample</a>
             </td>
@@ -58,7 +61,7 @@
             <td th:text="${#temporals.format(data.modDate, 'yyyy-MM-dd hh:mm')}">2024-12-18 12:00</td>
             <td>
               <a th:href="@{/notice/update(noticeId=${data.noticeId})}">수정</a> /
-              <a th:href="@{/notice/delete(noticeId=${data.noticeId})}">삭제</a>
+              <a th:href="@{/notice/delete(noticeId=${data.noticeId})}" onclick="confirmDelete()">삭제</a>
             </td>
           </tr>
 
@@ -90,10 +93,35 @@
           </div>
 
 
-      <div class="col-1"></div><!--우측여백-->
+<!--      <div class="col-1"></div>-->
+          <!--우측여백-->
       </div>
     </div><!--row 행 끝-->
   </div><!--container 끝-->
 </div>
+  <!--알림 실험-->
+  <div class="container mt-3">
+    <!-- Flash 메시지 표시 -->
+    <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+      <span th:text="${message}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+
+    <!-- 공지사항 리스트 테이블 -->
+  </div>
+
+
+  <script>
+    function confirmDelete() {
+      if (confirm("정말로 삭제하시겠습니까?")) {
+        // 삭제 로직 실행
+        alert("삭제되었습니다.");
+      } else {
+        // 취소 시 아무 동작 없음
+      }
+    }
+  </script>
+
 </body>
 </html>
