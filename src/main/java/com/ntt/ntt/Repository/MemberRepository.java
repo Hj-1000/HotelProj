@@ -20,4 +20,7 @@ public interface MemberRepository extends JpaRepository<Member, Integer> {
 
     // 모든 회원을 조회
     List<Member> findAll();
+
+    @Query("SELECT m.memberId FROM Member m WHERE m.memberId IN (SELECT h.member.memberId FROM Hotel h WHERE h.hotelId = :hotelId)")
+    List<Long> findMemberIdsByHotel(@Param("hotelId") Integer hotelId);
 }

@@ -102,27 +102,31 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <th:block th:each="memberDTO : ${memberDTOList}">
+                    <th:block th:each="hotelDTO : ${hotelMemberIds}">
                         <tr style="vertical-align: middle;">
-                            <td th:text="${memberDTO.memberId}">1</td>
+                            <!-- hotelDTO에서 memberId를 출력 -->
+                            <td th:text="${hotelDTO.memberId.memberId}">1</td> <!-- memberId는 memberId 객체 내에 있으므로 .memberId로 접근 -->
+
+                            <!-- 필요한 다른 정보들 -->
+                            <td th:text="${hotelDTO.hotelName}">호텔 이름</td>
+                            <td th:text="${hotelDTO.hotelLocation}">호텔 지역</td>
+                            <td th:text="${hotelDTO.hotelPhone}">호텔 전화번호</td>
+                            <td th:text="${#temporals.format(hotelDTO.regDate, 'yyyy-MM-dd HH:mm:ss')}">등록일</td>
+
                             <td>
                                 <form th:action="@{/admin/update}" method="post">
-                                    <input type="hidden" th:value="${memberDTO.memberId}" name="memberId" />
+                                    <input type="hidden" th:value="${hotelDTO.memberId.memberId}" name="memberId" />
                                     <select class="form-select" name="role">
                                         <option th:each="role : ${roles}"
                                                 th:value="${role}"
                                                 th:text="${role}"
-                                                th:selected="${memberDTO.role == role}"></option>
+                                                th:selected="${hotelDTO.memberId.role == role}"></option>
                                     </select>
                             </td>
-                            <td th:text="${memberDTO.memberEmail}">test2@ggg.com</td>
-                            <td th:text="${memberDTO.memberName}">신짱구</td>
-                            <td th:text="${memberDTO.memberPhone}">010-2345-6789</td>
-                            <td th:text="${#temporals.format(memberDTO.regDate, 'yyyy-MM-dd HH:mm:ss')}">2023-01-01</td>
                             <td>
                                 <select class="form-select" name="memberStatus">
-                                    <option value="활성" th:selected="${memberDTO.memberStatus == '활성'}">활성</option>
-                                    <option value="비활성" th:selected="${memberDTO.memberStatus == '비활성'}">비활성</option>
+                                    <option value="활성" th:selected="${hotelDTO.memberId.memberStatus == '활성'}">활성</option>
+                                    <option value="비활성" th:selected="${hotelDTO.memberId.memberStatus == '비활성'}">비활성</option>
                                 </select>
                             </td>
                             <td>
@@ -131,7 +135,6 @@
                             </form>
                         </tr>
                     </th:block>
-                    </tbody>
                 </table>
                 </table>
                 <div th:if="${totalPages > 1}" class="pagination d-flex justify-content-center">
