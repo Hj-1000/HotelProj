@@ -61,7 +61,7 @@
             background-color: #90EE90; /* 초록색: 예약 가능 */
         }
         .reserved {
-            background-color: #FFD700; /* 노란색: 예약됨 */
+            background-color: #FFD700; /* 노란색: 예약 */
         }
         .unavailable {
             background-color: #FFB6C1; /* 분홍색: 예약 불가 */
@@ -411,7 +411,7 @@
                 <h2 class="text-center">객실 목록</h2>
                 <div class="color-info">
                     <span><span class="color-box green"></span>예약 가능 (빈방)</span>
-                    <span><span class="color-box yellow"></span>이용 중 (예약됨)</span>
+                    <span><span class="color-box yellow"></span>이용 중 (예약)</span>
                     <span><span class="color-box pink"></span>예약 불가 (기간 만료)</span>
                 </div>
             </div>
@@ -438,7 +438,7 @@
             <input type="hidden" name="memberId" id="memberId" th:value="${memberId}">
         </form>
 
-        <!-- 전체 방 목록 (예약된 방 포함) -->
+        <!-- 모든 방 목록 (예약된 방 포함) -->
         <div class="admin-section">
             <h2 class="text-center">객실 관리 현황</h2>
             <div class="table-tabs">
@@ -453,9 +453,10 @@
                     <tr>
                         <th>No</th>
                         <th>객실 이름</th>
-                        <th>예약자 ID</th>
-                        <th>예약자 이름</th>
-                        <th>예약자 이메일</th>
+                        <th>ID</th>
+                        <th>이름</th>
+                        <th>총 인원</th>
+                        <th>이메일</th>
                         <th>체크인 날짜</th>
                         <th>체크아웃 날짜</th>
                         <th>상태</th>
@@ -468,6 +469,7 @@
                         <td th:text="${reservation.room.roomName}"></td>
                         <td th:text="${reservation.memberId}"></td>
                         <td th:text="${reservation.memberName}"></td>
+                        <td th:text="${reservation.getCount()}"></td>
                         <td th:text="${reservation.memberEmail}"></td>
                         <td th:text="${reservation.checkInDate}"></td>
                         <td th:text="${reservation.checkOutDate}"></td>
@@ -519,9 +521,10 @@
                     <tr>
                         <th>No</th>
                         <th>객실 이름</th>
-                        <th>예약자 ID</th>
-                        <th>예약자 이름</th>
-                        <th>예약자 이메일</th>
+                        <th>ID</th>
+                        <th>이름</th>
+                        <th>총 인원</th>
+                        <th>이메일</th>
                         <th>체크인 날짜</th>
                         <th>체크아웃 날짜</th>
                         <th>예약마감 날짜</th>
@@ -530,77 +533,85 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="room, iterStat : ${roomPage.content}" th:with="reservation=${reservationMap[room.roomId]}">
-                        <td th:text="${roomPage.number * roomPage.size + iterStat.index + 1}"></td>
-                        <td th:text="${room.roomName}"></td>
+                        <tr th:each="room, iterStat : ${roomPage.content}" th:with="reservation=${reservationMap[room.roomId]}">
+                            <td th:text="${roomPage.number * roomPage.size + iterStat.index + 1}"></td>
+                            <td th:text="${room.roomName}"></td>
 
-                        <!-- 예약자 ID (예약된 경우만 표시) -->
-                        <td th:text="${reservation != null ? reservation.memberId : ''}"></td>
+                            <!-- 예약자 ID -->
+                            <td th:text="${reservation != null ? reservation.memberId : ''}"></td>
 
-                        <!-- 예약자 ID 이름 -->
-                        <td th:text="${reservation != null ? reservation.memberName : ''}"></td>
-                        <!-- 예약자 ID 이메일 -->
-                        <td th:text="${reservation != null ? reservation.memberEmail : ''}"></td>
+                            <!-- 예약자 이름 -->
+                            <td th:text="${reservation != null ? reservation.memberName : ''}"></td>
 
-                        <!-- 체크인 및 체크아웃 날짜 (예약된 경우만 표시) -->
-                        <td th:text="${reservation != null ? reservation.checkInDate : ''}"></td>
-                        <td th:text="${reservation != null ? reservation.checkOutDate : ''}"></td>
+                            <!-- 총 인원 (예약된 경우만 표시) -->
+                            <td th:text="${reservation != null ? reservation.getCount() : ''}"></td> <!-- 추가 -->
 
-                        <!-- 모든 객실의 예약 마감 날짜 표시 -->
-                        <td th:text="${room.reservationEnd != null ? room.reservationEnd : 'N/A'}"></td>
+                            <!-- 예약자 이메일 -->
+                            <td th:text="${reservation != null ? reservation.memberEmail : ''}"></td>
 
-                        <!-- 예약 상태 -->
-                        <td>
-                            <span th:if="${room.isExpired}">기간 만료</span>
-                            <span th:unless="${room.isExpired}">
-                                <span th:if="${reservation != null}">예약됨</span>
-                                <span th:unless="${reservation != null}">빈방</span>
-                            </span>
-                        </td>
+                            <!-- 체크인 및 체크아웃 날짜 -->
+                            <td th:text="${reservation != null ? reservation.checkInDate : ''}"></td>
+                            <td th:text="${reservation != null ? reservation.checkOutDate : ''}"></td>
 
-                        <!-- 수정 버튼 추가 (모든 방에서 활성화) -->
-                        <td>
-                            <button th:classappend="${room.isExpired ? 'btn-danger' : (reservation != null ? 'btn-warning' : 'btn-primary')}"
-                                    th:text="${room.isExpired ? '수정' : (reservation != null ? '수정' : '등록')}"
-                                    th:attr="data-room-id=${room.roomId},
-                                             data-reservation-id=${reservation != null ? reservation.reservationId : '-1'},
-                                             data-member-id=${reservation != null ? reservation.memberId : ''},
-                                             data-checkin=${reservation != null ? reservation.checkInDate : ''},
-                                             data-checkout=${reservation != null ? reservation.checkOutDate : ''},
-                                             data-reservationEnd=${room.reservationEnd},
-                                             data-is-expired=${room.isExpired}"
-                                    onclick="
-                                        if (this.getAttribute('data-is-expired') === 'true') {
-                                            openEditModal(
-                                                this.getAttribute('data-room-id'),
-                                                this.getAttribute('data-reservation-id'),
-                                                this.getAttribute('data-member-id'),
-                                                this.getAttribute('data-checkin'),
-                                                this.getAttribute('data-checkout'),
-                                                this.getAttribute('data-reservationEnd'),
-                                                this.getAttribute('data-is-expired')
-                                            );
-                                        } else if (this.getAttribute('data-reservation-id') !== '-1') {
-                                            openEditModal(
-                                                this.getAttribute('data-room-id'),
-                                                this.getAttribute('data-reservation-id'),
-                                                this.getAttribute('data-member-id'),
-                                                this.getAttribute('data-checkin'),
-                                                this.getAttribute('data-checkout'),
-                                                this.getAttribute('data-reservationEnd'),
-                                                'false'
-                                            );
-                                        } else {
-                                            openRegisterModal(
-                                                this.getAttribute('data-room-id'),
-                                                this.getAttribute('data-reservationEnd')
-                                            );
-                                        }
-                                    ">
-                            </button>
-                        </td>
-                    </tr>
+                            <!-- 예약 마감 날짜 -->
+                            <td th:text="${room.reservationEnd != null ? room.reservationEnd : 'N/A'}"></td>
+
+                            <!-- 예약 상태 -->
+                            <td>
+                                <span th:if="${room.isExpired}">기간 만료</span>
+                                <span th:unless="${room.isExpired}">
+                                    <span th:if="${reservation != null}">예약</span>
+                                    <span th:unless="${reservation != null}">빈방</span>
+                                </span>
+                            </td>
+
+                            <!-- 수정 버튼 -->
+                            <td>
+                                <button th:classappend="${room.isExpired ? 'btn-danger' : (reservation != null ? 'btn-warning' : 'btn-primary')}"
+                                        th:text="${room.isExpired ? '수정' : (reservation != null ? '수정' : '등록')}"
+                                        th:attr="data-room-id=${room.roomId},
+                             data-reservation-id=${reservation != null ? reservation.reservationId : '-1'},
+                             data-member-id=${reservation != null ? reservation.memberId : ''},
+                             data-checkin=${reservation != null ? reservation.checkInDate : ''},
+                             data-checkout=${reservation != null ? reservation.checkOutDate : ''},
+                             data-reservationEnd=${room.reservationEnd},
+                             data-is-expired=${room.isExpired},
+                             data-count=${reservation != null ? reservation.getCount() : 1}" <!-- 추가 -->
+                                onclick="
+                                if (this.getAttribute('data-is-expired') === 'true') {
+                                openEditModal(
+                                this.getAttribute('data-room-id'),
+                                this.getAttribute('data-reservation-id'),
+                                this.getAttribute('data-member-id'),
+                                this.getAttribute('data-checkin'),
+                                this.getAttribute('data-checkout'),
+                                this.getAttribute('data-reservationEnd'),
+                                this.getAttribute('data-is-expired'),
+                                this.getAttribute('data-count') // 추가
+                                );
+                                } else if (this.getAttribute('data-reservation-id') !== '-1') {
+                                openEditModal(
+                                this.getAttribute('data-room-id'),
+                                this.getAttribute('data-reservation-id'),
+                                this.getAttribute('data-member-id'),
+                                this.getAttribute('data-checkin'),
+                                this.getAttribute('data-checkout'),
+                                this.getAttribute('data-reservationEnd'),
+                                'false',
+                                this.getAttribute('data-count') // 추가
+                                );
+                                } else {
+                                openRegisterModal(
+                                this.getAttribute('data-room-id'),
+                                this.getAttribute('data-reservationEnd')
+                                );
+                                }
+                                ">
+                                </button>
+                            </td>
+                        </tr>
                     </tbody>
+
                 </table>
 
                 <!-- 모든 방 검색바 -->
@@ -646,35 +657,6 @@
         <p class="Non-login"> 관리자 기능은 관리자만 이용 가능합니다.</p>
     </th:block>
 
-    <!-- 예약 수정 모달 -->
-    <div id="editModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h3>객실 정보 수정</h3>
-            <form id="editForm" method="post" action="/manager/room/reservation/update"  th:object="${reservationDTO}" >
-                <input type="hidden" id="editRoomId" name="roomId">
-                <input type="hidden" id="editReservationId" name="reservationId">
-
-                <label>예약자 ID:</label>
-                <input type="number" id="editMemberId" name="memberId" min="1"><br>
-                <label>예약자 이름:</label>
-                <input type="text" id="editMemberName" name="memberName"  readonly><br>
-                <label>예약자 이메일:</label>
-                <input type="email" id="editMemberEmail" name="memberEmail" readonly><br>
-
-                <label>체크인 날짜:</label>
-                <input type="date" id="editCheckIn" name="checkInDate"><br>
-                <label>체크아웃 날짜:</label>
-                <input type="date" id="editCheckOut" name="checkOutDate"><br>
-                <label>예약마감 날짜:</label>
-                <input type="date" id="editReservationEnd"  name="reservationEnd" ><br>
-
-
-                <button type="submit" class="btn btn-primary">수정</button>
-            </form>
-        </div>
-    </div>
-
     <!-- 예약 등록 모달 -->
     <div id="registerModal" class="modal">
         <div class="modal-content">
@@ -692,6 +674,16 @@
                 <label>예약자 이메일:</label>
                 <input type="email" id="registerMemberEmail" name="memberEmail" readonly><br>
 
+                <label>총 인원 선택:</label>
+                <select id="registerCount" name="count" required>
+                    <option value="1">1명</option>
+                    <option value="2">2명</option>
+                    <option value="3">3명</option>
+                    <option value="4">4명</option>
+                    <option value="5">5명</option>
+                    <option value="6">6명</option>
+                </select><br><br>
+
                 <label>체크인 날짜:</label>
                 <input type="date" id="registerCheckIn" name="checkInDate" required><br>
 
@@ -706,16 +698,70 @@
         </div>
     </div>
 
+    <!-- 예약 수정 모달 -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3>객실 정보 수정</h3>
+            <form id="editForm" method="post" action="/manager/room/reservation/update"  th:object="${reservationDTO}" >
+                <input type="hidden" id="editRoomId" name="roomId">
+                <input type="hidden" id="editReservationId" name="reservationId">
+
+                <label>예약자 ID:</label>
+                <input type="number" id="editMemberId" name="memberId" min="1"><br>
+
+                <label>예약자 이름:</label>
+                <input type="text" id="editMemberName" name="memberName"  readonly><br>
+
+                <label>예약자 이메일:</label>
+                <input type="email" id="editMemberEmail" name="memberEmail" readonly><br>
+
+                <label>총 인원 선택:</label>
+                <select id="editCount" name="count">
+                    <option value="1">1명</option>
+                    <option value="2">2명</option>
+                    <option value="3">3명</option>
+                    <option value="4">4명</option>
+                    <option value="5">5명</option>
+                    <option value="6">6명</option>
+                </select><br><br>
+
+                <label>체크인 날짜:</label>
+                <input type="date" id="editCheckIn" name="checkInDate"><br>
+
+                <label>체크아웃 날짜:</label>
+                <input type="date" id="editCheckOut" name="checkOutDate"><br>
+
+                <label>예약마감 날짜:</label>
+                <input type="date" id="editReservationEnd"  name="reservationEnd" ><br>
+
+                <button type="submit" class="btn btn-primary">수정</button>
+            </form>
+        </div>
+    </div>
+
     <script>
 
         /* 예약 마감 기한 수정시 Room_Status 자동 업데이트 */
 
         document.addEventListener("DOMContentLoaded", function () {
-            const reservationEndInput = document.getElementById("reservationEnd");
+            // 수정 모달의 예약 마감 날짜
+            const editReservationEndInput = document.getElementById("editReservationEnd");
+            // 등록 모달의 예약 마감 날짜
+            const registerReservationEndInput = document.getElementById("registerReservationEnd");
+
             const statusAvailable = document.getElementById("statusAvailable");
             const statusUnavailable = document.getElementById("statusUnavailable");
 
-            function updateRoomStatus() {
+            // 상태 업데이트 함수
+            function updateRoomStatus(reservationEndInput) {
+                if (!reservationEndInput) return; // 해당 입력 필드가 없으면 실행하지 않음
+
+                if (!statusAvailable || !statusUnavailable) {
+                    console.warn("현재 페이지 라디오버튼 오류방지");
+                    return; // 라디오 버튼이 없으면 함수 종료
+                }
+
                 const today = new Date().toISOString().split("T")[0];
                 const reservationEnd = reservationEndInput.value;
 
@@ -727,16 +773,28 @@
                     statusUnavailable.checked = false;
                 }
 
-                // 라디오 버튼 비활성화 (수동 조작 불가)
+                // 라디오 버튼 비활성화 (사용자가 직접 조작하지 못하도록)
                 statusAvailable.disabled = true;
                 statusUnavailable.disabled = true;
             }
 
-            // 페이지 로드 시 상태 업데이트
-            updateRoomStatus();
+            // 수정 모달이 열릴 때마다 상태 업데이트
+            if (editReservationEndInput) {
+                editReservationEndInput.addEventListener("change", function () {
+                    updateRoomStatus(editReservationEndInput);
+                });
 
-            // 예약 마감 날짜 변경 시 자동 업데이트
-            reservationEndInput.addEventListener("change", updateRoomStatus);
+                updateRoomStatus(editReservationEndInput);
+            }
+
+            // 등록 모달이 열릴 때마다 상태 업데이트
+            if (registerReservationEndInput) {
+                registerReservationEndInput.addEventListener("change", function () {
+                    updateRoomStatus(registerReservationEndInput);
+                });
+
+                updateRoomStatus(registerReservationEndInput);
+            }
         });
 
         /* 객실 목록 간편 예약 관리 */
@@ -765,7 +823,7 @@
                     }
 
                     // 예약 가능(초록색) 방 클릭 시 자동으로 오늘, 내일 날짜로 간편 예약 진행
-                    if (confirm("간편 예약하시겠습니까? (체크인: 오늘, 체크아웃: 내일)")) {
+                    if (confirm("간편 예약하시겠습니까? ")) {
                         let today = new Date().toISOString().split("T")[0]; // 오늘 날짜 (YYYY-MM-DD)
                         let tomorrow = new Date();
                         tomorrow.setDate(tomorrow.getDate() + 1);
@@ -798,6 +856,12 @@
                         checkOutInput.name = "checkOutDate";
                         checkOutInput.value = formattedTomorrow;
                         form.appendChild(checkOutInput);
+
+                        let countInput = document.createElement("input");
+                        countInput.type = "hidden";
+                        countInput.name = "count";
+                        countInput.value = "1"; // 무조건 1명으로 설정
+                        form.appendChild(countInput);
 
                         document.body.appendChild(form);
                         form.submit();
@@ -1035,8 +1099,9 @@
         });
 
         /* 수정 모달 열기 */
-        function openEditModal(roomId, reservationId, memberId, checkIn, checkOut, reservationEnd, isExpired) {
-            console.log("모달 열기 함수 실행됨!", { roomId, reservationId, memberId, checkIn, checkOut, reservationEnd, isExpired });
+
+        function openEditModal(roomId, reservationId, memberId, checkIn, checkOut, reservationEnd, isExpired, count) {
+            console.log("모달 열기 함수 실행됨!", { roomId, reservationId, memberId, checkIn, checkOut, reservationEnd, isExpired, count });
 
             let modal = document.getElementById("editModal");
 
@@ -1053,6 +1118,7 @@
             let editCheckIn = document.getElementById("editCheckIn");
             let editCheckOut = document.getElementById("editCheckOut");
             let editReservationEnd = document.getElementById("editReservationEnd");
+            let editCount = document.getElementById("editCount"); //
             let editButton = document.querySelector(".btn-primary");
 
             editRoomId.value = roomId;
@@ -1060,6 +1126,7 @@
             editMemberId.value = memberId || "";
             editCheckIn.value = checkIn || "";
             editCheckOut.value = checkOut || "";
+            editCount.value = count || 1;
 
             // reservationEnd가 undefined라면 roomId를 이용해 가져오기
             if (!reservationEnd || reservationEnd === 'null' || reservationEnd === 'undefined' || reservationEnd === '') {
@@ -1071,7 +1138,8 @@
                 }
             }
 
-            editReservationEnd.value = reservationEnd; //  수정된 reservationEnd 값 설정
+            //  수정된 reservationEnd 값 설정
+            editReservationEnd.value = reservationEnd;
 
             if (!roomId || roomId === 'null' || roomId === 'undefined') {
                 console.error("[오류] `roomId`가 존재하지 않습니다.");
@@ -1144,18 +1212,17 @@
                 editCheckIn.value = checkIn || "";
                 editCheckOut.value = checkOut || "";
                 editReservationEnd.value = reservationEnd || "";
+                editCount.value = count || 1;
 
                 editMemberName.disabled = true;
                 editMemberEmail.disabled = true;
                 editCheckIn.disabled = false;
                 editCheckOut.disabled = false;
                 editMemberId.disabled = false;
-
                 editReservationEnd.disabled = true;
 
                 editButton.style.backgroundColor = "#000000";
             }
-
             modal.style.display = "block";
             document.body.style.overflow = "hidden";
         }
@@ -1285,6 +1352,26 @@
                 document.body.style.overflow = ""; // 스크롤 다시 활성화
             }
         }
+
+        /* 검색기능 예외처리 alert */
+
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("allRoomSearchForm").addEventListener("submit", function (event) {
+                let category = this.querySelector("select[name='category']").value;
+                let keyword = this.querySelector("input[name='keyword']").value.trim();
+
+                if (category === "status") {
+                    let validStatuses = ["빈방", "예약", "기간 만료"];
+
+                    if (!validStatuses.includes(keyword)) {
+                        alert("유효하지 않은 상태 키워드입니다. '빈방', '예약', '기간 만료' 중에서 입력해주세요.");
+                        event.preventDefault(); // 폼 제출 방지
+                        return;
+                    }
+                }
+            });
+        });
+
     </script>
 </div>
 </body>

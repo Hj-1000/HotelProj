@@ -2,6 +2,8 @@ package com.ntt.ntt.DTO;
 
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Entity.Reservation;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -41,8 +43,13 @@ public class ReservationDTO {
     // 방 예약 여부
     private Boolean reserved;
 
-    // 예약 종료일
     private String reservationEnd = "";
+
+    private Integer dayCount;
+
+    @Min(1) @Max(6)
+    private Integer count;
+
 
 
     // Entity -> DTO 변환 메서드
@@ -65,7 +72,9 @@ public class ReservationDTO {
                 reservation.getRegDate(),
                 reservation.getModDate(),
                 roomDTO.getReservationEnd() != null && LocalDate.parse(roomDTO.getReservationEnd()).isAfter(LocalDate.now()),
-                roomDTO.getReservationEnd()
+                roomDTO.getReservationEnd(),
+                reservation.getDayCount(),
+                reservation.getCount()
         );
     }
 }

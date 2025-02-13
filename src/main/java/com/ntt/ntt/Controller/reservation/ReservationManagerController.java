@@ -44,10 +44,13 @@ public class ReservationManagerController {
     public String registerReservationProc(@RequestParam("roomId") Integer roomId,
                                           @RequestParam("memberId") Integer memberId,
                                           @RequestParam("checkInDate") String checkInDate,
-                                          @RequestParam("checkOutDate") String checkOutDate) {
-        reservationService.registerReservation(roomId, memberId, checkInDate, checkOutDate);
+                                          @RequestParam("checkOutDate") String checkOutDate,
+                                          @RequestParam("count") Integer count) {
+        reservationService.registerReservation(roomId, memberId, checkInDate, checkOutDate, count);
         return "redirect:/manager/room/reservation/list";
     }
+
+
 
     // 2. 방 목록 가져오기
     @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER')")

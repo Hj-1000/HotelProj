@@ -57,8 +57,6 @@ public class RoomService {
         Pageable pageable = PageRequest.of(0, 4, Sort.by(Sort.Direction.DESC, "roomId"));
         Page<Room> roomsPage = roomRepository.findByRoomStatus(true, pageable);
 
-
-
         log.info("Rooms fetched from repository: {}", roomsPage.getContent());
 
         List<RoomDTO> roomDTOs = roomsPage.stream()
@@ -339,13 +337,13 @@ public class RoomService {
                     break;
                 case "status":
                     if ("빈방".equalsIgnoreCase(keyword)) {
-                        rooms = roomRepository.findAvailableRooms(pageable); // 예약되지 않은 방만 검색
-                    } else if ("예약됨".equalsIgnoreCase(keyword)) {
+                        rooms = roomRepository.findAvailableRooms(pageable); // 빈방만 검색
+                    } else if ("예약".equalsIgnoreCase(keyword)) {
                         rooms = roomRepository.findReservedRooms(pageable); // 모든 예약된 방 검색
                     } else if ("기간 만료".equalsIgnoreCase(keyword)) {
                         rooms = roomRepository.findExpiredRooms(pageable); // 기간 만료 검색
                     } else {
-                        throw new IllegalArgumentException("유효하지 않은 상태 키워드: 빈방, 예약됨, 기간 만료 중 선택하세요.");
+                        throw new IllegalArgumentException("유효하지 않은 상태 키워드: 빈방, 예약, 기간 만료 중 선택하세요.");
                     }
                     break;
                 default:
@@ -375,7 +373,6 @@ public class RoomService {
             return roomDTO;
         });
     }
-
 
     // 방 강제 사용 중지 (관리자 기능)
     public void disableRoom(Integer roomId) {

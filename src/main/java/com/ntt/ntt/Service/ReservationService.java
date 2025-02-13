@@ -30,8 +30,7 @@ public class ReservationService {
     private final MemberRepository memberRepository;
 
     // 1. 방 예약 추가
-    public ReservationDTO registerReservation(Integer roomId, Integer memberId , String checkInDate , String checkOutDate) {
-
+    public ReservationDTO registerReservation(Integer roomId, Integer memberId, String checkInDate, String checkOutDate, Integer count) {
         // 방 정보 확인
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 방을 찾을 수 없습니다."));
@@ -45,10 +44,14 @@ public class ReservationService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원 정보를 찾을 수 없습니다. memberId : " + memberId));
 
-
         // 날짜 검증
         if (!isValidDateRange(checkInDate, checkOutDate)) {
             throw new IllegalArgumentException("체크인 날짜는 체크아웃 날짜보다 이전이어야 합니다.");
+        }
+
+        // 인원 수 제한 (최소 1명 ~ 최대 6명)
+        if (count < 1 || count > 6) {
+            throw new IllegalArgumentException("예약 인원 수는 최소 1명, 최대 6명까지 가능합니다.");
         }
 
         try {
@@ -57,7 +60,8 @@ public class ReservationService {
                     .checkInDate(checkInDate)
                     .checkOutDate(checkOutDate)
                     .totalPrice(room.getRoomPrice())
-                    .reservationStatus("예약됨")
+                    .reservationStatus("예약")
+                    .count(count)
                     .room(room)
                     .member(member)
                     .build();
@@ -69,11 +73,9 @@ public class ReservationService {
             roomRepository.save(room);
 
             return ReservationDTO.fromEntity(reservation);
-
         } catch (Exception e) {
             throw new RuntimeException("예약 처리 중 오류가 발생했습니다.", e);
         }
-
     }
 
     // 2. 모든 예약 목록 가져오기
@@ -119,12 +121,15 @@ public class ReservationService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 예약을 찾을 수 없습니다."));
 
         Room room = reservation.getRoom();
-
         reservationRepository.delete(reservation);
 
-        // 방을 예약 가능 상태로 변경
-        room.setRoomStatus(true);
-        roomRepository.save(room);
+        // 해당 방의 다른 예약이 없는지 확인 후 상태 변경
+        boolean hasOtherReservations = reservationRepository.existsByRoom_RoomId(room.getRoomId());
+
+        if (!hasOtherReservations) {
+            room.setRoomStatus(true); // 다른 예약이 없다면 예약 가능 상태로 변경
+            roomRepository.save(room);
+        }
     }
 
     /* 체크인 날짜가 체크아웃 날짜보다 이전인지 검증하는 메서드 */
