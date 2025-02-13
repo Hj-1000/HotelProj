@@ -31,12 +31,14 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
     @Query("SELECT r FROM Room r LEFT JOIN FETCH r.roomImageList")
     Page<Room> findAllWithImages(Pageable pageable);
 
-    /* 빈방 조회 */
-    @Query("SELECT r FROM Room r WHERE r.roomStatus = true AND NOT EXISTS (SELECT 1 FROM Reservation res WHERE res.room.roomId = r.roomId)")
+    /* 빈방 조회 (현재 예약이 존재하지 않는 방만 조회) */
+    @Query("SELECT r FROM Room r WHERE NOT EXISTS " +
+            "(SELECT 1 FROM Reservation res WHERE res.room = r) " +
+            "AND (r.reservationEnd IS NULL OR FUNCTION('PARSEDATETIME', r.reservationEnd, 'yyyy-MM-dd') >= CURRENT_DATE)")
     Page<Room> findAvailableRooms(Pageable pageable);
 
-    /* 예약된 방 조회 */
-    @Query("SELECT r FROM Room r WHERE EXISTS (SELECT 1 FROM Reservation res WHERE res.room.roomId = r.roomId)")
+    /* 예약된 방 조회 (현재 예약이 존재하는 방만 조회) */
+    @Query("SELECT r FROM Room r WHERE EXISTS (SELECT 1 FROM Reservation res WHERE res.room = r)")
     Page<Room> findReservedRooms(Pageable pageable);
 
     /* 기간 만료된 방 조회 */

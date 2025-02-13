@@ -26,6 +26,12 @@ public class Reservation extends BaseEntity {
     // 예약 상태
     @Column(length = 50, nullable = false)
     private String reservationStatus;
+    // 숙박일 수
+    @Column(nullable = false)
+    private Integer dayCount;
+    //예약 인원수
+    @Column(nullable = false)
+    private Integer count;
 
     @ManyToOne
     @JoinColumn(name = "memberId")
