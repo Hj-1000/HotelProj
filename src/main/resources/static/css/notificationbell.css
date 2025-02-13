@@ -1,60 +1,56 @@
-.notification-bell {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    position: relative;
-    z-index: 1001; /* 벨 아이콘이 다른 요소 위에 오도록 설정 */
-}
-
-.notification-bell span {
-    position: absolute;
-    top: 20%;
-    right: -5px;
-    background: red;
-    color: white;
-    font-size: 0.8rem;
-    border-radius: 50%;
-    padding: 7px 7px;
-    min-width: 19px;
-    text-align: center;
-    font-weight: bold;
-}
-
 #notification-container {
     position: relative;
     display: inline-block;
 }
 
-#unread-count {
-    color: white; /* 글자 색상 */
-    font-weight: bold;
-    position: absolute;
-    top: -5px;  /* 벨 아이콘과의 거리 조정 */
-    background-color: red; /* 배경색 */
-    border-radius: 50%;
-    padding: 3px 6px;
-    font-size: 12px;
-    min-width: 18px;
-    text-align: center;
-}
-
-.notification-list {
-    position: absolute;
-    top: 40px;
-    right: 10px;
-    background: white;
+#notification-list {
+    background-color: white;
     border: 1px solid #ddd;
     width: 250px;
     max-height: 300px;
     overflow-y: auto;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-    display: none !important;
-    z-index: 1050; /* 다른 요소들보다 우선되도록 설정 */
+    display: none;
+    z-index: 1050;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 30%;
+    margin-left: -30%;
 }
 
 .notification-item {
     padding: 10px;
     border-bottom: 1px solid #eee;
     cursor: pointer;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.notification-item:hover {
+    background-color: #e2e6ea; /* 마우스 올렸을 때 배경 색상 변화 */
+}
+
+.text-yellow {
+    color: #ffbf00; /* 새 알림에 대해 강조된 노란색 */
+}
+
+.text-muted {
+    color: #6c757d; /* 이미 읽은 알림은 흐릿하게 */
+}
+
+/* 알림 아이콘 배지 디자인 */
+#unread-count {
+    color: white;
+    font-weight: bold;
+    position: absolute;
+    top: -5px;
+
+    background-color: red;
+    border-radius: 50%;
+    font-size: 12px;
+    min-width: 18px;
+    text-align: center;
+    z-index: 1051; /* 알림 아이콘 배지가 벨 아이콘 위에 오도록 */
 }
