@@ -54,9 +54,13 @@
             var maxSize = 10 * 1024 * 1024; // 10MB 제한
             var allowedExt = ["jpg", "jpeg", "gif", "png", "bmp", "jfif", "webp"];
 
-            // 파일 개수 검사: 최대 3개까지 허용
-            if (files.length > 3) {
-                alert("최대 3장까지만 업로드할 수 있습니다.");
+            // 파일 개수 검사: 최대 5개까지 허용
+            if (files.length > 5) {
+                alert("최대 5장까지만 업로드할 수 있습니다.");
+                event.target.value = ""; // 입력 필드 초기화
+                return;
+            } else if (files.length == 0) {
+                alert("지사이미지는 최소 1장 이상 업로드해주세요")
                 event.target.value = ""; // 입력 필드 초기화
                 return;
             }
@@ -252,7 +256,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="hotelLocation" class="form-label">호텔지역:</label>
-                            <input type="text" class="form-control" id="hotelLocation" name="hotelLocation required">
+                            <input type="text" class="form-control" id="hotelLocation" name="hotelLocation" required>
                         </div>
                         <div class="mb-3 mt-3">
                             <label for="hotelAddress" class="form-label">호텔주소:</label>
@@ -332,7 +336,7 @@
                         <div>
                             <label for="newImageFiles">지사이미지:</label>
                             <input type="file" id="newImageFiles" name="imageFiles" multiple accept="image/*" onchange="validateImage(event)" required>
-                            <small>이미지 파일(PNG, JPG, GIF, BMP, JFIF, WEBP)만 업로드 가능합니다.</small>
+                            <small>이미지 파일(PNG, JPG, GIF, BMP, JFIF, WEBP)만 업로드 가능합니다. 최대 5장까지 선택할 수 있습니다.</small>
                         </div>
 
                         <!-- 미리보기 이미지 표시 -->

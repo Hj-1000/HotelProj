@@ -223,7 +223,13 @@ public class HotelManagerController {
     public String updateProc(HotelDTO hotelDTO, List<MultipartFile> newImageFiles, RedirectAttributes redirectAttributes) {
         hotelService.update(hotelDTO, newImageFiles);
         redirectAttributes.addFlashAttribute("message", "지사 수정이 완료되었습니다.");
-        return "redirect:/manager/hotel/list";
+
+        // 등록된 지사의 hotelId 가져오기
+        Integer hotelId = hotelDTO.getHotelId();  // hotelDTO에 hotelId 포함되어 있다고 가정
+        redirectAttributes.addFlashAttribute("hotelId", hotelId);
+
+        return "redirect:/manager/hotel/read?hotelId=" + hotelId;  // hotelId 쿼리 파라미터로 전달
+
     }
 
     //삭제

@@ -15,6 +15,46 @@
 
 
     <script th:inline="javascript">
+
+        //이미지파일 검사
+        function validateImage(event) {
+            var files = event.target.files;
+            var maxSize = 10 * 1024 * 1024; // 10MB 제한
+            var allowedExt = ["jpg", "jpeg", "gif", "png", "bmp", "jfif", "webp"];
+
+            // 파일 개수 검사: 최대 10개까지 허용
+            if (files.length > 15) {
+                alert("최대 15장까지만 업로드할 수 있습니다.");
+                event.target.value = ""; // 입력 필드 초기화
+                return;
+            } else if (files.length == 0) {
+                alert("지사이미지는 최소 1장 이상 업로드해주세요")
+                event.target.value = ""; // 입력 필드 초기화
+                return;
+            }
+
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                var fileName = file.name;
+                var fileSize = file.size;
+                var fileExt = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+
+                // 확장자 검사
+                if (!allowedExt.includes(fileExt)) {
+                    alert("이미지 파일(PNG, JPG, GIF, BMP, JFIF, WEBP)만 업로드 가능합니다.");
+                    event.target.value = ""; // 입력 필드 초기화
+                    return;
+                }
+
+                // 파일 크기 검사
+                if (fileSize > maxSize) {
+                    alert("파일 크기가 10MB를 초과할 수 없습니다.");
+                    event.target.value = ""; // 입력 필드 초기화
+                    return;
+                }
+            }
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
             var moBtn = document.querySelectorAll(".modalBtn");  // 버튼을 모든 요소로 처리
             var modalElement = document.getElementById("myModal"); // 모달 요소 가져오기
@@ -43,33 +83,6 @@
             });
         });
 
-        //이미지파일 검사
-        function validateImage(event) {
-            var files = event.target.files;
-            var maxSize = 10 * 1024 * 1024; // 10MB 제한
-            var allowedExt = ["jpg", "jpeg", "gif", "png", "bmp", "jfif", "webp"];
-
-            for (var i = 0; i < files.length; i++) {
-                var file = files[i];
-                var fileName = file.name;
-                var fileSize = file.size;
-                var fileExt = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
-
-                // 확장자 검사
-                if (!allowedExt.includes(fileExt)) {
-                    alert("이미지 파일(PNG, JPG, GIF, BMP)만 업로드 가능합니다.");
-                    event.target.value = ""; // 입력 필드 초기화
-                    return;
-                }
-
-                // 파일 크기 검사
-                if (fileSize > maxSize) {
-                    alert("파일 크기가 10MB를 초과할 수 없습니다.");
-                    event.target.value = ""; // 입력 필드 초기화
-                    return;
-                }
-            }
-        }
 
     </script>
 
@@ -222,12 +235,14 @@
                 </div>
                 <div class="modal-body">
 
-                    <form th:action="@{/manager/room/register}" th:object="${room}" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    <form th:action="@{/manager/room/register}" th:object="${rooms}" method="post" enctype="multipart/form-data">
                         <!-- 지사(호텔) -->
                         <div class="mb-3 mt-3">
                             <label for="hotelId" class="form-label">지사명:</label>
                             <select id="hotelId" name="hotelId" class="form-select">
-                                <option th:value="${hotelDTO.hotelId}" th:text="${hotelDTO.hotelName}">뒤에바</option>
+                                <th:block th:each="data : ${hotelDTO}">
+                                    <option th:value="${data.hotelId}" th:text="${data.hotelName}">뒤에바</option>
+                                </th:block>
                             </select>
                         </div>
                         <!-- 객실 이름 -->
@@ -262,19 +277,6 @@
                             </div>
                         </div>
 
-                        <!-- 객실 상태 -->
-                        <div class="mb-3">
-                            <label class="form-label">객실 상태</label>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" id="statusAvailable" name="roomStatus" value="true">
-                                <label class="form-check-label" for="statusAvailable">예약 가능</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" id="statusUnavailable" name="roomStatus" value="false">
-                                <label class="form-check-label" for="statusUnavailable">예약 불가</label>
-                            </div>
-                        </div>
-
                         <!-- 객실 정보 -->
                         <div class="mb-3">
                             <label for="roomInfo" class="form-label">객실 설명</label>
@@ -301,11 +303,24 @@
                             </div>
                         </div>
 
+                        <!-- 객실 상태 -->
+                        <div class="mb-3">
+                            <label class="form-label">객실 상태</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" id="statusAvailable" name="statusAvailable" value="true">
+                                <label class="form-check-label" for="statusAvailable">예약 가능</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" id="statusUnavailable" name="statusUnavailable" value="false">
+                                <label class="form-check-label" for="statusUnavailable">예약 불가</label>
+                            </div>
+                        </div>
+
                         <!-- 객실 이미지 업로드 -->
                         <div class="mb-3">
-                            <label for="imageFile" class="form-label">객실 이미지 업로드</label>
-                            <input type="file" class="form-control" id="imageFile" name="imageFile" multiple>
-                            <small class="form-text text-muted">여러 이미지를 선택하려면 Ctrl(또는 Cmd) 키를 누른 상태로 이미지를 선택하세요.</small>
+                            <label for="newImageFiles" class="form-label">객실 이미지 업로드</label>
+                            <input type="file" id="newImageFiles" name="imageFiles" multiple accept="image/*" onchange="validateImage(event)" required>
+                            <small>PNG, JPG, GIF, BMP, JFIF, WEBP만 업로드 가능합니다. 최대 15장까지 선택할 수 있습니다.</small>
                         </div>
 
                         <!-- Submit Button -->
