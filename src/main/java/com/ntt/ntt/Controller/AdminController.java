@@ -24,7 +24,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller
@@ -131,8 +133,17 @@ public class AdminController {
             // 현재 로그인한 사용자가 등록한 본사 목록 가져오기
             List<CompanyDTO> companyList = companyService.getFilteredCompany(member.getMemberId());
 
-            // 모델에 companyList 추가
+            // 모델에 현재 로그인한 사용자가 등록한 본사 목록 추가
             model.addAttribute("companyList", companyList);
+
+            // 가져온 본사 목록을 기반으로 지사 목록 가져오기
+            List<HotelDTO> hotelMemberIds = new ArrayList<>();
+            for (CompanyDTO company : companyList) {
+                hotelMemberIds.addAll(hotelService.getFilteredHotel(company.getCompanyId())); // 기존 메서드 그대로 사용
+            }
+
+            // 모델에 현재 로그인한 사용자가 등록한 본사의 지사 목록 추가
+            model.addAttribute("hotelMemberIds", hotelMemberIds);
 
         } catch (Exception e) {
             model.addAttribute("error", "회원 목록을 가져오는 중 오류가 발생했습니다.");
