@@ -42,6 +42,7 @@ public class ServiceOrderController {
         //만약에 아이템 id가 없다면
         //만약에 수량이 없다면
         //유효성 검사
+        log.info("컨트롤러로 들어온 serviceOrderDTO: " + serviceOrderDTO);
         if (bindingResult.hasErrors()) {
             StringBuffer sb = new StringBuffer();
             List<FieldError> fieldErrors = bindingResult.getFieldErrors();

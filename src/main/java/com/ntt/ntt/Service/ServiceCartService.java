@@ -117,7 +117,7 @@ public class ServiceCartService {
         List<ServiceCartDetailDTO> serviceCartDetailDTOList = new ArrayList<>();
 
         Member member = memberRepository.findByEmail(memberEmail);
-        ServiceCart serviceCart = serviceCartRepository.findByMember_MemberEmail(memberEmail);
+        ServiceCart serviceCart = serviceCartRepository.findByMember_MemberEmail(member.getMemberEmail());
 
         if (serviceCart == null) {
             return serviceCartDetailDTOList;
