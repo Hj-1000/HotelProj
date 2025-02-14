@@ -61,7 +61,7 @@
             <td th:text="${#temporals.format(data.modDate, 'yyyy-MM-dd hh:mm')}">2024-12-18 12:00</td>
             <td>
               <a th:href="@{/notice/update(noticeId=${data.noticeId})}">수정</a> /
-              <a th:href="@{/notice/delete(noticeId=${data.noticeId})}" onclick="confirmDelete()">삭제</a>
+              <a th:href="@{/notice/delete(noticeId=${data.noticeId})}" class="delete-link">삭제</a>
             </td>
           </tr>
 
@@ -91,9 +91,10 @@
             </ul>
           </div>
           </div>
+<!--          <td th:text="${(pagination.currentPage - 1) * size + stat.index + 1}"></td>-->
 
 
-<!--      <div class="col-1"></div>-->
+          <!--      <div class="col-1"></div>-->
           <!--우측여백-->
       </div>
     </div><!--row 행 끝-->
@@ -113,14 +114,27 @@
 
 
   <script>
-    function confirmDelete() {
-      if (confirm("정말로 삭제하시겠습니까?")) {
-        // 삭제 로직 실행
-        alert("삭제되었습니다.");
-      } else {
-        // 취소 시 아무 동작 없음
-      }
-    }
+
+      document.addEventListener("DOMContentLoaded", function() {
+      // 모든 삭제 버튼에 대해 이벤트 리스너 추가
+      document.querySelectorAll(".delete-link").forEach(function (deleteLink) {
+        deleteLink.addEventListener("click", function (event) {
+          if (!confirm("정말로 삭제하시겠습니까?")) {
+            event.preventDefault();  // 삭제 요청 막기
+          }
+        });
+      });
+    });
+
+
+  // function confirmDelete() {
+  // if (confirm("정말로 삭제하시겠습니까?")) {
+  // // 삭제 로직 실행
+  // alert("삭제되었습니다.");
+  // } else {
+  // // 취소 시 아무 동작 없음
+  // }
+  // }
   </script>
 
 </body>

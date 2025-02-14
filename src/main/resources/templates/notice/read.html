@@ -17,6 +17,7 @@
     margin-top: 20px;
     margin-bottom: 100px;
   }
+
 </style>
 <body>
 <div layout:fragment="content">
@@ -27,12 +28,14 @@
     <div class="col-6">
               <!--디자인-->
         <div class="card">
-          <div class="card-header">
-            <h2>공지사항 상세보기</h2></div>
+          <div class="card-header text-center">
+            <h2 >공지사항 상세보기</h2></div>
           <div class="card-body">
             <!--Controller에서 model.addAttribute 명 :board-->
             <!--board.DTO 변수명-->
-            <p>번호: <span th:text="${noticeDTO.noticeId}"></span></p>
+<!--            <p>번호: <span th:text="${noticeDTO.noticeId}"></span></p>-->
+
+<!--            <p>번호: <span th:each="data, stat : ${noticeDTOList}" th:text="${stat.index+1}"></span></p>-->
             <p>제목: <span th:text="${noticeDTO.noticeTitle}"></span></p>
             <p>내용: <span th:text="${noticeDTO.noticeContent}"></span></p>
 <!--            <td style="width:20%">-->

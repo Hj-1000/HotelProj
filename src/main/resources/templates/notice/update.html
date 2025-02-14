@@ -15,6 +15,7 @@
     margin-top: 20px;
     margin-bottom: 50px;
   }
+
 </style>
 <body>
 <div layout:fragment="content">
@@ -27,20 +28,20 @@
         <!--디자인-->
         <div class="card">
 
-          <div class="card-header">
+          <div class="card-header text-center">
             <!--삽입은 빈폼에서 작업, 수정은 기존데이터로 작업-->
             <!--수정시 기본키 생략이 불가능-->
-            <h2>공지사항 수정</h2>
+            <h2 >공지사항 수정</h2>
 
           </div>
           <div class="card-body">
             <!--작업시 기본키가 필요없으면 숨겨서 처리-->
             <input type="hidden" name="noticeId" th:value="${noticeDTO.noticeId}">
             <!--기본키를 화면에 출력할 때는 반드시 수정불가능 상태로 지정-->
-            <div class="mb-3 mt-3">
-              <label for="noticeId" class="form-label">번호:</label>
-              <input type="text" class="form-control" id="noticeId" name="noticeId" th:value="${noticeDTO.noticeId} " readonly>
-            </div>
+<!--            <div class="mb-3 mt-3">-->
+<!--              <label for="noticeId" class="form-label">번호:</label>-->
+<!--              <input type="text" class="form-control" id="noticeId" name="noticeId" th:value="${noticeDTO.noticeId} " readonly>-->
+<!--            </div>-->
             <!--board로 전달-->
             <div class="mb-3 mt-3"><!--게시글제목-->
               <label for="noticeTitle" class="form-label">제목:</label>
