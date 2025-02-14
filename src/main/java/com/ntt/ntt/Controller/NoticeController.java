@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -89,12 +90,25 @@ public class NoticeController {
 
     }
     @Operation(summary = "등록창", description = "공지사항 등록 후 리스트 페이지로 이동한다.")
+    //알림 실험
     @PostMapping("/notice/register")
-    public String registerProc(NoticeDTO noticeDTO, @RequestParam("multipartFile") List<MultipartFile> multipartFile){
+    public String registerProc(NoticeDTO noticeDTO, @RequestParam("multipartFile") List<MultipartFile> multipartFile,
+                               RedirectAttributes redirectAttributes) {
 
         noticeService.register(noticeDTO, multipartFile);
+
+        // 성공 메시지를 추가
+        redirectAttributes.addFlashAttribute("message", "공지사항이 성공적으로 등록되었습니다.");
+
         return "redirect:/notice/list";
     }
+//    @PostMapping("/notice/register")
+//    public String registerProc(NoticeDTO noticeDTO, @RequestParam("multipartFile") List<MultipartFile> multipartFile){
+//
+//        noticeService.register(noticeDTO, multipartFile);
+//        return "redirect:/notice/list";
+//    }
+
     @Operation(summary = "이동폼", description = "공지사항 상세보기 페이지로 이동한다.")
     @GetMapping("/notice/read")
     public String readForm(@RequestParam Integer noticeId, Model model){
@@ -168,6 +182,8 @@ public class NoticeController {
         model.addAttribute("noticeDTO", noticeDTO);
         return "notice/userread";
     }
+
+    //샘플 뷰테이지용 테스트
     @GetMapping("/sample/hotellist")
     public String hotellistForm() {
         return "sample/hotellist";
@@ -176,6 +192,9 @@ public class NoticeController {
     public String hotelreadForm() {
         return "sample/hotelread";
     }
+
+
+
 }
 
 
