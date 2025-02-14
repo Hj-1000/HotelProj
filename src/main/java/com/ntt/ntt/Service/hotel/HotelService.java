@@ -467,7 +467,7 @@ public class HotelService {
         List<Hotel> hotels = hotelRepository.findByCompany_CompanyId(companyId);
 
         return hotels.stream()
-                .map(hotel -> modelMapper.map(hotel, HotelDTO.class))
+                .map(hotel -> new HotelDTO(hotel))  // HotelDTO 생성자에서 MemberDTO도 포함
                 .collect(Collectors.toList());
     }
 

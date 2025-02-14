@@ -95,8 +95,9 @@
                         <th>임원권한</th>
                         <th>아이디</th>
                         <th>이름</th>
+                        <th>담당지사</th>
                         <th>연락처</th>
-                        <th>가입일</th>
+                        <th>등록일</th>
                         <th>상태</th>
                         <th>수정</th>
                     </tr>
@@ -104,29 +105,27 @@
                     <tbody>
                     <th:block th:each="hotelDTO : ${hotelMemberIds}">
                         <tr style="vertical-align: middle;">
-                            <!-- hotelDTO에서 memberId를 출력 -->
-                            <td th:text="${hotelDTO.memberId.memberId}">1</td> <!-- memberId는 memberId 객체 내에 있으므로 .memberId로 접근 -->
-
-                            <!-- 필요한 다른 정보들 -->
-                            <td th:text="${hotelDTO.hotelName}">호텔 이름</td>
-                            <td th:text="${hotelDTO.hotelLocation}">호텔 지역</td>
-                            <td th:text="${hotelDTO.hotelPhone}">호텔 전화번호</td>
-                            <td th:text="${#temporals.format(hotelDTO.regDate, 'yyyy-MM-dd HH:mm:ss')}">등록일</td>
-
+                            <!-- memberId 출력 -->
+                            <td th:text="${hotelDTO.member != null ? hotelDTO.member.memberId : 'N/A'}">1</td>
                             <td>
-                                <form th:action="@{/admin/update}" method="post">
-                                    <input type="hidden" th:value="${hotelDTO.memberId.memberId}" name="memberId" />
+                                <form th:action="@{/admin/executiveUpdate}" method="post">
+                                    <input type="hidden" th:value="${hotelDTO.member != null ? hotelDTO.member.memberId : ''}" name="memberId" />
                                     <select class="form-select" name="role">
                                         <option th:each="role : ${roles}"
                                                 th:value="${role}"
                                                 th:text="${role}"
-                                                th:selected="${hotelDTO.memberId.role == role}"></option>
+                                                th:selected="${hotelDTO.member != null && hotelDTO.member.role == role}"></option>
                                     </select>
                             </td>
+                            <td th:text="${hotelDTO.member != null ? hotelDTO.member.memberEmail : 'N/A'}">아이디</td>
+                            <td th:text="${hotelDTO.member != null ? hotelDTO.member.memberName : 'N/A'}">회원 이름</td>
+                            <td th:text="${hotelDTO.member != null ? hotelDTO.hotelName : 'N/A'}">지사명</td>
+                            <td th:text="${hotelDTO.member != null ? hotelDTO.member.memberPhone : 'N/A'}">전화번호</td>
+                            <td th:text="${hotelDTO.regDate != null ? #temporals.format(hotelDTO.modDate, 'yyyy-MM-dd HH:mm:ss') : 'N/A'}">등록일</td>
                             <td>
                                 <select class="form-select" name="memberStatus">
-                                    <option value="활성" th:selected="${hotelDTO.memberId.memberStatus == '활성'}">활성</option>
-                                    <option value="비활성" th:selected="${hotelDTO.memberId.memberStatus == '비활성'}">비활성</option>
+                                    <option value="활성" th:selected="${hotelDTO.member != null && hotelDTO.member.memberStatus == '활성'}">활성</option>
+                                    <option value="비활성" th:selected="${hotelDTO.member != null && hotelDTO.member.memberStatus == '비활성'}">비활성</option>
                                 </select>
                             </td>
                             <td>
@@ -160,33 +159,50 @@
                         </li>
                     </ul>
                 </div>
+
+                <!-- 회원정보 수정 성공시 메시지 -->
+                <div id="successMessage" th:if="${successMessage}" class="alert alert-success" role="alert">
+                    <span th:text="${successMessage}"></span>
+                </div>
+
                 <script>
-                    // 회원 검색 후 내가 검색 선택했던 권한과 상태 유지
-                    var urlParams = new URLSearchParams(window.location.search);
-
-                    // 상태 유지
-                    var status = urlParams.get('status');
-                    if (status) {
-                        var statusInput = document.querySelector("input[name='status'][value='" + status + "']");
-                        if (statusInput) {
-                            statusInput.checked = true;
+                    window.onload = function() {
+                        // 회원정보 수정 성공 메시지 숨기기
+                        var successMessage = document.getElementById('successMessage');
+                        if (successMessage) {
+                            setTimeout(function() {
+                                successMessage.style.display = 'none';
+                            }, 5000); // 5초 후에 숨기기
                         }
-                    }
 
-                    // 권한 유지
-                    var role = urlParams.get('role');
-                    if (role) {
-                        var selectElement = document.getElementById('role');
-                        if (selectElement) {
-                            for (var i = 0; i < selectElement.options.length; i++) {
-                                if (selectElement.options[i].value === role) {
-                                    selectElement.selectedIndex = i;
-                                    break;
+                        // 회원 검색 후 내가 검색 선택했던 권한과 상태 유지
+                        var urlParams = new URLSearchParams(window.location.search);
+
+                        // 상태 유지
+                        var status = urlParams.get('status');
+                        if (status) {
+                            var statusInput = document.querySelector("input[name='status'][value='" + status + "']");
+                            if (statusInput) {
+                                statusInput.checked = true;
+                            }
+                        }
+
+                        // 권한 유지
+                        var role = urlParams.get('role');
+                        if (role) {
+                            var selectElement = document.getElementById('role');
+                            if (selectElement) {
+                                for (var i = 0; i < selectElement.options.length; i++) {
+                                    if (selectElement.options[i].value === role) {
+                                        selectElement.selectedIndex = i;
+                                        break;
+                                    }
                                 }
                             }
                         }
                     };
                 </script>
+
                 <!-- 등록 버튼 -->
                 <div class="text-end">
                     <button class="btn btn-primary" style="background-color: black" onclick="location.href='/admin/executiveRegister'">등록</button>

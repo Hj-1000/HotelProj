@@ -1,6 +1,7 @@
 package com.ntt.ntt.DTO;
 
 import com.ntt.ntt.Constant.Role;
+import com.ntt.ntt.Entity.Member;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -49,5 +50,17 @@ public class MemberDTO {
 
     // 새 비밀번호 확인
     private String newPasswordCheck;
+
+    public MemberDTO(Member member) {
+        this.memberId = member.getMemberId();
+        this.memberName = member.getMemberName();
+        this.memberEmail = member.getMemberEmail();
+        this.memberPassword = member.getMemberPassword();
+        this.memberPhone = member.getMemberPhone();
+        this.memberStatus = member.getMemberStatus();
+        this.role = member.getRole();
+        this.regDate = member.getRegDate();
+        this.modDate = member.getModDate();
+    }
 
 }

@@ -47,6 +47,8 @@ public class HotelDTO {
 
     private Member memberId;
 
+    private MemberDTO member;
+
     private LocalDateTime regDate;
 
     private LocalDateTime modDate;
@@ -67,5 +69,11 @@ public class HotelDTO {
         this.hotelId = hotel.getHotelId();
         this.hotelName = hotel.getHotelName();
         this.companyId = hotel.getCompany().getCompanyId(); // Company 엔티티를 DTO로 변환
+
+        this.regDate = hotel.getRegDate();
+        this.modDate = hotel.getModDate();
+
+        // Member 정보 포함
+        this.member = hotel.getMember() != null ? new MemberDTO(hotel.getMember()) : null;
     }
 }
