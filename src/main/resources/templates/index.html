@@ -77,7 +77,7 @@
                                  alt="Default Room Image" />
                             <!-- Hover 시 나타나는 예약 버튼 -->
                             <div class="hover-overlay">
-                                <a href="#" class="btn btn-hover">예약하기</a>
+                                <a href="#" class="btn btn-hover">자세히 보기</a>
                             </div>
                         </div>
                         <div class="card-body text-left">
@@ -95,6 +95,7 @@
                             <h5 th:text="${room.roomName}" class="card-title">객실 이름</h5>
                             <p th:text="'예약 기간: ' + ${room.reservationStart} + ' ~ ' + ${room.reservationEnd}" class="card-text">예약 기간</p>
                             <p th:text="'숙박 기간: ' + ${room.stayStart} + ' ~ ' + ${room.stayEnd}" class="card-text">숙박 기간</p>
+                            <p th:text=" ${room.roomInfo}" class="card-text"></p>
                             <p th:text="${room.formattedRoomPrice} + ' ' " class="card-text money"> 0 KRW</p>
                         </div>
                     </div>

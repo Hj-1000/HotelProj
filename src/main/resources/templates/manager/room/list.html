@@ -207,6 +207,18 @@
             </li>
         </ul>
     </div>
+    <script th:inline="javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+            let successMessage = /*[[${successMessage} ?: '' ]]*/ "";  // Null 방지
+
+            console.log("Success Message:", successMessage);  //값 확인용 로그
+
+            if (successMessage.trim() !== "") {
+                alert(successMessage); // 이제 반드시 alert 창이 뜸
+            }
+        });
+    </script>
+
 </div>
 <script>
 

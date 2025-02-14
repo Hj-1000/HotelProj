@@ -108,6 +108,8 @@
                 </div>
             </div>
 
+            <input type="hidden" name="roomStatus" value="true">
+
             <!-- 객실 상태 -->
             <div class="mb-3">
                 <label class="form-label">객실 상태</label>
@@ -131,7 +133,9 @@
             <!-- Submit Button -->
             <button type="submit" class="btn btn-primary">수정</button>
         </form>
+
     </div>
+
     <script>
 
         /* 예약기간 , 숙박기간 이후부터 시작 메서드*/
@@ -182,28 +186,28 @@
 
         document.addEventListener("DOMContentLoaded", function () {
             const reservationEndInput = document.getElementById("reservationEnd");
-            const reservationStartInput = document.getElementById("reservationStart");
             const statusAvailable = document.getElementById("statusAvailable");
             const statusUnavailable = document.getElementById("statusUnavailable");
             const form = document.querySelector("form");
             const isReserved = document.getElementById("isReserved").value === "true"; // 예약 여부 확인
-            let originalReservationEnd = reservationEndInput.value; // 원래 예약 마감 날짜 저장
 
             function updateRoomStatus() {
-                const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD 형식의 오늘 날짜
-                const reservationEnd = reservationEndInput.value; // 사용자가 선택한 예약 종료 날짜
+                const today = new Date(); // 오늘 날짜
+                const reservationEnd = reservationEndInput.value ? new Date(reservationEndInput.value) : null;
 
                 if (reservationEnd) {
-                    if (reservationEnd > today) {
+                    if (reservationEnd.getTime() > today.getTime()) {
+                        // 예약 종료일이 오늘 이후이면 예약 가능
                         statusAvailable.checked = true;
                         statusUnavailable.checked = false;
                     } else {
+                        // 예약 종료일이 오늘이거나 이전이면 예약 불가
                         statusAvailable.checked = false;
                         statusUnavailable.checked = true;
                     }
                 }
 
-                // 사용자가 직접 변경하지 못하도록 비활성화
+                // 관리자가 직접 변경하지 못하도록 radio 버튼 비활성화
                 statusAvailable.disabled = true;
                 statusUnavailable.disabled = true;
             }
@@ -218,29 +222,21 @@
                 }
             }
 
-            // 예약 종료일 변경 시 예외 처리 적용
-            reservationEndInput.addEventListener("change", validateReservationEnd);
-            reservationEndInput.addEventListener("input", validateReservationEnd);
+            // 예약 종료일 변경 시 상태 자동 업데이트
+            reservationEndInput.addEventListener("change", updateRoomStatus);
+            reservationEndInput.addEventListener("input", updateRoomStatus);
 
-            // 페이지 로드 시 기존 기능 + 상태 업데이트 실행
+            // 페이지 로드 시 상태 자동 업데이트
             window.onload = function () {
                 updateRoomStatus();
                 validateReservationEnd();
             };
 
-            // 폼 제출 시 잘못된 값이 제출되지 않도록 방지
-            form.addEventListener("submit", function (event) {
-                const today = new Date().toISOString().split("T")[0];
-                const reservationEnd = reservationEndInput.value;
-
-                if (isReserved && reservationEnd < today) {
-                    alert("예약 마감 날짜가 잘못되었습니다. 다시 설정해주세요.");
-                    reservationEndInput.value = originalReservationEnd;
-                    event.preventDefault();
-                }
+            // 폼 제출 시 자동 상태 설정 유지
+            form.addEventListener("submit", function () {
+                updateRoomStatus(); // 제출 전 상태를 최신화
             });
         });
-
 
         (() => {
             'use strict';
@@ -257,6 +253,5 @@
         })();
     </script>
 </div>
-
 </body>
 </html>

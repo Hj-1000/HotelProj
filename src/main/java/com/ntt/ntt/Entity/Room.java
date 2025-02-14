@@ -52,6 +52,7 @@ public class Room extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "hotelId")
+    @ToString.Exclude
     private Hotel hotelId;
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL,

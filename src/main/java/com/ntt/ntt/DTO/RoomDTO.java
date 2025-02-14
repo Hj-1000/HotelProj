@@ -25,7 +25,7 @@ public class RoomDTO {
 
     private Integer roomPrice;
 
-    private Boolean roomStatus;
+    private Boolean roomStatus = true;
 
     private String roomInfo;
 

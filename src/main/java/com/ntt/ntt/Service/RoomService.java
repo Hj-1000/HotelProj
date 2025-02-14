@@ -215,14 +215,21 @@ public class RoomService {
                 .orElseThrow(() -> new IllegalArgumentException("등록된 아이디에 방을 찾을수 없습니다 : " + roomId));
 
         LocalDate today = LocalDate.now();
-        LocalDate newReservationEnd = LocalDate.parse(roomDTO.getReservationEnd());
+        LocalDate newReservationEnd = roomDTO.getReservationEnd() != null ? LocalDate.parse(roomDTO.getReservationEnd()) : null;
 
         // 현재 방에 예약이 있는지 확인
-        boolean hasActiveReservation = reservationRepository.existsByRoom_RoomId(roomId);
+        boolean reserved = reservationRepository.existsByRoom_RoomId(roomId);
 
         // 현재 예약이 있는 경우 , 예약 마감일을 오늘보다 이전으로 수정 할 수 없도록 예외 처리
-        if (hasActiveReservation && newReservationEnd.isBefore(today)) {
-            throw new IllegalArgumentException("현재 예약이 존재하는 방은 예약 기간을 이전으로 수정할 수 없습니다.");
+        if (reserved && newReservationEnd != null && newReservationEnd.isBefore(today)) {
+            throw new IllegalArgumentException("현재 예약이 존재하는 방은 예약 기간을 오늘 이전으로 수정할 수 없습니다.");
+        }
+
+        // roomStatus가 null이면 기본값 설정
+        if (roomDTO.getRoomStatus() == null) {
+            room.setRoomStatus(true);
+        } else {
+            room.setRoomStatus(roomDTO.getRoomStatus());
         }
 
         // 수정한 내용 적용
@@ -235,6 +242,8 @@ public class RoomService {
         room.setReservationEnd(roomDTO.getReservationEnd());
         room.setStayStart(roomDTO.getStayStart());
         room.setStayEnd(roomDTO.getStayEnd());
+
+        log.info("Room ID: {} 수정됨. 새로운 예약 종료일: {}", roomId, room.getReservationEnd());
 
         // 기존 이미지를 삭제
         if (imageFile != null && !imageFile.isEmpty()) {
@@ -254,12 +263,14 @@ public class RoomService {
                 log.info("Image deleted successfully with ID: {}", imageDTO.getImageId());
             });
 
-            // 4. 새로운 이미지 저장
+            // 새로운 이미지 저장
+            log.info("Room ID: {} 새로운 이미지 저장 시작", roomId);
             imageService.registerRoomImage(roomId, imageFile); // ImageService 활용
         }
 
         // Room 저장
         roomRepository.save(room);
+        log.info("Room ID: {} 업데이트 완료", roomId);
     }
 
     // 삭제 delete

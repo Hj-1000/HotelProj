@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -74,7 +75,17 @@ public class RoomManagerController {
         Pageable updatedPageable = PageRequest.of(page, pageable.getPageSize());
 
         // 검색 조건과 페이징 정보를 이용하여 데이터 가져오기
-        Page<RoomDTO> roomDTOS = roomService.searchRooms(keyword, category, pageable);
+        Page<RoomDTO> roomDTOS = roomService.searchRooms(keyword, category, updatedPageable);
+
+        // 상태 자동 업데이트: 예약 마감일이 지난 경우 예약 불가 처리
+        LocalDate today = LocalDate.now();
+        roomDTOS.forEach(room -> {
+            if (room.getReservationEnd() != null) {
+                LocalDate reservationEndDate = LocalDate.parse(room.getReservationEnd());
+                room.setRoomStatus(!reservationEndDate.isBefore(today));
+            }
+        });
+
 
         // 유효성 검사: 상태(category가 roomStatus일 경우)
         if ("roomStatus".equals(category)) {
@@ -96,8 +107,6 @@ public class RoomManagerController {
 
         // 페이지네이션 정보 생성
         Map<String, Integer> pageInfo = PaginationUtil.pagination(roomDTOS);
-
-
 
         // 전체 페이지 수
         int totalPages = roomDTOS.getTotalPages();
@@ -164,14 +173,30 @@ public class RoomManagerController {
     @PostMapping("/update/{roomId}")
     public String updateRoomProc(@PathVariable Integer roomId,
                                  @ModelAttribute RoomDTO roomDTO,
-                                 @RequestParam("imageFile") List<MultipartFile> imageFile) {
+                                 @RequestParam("imageFile") List<MultipartFile> imageFile,
+                                 RedirectAttributes redirectAttributes) {
 
         log.info("Updating Room with ID: {}", roomId);
-        //Room 수정
+
+        // 객실 상태 자동 변경 (예약 마감일 기준)
+        LocalDate today = LocalDate.now();
+        LocalDate newReservationEnd = roomDTO.getReservationEnd() != null ? LocalDate.parse(roomDTO.getReservationEnd()) : null;
+
+        if (newReservationEnd != null && newReservationEnd.isBefore(today)) {
+            roomDTO.setRoomStatus(false); // 예약 불가
+        } else {
+            roomDTO.setRoomStatus(true); // 예약 가능
+        }
+
         roomService.updateRoom(roomId, roomDTO, imageFile);
-        // 수정 후 list 페이지로 이동
+
+        //
+        redirectAttributes.addFlashAttribute("successMessage", "객실 정보가 성공적으로 수정되었습니다.");
+
         return "redirect:/manager/room/list";
     }
+
+
 
 
     // 5. Room 삭제
