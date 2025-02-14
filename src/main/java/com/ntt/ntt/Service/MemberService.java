@@ -2,11 +2,15 @@ package com.ntt.ntt.Service;
 
 import com.ntt.ntt.Constant.Role;
 import com.ntt.ntt.DTO.MemberDTO;
+import com.ntt.ntt.Entity.Company;
+import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Repository.MemberRepository;
 import com.ntt.ntt.Repository.NotificationRepository;
 import com.ntt.ntt.Repository.QnaRepository;
 import com.ntt.ntt.Repository.ReplyRepository;
+import com.ntt.ntt.Repository.company.CompanyRepository;
+import com.ntt.ntt.Repository.hotel.HotelRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
@@ -37,6 +41,8 @@ public class MemberService implements UserDetailsService {
     private final QnaRepository qnaRepository;
     private final ReplyRepository replyRepository;
     private final NotificationRepository notificationRepository;
+    private final HotelRepository hotelRepository;
+    private final CompanyRepository companyRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -103,7 +109,7 @@ public class MemberService implements UserDetailsService {
     }
 
     // 매니저 회원가입
-    public void saveManager(MemberDTO memberDTO) {
+    public Member saveManager(MemberDTO memberDTO) {
         // 회원가입시 입력한 이메일이 존재하는지 조회
         Optional<Member> read = memberRepository.findByMemberEmail(memberDTO.getMemberEmail());
 
@@ -120,7 +126,9 @@ public class MemberService implements UserDetailsService {
         member.setMemberPassword(password); // 암호화된 비밀번호 저장
         member.setMemberStatus("활성"); // 회원가입시 memberStatus 는 기본적으로 '활성' 상태로 가입
         member.setRole(Role.MANAGER); // MANAGER 권한으로 가입
-        memberRepository.save(member);
+
+        // Member 저장 후 반환
+        return memberRepository.save(member);  // 저장된 Member 객체 반환
     }
 
     // 이메일 중복 확인
@@ -175,6 +183,23 @@ public class MemberService implements UserDetailsService {
         return memberRepository.save(member);
     }
 
+    // 호텔장에 의한 회원정보 수정
+    public Member managerUpdate(MemberDTO memberDTO) {
+        // 수정하려는 회원 정보를 찾기
+        Member member = memberRepository.findById(memberDTO.getMemberId())
+                .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
+
+        // 수정하려는 회원의 role이 'ADMIN' 또는 'USER'인지 확인
+        if ("ADMIN".equals(member.getRole()) || "USER".equals(member.getRole())) {
+            throw new IllegalArgumentException("ADMIN 또는 USER 역할을 가진 회원은 수정할 수 없습니다.");
+        }
+
+        member.setRole(memberDTO.getRole());
+        member.setMemberStatus(memberDTO.getMemberStatus());
+
+        return memberRepository.save(member);
+    }
+
     // 회원정보 개별조회
     public MemberDTO read(String memberEmail) {
         Optional<Member> user = memberRepository.findByMemberEmail(memberEmail);
@@ -206,6 +231,29 @@ public class MemberService implements UserDetailsService {
 
         // 비밀번호가 일치하면 회원에게 온 알림 데이터를 먼저 삭제
         notificationRepository.deleteByMember(member);
+
+        // 비밀번호가 일치하면 호텔장 회원이라면 해당 호텔 레코드를 삭제
+        List<Hotel> hotels = hotelRepository.findByMember(member);
+        for (Hotel hotel : hotels) {
+            // 호텔의 memberId와 회사의 memberId가 같을 경우, 호텔 레코드를 삭제
+            if (hotel.getCompany().getMember().getMemberId().equals(member.getMemberId())) {
+                hotelRepository.delete(hotel);
+            } else {
+                // 그렇지 않으면 hotel의 memberId를 해당 회사의 memberId로 업데이트
+                Member companyMember = hotel.getCompany().getMember();
+
+                // 회사의 Member가 영속 상태가 아닐 경우 저장
+                if (!memberRepository.existsById(companyMember.getMemberId())) {
+                    memberRepository.save(companyMember); // Member 객체 먼저 저장
+                }
+
+                hotel.setMember(companyMember); // Hotel에 member 설정
+                hotelRepository.save(hotel); // Hotel 객체 저장
+            }
+        }
+
+        // 비밀번호가 일치하면 회원이 등록한 company 데이터를 먼저 삭제
+        companyRepository.deleteByMember(member);
 
         // 비밀번호가 일치하면 회원 삭제
         memberRepository.delete(member);
@@ -266,5 +314,14 @@ public class MemberService implements UserDetailsService {
     public Member readByMembername(String memberEmail) {
         Optional<Member> member = memberRepository.findByMemberEmail(memberEmail);
         return member.orElse(null);  // 없으면 null 반환
+    }
+
+    public Member findById(Integer memberId) {
+        Optional<Member> memberOpt = memberRepository.findById(memberId);
+        if (memberOpt.isPresent()) {
+            return memberOpt.get();
+        } else {
+            throw new RuntimeException("Member를 찾을 수 없습니다.");
+        }
     }
 }

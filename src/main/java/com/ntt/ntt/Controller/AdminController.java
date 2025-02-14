@@ -104,46 +104,37 @@ public class AdminController {
                                 Model model,
                                 Principal principal) {
         try {
-            // "전체" 선택시 검색 필터링 null 처리
+            // "전체" 선택 시 필터링을 적용하지 않도록 null 처리
             if ("전체".equals(role)) role = null;
             if ("전체".equals(status)) status = null;
 
-            // 필터링된 회원 리스트 가져오기
-            List<MemberDTO> filteredMembers = memberService.getFilteredMembers(role, email, status, name, phone, startDate, endDate);
-
-            // 페이징 처리
-            int startIdx = page * size;
-            int endIdx = Math.min(startIdx + size, filteredMembers.size());
-            List<MemberDTO> pagedMembers = filteredMembers.subList(startIdx, endIdx);
-
-            // 모델에 회원 리스트 추가
-            model.addAttribute("memberDTOList", pagedMembers);
-            model.addAttribute("roles", Role.values());
-            model.addAttribute("pageNumber", page);
-            model.addAttribute("totalPages", (int) Math.ceil((double) filteredMembers.size() / size));
-            model.addAttribute("size", size);
-
             // 로그인한 사용자의 이메일 가져오기
             String userEmail = principal.getName();
-
-            // 이메일로 회원 정보 조회
             Member member = memberRepository.findByMemberEmail(userEmail)
                     .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다."));
 
-            // 현재 로그인한 사용자가 등록한 본사 목록 가져오기
+            // 로그인한 사용자가 등록한 본사 목록 가져오기
             List<CompanyDTO> companyList = companyService.getFilteredCompany(member.getMemberId());
-
-            // 모델에 현재 로그인한 사용자가 등록한 본사 목록 추가
             model.addAttribute("companyList", companyList);
 
-            // 가져온 본사 목록을 기반으로 지사 목록 가져오기
-            List<HotelDTO> hotelMemberIds = new ArrayList<>();
+            // 로그인한 사용자가 등록한 본사에서 특정 조건을 만족하는 지사 목록 가져오기 (hotelDTO.member 기준 필터링)
+            List<HotelDTO> filteredHotels = new ArrayList<>();
             for (CompanyDTO company : companyList) {
-                hotelMemberIds.addAll(hotelService.getFilteredHotel(company.getCompanyId())); // 기존 메서드 그대로 사용
+                filteredHotels.addAll(hotelService.getFilteredHotelsByMember(
+                        company.getCompanyId(), role, email, status, name, phone, startDate, endDate));
             }
 
-            // 모델에 현재 로그인한 사용자가 등록한 본사의 지사 목록 추가
-            model.addAttribute("hotelMemberIds", hotelMemberIds);
+            // 필터링된 지사의 멤버를 기준으로 페이징 처리
+            int startIdx = page * size;
+            int endIdx = Math.min(startIdx + size, filteredHotels.size());
+            List<HotelDTO> pagedHotels = filteredHotels.subList(startIdx, endIdx);
+
+            // 모델에 필요한 데이터 추가
+            model.addAttribute("hotelMemberIds", pagedHotels);
+            model.addAttribute("roles", Role.values());
+            model.addAttribute("pageNumber", page);
+            model.addAttribute("totalPages", (int) Math.ceil((double) filteredHotels.size() / size));
+            model.addAttribute("size", size);
 
         } catch (Exception e) {
             model.addAttribute("error", "회원 목록을 가져오는 중 오류가 발생했습니다.");
@@ -156,7 +147,7 @@ public class AdminController {
     @PostMapping("/admin/executiveUpdate")
     public String managerUpdate(MemberDTO memberDTO, RedirectAttributes redirectAttributes) {
         try {
-            memberService.adminUpdate(memberDTO);
+            memberService.managerUpdate(memberDTO);
             redirectAttributes.addFlashAttribute("successMessage", "회원 정보가 성공적으로 수정되었습니다.");
             return "redirect:/admin/executiveList";
         } catch (IllegalArgumentException e) {
@@ -198,9 +189,22 @@ public class AdminController {
 
     @Operation(summary = "매니저 회원가입 요청", description = "입력한 유저 정보를 데이터에 저장하고 로그인 페이지로 이동한다.")
     @PostMapping("/admin/executiveRegister")
-    public String executiveRegisterProc(MemberDTO memberDTO) {
+    public String executiveRegisterProc(MemberDTO memberDTO, @RequestParam Integer hotelId) {
         try {
-            memberService.saveManager(memberDTO);
+            // 1. 매니저 회원 등록 후 Member 객체 받기
+            Member member = memberService.saveManager(memberDTO); // Member 객체 반환
+
+            // 2. Member 객체에서 memberId 가져오기
+            Integer memberId = member.getMemberId();
+
+            // 3. 호텔 DTO에 Member 객체 설정
+            HotelDTO hotelDTO = new HotelDTO();
+            hotelDTO.setHotelId(hotelId);
+            hotelDTO.setMemberId(member);  // 방금 생성된 Member 객체로 설정
+
+            // 4. 호텔의 memberId 업데이트
+            hotelService.updateHotelMemberId(hotelDTO);  // 호텔의 memberId 업데이트
+
             return "redirect:/admin/executiveRegister"; // 회원가입 성공 시 현재 페이지로 리다이렉트
         } catch (IllegalStateException e) {
             // 예외가 발생한 경우 회원가입 페이지로 리다이렉트

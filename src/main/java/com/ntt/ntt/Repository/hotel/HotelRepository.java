@@ -1,9 +1,12 @@
 package com.ntt.ntt.Repository.hotel;
 
 import com.ntt.ntt.Entity.Hotel;
+import com.ntt.ntt.Entity.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -38,4 +41,11 @@ public interface HotelRepository extends JpaRepository<Hotel, Integer> {
     Page<Hotel> findByCompany_CompanyId(Integer companyId, Pageable pageable);
 
     List<Hotel> findByCompany_CompanyId(Integer companyId);
+
+    @Query("SELECT h FROM Hotel h WHERE h.company.companyId = :companyId")
+    List<Hotel> findByCompanyId(@Param("companyId") Integer companyId);
+
+    List<Hotel> findByMember(Member member);
+
+    void deleteByMember(Member member);
 }
