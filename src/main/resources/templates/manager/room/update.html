@@ -122,21 +122,62 @@
                     <label class="form-check-label" for="statusUnavailable">예약 불가</label>
                 </div>
             </div>
+            <!-- 이미지 업로드 -->
+            <div class="mb-3">
+                <label class="form-label">현재 등록된 이미지</label>
+                <div id="imagePreviewContainer">
+                    <div th:each="image : ${room.roomImageDTOList}" class="image-preview">
+                        <img th:src="@{|/upload/${image.imagePath}|}" alt="이미지 미리보기" class="preview-img" style="width:150px; height:auto;">
+                        <input type="checkbox" th:name="deleteImages" th:value="${image.imageId}"> 삭제
+                    </div>
+                </div>
+            </div>
 
-
+            <!-- 새 이미지 업로드 -->
             <div class="mb-3">
                 <label for="imageFile" class="form-label">객실 이미지 업로드</label>
                 <input type="file" class="form-control" id="imageFile" name="imageFile" multiple>
                 <small class="form-text text-muted">여러 이미지를 선택하려면 Ctrl(또는 Cmd) 키를 누른 상태로 이미지를 선택하세요.</small>
             </div>
 
-            <!-- Submit Button -->
             <button type="submit" class="btn btn-primary">수정</button>
         </form>
 
     </div>
 
     <script>
+
+        /* 이미지 예외처리 */
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.querySelector("form");
+            const imageCheckboxes = document.querySelectorAll("input[name='deleteImages']");
+            const deleteImagesInput = document.createElement("input");
+
+            deleteImagesInput.setAttribute("type", "hidden");
+            deleteImagesInput.setAttribute("name", "deleteImages");
+            form.appendChild(deleteImagesInput);
+
+            form.addEventListener("submit", function (event) {
+                let checkedImages = [];
+
+                imageCheckboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        checkedImages.push(checkbox.value);
+                    }
+                });
+
+                deleteImagesInput.value = checkedImages.length > 0 ? checkedImages.join(",") : ""; // 빈 값이면 유지
+
+                console.log("최종 삭제 이미지 목록:", deleteImagesInput.value); // 확인용 로그
+
+                if (checkedImages.length === imageCheckboxes.length && !document.getElementById("imageFile").files.length) {
+                    alert("최소 한 개 이상의 이미지를 등록해야 합니다.");
+                    event.preventDefault();
+                }
+            });
+        });
+
 
         /* 예약기간 , 숙박기간 이후부터 시작 메서드*/
         document.addEventListener("DOMContentLoaded", function () {

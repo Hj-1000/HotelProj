@@ -103,6 +103,7 @@
                             <h5 th:text="${room.roomName}" class="card-title"></h5>
                             <p th:text="'예약 기간 : ' + ${room.reservationStart} + ' ~ ' + ${room.reservationEnd}" class="card-text"></p>
                             <p th:text="'숙박 기간 : ' + ${room.stayStart} + ' ~ ' + ${room.stayEnd}" class="card-text"></p>
+                            <p th:text=" ${room.roomInfo}" class="card-text"></p>
                             <div class="room-actions">
                                 <p class="room-price mb-0"
                                    th:text="${room.formattedRoomPrice != null ? room.formattedRoomPrice + ' ' + '~' : '가격 미정'}"></p>
@@ -451,8 +452,9 @@
                                     <h5 class="card-title">${room.roomName}</h5>
                                     <p class="card-text">예약 기간 : ${room.reservationStart} ~ ${room.reservationEnd}</p>
                                     <p class="card-text">숙박 기간 : ${room.stayStart} ~ ${room.stayEnd}</p>
+                                    <p class="card-text">${room.roomInfo}</p>
                                     <div class="room-actions">
-                                        <p class="room-price mb-0">${room.formattedRoomPrice ? room.formattedRoomPrice + ' KRW' : '가격 미정'}</p>
+                                        <p class="room-price mb-0">${room.formattedRoomPrice ? room.formattedRoomPrice + " ~ " : '가격 미정'}</p>
                                         <button class="btn btn-book ${room.roomStatus ? 'btn-dark' : 'btn-danger'}" ${!room.roomStatus ? 'disabled' : ''}>
                                             ${room.roomStatus ? '예약하기' : '예약 불가'}
                                         </button>

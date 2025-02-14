@@ -3,7 +3,9 @@ package com.ntt.ntt.Controller.Room;
 
 import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.RoomDTO;
+import com.ntt.ntt.Repository.ImageRepository;
 import com.ntt.ntt.Repository.ReservationRepository;
+import com.ntt.ntt.Service.ImageService;
 import com.ntt.ntt.Service.RoomService;
 import com.ntt.ntt.Util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/manager/room")
@@ -30,6 +33,8 @@ public class RoomManagerController {
 
     private final RoomService roomService;
     private final ReservationRepository reservationRepository;
+    private final ImageRepository imageRepository;
+    private final ImageService imageService;
 
 
     /* -----------관리자 페이지----------- */
@@ -51,14 +56,21 @@ public class RoomManagerController {
 
     // Room 등록
     @PostMapping("/register")
-    public String registerRoomProc(@ModelAttribute RoomDTO roomDTO, @RequestParam("imageFile") List<MultipartFile> imageFile) {
+    public String registerRoomProc(@ModelAttribute RoomDTO roomDTO,
+                                   @RequestParam("imageFile") List<MultipartFile> imageFile,
+                                   RedirectAttributes redirectAttributes) {
 
-        log.info("Room registration data: {}", roomDTO); // 확인 로그 추가
+        log.info("객실 등록 요청: {}", roomDTO);
 
-        //Room 등록
+        // 이미지가 없으면 등록 불가
+        if (imageFile == null || imageFile.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "객실 이미지는 필수입니다.");
+            return "redirect:/manager/room/register";
+        }
+
         roomService.registerRoom(roomDTO, imageFile);
 
-        //등록후 list 페이지로 이동하기
+        redirectAttributes.addFlashAttribute("successMessage", "객실이 성공적으로 등록되었습니다.");
         return "redirect:/manager/room/list";
     }
 
@@ -173,7 +185,8 @@ public class RoomManagerController {
     @PostMapping("/update/{roomId}")
     public String updateRoomProc(@PathVariable Integer roomId,
                                  @ModelAttribute RoomDTO roomDTO,
-                                 @RequestParam("imageFile") List<MultipartFile> imageFile,
+                                 @RequestParam(value = "imageFile", required = false) List<MultipartFile> imageFile,
+                                 @RequestParam(value = "deleteImages", required = false) List<Integer> deleteImages, // ✅ 추가
                                  RedirectAttributes redirectAttributes) {
 
         log.info("Updating Room with ID: {}", roomId);
@@ -188,11 +201,44 @@ public class RoomManagerController {
             roomDTO.setRoomStatus(true); // 예약 가능
         }
 
-        roomService.updateRoom(roomId, roomDTO, imageFile);
+        // 기존 이미지 삭제 로직 추가
+        if (deleteImages != null && !deleteImages.isEmpty()) {
+            List<Integer> uniqueDeleteImages = deleteImages.stream().distinct().collect(Collectors.toList()); // 중복 제거
 
-        //
+            for (Integer imageId : uniqueDeleteImages) {
+                if (imageRepository.existsById(imageId)) { // 존재 여부 체크
+                    try {
+                        imageService.deleteImage(imageId);
+                        log.info("삭제된 이미지 ID: {}", imageId);
+                    } catch (Exception e) {
+                        log.warn("이미지를 삭제하는 중 오류 발생. ID: {}", imageId, e);
+                    }
+                } else {
+                    log.warn("이미지를 찾을 수 없습니다. ID: {}", imageId);
+                }
+            }
+        }
+
+        // 수정 후 남아있는 이미지 개수 확인
+        int remainingImages = imageRepository.countByRoom_RoomId(roomId);
+        log.info("남아있는 이미지 개수: {}", remainingImages);
+        boolean hasNewImages = (imageFile != null && !imageFile.isEmpty());
+
+        if (remainingImages == 0 && !hasNewImages) {
+            redirectAttributes.addFlashAttribute("errorMessage", "객실 이미지는 최소 1개 이상 등록해야 합니다.");
+            return "redirect:/manager/room/update/" + roomId;
+        }
+
+        // 새 이미지가 존재하는 경우에만 업데이트
+        if (imageFile != null && !imageFile.isEmpty()) {
+            log.info("새로운 이미지 저장 시작");
+            roomService.updateRoom(roomId, roomDTO, imageFile, deleteImages);
+        } else {
+            log.info("이미지를 변경하지 않고 방 정보만 업데이트");
+            roomService.updateRoomWithoutImages(roomId, roomDTO);
+        }
+
         redirectAttributes.addFlashAttribute("successMessage", "객실 정보가 성공적으로 수정되었습니다.");
-
         return "redirect:/manager/room/list";
     }
 

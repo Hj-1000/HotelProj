@@ -209,7 +209,7 @@ public class RoomService {
     }
 
     // 4. 수정 update
-    public void updateRoom(Integer roomId, RoomDTO roomDTO, List<MultipartFile> imageFile) {
+    public void updateRoom(Integer roomId, RoomDTO roomDTO, List<MultipartFile> imageFile, List<Integer> deleteImages) {
         //Room 존재 확인
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("등록된 아이디에 방을 찾을수 없습니다 : " + roomId));
@@ -246,26 +246,35 @@ public class RoomService {
         log.info("Room ID: {} 수정됨. 새로운 예약 종료일: {}", roomId, room.getReservationEnd());
 
         // 기존 이미지를 삭제
+        if (deleteImages != null && !deleteImages.isEmpty()) {
+            for (Integer imageId : deleteImages) {
+                // 이미지 존재 여부 확인
+                Optional<Image> optionalImage = imageRepository.findById(imageId);
+
+                if (optionalImage.isPresent()) {
+                    Image image = optionalImage.get();
+                    String imagePath = image.getImagePath();
+                    String imageFileName = imagePath.substring(imagePath.lastIndexOf("/") + 1); // 파일명 추출
+
+                    log.info("Deleting selected image: {}", imagePath);
+
+                    // 물리적 파일 삭제 (경로와 파일명을 분리하여 전달)
+                    fileUpload.FileDelete(IMG_LOCATION, imageFileName);
+                    log.info("Image file deletion attempted: {}", imageFileName);
+
+                    // DB에서 이미지 삭제
+                    imageRepository.deleteById(imageId);
+                    log.info("Image record deleted from DB: Image ID {}", imageId);
+                } else {
+                    log.warn("이미지를 찾을 수 없습니다. ID: {}", imageId);
+                }
+            }
+        }
+
+
         if (imageFile != null && !imageFile.isEmpty()) {
-            // Room에 연결된 모든 이미지를 가져온다
-            List<ImageDTO> existingImages = imageRepository.findByRoom_RoomId(roomId)
-                    .stream()
-                    .map(image -> {
-                        // 이미지 경로를 삭제 전에 로그로 확인
-                        log.info("Deleting image with path: {}", image.getImagePath());
-                        return modelMapper.map(image, ImageDTO.class);
-                    })
-                    .collect(Collectors.toList());
-
-            // 각 이미지 엔티티를 삭제
-            existingImages.forEach(imageDTO -> {
-                imageRepository.deleteById(imageDTO.getImageId()); // 이미지 ID를 기반으로 삭제
-                log.info("Image deleted successfully with ID: {}", imageDTO.getImageId());
-            });
-
-            // 새로운 이미지 저장
             log.info("Room ID: {} 새로운 이미지 저장 시작", roomId);
-            imageService.registerRoomImage(roomId, imageFile); // ImageService 활용
+            imageService.registerRoomImage(roomId, imageFile);
         }
 
         // Room 저장
@@ -448,5 +457,30 @@ public class RoomService {
         }
 
         roomRepository.save(room);
+    }
+
+    public void updateRoomWithoutImages(Integer roomId, RoomDTO roomDTO) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("등록된 아이디에 방을 찾을 수 없습니다: " + roomId));
+
+        room.setRoomName(roomDTO.getRoomName());
+        room.setRoomType(roomDTO.getRoomType());
+        room.setRoomPrice(roomDTO.getRoomPrice());
+        room.setRoomStatus(roomDTO.getRoomStatus());
+        room.setRoomInfo(roomDTO.getRoomInfo());
+        room.setReservationStart(roomDTO.getReservationStart());
+        room.setReservationEnd(roomDTO.getReservationEnd());
+        room.setStayStart(roomDTO.getStayStart());
+        room.setStayEnd(roomDTO.getStayEnd());
+
+        log.info("Room ID: {} 수정됨 (이미지는 변경되지 않음)", roomId);
+        roomRepository.save(room);
+    }
+
+    /* 이미지 개수 체크 메서드*/
+    public int countRoomImages(Integer roomId) {
+        int imageCount = imageRepository.countByRoom_RoomId(roomId);
+        log.info("Room ID: {} - 이미지 개수: {}", roomId, imageCount);
+        return imageCount;
     }
 }
