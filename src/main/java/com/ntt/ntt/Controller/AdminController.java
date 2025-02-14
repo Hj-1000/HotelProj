@@ -152,6 +152,19 @@ public class AdminController {
         return "admin/executiveList";
     }
 
+    @Operation(summary = "매니저의 회원정보 수정", description = "매니저의 회원정보를 새로 입력한 값으로 업데이트한다.")
+    @PostMapping("/admin/executiveUpdate")
+    public String managerUpdate(MemberDTO memberDTO, RedirectAttributes redirectAttributes) {
+        try {
+            memberService.adminUpdate(memberDTO);
+            redirectAttributes.addFlashAttribute("successMessage", "회원 정보가 성공적으로 수정되었습니다.");
+            return "redirect:/admin/executiveList";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/admin/executiveList";
+        }
+    }
+
     @Operation(summary = "매니저 회원가입 페이지", description = "매니저 회원가입 페이지로 이동한다.")
     @GetMapping("/admin/executiveRegister")
     public String executiveRegisterForm(Model model, Principal principal) {
