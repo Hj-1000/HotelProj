@@ -91,6 +91,7 @@ public class RoomService {
         // Room 데이터와 이미지를 함께 가져오기 위해 fetch join 사용
         Page<Room> roomEntities = roomRepository.findAllWithImages(pageable);
 
+
         // Room Entity를 DTO로 변환
         return roomEntities.map(room -> {
             // 예약 상태 업데이트
@@ -212,6 +213,17 @@ public class RoomService {
         //Room 존재 확인
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("등록된 아이디에 방을 찾을수 없습니다 : " + roomId));
+
+        LocalDate today = LocalDate.now();
+        LocalDate newReservationEnd = LocalDate.parse(roomDTO.getReservationEnd());
+
+        // 현재 방에 예약이 있는지 확인
+        boolean hasActiveReservation = reservationRepository.existsByRoom_RoomId(roomId);
+
+        // 현재 예약이 있는 경우 , 예약 마감일을 오늘보다 이전으로 수정 할 수 없도록 예외 처리
+        if (hasActiveReservation && newReservationEnd.isBefore(today)) {
+            throw new IllegalArgumentException("현재 예약이 존재하는 방은 예약 기간을 이전으로 수정할 수 없습니다.");
+        }
 
         // 수정한 내용 적용
         room.setRoomName(roomDTO.getRoomName());

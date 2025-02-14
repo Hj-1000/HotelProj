@@ -3,6 +3,7 @@ package com.ntt.ntt.Controller.Room;
 
 import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.RoomDTO;
+import com.ntt.ntt.Repository.ReservationRepository;
 import com.ntt.ntt.Service.RoomService;
 import com.ntt.ntt.Util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Map;
@@ -26,6 +28,7 @@ import java.util.Map;
 public class RoomManagerController {
 
     private final RoomService roomService;
+    private final ReservationRepository reservationRepository;
 
 
     /* -----------관리자 페이지----------- */
@@ -147,16 +150,17 @@ public class RoomManagerController {
     // 3. Room 수정 페이지로 이동
     @GetMapping("/update/{roomId}")
     public String updateRoomForm(@PathVariable Integer roomId, Model model) {
-        // 수정할 Room 데이터 가져오기
         RoomDTO room = roomService.readRoom(roomId);
-        // Model에 데이터 추가
+
+        // 방의 예약 여부를 `reserved` 필드로 설정
+        room.setReserved(reservationRepository.existsByRoom_RoomId(roomId));
+
         model.addAttribute("room", room);
 
-        // update.html로 이동
         return "manager/room/update";
     }
 
-    // Room 수정
+    // 4. Room 수정
     @PostMapping("/update/{roomId}")
     public String updateRoomProc(@PathVariable Integer roomId,
                                  @ModelAttribute RoomDTO roomDTO,
@@ -170,13 +174,16 @@ public class RoomManagerController {
     }
 
 
-    // 4. Room 삭제
+    // 5. Room 삭제
     @GetMapping("/delete/{roomId}")
-    public String deleteRoomForm(@PathVariable Integer roomId) {
-        // Room 삭제
-        roomService.deleteRoom(roomId);
-
-        // Room 삭제 후 list 페이지로 이동
+    public String deleteRoomForm(@PathVariable Integer roomId, RedirectAttributes redirectAttributes) {
+        try {
+            roomService.deleteRoom(roomId);
+            redirectAttributes.addFlashAttribute("successMessage", "삭제가 완료되었습니다.");
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "객실 삭제 실패: " + e.getMessage());
+        }
         return "redirect:/manager/room/list";
     }
+
 }

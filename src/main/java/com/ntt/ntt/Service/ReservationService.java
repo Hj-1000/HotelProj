@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 
 @Service
 @Transactional
@@ -33,19 +34,20 @@ public class ReservationService {
     public ReservationDTO registerReservation(Integer roomId, Integer memberId, String checkInDate, String checkOutDate, Integer count) {
         // 방 정보 확인
         Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 방을 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("해당 방을 찾을 수 없습니다. roomId: " + roomId));
 
         // 이미 예약된 방인지 확인
         if (!room.getRoomStatus()) {
-            throw new IllegalStateException("이미 예약된 방입니다. roomId : " + roomId);
+            throw new IllegalStateException("이미 예약된 방입니다. roomId: " + roomId);
         }
 
         // 회원 정보 확인
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 회원 정보를 찾을 수 없습니다. memberId : " + memberId));
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원 정보를 찾을 수 없습니다. memberId: " + memberId));
 
         // 날짜 검증
         if (!isValidDateRange(checkInDate, checkOutDate)) {
+            log.error("체크인 날짜는 체크아웃 날짜보다 이전이어야 합니다.");
             throw new IllegalArgumentException("체크인 날짜는 체크아웃 날짜보다 이전이어야 합니다.");
         }
 
@@ -55,11 +57,25 @@ public class ReservationService {
         }
 
         try {
+            // 체크인, 체크아웃 날짜 변환
+            LocalDate checkIn = LocalDate.parse(checkInDate);
+            LocalDate checkOut = LocalDate.parse(checkOutDate);
+
+            // 숙박 일수 계산 (체크아웃 날짜 - 체크인 날짜)
+            long dayCount = ChronoUnit.DAYS.between(checkIn, checkOut);
+            if (dayCount <= 0) {
+                throw new IllegalArgumentException("체크아웃 날짜는 체크인 날짜보다 이후여야 합니다. checkInDate: " + checkInDate + ", checkOutDate: " + checkOutDate);
+            }
+
+            // 총 비용 계산 (객실 가격 * 숙박일)
+            int totalPrice = room.getRoomPrice() * (int) dayCount;
+
             // 예약 생성
             Reservation reservation = Reservation.builder()
                     .checkInDate(checkInDate)
                     .checkOutDate(checkOutDate)
-                    .totalPrice(room.getRoomPrice())
+                    .dayCount((int) dayCount)
+                    .totalPrice(totalPrice)
                     .reservationStatus("예약")
                     .count(count)
                     .room(room)
@@ -73,8 +89,10 @@ public class ReservationService {
             roomRepository.save(room);
 
             return ReservationDTO.fromEntity(reservation);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("날짜 형식이 올바르지 않습니다. (yyyy-MM-dd 형식이어야 합니다.) checkInDate: " + checkInDate + ", checkOutDate: " + checkOutDate, e);
         } catch (Exception e) {
-            throw new RuntimeException("예약 처리 중 오류가 발생했습니다.", e);
+            throw new RuntimeException("예약 처리 중 알 수 없는 오류가 발생했습니다.", e);
         }
     }
 
@@ -174,6 +192,5 @@ public class ReservationService {
 
         return reservations.map(ReservationDTO::fromEntity);
     }
-
 
 }

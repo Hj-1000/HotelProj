@@ -72,6 +72,8 @@
                     <option value="Single">Single Room</option>
                     <option value="Double">Double Room</option>
                     <option value="Suite">Suite Room</option>
+                    <option value="Deluxe">Deluxe Room</option>
+                    <option value="Family">Family Room</option>
                 </select>
                 <div class="invalid-feedback">
                     객실 타입을 선택해야 합니다.
@@ -138,6 +140,52 @@
         </form>
     </div>
     <script>
+
+        /* 예약기간 , 숙박기간 이후부터 시작 메서드*/
+        document.addEventListener("DOMContentLoaded", function () {
+            function setMinDate(startInput, endInput) {
+                startInput.addEventListener("change", function () {
+                    let startDate = new Date(this.value);
+                    if (!isNaN(startDate.getTime())) {
+                        let nextDay = new Date(startDate);
+                        nextDay.setDate(nextDay.getDate() + 1); // 시작일 다음 날 설정
+                        endInput.min = nextDay.toISOString().split("T")[0];
+
+                        // 기존 종료일이 새로운 최소값보다 작으면 초기화
+                        if (endInput.value && new Date(endInput.value) < nextDay) {
+                            endInput.value = "";
+                        }
+                    }
+                });
+            }
+
+            function preventInvalidEndDate(startInput, endInput) {
+                endInput.addEventListener("change", function () {
+                    let startDate = new Date(startInput.value);
+                    let endDate = new Date(this.value);
+                    if (startDate && endDate < startDate) {
+                        alert("종료 날짜는 시작 날짜 이후여야 합니다.");
+                        this.value = "";
+                    }
+                });
+            }
+
+            // 예약 기간
+            const reservationStart = document.getElementById("reservationStart");
+            const reservationEnd = document.getElementById("reservationEnd");
+            if (reservationStart && reservationEnd) {
+                setMinDate(reservationStart, reservationEnd);
+                preventInvalidEndDate(reservationStart, reservationEnd);
+            }
+
+            // 숙박 기간
+            const stayStart = document.getElementById("stayStart");
+            const stayEnd = document.getElementById("stayEnd");
+            if (stayStart && stayEnd) {
+                setMinDate(stayStart, stayEnd);
+                preventInvalidEndDate(stayStart, stayEnd);
+            }
+        });
 
         document.addEventListener("DOMContentLoaded", function () {
             const reservationEndInput = document.getElementById("reservationEnd");

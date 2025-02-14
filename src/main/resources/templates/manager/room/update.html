@@ -64,6 +64,8 @@
                     <option value="Single">Single Room</option>
                     <option value="Double">Double Room</option>
                     <option value="Suite">Suite Room</option>
+                    <option value="Deluxe">Deluxe Room</option>
+                    <option value="Family">Family Room</option>
                 </select>
                 <div class="invalid-feedback">
                     객실 타입을 선택해야 합니다.
@@ -93,6 +95,7 @@
                         <input type="date" class="form-control" id="reservationStart" th:field="*{reservationStart}" required>
                         ~
                         <input type="date" class="form-control" id="reservationEnd" th:field="*{reservationEnd}" required>
+                        <input type="hidden" id="isReserved" name="isReserved" th:value="${room.reserved}">
                     </div>
                 </div>
                 <div class="date-group">
@@ -131,11 +134,60 @@
     </div>
     <script>
 
+        /* 예약기간 , 숙박기간 이후부터 시작 메서드*/
+        document.addEventListener("DOMContentLoaded", function () {
+            function setMinDate(startInput, endInput) {
+                startInput.addEventListener("change", function () {
+                    let startDate = new Date(this.value);
+                    if (!isNaN(startDate.getTime())) {
+                        let nextDay = new Date(startDate);
+                        nextDay.setDate(nextDay.getDate() + 1); // 시작일 다음 날 설정
+                        endInput.min = nextDay.toISOString().split("T")[0];
+
+                        // 기존 종료일이 새로운 최소값보다 작으면 초기화
+                        if (endInput.value && new Date(endInput.value) < nextDay) {
+                            endInput.value = "";
+                        }
+                    }
+                });
+            }
+
+            function preventInvalidEndDate(startInput, endInput) {
+                endInput.addEventListener("change", function () {
+                    let startDate = new Date(startInput.value);
+                    let endDate = new Date(this.value);
+                    if (startDate && endDate < startDate) {
+                        alert("종료 날짜는 시작 날짜 이후여야 합니다.");
+                        this.value = "";
+                    }
+                });
+            }
+
+            // 예약 기간
+            const reservationStart = document.getElementById("reservationStart");
+            const reservationEnd = document.getElementById("reservationEnd");
+            if (reservationStart && reservationEnd) {
+                setMinDate(reservationStart, reservationEnd);
+                preventInvalidEndDate(reservationStart, reservationEnd);
+            }
+
+            // 숙박 기간
+            const stayStart = document.getElementById("stayStart");
+            const stayEnd = document.getElementById("stayEnd");
+            if (stayStart && stayEnd) {
+                setMinDate(stayStart, stayEnd);
+                preventInvalidEndDate(stayStart, stayEnd);
+            }
+        });
+
         document.addEventListener("DOMContentLoaded", function () {
             const reservationEndInput = document.getElementById("reservationEnd");
+            const reservationStartInput = document.getElementById("reservationStart");
             const statusAvailable = document.getElementById("statusAvailable");
             const statusUnavailable = document.getElementById("statusUnavailable");
             const form = document.querySelector("form");
+            const isReserved = document.getElementById("isReserved").value === "true"; // 예약 여부 확인
+            let originalReservationEnd = reservationEndInput.value; // 원래 예약 마감 날짜 저장
 
             function updateRoomStatus() {
                 const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD 형식의 오늘 날짜
@@ -143,11 +195,9 @@
 
                 if (reservationEnd) {
                     if (reservationEnd > today) {
-                        // 예약 종료일이 오늘 이후면 예약 가능
                         statusAvailable.checked = true;
                         statusUnavailable.checked = false;
                     } else {
-                        // 예약 종료일이 오늘 이전이면 예약 불가
                         statusAvailable.checked = false;
                         statusUnavailable.checked = true;
                     }
@@ -158,19 +208,39 @@
                 statusUnavailable.disabled = true;
             }
 
-            // 페이지 로드 시 상태 업데이트 (값이 있을 경우)
-            window.onload = updateRoomStatus;
+            function validateReservationEnd() {
+                const today = new Date().toISOString().split("T")[0];
+                const reservationEnd = reservationEndInput.value;
 
-            // 예약 종료일이 변경될 때마다 상태 업데이트
-            reservationEndInput.addEventListener("change", updateRoomStatus);
-            reservationEndInput.addEventListener("input", updateRoomStatus);
+                if (isReserved && reservationEnd < today) {
+                    alert("현재 예약이 있는 방은 예약 마감일을 이전으로 설정할 수 없습니다.");
+                    reservationEndInput.value = originalReservationEnd; // 기존 값으로 복구
+                }
+            }
 
-            // 폼 제출 시 roomStatus 값이 서버로 정상적으로 전송되도록 disabled 해제
-            form.addEventListener("submit", function () {
-                statusAvailable.removeAttribute("disabled");
-                statusUnavailable.removeAttribute("disabled");
+            // 예약 종료일 변경 시 예외 처리 적용
+            reservationEndInput.addEventListener("change", validateReservationEnd);
+            reservationEndInput.addEventListener("input", validateReservationEnd);
+
+            // 페이지 로드 시 기존 기능 + 상태 업데이트 실행
+            window.onload = function () {
+                updateRoomStatus();
+                validateReservationEnd();
+            };
+
+            // 폼 제출 시 잘못된 값이 제출되지 않도록 방지
+            form.addEventListener("submit", function (event) {
+                const today = new Date().toISOString().split("T")[0];
+                const reservationEnd = reservationEndInput.value;
+
+                if (isReserved && reservationEnd < today) {
+                    alert("예약 마감 날짜가 잘못되었습니다. 다시 설정해주세요.");
+                    reservationEndInput.value = originalReservationEnd;
+                    event.preventDefault();
+                }
             });
         });
+
 
         (() => {
             'use strict';

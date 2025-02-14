@@ -28,7 +28,7 @@ public class Reservation extends BaseEntity {
     private String reservationStatus;
     // 숙박일 수
     @Column(nullable = false)
-    private Integer dayCount;
+    private Integer dayCount = 1;
     //예약 인원수
     @Column(nullable = false)
     private Integer count;

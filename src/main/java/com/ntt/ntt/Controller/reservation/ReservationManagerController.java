@@ -47,10 +47,8 @@ public class ReservationManagerController {
                                           @RequestParam("checkOutDate") String checkOutDate,
                                           @RequestParam("count") Integer count) {
         reservationService.registerReservation(roomId, memberId, checkInDate, checkOutDate, count);
-        return "redirect:/manager/room/reservation/list";
+        return "redirect:/manager/room/reservation/list?success=register";
     }
-
-
 
     // 2. 방 목록 가져오기
     @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER')")
@@ -166,7 +164,7 @@ public class ReservationManagerController {
         // 예약 정보 수정 후 객실 상태 자동 업데이트
         roomService.updateRoomStatusBasedOnReservationEnd(roomId);
 
-        return "redirect:/manager/room/reservation/list";
+        return "redirect:/manager/room/reservation/list?success=update";
     }
 
     // 5. 예약 삭제
@@ -182,7 +180,7 @@ public class ReservationManagerController {
     @PostMapping("/disableRoom")
     public String disableRoomProc(@RequestParam("roomId") Integer roomId) {
         roomService.disableRoom(roomId);
-        return "redirect:/manager/room/reservation/list";
+        return "redirect:/manager/room/reservation/list?success=disable";
     }
 
     // 7. 회원 정보 조회 API

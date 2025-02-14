@@ -209,6 +209,20 @@
     </div>
 </div>
 <script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var errorMessage = /*[[${errorMessage}]]*/ null;
+        var successMessage = /*[[${successMessage}]]*/ null;
+
+        if (errorMessage) {
+            alert(errorMessage);
+        }
+
+        if (successMessage) {
+            alert(successMessage);
+        }
+    });
+
     document.querySelector('form').addEventListener('submit', function(event) {
         const category = document.querySelector('select[name="category"]').value;
         const keyword = document.querySelector('input[name="keyword"]').value.trim();
