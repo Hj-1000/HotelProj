@@ -74,6 +74,10 @@ public class ServiceCateController {
         // 페이지 정보 계산
         Map<String, Integer> pageInfo = paginationUtil.pagination(serviceCateDTOS);
 
+        //hotelDTO hotelName 전달하기
+        List<HotelDTO> hotelDTOS = serviceCateService.getAllHotel();
+
+
         // 만약 글이 10개 이하라면, 페이지 2는 표시되지 않도록 수정
         if (serviceCateDTOS.getTotalPages() <= 1) {
             pageInfo.put("startPage", 1);
@@ -86,6 +90,8 @@ public class ServiceCateController {
         model.addAttribute("keyword", keyword);
         model.addAttribute("searchType", searchType);
         model.addAttribute("hotelId", hotelId); // 2024-02-11 추가
+        model.addAttribute("hotelDTOS", hotelDTOS);
+        model.addAttribute("hotelDTO", new HotelDTO());
 
         return "/manager/roomservice/category/list";
     }

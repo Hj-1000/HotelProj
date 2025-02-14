@@ -23,11 +23,39 @@
 
         })
 
+        // 이미지 미리보기 함수
+        function previewImage(event) {
+
+            console.log("수정 진입")
+
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            previewContainer.innerHTML = '';  // 기존 미리보기 이미지 제거
+
+            const files = event.target.files;
+
+            if (files.length > 0) {
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = 'Image Preview';
+                        img.style.maxWidth = '200px';  // 미리보기 이미지 크기 조정
+                        img.style.marginTop = '10px';
+                        previewContainer.appendChild(img);
+                    }
+
+                    reader.readAsDataURL(file);  // 이미지 파일을 읽어서 미리보기
+                });
+            }
+        }
+
         //이미지파일 검사
         function validateImage(event) {
             var files = event.target.files;
             var maxSize = 10 * 1024 * 1024; // 10MB 제한
-            var allowedExt = ["jpg", "jpeg", "gif", "png", "bmp"];
+            var allowedExt = ["jpg", "jpeg", "gif", "png", "bmp", "jfif", "webp"];
 
             for (var i = 0; i < files.length; i++) {
                 var file = files[i];
@@ -79,7 +107,7 @@
                     <div class="mb-3 mt-3">
                         <label for="hotelAddress" class="form-label">호텔주소:</label>
                         <div class="input-group">
-                            <input type="text" class="form-control" id="hotelAddress" name="hotelAddress">
+                            <input type="text" class="form-control" id="hotelAddress" name="hotelAddress" th:field="*{hotelAddress}">
                             <button type="button" class="btn btn-secondary" onclick="execDaumPostcode()">주소찾기</button>
                         </div>
                     </div>
@@ -91,10 +119,9 @@
                         <label for="hotelPhone" class="form-label">호텔전화:</label>
                         <input type="text" class="form-control" id="hotelPhone" name="hotelPhone" th:field="*{hotelPhone}">
                     </div>
-                    <!--<div class="mb-3 mt-3">
-                        <label for="hotelEmail" class="form-label">호텔이메일:</label>
-                        <input type="email" class="form-control" id="hotelEmail" name="hotelEmail" th:field="*{hotelEmail}">
-                    </div>-->
+                    <div class="mb-3 mt-3">
+                        <input type="hidden" class="form-control" id="hotelEmail" name="hotelEmail" th:field="*{hotelEmail}">
+                    </div>
                     <div class="mb-3 mt-3">
                         <label for="hotelCheckIn" class="form-label">호텔 체크인:</label>
                         <select id="hotelCheckIn" name="hotelCheckIn" class="form-select" th:field="*{hotelCheckIn}">
@@ -157,14 +184,14 @@
                     <div th:each="img : ${hotelDTO.hotelImgDTOList}">
                         <label>기존 이미지:</label>
                         <img th:src="@{'/upload/' + ${img.imagePath}}" alt="old" width="100">
-                        <img src="${img.imagePath}" alt="Company Image" width="100">
+                        <img th:src="@{'/upload/' + ${img.imagePath}}" alt="Hotel Image" width="100">
                     </div>
 
                     <!-- 새 이미지 업로드 및 미리보기 -->
                     <div>
                         <label for="newImageFiles">새 이미지:</label>
                         <input type="file" id="newImageFiles" name="imageFiles" multiple accept="image/*" onchange="validateImage(event)">
-                        <small>이미지 파일(PNG, JPG, GIF, BMP)만 업로드 가능합니다.</small>
+                        <small>이미지 파일(PNG, JPG, GIF, BMP, JFIF, WEBP)만 업로드 가능합니다.</small>
                     </div>
 
                     <!-- 미리보기 이미지 표시 -->

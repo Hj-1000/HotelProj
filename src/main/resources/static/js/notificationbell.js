@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function () {
     setInterval(() => {
         fetchUnreadNotifications();
         updateUnreadCount();
-    }, 1000);
+    }, 50000);
 
     // 📌 페이지 로드 시 알림 목록을 불러오기
     fetchNotifications();

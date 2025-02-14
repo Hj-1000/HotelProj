@@ -11,6 +11,46 @@
 
   <script th:inline="javascript">
 
+    // 이미지 파일 검사
+    function validateImage(event) {
+      var files = event.target.files;
+      var maxSize = 10 * 1024 * 1024; // 10MB 제한
+      var allowedExt = ["jpg", "jpeg", "gif", "png", "bmp", "jfif", "webp"];
+
+      // 파일 개수 검사: 최대 1개까지만 허용
+      if (files.length > 1) {
+        alert("본사 이미지는 1장만 업로드할 수 있습니다.");
+        event.target.value = ""; // 입력 필드 초기화
+        return;
+      } else if (files.length == 0) {
+        alert("본사 이미지는 최소 1장 이상 업로드해야 합니다.");
+        event.target.value = ""; // 입력 필드 초기화
+        return;
+      }
+
+      for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+        var fileName = file.name;
+        var fileSize = file.size;
+        var fileExt = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+
+        // 확장자 검사
+        if (!allowedExt.includes(fileExt)) {
+          alert("이미지 파일(PNG, JPG, GIF, BMP, JFIF, WEBP)만 업로드 가능합니다.");
+          event.target.value = ""; // 입력 필드 초기화
+          return;
+        }
+
+        // 파일 크기 검사
+        if (fileSize > maxSize) {
+          alert("파일 크기가 10MB를 초과할 수 없습니다.");
+          event.target.value = ""; // 입력 필드 초기화
+          return;
+        }
+      }
+    }
+
+
     // 폼 제출 시 커스터마이즈된 오류 메시지 처리
     document.addEventListener('DOMContentLoaded', function () {
       const form = document.querySelector('form');
@@ -55,34 +95,6 @@
       }
     }
 
-    //이미지파일 검사
-    function validateImage(event) {
-      var files = event.target.files;
-      var maxSize = 10 * 1024 * 1024; // 10MB 제한
-      var allowedExt = ["jpg", "jpeg", "gif", "png", "bmp", "jfif", "webp"];
-
-      for (var i = 0; i < files.length; i++) {
-        var file = files[i];
-        var fileName = file.name;
-        var fileSize = file.size;
-        var fileExt = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
-
-        // 확장자 검사
-        if (!allowedExt.includes(fileExt)) {
-          alert("이미지 파일(PNG, JPG, GIF, BMP)만 업로드 가능합니다.");
-          event.target.value = ""; // 입력 필드 초기화
-          return;
-        }
-
-        // 파일 크기 검사
-        if (fileSize > maxSize) {
-          alert("파일 크기가 10MB를 초과할 수 없습니다.");
-          event.target.value = ""; // 입력 필드 초기화
-          return;
-        }
-      }
-    }
-
   </script>
 
 </head>
@@ -110,7 +122,7 @@
           <div>
             <label for="newImageFiles">본사이미지:</label>
             <input type="file" id="newImageFiles" name="imageFiles" multiple accept="image/*" onchange="validateImage(event)"  required>
-            <small>이미지 파일(PNG, JPG, GIF, BMP, JFIF, WEBP)만 업로드 가능합니다.</small>
+            <small>이미지 파일(PNG, JPG, GIF, BMP, JFIF, WEBP)만 업로드 가능합니다. 1장만 선택해주세요</small>
           </div>
 
           <!-- 미리보기 이미지 표시 -->

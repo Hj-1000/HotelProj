@@ -11,6 +11,46 @@
 
     <script th:inline="javascript">
 
+        // 이미지 파일 검사
+        function validateImage(event) {
+            var files = event.target.files;
+            var maxSize = 10 * 1024 * 1024; // 10MB 제한
+            var allowedExt = ["jpg", "jpeg", "gif", "png", "bmp", "jfif", "webp"];
+
+            // 파일 개수 검사: 최대 1개까지만 허용
+            if (files.length > 1) {
+                alert("본사 이미지는 1장만 업로드할 수 있습니다.");
+                event.target.value = ""; // 입력 필드 초기화
+                return;
+            } else if (files.length == 0) {
+                alert("본사 이미지는 최소 1장 이상 업로드해야 합니다.");
+                event.target.value = ""; // 입력 필드 초기화
+                return;
+            }
+
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                var fileName = file.name;
+                var fileSize = file.size;
+                var fileExt = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+
+                // 확장자 검사
+                if (!allowedExt.includes(fileExt)) {
+                    alert("이미지 파일(PNG, JPG, GIF, BMP, JFIF, WEBP)만 업로드 가능합니다.");
+                    event.target.value = ""; // 입력 필드 초기화
+                    return;
+                }
+
+                // 파일 크기 검사
+                if (fileSize > maxSize) {
+                    alert("파일 크기가 10MB를 초과할 수 없습니다.");
+                    event.target.value = ""; // 입력 필드 초기화
+                    return;
+                }
+            }
+        }
+
+
         $(document).ready(function () {
 
             // 세션에서 message 값을 가져옴
@@ -38,6 +78,23 @@
                 alert("글 작성이 완료되었습니다.");
             }) //submitBtn 끝
 
+
+            $("#registerBtn").on("click", function (event) {
+                var companyName = $("#companyName").val().trim();
+                var files = $("#newImageFiles")[0].files;
+
+                if (companyName === "") {
+                    alert("본사명을 입력해주세요.");
+                    event.preventDefault(); // 폼 제출 방지
+                    return;
+                }
+
+                if (files.length === 0) {
+                    alert("본사 이미지는 최소 1장 이상 업로드해야 합니다.");
+                    event.preventDefault(); // 폼 제출 방지
+                    return;
+                }
+            });
 
             // $(".delBtn").off.on("click" , function (e) {
             //
@@ -94,34 +151,6 @@
         //     })
         //     //삭제버튼은 버튼자체의 태그를 갖는다.
         // }
-
-        //이미지파일 검사
-        function validateImage(event) {
-            var files = event.target.files;
-            var maxSize = 10 * 1024 * 1024; // 10MB 제한
-            var allowedExt = ["jpg", "jpeg", "gif", "png", "bmp", "jfif", "webp"];
-
-            for (var i = 0; i < files.length; i++) {
-                var file = files[i];
-                var fileName = file.name;
-                var fileSize = file.size;
-                var fileExt = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
-
-                // 확장자 검사
-                if (!allowedExt.includes(fileExt)) {
-                    alert("이미지 파일(PNG, JPG, GIF, BMP)만 업로드 가능합니다.");
-                    event.target.value = ""; // 입력 필드 초기화
-                    return;
-                }
-
-                // 파일 크기 검사
-                if (fileSize > maxSize) {
-                    alert("파일 크기가 10MB를 초과할 수 없습니다.");
-                    event.target.value = ""; // 입력 필드 초기화
-                    return;
-                }
-            }
-        }
 
     </script>
 
@@ -196,8 +225,8 @@
                             <td th:text="${data.hotelCount}" class="align-middle text-center">2</td>
                             <!--<td class="align-middle text-center">2</td>-->
                             <td class="align-middle text-center">
-                                <a th:href="@{company/read(hotelId=${data.companyId})}" class="btn btn-info btn-sm">보기</a>
-                                <a th:href="@{company/update(hotelId=${data.companyId})}"  class="btn btn-warning btn-sm">수정</a>
+                                <a th:href="@{/company/read(companyId=${data.companyId})}" class="btn btn-info btn-sm">보기</a>
+                                <a th:href="@{/company/update(companyId=${data.companyId})}"  class="btn btn-warning btn-sm">수정</a>
 
                                 <!--삭제 버튼 누르면 해당 본사 삭제됨-->
                                 <a th:href="@{/company/delete(companyId=${data.companyId})}" style="text-decoration: none" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')">삭제</a>
@@ -216,8 +245,8 @@
 
                 <!-- 추가 버튼 -->
                 <div class="text-end mt-3">
-                    <button class="btn btn-primary" style="background-color: black" onclick="location.href='/company/register' ">등록</button>
-                    <button type="button" class="btn btn-primary modalBtn">간편 등록</button>
+                    <button class="btn btn-success" onclick="location.href='/company/register' ">등록</button>
+                    <button type="button" class="btn btn-dark modalBtn">간편 등록</button>
                 </div>
 
 
@@ -269,7 +298,7 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="companyName" class="form-label">본사명:</label>
-                            <input type="text" class="form-control" id="companyName" name="companyName">
+                            <input type="text" class="form-control" id="companyName" name="companyName" required>
                         </div>
 <!--                        <div class="mb-3 mt-3">-->
 <!--                            &lt;!&ndash;나중에 자동으로 서비스에서 등록되도록 바꿀 것&ndash;&gt;-->
@@ -279,7 +308,7 @@
                         <!-- 새 이미지 업로드 및 미리보기 -->
                         <div>
                             <label for="newImageFiles">본사이미지:</label>
-                            <input type="file" id="newImageFiles" name="imageFiles" multiple accept="image/*" onchange="validateImage(event)">
+                            <input type="file" id="newImageFiles" name="imageFiles" multiple accept="image/*" onchange="validateImage(event)" required>
                             <small>이미지 파일(PNG, JPG, GIF, BMP, JFIF, WEBP)만 업로드 가능합니다.</small>
                         </div>
 
@@ -293,7 +322,7 @@
                     <!-- Modal footer -->
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">닫기</button>
-                        <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">등록</button>
+                        <button type="submit" class="btn btn-primary" id="registerBtn">등록</button>
                     </div>
 
                 </form>
