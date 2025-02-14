@@ -4,7 +4,6 @@ import com.ntt.ntt.Entity.Image;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -30,5 +29,7 @@ public interface ImageRepository extends JpaRepository<Image, Integer> {
 
     public List<Image> findByBanner_BannerId(Integer bannerId);
     public Image findByBanner_BannerIdAndImageMain(Integer bannerId, String val);
+
+    int countByRoom_RoomId(Integer roomId);
 
 }

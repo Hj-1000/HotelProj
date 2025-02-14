@@ -25,7 +25,7 @@ public class RoomDTO {
 
     private Integer roomPrice;
 
-    private Boolean roomStatus;
+    private Boolean roomStatus = true;
 
     private String roomInfo;
 
@@ -49,6 +49,8 @@ public class RoomDTO {
     private String stayStart;
     // 숙박 종료일
     private String stayEnd;
+    // 방 예약 여부
+    private Boolean reserved;
     // 예약 기간 만료여부
     private boolean isExpired;
 
@@ -64,13 +66,14 @@ public class RoomDTO {
                 room.getHotelId(),
                 room.getRegDate(),
                 room.getModDate(),
-                new ArrayList<>(),
-                null,
+                new ArrayList<>(), // roomImageDTOList 초기화
+                null, // formattedRoomPrice 초기화
                 room.getReservationStart() != null ? room.getReservationStart().toString() : "",
                 room.getReservationEnd() != null ? room.getReservationEnd().toString() : "",
                 room.getStayStart() != null ? room.getStayStart().toString() : "",
                 room.getStayEnd() != null ? room.getStayEnd().toString() : "",
-                room.getReservationStart() != null
+                room.getReservationStart() != null, // 예약 여부 확인 로직 수정
+                checkIfExpired(room.getReservationEnd()) // 예약 기간 만료 여부 체크
         );
     }
 
@@ -81,7 +84,7 @@ public class RoomDTO {
     }
 
     // 예약 기간 만료 여부 확인
-    private boolean checkIfExpired(String reservationEnd) {
+    private static boolean checkIfExpired(String reservationEnd) {
         if (reservationEnd == null || reservationEnd.trim().isEmpty()) {
             return false;
         }

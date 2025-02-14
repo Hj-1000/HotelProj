@@ -124,7 +124,12 @@
     position: relative; /* 오버레이를 이미지 위에 배치하기 위해 부모를 relative로 설정 */
 }
 
+/* Modal */
 
+#recommendedCountText {
+    color: #ff8400 !important;
+    font-weight: bold !important;
+}
 
 
 

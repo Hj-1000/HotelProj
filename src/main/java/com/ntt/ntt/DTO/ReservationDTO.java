@@ -54,7 +54,7 @@ public class ReservationDTO {
 
     // Entity -> DTO 변환 메서드
     public static ReservationDTO fromEntity(Reservation reservation) {
-        RoomDTO roomDTO = RoomDTO.fromEntity(reservation.getRoom());
+        RoomDTO roomDTO = reservation.getRoom() != null ? RoomDTO.fromEntity(reservation.getRoom()) : null;
         // 예약자 정보 가져오기
         Member member = reservation.getMember();
 
