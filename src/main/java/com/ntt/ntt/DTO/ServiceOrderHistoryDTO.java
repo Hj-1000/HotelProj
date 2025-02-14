@@ -1,10 +1,7 @@
 package com.ntt.ntt.DTO;
 
 import com.ntt.ntt.Constant.ServiceOrderStatus;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -14,6 +11,7 @@ import java.util.List;
 @Setter
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
 public class ServiceOrderHistoryDTO {
     //주문내역에 필요한 serviceOrder에서 필요한
     //내용만큼 담은 serviceOrderHistoryDTO 브라우저로 전달할 내용들
@@ -27,6 +25,8 @@ public class ServiceOrderHistoryDTO {
 
     private List<ServiceOrderItemDTO> serviceOrderItemDTOList = new ArrayList<>();
     //구매이력에 담길 구매 아이템들
+
+
 
     public void addServiceOrderItemDTO(ServiceOrderItemDTO serviceOrderItemDTO) {
         serviceOrderItemDTOList.add(serviceOrderItemDTO);

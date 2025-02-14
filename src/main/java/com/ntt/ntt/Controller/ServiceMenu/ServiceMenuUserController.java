@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -35,24 +36,13 @@ public class ServiceMenuUserController {
     private final ServiceCateService serviceCateService;
     private final PaginationUtil paginationUtil;
 
-
-
-//    @Operation(summary = "유저의 메뉴 목록", description = "등록되어 있는 메뉴를 조회한다.")
-//    @GetMapping("/myPage/menu/list")
-//    public String list(@RequestParam(required = false) Integer serviceCateId,
-//                       Model model) {
-//
-//        List<ServiceMenuDTO> serviceMenuDTOS = serviceMenuService.getMenusByCategory(serviceCateId);
-//        List<ServiceCateDTO> serviceCateDTOS = serviceCateService.getAllServiceCate();
-//        model.addAttribute("serviceCateDTOS", serviceCateDTOS);
-//        model.addAttribute("serviceMenuDTOS", serviceMenuDTOS);
-//
-//    return "/myPage/menu/list";
-//    }
-
     @Operation(summary = "유저의 메뉴 목록", description = "등록되어 있는 메뉴를 조회한다.")
     @GetMapping("/myPage/menu/list")
-    public String list(Model model) {
+    public String list(Model model, Principal principal) {
+        if (principal == null || principal.getName() == null) {
+            // 로그인을 하지 않으면 로그인 페이지로 이동
+            return "redirect:/login";
+        }
 
         List<ServiceMenuDTO> serviceMenuDTOS = serviceMenuService.listUserMenu();
         List<ServiceCateDTO> serviceCateDTOS = serviceCateService.getAllServiceCate();
@@ -62,51 +52,4 @@ public class ServiceMenuUserController {
         return "/myPage/menu/list";
     }
 
-
-//    @Operation(summary = "유저의 메뉴 목록", description = "등록되어 있는 메뉴를 조회한다.")
-//    @GetMapping("/myPage/menu/list")
-//    public String list(@RequestParam(required = false) Integer serviceCateId,
-//                       @RequestParam(required = false) String keyword,
-//                       @RequestParam(required = false) String searchType,
-//                       @RequestParam(required = false) String status,
-//                       @PageableDefault(page = 1) Pageable page,
-//                       Model model) {
-//
-//        Page<ServiceMenuDTO> serviceMenuDTOS;
-//        if (serviceCateId != null) {
-//            serviceMenuDTOS = serviceMenuService.list(page, keyword, searchType, serviceCateId, status);
-//        } else {
-//            serviceMenuDTOS = serviceMenuService.list(page, keyword, searchType, null, status);
-//        }
-//
-//        Map<String, Integer> pageInfo = paginationUtil.pagination(serviceMenuDTOS);
-//        if (serviceMenuDTOS.getTotalPages() <= 1) {
-//            pageInfo.put("startPage", 1);
-//            pageInfo.put("endPage", 1);
-//        }
-//
-//        List<ServiceCateDTO> serviceCateDTOS = serviceCateService.getAllServiceCate();
-//        model.addAttribute("serviceCateDTOS", serviceCateDTOS);
-//        model.addAttribute("serviceMenuDTOS", serviceMenuDTOS);
-//        model.addAttribute("serviceMenuStatus", ServiceMenuStatus.values());
-//        model.addAttribute("pageInfo", pageInfo);
-//        model.addAttribute("keyword", keyword);
-//        model.addAttribute("searchType", searchType);
-//        model.addAttribute("status", status);
-//        model.addAttribute("serviceCateId", serviceCateId);
-//
-//        return "/myPage/menu/list";
-//    }
-
-    //    @ResponseBody
-//    @GetMapping("/api/user/menus")
-//    public ResponseEntity<List<ServiceMenuDTO>> getMenusByCategory(@RequestParam Integer serviceCateId) {
-//        List<ServiceMenuDTO> menus = serviceMenuService.getMenusByCategory(serviceCateId);
-//        return ResponseEntity.ok(menus);
-//    }
-
-//    @GetMapping("/api/user/menus")
-//    public List<ServiceMenuDTO> getMenus(@RequestParam Integer serviceCateId) {
-//        return serviceMenuService.getMenusByCategory(serviceCateId); // JSON으로 자동 변환되어 반환됨
-//    }
 }

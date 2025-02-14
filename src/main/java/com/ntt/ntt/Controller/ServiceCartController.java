@@ -152,7 +152,7 @@ public class ServiceCartController {
     public ResponseEntity orderServiceCartItem(@RequestBody ServiceCartOrderDTO serviceCartOrderDTO, BindingResult bindingResult,
                                                Principal principal) {
         String memberEmail = principal.getName();
-        log.info("컨트롤러로 들어온 serviceCartOrderDTO" + serviceCartOrderDTO);
+        log.info("컨트롤러로 들어온 serviceCartOrderDTO : " + serviceCartOrderDTO);
         //리스트 형태로 serviceCartOderDTO를 담을건데
         // ServiceCartOrderDTO에는 자기 자신을 리스트 형태로 이미 담아놓는 메서드가 존재함
         List<ServiceCartOrderDTO> serviceCartOrderDTOList =

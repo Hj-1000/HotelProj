@@ -13,7 +13,7 @@ import java.util.List;
 public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Integer> {
 
     //특정 회원의 구매 이력으로 모두 불러오기
-    @Query("select so from ServiceOrder so where so.member.memberEmail = :memberEmail order by so.regDate desc")
+    @Query("select so from ServiceOrder so where so.member.memberEmail = :memberEmail order by so.regDate asc")
     public List<ServiceOrder> findServiceOrders(@Param("memberEmail") String memberEmail, Pageable pageable);
 
     //특정 회원의 주문갯수 검색 메서드

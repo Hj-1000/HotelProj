@@ -35,7 +35,7 @@ public class ServiceOrderService {
 
     //주문 ServiceOrder, ServiceOrderItem
     //위의 내용이 있는 주문 리스트 필요
-    //단 주문 목록이 들어있는 경우 누구의 주문인지 알기 위해 memberId를 받는다.
+    //단 주문 목록이 들어있는 경우 누구의 주문인지 알기 위해 email을 받는다.
 
     //내 주문이 맞는지 체크부터 함
     public boolean validateOrder(Integer serviceOrderId, String memberEmail) {
@@ -68,6 +68,9 @@ public class ServiceOrderService {
             serviceOrderItem.getServiceMenu().setServiceMenuQuantity(
                     serviceOrderItem.getServiceMenu().getServiceMenuQuantity() + serviceOrderItem.getCount()
             );
+        }
+        if (serviceOrder != null) {
+            serviceOrderRepository.deleteById(serviceOrderId);
         }
     }
 
