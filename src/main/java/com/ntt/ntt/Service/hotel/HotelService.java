@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -469,6 +470,55 @@ public class HotelService {
         return hotels.stream()
                 .map(hotel -> new HotelDTO(hotel))  // HotelDTO 생성자에서 MemberDTO도 포함
                 .collect(Collectors.toList());
+    }
+
+    // 지사테이블의 memberId 로 가져온 멤버 목록 필터링
+    public List<HotelDTO> getFilteredHotelsByMember(Integer companyId, String role, String email,
+                                                    String status, String name, String phone,
+                                                    String startDate, String endDate) {
+        List<Hotel> hotels = hotelRepository.findByCompanyId(companyId);
+
+        return hotels.stream()
+                .filter(hotel -> hotel.getMember() != null) // 멤버가 있는 호텔만 필터링
+                .filter(hotel -> role == null || hotel.getMember().getRole().toString().equals(role))
+                .filter(hotel -> email == null || hotel.getMember().getMemberEmail().contains(email))
+                .filter(hotel -> status == null || hotel.getMember().getMemberStatus().equals(status))
+                .filter(hotel -> name == null || hotel.getMember().getMemberName().contains(name))
+                .filter(hotel -> phone == null || hotel.getMember().getMemberPhone().contains(phone))
+                .filter(hotel -> {
+                    if (startDate == null || endDate == null) return true;
+
+                    // Optional을 사용하여 날짜 필터링
+                    LocalDate start = Optional.ofNullable(startDate)
+                            .filter(s -> !s.isEmpty())
+                            .map(LocalDate::parse)
+                            .orElse(null);
+
+                    LocalDate end = Optional.ofNullable(endDate)
+                            .filter(s -> !s.isEmpty())
+                            .map(LocalDate::parse)
+                            .orElse(null);
+
+                    // startDate와 endDate가 null일 경우 필터링을 적용하지 않음
+                    if (start == null || end == null) return true;
+
+                    LocalDate memberRegDate = hotel.getMember().getRegDate().toLocalDate();
+                    return (memberRegDate.isEqual(start) || memberRegDate.isAfter(start)) &&
+                            (memberRegDate.isEqual(end) || memberRegDate.isBefore(end));
+                })
+                .map(hotel -> modelMapper.map(hotel, HotelDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    public void updateHotelMemberId(HotelDTO hotelDTO) {
+        Optional<Hotel> hotelOpt = hotelRepository.findById(hotelDTO.getHotelId());
+        if (hotelOpt.isPresent()) {
+            Hotel hotel = hotelOpt.get();
+            hotel.setMember(hotelDTO.getMemberId());  // 호텔에 memberId 설정
+            hotelRepository.save(hotel);  // 호텔 정보 저장
+        } else {
+            throw new RuntimeException("지사를 찾을 수 없습니다.");
+        }
     }
 
 }

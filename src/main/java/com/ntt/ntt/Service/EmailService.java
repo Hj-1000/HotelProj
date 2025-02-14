@@ -27,12 +27,12 @@ public class EmailService {
             helper.setFrom("jung04251@gmail.com", "NTT호텔"); // 보내는 사람 이름 설정
             helper.setTo(toEmail);
             helper.setSubject("비밀번호 찾기 코드"); // 이메일 제목
-            helper.setText("비밀번호 찾기 코드: " + resetCode, false); // 이메일 내용
+            helper.setText("비밀번호 찾기 코드 : " + resetCode + "\n \n 코드를 정확하게 입력해주세요.", false); // 이메일 내용
 
             emailSender.send(message);  // 이메일 전송
 
         } catch (MessagingException | UnsupportedEncodingException e) {
-            e.printStackTrace(); // 로그 출력 (실제 서비스에서는 로깅 처리 필요)
+            e.printStackTrace(); // 로그
         }
     }
 }
