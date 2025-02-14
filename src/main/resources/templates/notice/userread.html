@@ -29,18 +29,18 @@
                 <form th:action="@{/notice/register}" method="post">
                     <!--디자인-->
                     <div class="card">
-                        <div class="card-header">
+                        <div class="card-header text-center">
                             <h2>공지사항 상세보기</h2></div>
                         <div class="card-body">
                             <!--Controller에서 model.addAttribute 명 :board-->
                             <!--board.DTO 변수명-->
-                            <p>번호: <span th:text="${noticeDTO.noticeId}"></span></p>
+<!--                            <p>번호: <span th:text="${noticeDTO.noticeId}"></span></p>-->
                             <p>제목: <span th:text="${noticeDTO.noticeTitle}"></span></p>
                             <p>내용: <span th:text="${noticeDTO.noticeContent}"></span></p>
                             <div th:each="img : ${noticeDTO.noticeImageDTOList}"><!--그림파일이 존재하면-->
                                 <img th:src="@{'/upload/' + ${img.imagePath}}" width="300px" height="200px">
                             </div>
-                            <p>수정일: <span th:text="${#temporals.format(noticeDTO.modDate, 'yyyy-MM-dd HH:mm')}"></span></p>
+<!--                            <p>수정일: <span th:text="${#temporals.format(noticeDTO.modDate, 'yyyy-MM-dd HH:mm')}"></span></p>-->
                             <!--id와 name은 DTO에 변수명으로 작업-->
 
                         </div>

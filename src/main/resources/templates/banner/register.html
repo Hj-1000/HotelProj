@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>배너 등록</title>
+</head>
+<body>
+<h1>배너 등록</h1>
+<form action="/banner/register" method="post">
+  <label for="bannerTitle">배너 제목:</label>
+  <input type="text" id="bannerTitle" name="bannerTitle" required/><br>
+
+  <label for="bannerStatus">배너 상태:</label>
+  <select id="bannerStatus" name="bannerStatus">
+    <option value="true">활성</option>
+    <option value="false">비활성</option>
+  </select><br>
+
+  <label for="bannerRank">배너 순위:</label>
+  <input type="number" id="bannerRank" name="bannerRank" required/><br>
+
+  <button type="submit">등록</button>
+</form>
+<a href="/banner/list">뒤로 가기</a>
+</body>
+</html>

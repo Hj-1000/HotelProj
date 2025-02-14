@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import com.ntt.ntt.Entity.Notice;
 import com.ntt.ntt.DTO.NoticeDTO;
@@ -56,7 +58,7 @@ public class NoticeService {
                 modelMapper.map(noticeDTO, Notice.class);
         //노티스 글 먼저 저장
         noticeRepository.save(notice);
-        if (multipartFile !=null && !multipartFile.isEmpty()){
+        if (multipartFile != null && !multipartFile.isEmpty()) {
             imageService.registerNoticeImage(notice.getNoticeId(), multipartFile);
         }
     }
@@ -73,11 +75,13 @@ public class NoticeService {
         }
 
     }
+
     public List<NoticeDTO> list() {
         List<Notice> noticeList = noticeRepository.findAll();
         List<NoticeDTO> noticeDTOList = Arrays.asList(modelMapper.map(noticeList, NoticeDTO[].class));
         return noticeDTOList;
     }
+
     public NoticeDTO read(Integer noticeId) {
         Optional<Notice> notice = noticeRepository.findById(noticeId);
         NoticeDTO noticeDTO = modelMapper.map(notice, NoticeDTO.class);
@@ -105,12 +109,12 @@ public class NoticeService {
                 imageService.deleteImage(image.getImageId());
             }
             noticeRepository.delete(notice);
-        }else{
+        } else {
             throw new RuntimeException("공지사항이 없습니다");
         }
     }
 
-    public List<NoticeDTO> getFilteredNotice(String noticeTitle, String noticeContent,String regDate, String modDate) {
+    public List<NoticeDTO> getFilteredNotice(String noticeTitle, String noticeContent, String regDate, String modDate) {
 
         List<Notice> notices = noticeRepository.findAll();
 
@@ -124,7 +128,15 @@ public class NoticeService {
                     .filter(notice -> notice.getNoticeContent().contains(noticeContent))
                     .collect(Collectors.toList());
         }
+        return notices.stream()
+                .map(notice -> modelMapper.map(notice, NoticeDTO.class))
+                .collect(Collectors.toList());
+    }
 
+
+
+
+}
 
 //        if (regDate != null && !regDate.isEmpty() && modDate != null && !modDate.isEmpty()) {
 //            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -140,10 +152,7 @@ public class NoticeService {
 //                    .collect(Collectors.toList());
 //        }
 
-        return notices.stream()
-                .map(notice -> modelMapper.map(notice, NoticeDTO.class))
-                .collect(Collectors.toList());
-    }
+
 
 //    public Notice readByNoticeTitle(String noticeTitle) {
 //        Optional<Notice> notice = noticeRepository.findByNoticeTitle(noticeTitle);
@@ -218,4 +227,4 @@ public class NoticeService {
 //    }
 
 
-}
+
