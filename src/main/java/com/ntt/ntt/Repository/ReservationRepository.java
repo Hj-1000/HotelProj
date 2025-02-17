@@ -6,7 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -23,7 +22,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
 
     // 특정 회원의 모든 예약 정보 가져오기
     @Query("SELECT r FROM Reservation r WHERE r.member.memberId = :memberId")
-    List<Reservation> findAllByMember_MemberId(@Param("memberId") Integer memberId);
+    Page<Reservation> findAllByMember_MemberId(Integer memberId, Pageable pageable);
 
     // 특정 방이 예약되었는지 여부 확인
     boolean existsByRoom_RoomId(Integer roomId);

@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 
 @Service
 @Transactional
@@ -130,6 +129,10 @@ public class ReservationService {
         int totalPrice = room.getRoomPrice() * dayCount;
         reservation.setTotalPrice(totalPrice);
 
+        // 예약 인원수 업데이트
+        reservation.setCount(reservationDTO.getCount());
+        log.info("수정된 count 값: {}", reservation.getCount());
+
         // 예약자 정보 업데이트
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다."));
@@ -203,18 +206,14 @@ public class ReservationService {
     }
 
     // 특정 사용자의 예약 내역 조회 (모든 예약 가져오기)
-    public List<ReservationDTO> getUserReservations(Integer memberId) {
-        List<Reservation> reservations = reservationRepository.findAllByMember_MemberId(memberId);
+    public Page<ReservationDTO> getUserReservations(Integer memberId, Pageable pageable) {
+        Page<Reservation> reservationsPage = reservationRepository.findAllByMember_MemberId(memberId, pageable);
 
-        if (reservations == null) {
-            reservations = List.of(); // 빈 리스트 반환
-        }
+        // 로그로 예약 개수 출력 (기존 기능 유지)
+        log.info("조회된 예약 개수 (Service): {}", reservationsPage.getTotalElements());
 
-        log.info("조회된 예약 개수 (Service): {}", reservations.size());
-
-        return reservations.stream()
-                .map(ReservationDTO::fromEntity)
-                .toList();
+        // Page<Reservation>을 Page<ReservationDTO>로 변환
+        return reservationsPage.map(ReservationDTO::fromEntity);
     }
 
 

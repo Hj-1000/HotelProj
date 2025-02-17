@@ -1,6 +1,7 @@
 package com.ntt.ntt.DTO;
 
 import com.ntt.ntt.Entity.Hotel;
+import com.ntt.ntt.Entity.Image;
 import com.ntt.ntt.Entity.Room;
 import lombok.*;
 
@@ -56,6 +57,13 @@ public class RoomDTO {
 
     //Room엔티티 > RoomDTO로 변환 메서드
     public static RoomDTO fromEntity(Room room) {
+        List<ImageDTO> imageDTOList = new ArrayList<>();
+        if (room.getRoomImageList() != null) {
+            for (Image image : room.getRoomImageList()) {
+                imageDTOList.add(ImageDTO.fromEntity(image));
+            }
+        }
+
         return new RoomDTO(
                 room.getRoomId(),
                 room.getRoomName(),
@@ -66,14 +74,14 @@ public class RoomDTO {
                 room.getHotelId(),
                 room.getRegDate(),
                 room.getModDate(),
-                new ArrayList<>(), // roomImageDTOList 초기화
-                null, // formattedRoomPrice 초기화
+                imageDTOList,
+                null,
                 room.getReservationStart() != null ? room.getReservationStart().toString() : "",
                 room.getReservationEnd() != null ? room.getReservationEnd().toString() : "",
                 room.getStayStart() != null ? room.getStayStart().toString() : "",
                 room.getStayEnd() != null ? room.getStayEnd().toString() : "",
-                room.getReservationStart() != null, // 예약 여부 확인 로직 수정
-                checkIfExpired(room.getReservationEnd()) // 예약 기간 만료 여부 체크
+                room.getReservationStart() != null,
+                checkIfExpired(room.getReservationEnd())
         );
     }
 

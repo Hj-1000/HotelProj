@@ -1,6 +1,5 @@
 package com.ntt.ntt.DTO;
 
-import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Entity.Reservation;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -50,13 +49,9 @@ public class ReservationDTO {
     @Min(1) @Max(6)
     private Integer count;
 
-
-
     // Entity -> DTO 변환 메서드
     public static ReservationDTO fromEntity(Reservation reservation) {
         RoomDTO roomDTO = reservation.getRoom() != null ? RoomDTO.fromEntity(reservation.getRoom()) : null;
-        // 예약자 정보 가져오기
-        Member member = reservation.getMember();
 
         return new ReservationDTO(
                 reservation.getReservationId(),
@@ -64,15 +59,15 @@ public class ReservationDTO {
                 reservation.getCheckOutDate(),
                 reservation.getTotalPrice(),
                 reservation.getReservationStatus(),
-                member.getMemberId(),
-                member.getMemberName(),
-                member.getMemberEmail(),
+                reservation.getMember().getMemberId(),
+                reservation.getMember().getMemberName(),
+                reservation.getMember().getMemberEmail(),
                 reservation.getRoom().getRoomId(),
                 roomDTO,
                 reservation.getRegDate(),
                 reservation.getModDate(),
-                roomDTO.getReservationEnd() != null && LocalDate.parse(roomDTO.getReservationEnd()).isAfter(LocalDate.now()),
-                roomDTO.getReservationEnd(),
+                roomDTO != null && roomDTO.getReservationEnd() != null && LocalDate.parse(roomDTO.getReservationEnd()).isAfter(LocalDate.now()),
+                roomDTO != null ? roomDTO.getReservationEnd() : "",
                 reservation.getDayCount(),
                 reservation.getCount()
         );

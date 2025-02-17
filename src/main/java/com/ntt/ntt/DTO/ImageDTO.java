@@ -1,11 +1,7 @@
 package com.ntt.ntt.DTO;
 
 import com.ntt.ntt.Entity.*;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.*;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -37,5 +33,22 @@ public class ImageDTO {
     private Notice noticeId;
 
     private Banner baannerId;
+
+    public static ImageDTO fromEntity(Image image) {
+        return new ImageDTO(
+                image.getImageId(),
+                image.getImageName(),
+                image.getImageOriginalName(),
+                image.getImagePath(),
+                image.getImageMain(),
+                image.getCompany(),
+                image.getHotel(),
+                image.getRoom(),
+                image.getServiceCate(),
+                image.getServiceMenu(),
+                image.getNotice(),
+                image.getBanner()
+        );
+    }
 
 }
