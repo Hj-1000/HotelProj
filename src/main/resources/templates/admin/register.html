@@ -150,6 +150,11 @@
                         })
                 }
             }
+
+            // 전화번호 입력 시 숫자만 허용
+            document.getElementById("memberPhone").addEventListener("input", function (event) {
+                this.value = this.value.replace(/[^0-9]/g, "");
+            });
         </script>
         </div>
     </div>
