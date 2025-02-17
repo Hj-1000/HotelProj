@@ -20,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.HashMap;
 import java.util.List;
@@ -45,9 +46,17 @@ public class ReservationManagerController {
                                           @RequestParam("memberId") Integer memberId,
                                           @RequestParam("checkInDate") String checkInDate,
                                           @RequestParam("checkOutDate") String checkOutDate,
-                                          @RequestParam("count") Integer count) {
-        reservationService.registerReservation(roomId, memberId, checkInDate, checkOutDate, count);
-        return "redirect:/manager/room/reservation/list?success=register";
+                                          @RequestParam("count") Integer count,
+                                          RedirectAttributes redirectAttributes) {
+        try {
+            reservationService.registerReservation(roomId, memberId, checkInDate, checkOutDate, count);
+            redirectAttributes.addFlashAttribute("successMessage", "예약이 성공적으로 등록되었습니다.");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "예약 등록 중 오류가 발생했습니다.");
+        }
+        return "redirect:/manager/room/reservation/list";
     }
 
     // 2. 방 목록 가져오기

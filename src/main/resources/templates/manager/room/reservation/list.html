@@ -51,8 +51,8 @@
         <div class="admin-section">
             <h2 class="text-center">객실 관리 현황</h2>
             <div class="table-tabs">
-                <div id="reservedTab" class="table-tab active" onclick="changeTab('reserved')">예약된 방</div>
-                <div id="allTab" class="table-tab" onclick="changeTab('all')">모든 방</div>
+                <div id="reservedTab" class="table-tab active" onclick="changeTab('reserved')">예약된 객실</div>
+                <div id="allTab" class="table-tab" onclick="changeTab('all')">모든 객실</div>
             </div>
 
             <!-- 예약된 방만 표시 -->
@@ -88,7 +88,15 @@
                         <td th:text="${reservation.checkOutDate}"></td>
                         <td th:text="${reservation.dayCount} + '박'"></td>
                         <td th:text="'₩' + ${#numbers.formatInteger(reservation.totalPrice, 1, 'COMMA')}"></td>
-                        <td th:text="${reservation.reservationStatus}"></td>
+                        <td>
+                            <span th:class="'status-box ' + (${reservation.reservationStatus == '예약' ? 'status-reserved' : 'status-cancel'})">
+                                <th:block th:if="${reservation.reservationStatus == '예약'}">예약</th:block>
+                                <th:block th:if="${reservation.reservationStatus == '취소 요청'}">
+                                    <span class="cancel-text">취소</span> 요청
+                                </th:block>
+                            </span>
+                        </td>
+
                         <td>
                             <form sec:authorize="isAuthenticated()" method="post" action="/manager/room/reservation/delete"
                                   onsubmit="return confirm('정말 예약을 취소하시겠습니까?');">
@@ -362,22 +370,26 @@
                 <button type="submit" class="btn btn-primary">수정</button>
             </form>
         </div>
+
+        <script th:inline="javascript">
+            /* 예약 성공 또는 실패 메시지를 alert 창으로 표시 */
+            document.addEventListener("DOMContentLoaded", function () {
+                let successMessage = /*[[${successMessage}]]*/ null;
+                let errorMessage = /*[[${errorMessage}]]*/ null;
+
+                if (successMessage) {
+                    alert(successMessage);
+                }
+                if (errorMessage) {
+                    alert(errorMessage);
+                }
+            });
+        </script>
+
     </div>
 
     <script>
 
-        document.addEventListener("DOMContentLoaded", function () {
-            const urlParams = new URLSearchParams(window.location.search);
-            const successMessage = urlParams.get('success');
-
-            if (successMessage) {
-                if (successMessage === "register") {
-                    alert("예약이 완료되었습니다.");
-                } else if (successMessage === "update") {
-                    alert("수정이 완료되었습니다.");
-                }
-            }
-        });
 
         /* 예약 마감 기한 수정시 Room_Status 자동 업데이트 */
 
@@ -1091,6 +1103,18 @@
                         return;
                     }
                 }
+            });
+        });
+
+        /* cancel 상하 반복 */
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const cancelRequests = document.querySelectorAll(".status-cancel");
+
+            cancelRequests.forEach(button => {
+                setInterval(() => {
+                    button.style.animationDuration = "0.6s";
+                }, 1000);
             });
         });
 

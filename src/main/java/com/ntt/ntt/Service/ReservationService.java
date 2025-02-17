@@ -2,7 +2,6 @@ package com.ntt.ntt.Service;
 
 
 import com.ntt.ntt.DTO.ReservationDTO;
-import com.ntt.ntt.DTO.RoomDTO;
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Entity.Reservation;
 import com.ntt.ntt.Entity.Room;
@@ -19,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @Service
 @Transactional
@@ -119,17 +119,23 @@ public class ReservationService {
         reservation.setCheckInDate(reservationDTO.getCheckInDate());
         reservation.setCheckOutDate(reservationDTO.getCheckOutDate());
 
-        // 예약 마감 날짜 업데이트
-        RoomDTO roomDTO = reservationDTO.getRoom(); // RoomDTO 객체에서 예약 마감 날짜 가져오기
-        if (roomDTO != null) {
-            reservation.getRoom().setReservationEnd(roomDTO.getReservationEnd()); // Room 엔티티에 반영
-        }
+        // 숙박일 수 다시 계산
+        LocalDate checkInDate = LocalDate.parse(reservationDTO.getCheckInDate());
+        LocalDate checkOutDate = LocalDate.parse(reservationDTO.getCheckOutDate());
+        int dayCount = (int) ChronoUnit.DAYS.between(checkInDate, checkOutDate);
+        reservation.setDayCount(dayCount);
+
+        // 총 비용 계산 (객실 가격 * 숙박일 수)
+        Room room = reservation.getRoom();
+        int totalPrice = room.getRoomPrice() * dayCount;
+        reservation.setTotalPrice(totalPrice);
 
         // 예약자 정보 업데이트
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다."));
         reservation.setMember(member);
 
+        // 업데이트 후 저장
         reservationRepository.save(reservation);
     }
 
@@ -150,7 +156,8 @@ public class ReservationService {
         }
     }
 
-    /* 체크인 날짜가 체크아웃 날짜보다 이전인지 검증하는 메서드 */
+
+    /* 체크인 날짜가 체크아웃 날짜보다 이전인지 검증메서드 */
 
     private boolean isValidDateRange(String checkInDate, String checkOutDate) {
         try {
@@ -161,6 +168,8 @@ public class ReservationService {
             throw new IllegalArgumentException("날짜 형식이 올바르지 않습니다. (yyyy-MM-dd 형식이어야 합니다.)");
         }
     }
+
+    /* 키워드 검색 메서드 */
 
     public Page<ReservationDTO> searchReservations(String category, String keyword, Pageable pageable) {
         Page<Reservation> reservations;
@@ -192,5 +201,36 @@ public class ReservationService {
 
         return reservations.map(ReservationDTO::fromEntity);
     }
+
+    // 특정 사용자의 예약 내역 조회 (모든 예약 가져오기)
+    public List<ReservationDTO> getUserReservations(Integer memberId) {
+        List<Reservation> reservations = reservationRepository.findAllByMember_MemberId(memberId);
+
+        if (reservations == null) {
+            reservations = List.of(); // 빈 리스트 반환
+        }
+
+        log.info("조회된 예약 개수 (Service): {}", reservations.size());
+
+        return reservations.stream()
+                .map(ReservationDTO::fromEntity)
+                .toList();
+    }
+
+
+    // 고객 예약 취소 요청
+    public void requestCancelReservation(Integer reservationId, Integer memberId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 예약을 찾을 수 없습니다."));
+
+        if (!reservation.getMember().getMemberId().equals(memberId)) {
+            throw new IllegalArgumentException("본인의 예약만 취소할 수 있습니다.");
+        }
+
+        reservation.setReservationStatus("취소 요청");
+        reservationRepository.save(reservation);
+    }
+
+
 
 }
