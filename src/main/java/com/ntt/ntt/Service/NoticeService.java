@@ -76,6 +76,7 @@ public class NoticeService {
 
     }
 
+
     public List<NoticeDTO> list() {
         List<Notice> noticeList = noticeRepository.findAll();
         List<NoticeDTO> noticeDTOList = Arrays.asList(modelMapper.map(noticeList, NoticeDTO[].class));

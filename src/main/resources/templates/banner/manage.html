@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>배너 관리</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .container { max-width: 800px; margin: auto; }
+    .banner-list { display: flex; flex-wrap: wrap; gap: 10px; }
+    .banner-item { position: relative; }
+    .banner-item img { width: 100%; max-width: 200px; height: auto; }
+    .delete-btn { background: red; color: white; border: none; padding: 5px; cursor: pointer; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>배너 관리</h1>
+  <input type="file" id="fileInput">
+  <button onclick="uploadBanner()">업로드</button>
+  <div class="banner-list" id="bannerList"></div>
+</div>
+
+<script>
+  async function fetchBanners() {
+    try {
+      let response = await fetch('/api/banners');
+      let banners = await response.json();
+      let bannerList = document.getElementById('bannerList');
+      bannerList.innerHTML = '';
+      banners.forEach(banner => {
+        let div = document.createElement('div');
+        div.classList.add('banner-item');
+        div.innerHTML = `
+                        <img src="${banner.imagePath}" alt="${banner.imageName}">
+                        <button class="delete-btn" onclick="deleteBanner(${banner.imageId})">삭제</button>
+                    `;
+        bannerList.appendChild(div);
+      });
+    } catch (error) {
+      console.error('배너 불러오기 오류:', error);
+    }
+  }
+
+  async function uploadBanner() {
+    let fileInput = document.getElementById('fileInput');
+    if (!fileInput.files.length) return;
+    let formData = new FormData();
+    formData.append('imageFiles', fileInput.files[0]);
+    try {
+      await fetch('/api/banners/upload', {
+        method: 'POST',
+        body: formData
+      });
+      fetchBanners();
+    } catch (error) {
+      console.error('배너 업로드 오류:', error);
+    }
+  }
+
+  async function deleteBanner(imageId) {
+    try {
+      await fetch(`/api/banners/${imageId}`, { method: 'DELETE' });
+      fetchBanners();
+    } catch (error) {
+      console.error('배너 삭제 오류:', error);
+    }
+  }
+
+  fetchBanners();
+</script>
+</body>
+</html>

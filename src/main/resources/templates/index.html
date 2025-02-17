@@ -18,20 +18,28 @@
     <!-- 배너 -->
     <section class="text-center bg-light">
         <div id="bannerCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
-            <div class="bnr_wrapper carousel-inner">
-                <div class="carousel-item active">
-                    <img src="/img/bg_wedding.jpg" class="d-block w-100" alt="Wedding">
-                </div>
-                <div class="carousel-item">
-                    <img src="/img/bg_dining.jpg" class="d-block w-100" alt="Dining">
-                </div>
-                <div class="carousel-item">
-                    <img src="/img/bg_membership.jpg" class="d-block w-100" alt="Membership">
-                </div>
-                <div class="carousel-item">
-                    <img src="/img/bg_activity.jpg" class="d-block w-100" alt="Activity">
-                </div>
-            </div>
+                    <!--배너 테스트-->
+                    <div class="bnr_wrapper carousel-inner">
+                      <div class="carousel-item active">
+                          <img id="bannerImage" src="/img/bg_wedding.jpg" class="d-block w-100" alt="배너 이미지">
+                      </div>
+                    </div>
+
+
+<!--                    <div class="bnr_wrapper carousel-inner">-->
+<!--                <div class="carousel-item active">-->
+<!--                    <img src="/img/bg_wedding.jpg" class="d-block w-100" alt="Wedding">-->
+<!--                </div>-->
+<!--                <div class="carousel-item">-->
+<!--                    <img src="/img/bg_dining.jpg" class="d-block w-100" alt="Dining">-->
+<!--                </div>-->
+<!--                <div class="carousel-item">-->
+<!--                    <img src="/img/bg_membership.jpg" class="d-block w-100" alt="Membership">-->
+<!--                </div>-->
+<!--                <div class="carousel-item">-->
+<!--                    <img src="/img/bg_activity.jpg" class="d-block w-100" alt="Activity">-->
+<!--                </div>-->
+<!--            </div>-->
             <!-- 슬라이드 버튼 -->
             <button class="carousel-control-prev" type="button" data-bs-target="#bannerCarousel" data-bs-slide="prev">
                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -291,6 +299,24 @@
         });
         myModal.show();
     }
+
+    /*배너 테스트*/
+
+    const bannerImages = [
+        '/img/bg_wedding.jpg',
+        '/img/bg_dining.jpg',
+        '/img/bg_membership.jpg',
+        '/img/bg_activity.jpg'
+    ];
+    let currentIndex = 0;
+
+    function changeBannerImage() {
+        const banner = document.querySelector("#bannerCarousel .carousel-inner .carousel-item img");
+        banner.src = bannerImages[currentIndex];
+        currentIndex = (currentIndex + 1) % bannerImages.length;
+    }
+
+    setInterval(changeBannerImage, 3000); // 3초마다 이미지 변경
 </script>
 
 <script>
