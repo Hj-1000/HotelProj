@@ -41,6 +41,8 @@
                 </div>
                 <!-- 어드민 권한이 있을 경우에만 표시 -->
                 <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/admin/memberList" class="nav-link text-danger">관리자페이지</a>
+                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="/admin/executiveList" class="nav-link text-danger">관리자페이지</a>
+                <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" href="/manager/room/list" class="nav-link text-danger">관리자페이지</a>
             </nav>
         </div>
     </header>
