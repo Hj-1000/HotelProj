@@ -405,77 +405,39 @@
         });
 
         // 'More' 버튼과 현재 페이지 변수
-        const moreButton = document.getElementById('more-btn');
-        let currentPage = 0;
+        document.addEventListener("DOMContentLoaded", function () {
+            const roomListContainer = document.getElementById('room-list');
+            const moreButton = document.getElementById('more-btn');
 
-        // 'More' 버튼 클릭 이벤트 리스너 추가
-        moreButton.addEventListener('click', function () {
-            currentPage++;
+            let currentPage = 0;
+            const pageSize = 3;
 
-            fetch(`/roomList/data?page=${currentPage}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log("서버 응답 JSON:", data);
-
-                    if (!data.rooms || !Array.isArray(data.rooms)) {
-                        throw new Error("Invalid room data received");
-                    }
-
-                    const roomList = document.getElementById('room-list');
-
-                    data.rooms.forEach(room => {
-                        if (document.querySelector(`.room-card[data-room-id="${room.roomId}"]`)) {
-                            console.warn(`Room with ID ${room.roomId} is already added. Skipping.`);
-                            return;
+            function fetchRooms() {
+                fetch(`/roomList/data?page=${currentPage}`)
+                    .then(response => response.text())
+                    .then(text => {
+                        console.log("서버에서 받은 원본 데이터:", text); // 원본 JSON 출력 (디버깅)
+                        try {
+                            return JSON.parse(text);  // JSON 변환 시도
+                        } catch (error) {
+                            throw new Error("JSON 파싱 오류 발생: " + error.message);
                         }
-
-                        const roomCard = `
-                        <div class="col-md-4">
-                            <div class="room-card" data-room-id="${room.roomId}" data-stay-start="${room.stayStart}" data-stay-end="${room.stayEnd}">
-                                <div class="room-image">
-                                    <img src="${room.roomImageDTOList.length > 0 ? '/upload/' + room.roomImageDTOList[0].imagePath : '/img/default_img.jpg'}"
-                                         class="card-img-top" alt="Room Image">
-                                    <div class="sold-out-overlay" style="display: ${room.roomStatus ? 'none' : 'flex'}">예약 종료</div>
-                                </div>
-                                <div class="room-text">
-                                    <div class="d-flex justify-content-start gap-2 mb-3">
-                                        <span class="badge ${room.roomStatus ? 'bg-success text-white' : 'bg-danger text-white'}">
-                                            ${room.roomStatus ? '예약 가능' : '예약 불가'}
-                                        </span>
-                                        <span class="badge bg-dark text-white">${room.roomType}</span>
-                                    </div>
-                                    <h5 class="card-title">${room.roomName}</h5>
-                                    <p class="card-text">예약 기간 : ${room.reservationStart} ~ ${room.reservationEnd}</p>
-                                    <p class="card-text">숙박 기간 : ${room.stayStart} ~ ${room.stayEnd}</p>
-                                    <p class="card-text">${room.roomInfo}</p>
-                                    <div class="room-actions">
-                                        <p class="room-price mb-0">${room.formattedRoomPrice ? room.formattedRoomPrice + " ~ " : '가격 미정'}</p>
-                                        <button class="btn btn-book ${room.roomStatus ? 'btn-dark' : 'btn-danger'}" ${!room.roomStatus ? 'disabled' : ''}>
-                                            ${room.roomStatus ? '예약하기' : '예약 불가'}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>`;
-                        roomList.insertAdjacentHTML('beforeend', roomCard);
+                    })
+                    .then(data => {
+                        console.log("Parsed JSON:", data); // 정상 변환된 JSON 확인
+                    })
+                    .catch(error => {
+                        console.error("데이터 로드 중 오류:", error);
                     });
+            }
 
-                    if (data.isLastPage) {
-                        moreButton.style.display = 'none';
-                    }
+            // 초기 첫 페이지 로드
+            fetchRooms();
 
-                    addReservationButtonEvent(roomList);
-                })
-                .catch(error => {
-                    console.error('Error fetching more rooms:', error);
-                    moreButton.textContent = 'Error';
-                    moreButton.disabled = true;
-                });
+            // 'More' 버튼 클릭 시 다음 페이지 데이터 로드
+            moreButton.addEventListener('click', function () {
+                fetchRooms();
+            });
         });
 
     </script>
