@@ -96,9 +96,10 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <th:block th:each="memberDTO : ${memberDTOList}">
+                    <th:block th:each="memberDTO, index : ${memberDTOList}">
                         <tr style="vertical-align: middle;">
-                            <td th:text="${memberDTO.memberId}">1</td>
+                            <!-- index 출력 -->
+                            <td th:text="${index.index + 1}">1</td>
                             <td>
                                 <form th:action="@{/admin/update}" method="post">
                                     <input type="hidden" th:value="${memberDTO.memberId}" name="memberId" />

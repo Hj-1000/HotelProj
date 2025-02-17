@@ -103,10 +103,10 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <th:block th:each="hotelDTO : ${hotelMemberIds}">
+                    <th:block th:each="hotelDTO, index : ${hotelMemberIds}">
                         <tr style="vertical-align: middle;">
-                            <!-- memberId 출력 -->
-                            <td th:text="${hotelDTO.member != null ? hotelDTO.member.memberId : 'N/A'}">1</td>
+                            <!-- index 출력 -->
+                            <td th:text="${index.index + 1}">1</td>
                             <td>
                                 <form th:action="@{/admin/executiveUpdate}" method="post">
                                     <input type="hidden" th:value="${hotelDTO.member != null ? hotelDTO.member.memberId : ''}" name="memberId" />
