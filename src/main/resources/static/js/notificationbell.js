@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', function () {
     let notifications = [];
     let isNotificationsFetched = false;
 
+    // 📌 새로고침 시에도 즉시 알림 개수 가져오기
+    fetchUnreadNotifications();
+
     // 📌 알림 목록을 가져오는 함수
     function fetchNotifications() {
         if (isNotificationsFetched) return;
@@ -96,15 +99,17 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // 📌 새 알림 수 가져오는 함수
+    // 📌 새 알림 수 가져오는 함수 (새로고침 없이 알림 숫자 고정)
     function fetchUnreadNotifications() {
         fetch('/notifications/unreadCount')
             .then(response => response.json())
             .then(data => {
-                // 🔥 숫자가 아닐 경우 변환
-                unreadCount.textContent = isNaN(data) ? 0 : Number(data);
+                if (!isNaN(data)) {
+                    unreadCount.textContent = data;  // 📌 읽지 않은 알림 개수 표시
+                    unreadCount.style.display = data > 0 ? 'inline' : 'none'; // 📌 0이면 숨김
+                }
             })
-            .catch(error => console.error('Error fetching notifications:', error));
+            .catch(error => console.error('❌ Error fetching unread notifications:', error));
     }
 
     // 📌 읽지 않은 알림 수 업데이트
@@ -118,21 +123,31 @@ document.addEventListener('DOMContentLoaded', function () {
         unreadCount.textContent = unreadNotifications.length;
     }
 
-    // 📌 알림 벨 클릭 시 알림 목록 토글
-    bell.addEventListener('click', function () {
+    // 📌 알림 벨 클릭 시 알림 목록 고정
+    bell.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        // 알림 목록 토글
         if (notificationList.style.display === 'none' || notificationList.style.display === '') {
             notificationList.style.display = 'block';
-            fetchNotifications();
+
+            // 📌 Q&A가 내려가는 것을 방지
+            qnaSection.style.position = 'fixed';
+            qnaSection.style.top = '100px'; // 원하는 위치로 조정
         } else {
             notificationList.style.display = 'none';
+
+            // 📌 Q&A 위치 원래대로 복구
+            qnaSection.style.position = 'relative';
         }
     });
 
-    // 📌 1초마다 새 알림 수 확인
+    // 📌 5초마다 새 알림 수 확인 (고정된 숫자 업데이트)
     setInterval(() => {
         fetchUnreadNotifications();
         updateUnreadCount();
-    }, 50000);
+    }, 5000);
 
     // 📌 페이지 로드 시 알림 목록을 불러오기
     fetchNotifications();

@@ -4,6 +4,9 @@
 }
 
 #notification-list {
+    position: absolute;
+    top: 53%; /* 벨 아이콘 아래로 배치 */
+    right: 0;
     background-color: white;
     border: 1px solid #ddd;
     width: 250px;
@@ -11,12 +14,22 @@
     overflow-y: auto;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
     display: none;
-    z-index: 1050;
+    z-index: 2000; /* 다른 요소보다 위에 표시 */
     border-radius: 8px;
     padding: 10px;
-    margin-top: 30%;
-    margin-left: -30%;
 }
+
+
+/* Q&A 섹션을 화면에 고정 */
+#qna-section {
+    position: fixed; /* 화면에 고정 */
+    top: 100px; /* 원하는 위치로 조정 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%; /* 필요에 따라 조절 */
+    z-index: 1000; /* 다른 요소 위로 배치 */
+}
+
 
 .notification-item {
     padding: 10px;
