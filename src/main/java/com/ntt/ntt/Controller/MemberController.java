@@ -115,6 +115,12 @@ public class MemberController {
         }
     }
 
+    @Operation(summary = "회원탈퇴페이지", description = "회원탈퇴 get 요청시 메인페이지로 리디렉션한다.")
+    @GetMapping("/unregister")
+    public String redirectToMain() {
+        return "redirect:/";
+    }
+
     @Operation(summary = "회원탈퇴", description = "회원탈퇴를 요청한 사용자의 정보를 삭제한다.")
     @PostMapping("/unregister")
     public String unregister(@AuthenticationPrincipal UserDetails userDetails, HttpSession session,

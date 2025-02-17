@@ -57,7 +57,7 @@
             </div>
             <div class="mb-3">
                 <label for="memberPhone" class="form-label">전화번호 :</label>
-                <input type="text" class="form-control" id="memberPhone" name="memberPhone">
+                <input type="tel" pattern="[0-9]*" class="form-control" id="memberPhone" name="memberPhone">
             </div>
             <p>* 표시는 필수 입력 항목입니다.</p>
             <button type="submit" class="btn btn-primary">회원가입</button>
@@ -129,6 +129,11 @@
                         })
                 }
             }
+
+            // 전화번호 입력 시 숫자만 허용
+            document.getElementById("memberPhone").addEventListener("input", function (event) {
+                this.value = this.value.replace(/[^0-9]/g, "");
+            });
         </script>
 
         </div>
