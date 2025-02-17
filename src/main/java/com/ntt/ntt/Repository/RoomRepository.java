@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -19,10 +20,12 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
     Page<Room> findByRoomNameContaining(String roomName, Pageable pageable);
 
     /* 방 타입으로 검색하여 페이징된 결과 반환 , 특정 문자열이 포함된 방을 찾음*/
-    Page<Room> findByRoomTypeContaining(String roomType, Pageable pageable);
+    @Query("SELECT r FROM Room r WHERE LOWER(r.roomType) LIKE LOWER(CONCAT('%', :roomType, '%'))")
+    Page<Room> findByRoomTypeContaining(@Param("roomType") String roomType, Pageable pageable);
 
     /* 특정 상태(roomStatus)의 방을 페이징하여 조회 , true : 예약 , false : 예약 불가 */
-    Page<Room> findByRoomStatus(boolean roomStatus, Pageable pageable);
+    @Query("SELECT r FROM Room r WHERE r.roomStatus = :roomStatus")
+    Page<Room> findByRoomStatus(@Param("roomStatus") Boolean roomStatus, Pageable pageable);
 
     /* 모든 방 목록을 페이징 처리하여 조회*/
     Page<Room> findAll(Pageable pageable);

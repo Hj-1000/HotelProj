@@ -145,7 +145,7 @@
     </div>
 
     <!-- 페이지네이션 -->
-    <div class="pagination-container" style="display: flex; justify-content: center; align-items: center;">
+    <div th:if="${not #lists.isEmpty(qnalist)}" class="pagination-container" style="display: flex; justify-content: center; align-items: center;">
         <ul class="pagination">
             <!-- 이전 페이지 버튼 -->
             <li class="page-item" th:classappend="${pagination['currentPage'] == 1 ? 'disabled' : ''}">

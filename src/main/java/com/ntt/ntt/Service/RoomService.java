@@ -310,6 +310,8 @@ public class RoomService {
 
     @Transactional(readOnly = true)
     public Page<RoomDTO> searchRooms(String keyword, String category, Pageable pageable) {
+        log.info("🔎 검색 요청 - 카테고리: {}, 키워드: {}", category, keyword);
+
         Page<Room> rooms;
 
         if (keyword == null || keyword.isEmpty()) {
@@ -320,21 +322,31 @@ public class RoomService {
                     rooms = roomRepository.findByRoomNameContaining(keyword, pageable);
                     break;
                 case "roomType":
-                    rooms = roomRepository.findByRoomTypeContaining(keyword, pageable);
+                    rooms = roomRepository.findByRoomTypeContaining(keyword.toLowerCase(), pageable);
                     break;
                 case "roomStatus":
-                    Boolean status = "Available".equalsIgnoreCase(keyword) ? true :
-                            "Unavailable".equalsIgnoreCase(keyword) ? false : null;
+                    // 검색어 변환 (av → true, un → false)
+                    Boolean status = null;
+                    if ("av".equalsIgnoreCase(keyword) || "available".equalsIgnoreCase(keyword)) {
+                        status = true;
+                    } else if ("un".equalsIgnoreCase(keyword) || "unavailable".equalsIgnoreCase(keyword)) {
+                        status = false;
+                    }
+
+                    log.info(" 변환된 상태 값: {}", status);
+
                     if (status != null) {
                         rooms = roomRepository.findByRoomStatus(status, pageable);
+                        log.info(" 검색된 방 개수: {}", rooms.getTotalElements());
                     } else {
-                        throw new IllegalArgumentException("Invalid room status keyword: " + keyword);
+                        throw new IllegalArgumentException("유효하지 않은 상태 값입니다. 'av', 'un', 'available', 'unavailable'만 입력 가능합니다.");
                     }
                     break;
                 default:
                     rooms = roomRepository.findAll(pageable);
             }
         }
+
 
         // Room Entity를 RoomDTO로 변환하면서 이미지 리스트 추가
         return rooms.map(room -> {
