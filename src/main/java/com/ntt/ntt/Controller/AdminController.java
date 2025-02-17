@@ -205,7 +205,7 @@ public class AdminController {
             // 4. 호텔의 memberId 업데이트
             hotelService.updateHotelMemberId(hotelDTO);  // 호텔의 memberId 업데이트
 
-            return "redirect:/admin/executiveRegister"; // 회원가입 성공 시 현재 페이지로 리다이렉트
+            return "redirect:/admin/executiveList"; // 회원가입 성공 시 현재 페이지로 리다이렉트
         } catch (IllegalStateException e) {
             // 예외가 발생한 경우 회원가입 페이지로 리다이렉트
             return "redirect:/admin/executiveRegister"; // 회원가입 페이지로 리다이렉트
