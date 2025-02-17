@@ -98,7 +98,7 @@ public class PasswordResetController {
         }
 
         // 30초가 지나면 인증 코드 만료 -> 테스트하느라 30초로 했는데 실제 적용시에는 3분(180000ms) 로 수정하기
-        if (System.currentTimeMillis() - timestamp > 30000) {
+        if (System.currentTimeMillis() - timestamp > 60000) {
             // 인증 코드가 만료되면 세션에서 인증 코드와 타임스탬프를 삭제하고 비밀번호 찾기 페이지로 리디렉션
             session.removeAttribute("resetCode");
             session.removeAttribute("resetCodeTimestamp");
@@ -119,7 +119,7 @@ public class PasswordResetController {
         // 인증 코드와 타임스탬프가 세션에 있으면
         if (resetCode != null && timestamp != null) {
             // 30초(30000ms) 초과 여부 확인 -> 테스트하느라 30초로 했는데 실제 적용시에는 3분(180000ms) 로 수정하기
-            if (System.currentTimeMillis() - timestamp > 30000) {
+            if (System.currentTimeMillis() - timestamp > 60000) {
                 // 만약 30초가 지났다면 코드 만료, 세션에서 인증 코드와 타임스탬프 삭제 후 다시 비밀번호 찾기 페이지로 리디렉션
                 model.addAttribute("errorMessage", "인증 코드가 만료되었습니다.");
                 session.removeAttribute("resetCode");
@@ -219,7 +219,7 @@ public class PasswordResetController {
         Long timestamp = (Long) session.getAttribute("resetCodeTimestamp");
         if (timestamp != null) {
             // 30초 (30000ms) 후 만료되는 시간 계산 -> 테스트하느라 30초로 했는데 실제 적용시에는 3분(180000ms) 로 수정하기
-            long expiryTime = timestamp + 30000;
+            long expiryTime = timestamp + 60000;
             return expiryTime;
         }
         return 0;
