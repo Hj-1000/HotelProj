@@ -22,17 +22,17 @@
                         </div>
                         <div class="mb-3">
                             <label for="email" class="form-label">이메일</label>
-                            <input type="text" class="form-control" id="email" name="email">
+                            <input type="text" class="form-control" id="email" name="email" placeholder="이메일" th:value="${param.email}">
                         </div>
-                        <!--<div class="mb-3">
-                            <label for="company" class="form-label">본사</label>
-                            <select class="form-select" id="company" name="company">
+                        <div class="mb-3">
+                            <label for="companyId" class="form-label">본사</label>
+                            <select class="form-select" id="companyId" name="companyId">
                                 <option value="">전체</option>
                                 <option th:each="company : ${companyList}" th:value="${company.companyId}" th:text="${company.companyName}"></option>
                             </select>
-                        </div>-->
+                        </div>
                         <div class="mb-3">
-                            <label class="form-label">등록일</label>
+                            <label class="form-label">가입일</label>
                             <div class="d-flex gap-3">
                                 <div class="form-group" style="flex: 1;">
                                     <input type="date" class="form-control" id="시작일" name="startDate"th:value="${param.startDate}">
@@ -48,18 +48,18 @@
 
                         <div class="mb-3">
                             <label for="name" class="form-label">이름</label>
-                            <input type="text" class="form-control" id="name" name="name" placeholder="이름">
+                            <input type="text" class="form-control" id="name" name="name" placeholder="이름" th:value="${param.name}">
                         </div>
                         <div class="mb-3">
                             <label for="phone" class="form-label">연락처</label>
-                            <input type="text" class="form-control" id="phone" name="phone" placeholder="연락처">
+                            <input type="text" class="form-control" id="phone" name="phone" placeholder="연락처" th:value="${param.phone}">
                         </div>
-                        <!--<div class="mb-3">
-                            <label for="hotelSelect" class="form-label">지사</label>
-                            <select id="hotelSelect" class="form-select" name="hotel">
+                        <div class="mb-3">
+                            <label for="hotelId" class="form-label">지사</label>
+                            <select id="hotelId" class="form-select" name="hotelId" th:value="${param.hotelId}">
                                 <option value="">먼저 본사를 선택하세요.</option>
                             </select>
-                        </div>-->
+                        </div>
                         <div class="mb-3">
                             <label class="form-label">상태</label>
                             <div class="d-flex flex-wrap gap-3">
@@ -97,7 +97,7 @@
                         <th>이름</th>
                         <th>담당지사</th>
                         <th>연락처</th>
-                        <th>등록일</th>
+                        <th>가입일</th>
                         <th>상태</th>
                         <th>수정</th>
                     </tr>
@@ -119,9 +119,10 @@
                             </td>
                             <td th:text="${hotelDTO.member != null ? hotelDTO.member.memberEmail : 'N/A'}">아이디</td>
                             <td th:text="${hotelDTO.member != null ? hotelDTO.member.memberName : 'N/A'}">회원 이름</td>
+                            <input type="text" class="form-control" id="memberName" name="memberName" placeholder="이름" th:value="${hotelDTO.member != null ? hotelDTO.member.memberName : 'N/A'}" hidden="hidden">
                             <td th:text="${hotelDTO.member != null ? hotelDTO.hotelName : 'N/A'}">지사명</td>
                             <td th:text="${hotelDTO.member != null ? hotelDTO.member.memberPhone : 'N/A'}">전화번호</td>
-                            <td th:text="${hotelDTO.regDate != null ? #temporals.format(hotelDTO.modDate, 'yyyy-MM-dd HH:mm:ss') : 'N/A'}">등록일</td>
+                            <td th:text="${hotelDTO.regDate != null ? #temporals.format(hotelDTO.modDate, 'yyyy-MM-dd HH:mm:ss') : 'N/A'}">가입일</td>
                             <td>
                                 <select class="form-select" name="memberStatus">
                                     <option value="활성" th:selected="${hotelDTO.member != null && hotelDTO.member.memberStatus == '활성'}">활성</option>
@@ -175,8 +176,39 @@
                             }, 5000); // 5초 후에 숨기기
                         }
 
-                        // 회원 검색 후 내가 검색 선택했던 권한과 상태 유지
+                        // URL 파라미터에서 값을 가져오기
                         var urlParams = new URLSearchParams(window.location.search);
+
+                        // 본사 유지
+                        var companyId = urlParams.get('companyId');
+                        if (companyId) {
+                            var companySelect = document.getElementById('companyId');
+                            if (companySelect) {
+                                for (var i = 0; i < companySelect.options.length; i++) {
+                                    if (companySelect.options[i].value === companyId) {
+                                        companySelect.selectedIndex = i;
+                                        break;
+                                    }
+                                }
+
+                                // 본사 선택 후 지사 목록을 다시 불러옴
+                                loadHotels(companyId);
+                            }
+                        }
+
+                        // 지사 유지
+                        var hotelId = urlParams.get('hotelId');
+                        if (hotelId) {
+                            var hotelSelect = document.getElementById('hotelId');
+                            if (hotelSelect) {
+                                for (var i = 0; i < hotelSelect.options.length; i++) {
+                                    if (hotelSelect.options[i].value === hotelId) {
+                                        hotelSelect.selectedIndex = i;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
 
                         // 상태 유지
                         var status = urlParams.get('status');
@@ -201,6 +233,35 @@
                             }
                         }
                     };
+
+                    // 본사에 해당하는 지사 목록을 불러오는 함수
+                    function loadHotels(companyId) {
+                        $.ajax({
+                            url: "/admin/hotels",  // 본사에 해당하는 지사를 가져오는 API
+                            type: "GET",
+                            data: { companyId: companyId },  // 선택한 회사 ID 전송
+                            success: function(hotels) {
+                                var hotelId = $("#hotelId");
+                                hotelId.empty();  // 기존 옵션 제거
+
+                                if (hotels.length > 0) {
+                                    // 호텔 목록이 있을 경우
+                                    hotelId.append('<option value="">전체</option>'); // '전체' 옵션 추가
+                                    hotels.forEach(function(hotel) {
+                                        hotelId.append(
+                                            `<option value="${hotel.hotelId}">${hotel.hotelName}</option>`
+                                        );
+                                    });
+                                } else {
+                                    // 지사가 없으면 '지사 목록이 없습니다' 메시지 추가
+                                    hotelId.append('<option value="">지사 목록이 없습니다</option>');
+                                }
+                            },
+                            error: function() {
+                                alert("지사 목록을 불러오는 중 오류가 발생했습니다.");
+                            }
+                        });
+                    }
                 </script>
 
                 <!-- 등록 버튼 -->
@@ -213,16 +274,13 @@
             <script>
                 $(document).ready(function() {
                     // #company 선택 시 실행
-                    $("#company").change(function() {
+                    $("#companyId").change(function() {
                         var companyId = $(this).val(); // 선택한 본사의 ID 가져오기
-
-                        // console.log으로 확인
-                        console.log("선택한 본사 ID:", companyId);
 
                         // 회사 ID가 선택되지 않으면 지사 목록 초기화
                         if (!companyId) {
-                            $("#hotelSelect").empty();  // 기존 옵션 제거
-                            $("#hotelSelect").append('<option value="">먼저 본사를 선택하세요</option>');
+                            $("#hotelId").empty();  // 기존 옵션 제거
+                            $("#hotelId").append('<option value="">먼저 본사를 선택하세요</option>');
                             return;  // 추가적으로 처리할 필요가 없으므로 종료
                         }
 
@@ -231,19 +289,24 @@
                             type: "GET",
                             data: { companyId: companyId },  // 선택한 회사 ID 전송
                             success: function(hotels) {
-                                var hotelSelect = $("#hotelSelect");
-                                hotelSelect.empty();  // 기존 옵션 제거
+                                var hotelId = $("#hotelId");
+                                hotelId.empty();  // 기존 옵션 제거
 
                                 if (hotels.length > 0) {
-                                    // 호텔 목록이 있을 경우
+                                    hotelId.append('<option value="">전체</option>'); // '전체' 옵션 추가
                                     hotels.forEach(function(hotel) {
-                                        hotelSelect.append(
-                                            `<option value="${hotel.hotel}">${hotel.hotelName}</option>`
+                                        hotelId.append(
+                                            `<option value="${hotel.hotelId}">${hotel.hotelName}</option>`
                                         );
                                     });
+
+                                    // URL에서 hotelId 파라미터가 있으면 해당 값을 유지
+                                    var selectedHotelId = new URLSearchParams(window.location.search).get('hotelId');
+                                    if (selectedHotelId) {
+                                        hotelId.val(selectedHotelId); // 선택된 지사 유지
+                                    }
                                 } else {
-                                    // 지사가 없으면 '지사 목록이 없습니다' 메시지 추가
-                                    hotelSelect.append('<option value="">지사 목록이 없습니다</option>');
+                                    hotelId.append('<option value="">지사 목록이 없습니다</option>');
                                 }
                             },
                             error: function() {

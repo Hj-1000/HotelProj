@@ -16,10 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
@@ -79,10 +76,11 @@ public class AdminController {
 
     @Operation(summary = "회원정보 수정", description = "사용자의 회원정보를 새로 입력한 값으로 업데이트한다.")
     @PostMapping("/admin/update")
-    public String adminUpdate(MemberDTO memberDTO, RedirectAttributes redirectAttributes) {
+    public String adminUpdate(@ModelAttribute MemberDTO memberDTO, RedirectAttributes redirectAttributes) {
         try {
             memberService.adminUpdate(memberDTO);
-            redirectAttributes.addFlashAttribute("successMessage", "회원 정보가 성공적으로 수정되었습니다.");
+            String successMessage = memberDTO.getMemberName() + " 회원의 회원 정보가 성공적으로 수정되었습니다.";
+            redirectAttributes.addFlashAttribute("successMessage", successMessage);
             return "redirect:/admin/memberList";
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
@@ -92,7 +90,9 @@ public class AdminController {
 
     @Operation(summary = "임원관리", description = "임원관리 페이지로 이동한다.")
     @GetMapping("/admin/executiveList")
-    public String getExecutives(@RequestParam(required = false) String role,
+    public String getExecutives(@RequestParam(required = false) Integer companyId,
+                                @RequestParam(required = false) Integer hotelId,
+                                @RequestParam(required = false) String role,
                                 @RequestParam(required = false) String email,
                                 @RequestParam(required = false) String status,
                                 @RequestParam(required = false) String name,
@@ -117,19 +117,27 @@ public class AdminController {
             List<CompanyDTO> companyList = companyService.getFilteredCompany(member.getMemberId());
             model.addAttribute("companyList", companyList);
 
-            // 로그인한 사용자가 등록한 본사에서 특정 조건을 만족하는 지사 목록 가져오기 (hotelDTO.member 기준 필터링)
+            // 필터링된 호텔 리스트 가져오기
             List<HotelDTO> filteredHotels = new ArrayList<>();
-            for (CompanyDTO company : companyList) {
+
+            if (companyId != null) {
+                // 특정 본사의 지사만 조회
                 filteredHotels.addAll(hotelService.getFilteredHotelsByMember(
-                        company.getCompanyId(), role, email, status, name, phone, startDate, endDate));
+                        companyId, hotelId, role, email, status, name, phone, startDate, endDate));
+            } else {
+                // 전체 본사를 조회하여 각 본사에 속한 지사를 필터링
+                for (CompanyDTO company : companyList) {
+                    filteredHotels.addAll(hotelService.getFilteredHotelsByMember(
+                            company.getCompanyId(), hotelId, role, email, status, name, phone, startDate, endDate));
+                }
             }
 
-            // 필터링된 지사의 멤버를 기준으로 페이징 처리
+            // 페이징 처리
             int startIdx = page * size;
             int endIdx = Math.min(startIdx + size, filteredHotels.size());
             List<HotelDTO> pagedHotels = filteredHotels.subList(startIdx, endIdx);
 
-            // 모델에 필요한 데이터 추가
+            // 모델에 데이터 추가
             model.addAttribute("hotelMemberIds", pagedHotels);
             model.addAttribute("roles", Role.values());
             model.addAttribute("pageNumber", page);
@@ -148,7 +156,8 @@ public class AdminController {
     public String managerUpdate(MemberDTO memberDTO, RedirectAttributes redirectAttributes) {
         try {
             memberService.managerUpdate(memberDTO);
-            redirectAttributes.addFlashAttribute("successMessage", "회원 정보가 성공적으로 수정되었습니다.");
+            String successMessage = memberDTO.getMemberName() + " 회원의 회원 정보가 성공적으로 수정되었습니다.";
+            redirectAttributes.addFlashAttribute("successMessage", successMessage);
             return "redirect:/admin/executiveList";
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
