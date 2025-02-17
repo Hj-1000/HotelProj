@@ -70,11 +70,21 @@
             function emailCheck() {
                 var email = document.getElementById('memberEmailInput').value;
                 var messageElement = document.getElementById('emailCheckMessage');
+                // 이메일 형식 체크
+                var emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]{1,}$/;
 
                 if (!email) {
                     messageElement.style.display = "block";
                     messageElement.style.color = "red";
                     messageElement.innerText = "이메일을 입력하세요.";
+                    return;
+                }
+
+                // 이메일 형식이 맞지 않으면 메시지 표시
+                if (!emailPattern.test(email)) {
+                    messageElement.style.display = "block";
+                    messageElement.style.color = "red";
+                    messageElement.innerText = "이메일 형식에 맞춰 입력해주세요.";
                     return;
                 }
 

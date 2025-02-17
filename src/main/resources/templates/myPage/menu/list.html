@@ -61,6 +61,13 @@
             white-space: nowrap; /* 텍스트가 한 줄로 표시 */
             overflow: hidden; /* 넘치는 텍스트 숨기기 */
             text-overflow: ellipsis; /* 넘칠 경우 '...' 표시 */
+            width: 100%; /* 부모의 너비를 가득 채우도록 설정 */
+            display: block; /* 블록 요소로 설정하여 가로 공간을 채우도록 */
+        }
+        .card-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .card-body {

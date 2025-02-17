@@ -83,6 +83,14 @@ public class RoomManagerController {
             @RequestParam(value = "category", required = false) String category,
             Model model, RedirectAttributes redirectAttributes) {
 
+        if ("roomStatus".equals(category) && keyword != null) {
+            if ("av".equalsIgnoreCase(keyword)) {
+                keyword = "Available";
+            } else if ("un".equalsIgnoreCase(keyword)) {
+                keyword = "Unavailable";
+            }
+        }
+
         // 현재 페이지 정보를 Pageable에 반영
         Pageable updatedPageable = PageRequest.of(page, pageable.getPageSize());
 
@@ -90,20 +98,10 @@ public class RoomManagerController {
         Page<RoomDTO> roomDTOS;
 
         try {
-            // roomStatus 카테고리 검색 시, "Available" 또는 "Unavailable"만 허용
-            if ("roomStatus".equals(category) && keyword != null) {
-                if (!"Available".equalsIgnoreCase(keyword) && !"Unavailable".equalsIgnoreCase(keyword)) {
-                    log.warn("Invalid room status keyword: {}", keyword);
-                    redirectAttributes.addFlashAttribute("errorMessage", "유효하지 않은 텍스트입니다. 'Available' 또는 'Unavailable'을 입력해주세요.");
-                    return "redirect:/manager/room/list";
-                }
-            }
-
-            // 검색 수행
+            // 2. 검색 수행
             roomDTOS = roomService.searchRooms(keyword, category, updatedPageable);
-
         } catch (IllegalArgumentException e) {
-            log.warn("검색 중 오류 발생: {}", e.getMessage());
+            log.warn(" 검색 중 오류 발생: {}", e.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", "검색 조건이 올바르지 않습니다.");
             return "redirect:/manager/room/list";
         }

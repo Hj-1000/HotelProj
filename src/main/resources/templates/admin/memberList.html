@@ -96,9 +96,10 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <th:block th:each="memberDTO : ${memberDTOList}">
+                    <th:block th:each="memberDTO, index : ${memberDTOList}">
                         <tr style="vertical-align: middle;">
-                            <td th:text="${memberDTO.memberId}">1</td>
+                            <!-- index 출력 -->
+                            <td th:text="${index.index + 1}">1</td>
                             <td>
                                 <form th:action="@{/admin/update}" method="post">
                                     <input type="hidden" th:value="${memberDTO.memberId}" name="memberId" />
@@ -111,6 +112,7 @@
                             </td>
                             <td th:text="${memberDTO.memberEmail}">test2@ggg.com</td>
                             <td th:text="${memberDTO.memberName}">신짱구</td>
+                            <input type="text" class="form-control" id="memberName" name="memberName" placeholder="이름" th:value="${memberDTO.memberName}" hidden="hidden">
                             <td th:text="${memberDTO.memberPhone}">010-2345-6789</td>
                             <td th:text="${#temporals.format(memberDTO.regDate, 'yyyy-MM-dd HH:mm:ss')}">2023-01-01</td>
                             <td>

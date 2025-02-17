@@ -105,6 +105,7 @@
         <!-- 검색 영역 -->
         <div class="card p-4 mb-4">
             <form action="/roomService/category/list" method="get">
+                <input type="hidden" name="hotelId" th:value="${hotelId}">
                 <div class="row g-3 align-items-center">
                     <h5 class="card-title">카테고리 찾기</h5>
                     <!-- 검색창 -->

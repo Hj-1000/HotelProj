@@ -171,7 +171,7 @@
                 <option value="roomType" th:selected="${category == 'roomType'}">객실 타입</option>
                 <option value="roomStatus" th:selected="${category == 'roomStatus'}">상태</option>
             </select>
-            <input type="text" name="keyword" placeholder="검색어를 입력하세요" th:value="${keyword}">
+            <input type="text" name="keyword" id="searchInput" placeholder="검색어를 입력하세요" th:value="${keyword}">
             <button type="submit">검색</button>
         </form>
     </div>
@@ -221,6 +221,25 @@
 
 </div>
 <script>
+
+    /*  입력값을 소문자로 변환 */
+    document.getElementById("searchInput").addEventListener("input", function () {
+        this.value = this.value.toLowerCase();
+    });
+
+    document.getElementById("searchForm").addEventListener("submit", function (event) {
+        let searchInput = document.getElementById("searchInput");
+        let value = searchInput.value.trim().toLowerCase();
+
+        // 약어 변환 (폼 제출 전에 변환)
+        if (value === "av") {
+            searchInput.value = "Available";
+        } else if (value === "un") {
+            searchInput.value = "Unavailable";
+        }
+
+        console.log("변환된 검색어:", searchInput.value);  // 디버깅용 콘솔 출력
+    });
 
     document.addEventListener("DOMContentLoaded", function () {
         var errorMessage = /*[[${errorMessage}]]*/ null;
