@@ -71,7 +71,7 @@
                 var email = document.getElementById('memberEmailInput').value;
                 var messageElement = document.getElementById('emailCheckMessage');
                 // 이메일 형식 체크
-                var emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]$/;
+                var emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]{1,}$/;
 
                 if (!email) {
                     messageElement.style.display = "block";
