@@ -51,12 +51,63 @@ public class ServiceMenuController {
         log.info("post에서 등록할 serviceMenuDTO" + serviceMenuDTO);
         serviceMenuService.register(serviceMenuDTO, imageFiles);
         redirectAttributes.addFlashAttribute("message", "메뉴 등록이 완료되었습니다.");
-        return "redirect:/roomService/menu/list";
+
+        //등록된 메뉴의 카테고리Id 가져오기
+        Integer serviceCateId = serviceMenuDTO.getServiceCateId().getServiceCateId();
+        return "redirect:/roomService/menu/list?serviceCateId=" + serviceCateId;
     }
 
 
 
-    @Operation(summary = "전체목록", description = "전체목록을 조회한다.")
+//    @Operation(summary = "전체목록", description = "전체목록을 조회한다.")
+//    @GetMapping("/list")
+//    public String list(@RequestParam(required = false) Integer serviceCateId,
+//                       @RequestParam(required = false) Integer hotelId,
+//                       @RequestParam(required = false) String keyword,
+//                       @RequestParam(required = false) String searchType,
+//                       @RequestParam(required = false) String status, // 상태값 추가
+//                       @PageableDefault(page = 1) Pageable page,
+//                       Model model) {
+//
+//        // 메뉴 목록 조회
+//        Page<ServiceMenuDTO> serviceMenuDTOS;
+//        if (serviceCateId != null) {
+//            // 카테고리 ID가 있을 경우
+//            serviceMenuDTOS = serviceMenuService.list(page, keyword, searchType, serviceCateId, status);
+//        } else {
+//            // 카테고리 ID가 없을 경우 (전체 조회)
+//            serviceMenuDTOS = serviceMenuService.list(page, keyword, searchType, null, status);
+//        }
+//
+//        // 페이지 정보 계산
+//        Map<String, Integer> pageInfo = paginationUtil.pagination(serviceMenuDTOS);
+//
+//        // 페이지가 하나뿐일 경우, startPage와 endPage를 1로 설정
+//        if (serviceMenuDTOS.getTotalPages() <= 1) {
+//            pageInfo.put("startPage", 1);
+//            pageInfo.put("endPage", 1);
+//        }
+//
+//
+//
+//        // 모든 카테고리와 상태값 추가
+//        Page<ServiceCateDTO> serviceCateDTOS = serviceCateService.list(page, keyword, searchType, hotelId);
+//
+//        model.addAttribute("serviceCateDTOS", serviceCateDTOS);
+//        model.addAttribute("serviceMenuDTOS", serviceMenuDTOS);
+//        model.addAttribute("serviceMenuStatus", ServiceMenuStatus.values()); // 상태값 enum 전달
+//        model.addAttribute("pageInfo", pageInfo);
+//
+//        // 검색 관련 정보 전달
+//        model.addAttribute("keyword", keyword);
+//        model.addAttribute("searchType", searchType);
+//        model.addAttribute("status", status); // 선택한 상태값 전달
+//        model.addAttribute("serviceCateId", serviceCateId);
+//
+//        return "/manager/roomservice/menu/list";
+//    }
+
+    @Operation(summary = "특정지사의 서비스 메뉴", description = "특정 지사에 등록된 카테고리의 메뉴 목록을 조회한다.")
     @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER')")
     @GetMapping("/list")
     public String list(@RequestParam(required = false) Integer serviceCateId,
@@ -86,8 +137,19 @@ public class ServiceMenuController {
         }
 
         // 모든 카테고리와 상태값 추가
-        List<ServiceCateDTO> serviceCateDTOS = serviceCateService.getAllServiceCate();
-        model.addAttribute("serviceCateDTOS", serviceCateDTOS);
+        if (serviceCateId != null) {
+            ServiceCateDTO serviceCateDTO = serviceCateService.read(serviceCateId);
+            Integer hotelId = serviceCateDTO.getHotelId().getHotelId();
+            List<ServiceCateDTO> serviceCateDTOS = serviceCateService.listByHotel(hotelId);
+            model.addAttribute("serviceCateDTOS", serviceCateDTOS);
+        }else {
+            List<ServiceCateDTO> serviceCateDTOS = serviceCateService.getAllServiceCate();
+            model.addAttribute("serviceCateDTOS", serviceCateDTOS);
+        }
+
+
+
+
         model.addAttribute("serviceMenuDTOS", serviceMenuDTOS);
         model.addAttribute("serviceMenuStatus", ServiceMenuStatus.values()); // 상태값 enum 전달
         model.addAttribute("pageInfo", pageInfo);
@@ -142,8 +204,13 @@ public class ServiceMenuController {
     @GetMapping("/delete")
     public String deleteForm(Integer serviceMenuId, RedirectAttributes redirectAttributes) {
 
+        //삭제 전 메뉴 정보 조회
+        ServiceMenuDTO serviceMenuDTO = serviceMenuService.read(serviceMenuId);
+
         serviceMenuService.delete(serviceMenuId);
         redirectAttributes.addFlashAttribute("message", "메뉴 삭제가 완료되었습니다.");
-        return "redirect:/roomService/menu/list";
+
+        Integer serviceCateId = serviceMenuDTO.getServiceCateId().getServiceCateId();
+        return "redirect:/roomService/menu/list?serviceCateId=" + serviceCateId;
     }
 }
