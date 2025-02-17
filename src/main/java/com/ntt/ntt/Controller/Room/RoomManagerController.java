@@ -8,6 +8,7 @@ import com.ntt.ntt.Repository.ReservationRepository;
 import com.ntt.ntt.Service.ImageService;
 import com.ntt.ntt.Service.RoomService;
 import com.ntt.ntt.Util.PaginationUtil;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/manager/room")
 @RequiredArgsConstructor
 @Log4j2
+@Tag(name = "roomManagerController", description = "관리자 객실 관리 컨트롤러")
 public class RoomManagerController {
 
     private final RoomService roomService;

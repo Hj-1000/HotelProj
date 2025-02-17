@@ -9,8 +9,13 @@ import com.ntt.ntt.Repository.RoomRepository;
 import com.ntt.ntt.Service.ReservationService;
 import com.ntt.ntt.Service.RoomService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,7 +23,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -29,6 +37,7 @@ import java.util.Optional;
 @Controller
 @RequiredArgsConstructor
 @Log4j2
+@Tag(name = "reservationController", description = "유저 예약 관리 컨트롤러")
 public class ReservationController {
 
     private final ReservationService reservationService;
@@ -108,8 +117,12 @@ public class ReservationController {
     }
 
     @Operation(summary = "호텔 예약내역 조회", description = "호텔 예약내역 조회 페이지로 이동한다.")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/myPage/reservationList")
-    public String reservationList(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+    public String reservationList(@AuthenticationPrincipal UserDetails userDetails,
+                                  @RequestParam(value = "page", defaultValue = "0") int page, // 현재 페이지 (0부터 시작)
+                                  @RequestParam(value = "size", defaultValue = "5") int size, // 페이지 크기 (5개)
+                                  Model model) {
         if (userDetails == null) {
             return "redirect:/login";  // 로그인되어있지 않으면 로그인 페이지로 리다이렉트
         }
@@ -120,13 +133,37 @@ public class ReservationController {
         }
 
         Member member = memberOptional.get();
-        List<ReservationDTO> reservations = reservationService.getUserReservations(member.getMemberId());
 
-        // 데이터가 존재하지 않는 경우 빈 리스트 반환
-        if (reservations == null) {reservations = List.of();}
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "checkInDate", "reservationId"));
+
+        Page<ReservationDTO> reservationsPage = reservationService.getUserReservations(member.getMemberId(), pageable);
+
+        // 현재 페이지가 존재하지 않는 경우 마지막 페이지로 이동하도록 처리
+        if (reservationsPage.getTotalPages() > 0 && page >= reservationsPage.getTotalPages()) {
+            return "redirect:/myPage/reservationList?page=" + (reservationsPage.getTotalPages() - 1);
+        }
+
+        // 데이터가 없을 경우 빈 리스트 반환
+        List<ReservationDTO> reservations = reservationsPage.getContent();  // `getContent()` 사용
+
+        // 이미지 리스트 확인
+        for (ReservationDTO reservation : reservations) {
+            if (reservation.getRoom() != null) {
+                log.info("예약된 객실 ID: {}", reservation.getRoom().getRoomId());
+                log.info("이미지 리스트 개수: {}", reservation.getRoom().getRoomImageDTOList().size());
+                if (!reservation.getRoom().getRoomImageDTOList().isEmpty()) {
+                    log.info("첫 번째 이미지 경로: {}", reservation.getRoom().getRoomImageDTOList().get(0).getImagePath());
+                } else {
+                    log.warn("객실 ID {} - 이미지 없음", reservation.getRoom().getRoomId());
+                }
+            }
+        }
 
         // Thymeleaf에서 사용하기 위해 Model에 데이터 추가
         model.addAttribute("reservations", reservations);
+        model.addAttribute("currentPage", reservationsPage.getNumber()); // 현재 페이지 번호
+        model.addAttribute("totalPages", reservationsPage.getTotalPages()); // 전체 페이지 수
+
         return "myPage/reservationList";
     }
 

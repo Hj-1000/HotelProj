@@ -3,6 +3,7 @@ package com.ntt.ntt.Controller.Room;
 
 import com.ntt.ntt.DTO.RoomDTO;
 import com.ntt.ntt.Service.RoomService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -20,6 +21,7 @@ import java.util.Map;
 @Controller
 @RequiredArgsConstructor
 @Log4j2
+@Tag(name = "roomController", description = "유저 객실 관리 컨트롤러")
 public class RoomController {
 
     private final RoomService roomService;

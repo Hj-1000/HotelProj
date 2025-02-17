@@ -1,3 +1,115 @@
+/* 예약내역 CSS */
+
 .btn.disabled, .btn:disabled, fieldset:disabled .btn {
     border-color: #a5a4a4;
+}
+
+/* 마이페이지 화면 스타일 */
+
+.mypage-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: calc(100vh - 209px); /* 100vh = 화면 전체 높이를 차지하도록 (-209px 는 헤더와 푸터의 높이) */
+}
+
+.mypage-card {
+    width: 100%;
+    max-width: 800px; /* 카드 너비 */
+    padding: 20px 215px 20px 215px;
+    border: none;
+}
+
+/* 기본 탭의 글씨 색을 회색으로 설정 */
+.nav-item .nav-link1 {
+    width: 270px; /* 원하는 너비로 수정 */
+    text-align: center; /* 텍스트 중앙 정렬 */
+    padding: 10px 20px; /* 패딩을 추가하여 버튼이 더 커지도록 설정 */
+}
+
+/* active 상태일 때 배경을 회색으로 변경 */
+.nav-link1.active {
+    background-color: #6c757d !important; /* 회색 배경 */
+    color: white !important; /* 흰색 글씨 */
+}
+
+/* 호버 시 배경과 글씨 색을 변경 */
+.nav-link1:hover {
+    background-color: #5a6268 !important; /* 호버 시 어두운 회색 배경 */
+    color: white !important; /* 호버 시 흰색 글씨 */
+}
+
+/* 예약 취소 버튼 비활성화 스타일 */
+.btn-disabled {
+    background-color: #ccc !important;
+    cursor: not-allowed;
+}
+
+.room-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+/* 테이블 가운데 정렬 */
+td, th {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* 공통 페이징 스타일 */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1rem;
+    gap: 8px;
+}
+
+.pagination a {
+    padding: 10px 14px;
+    text-decoration: none;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    color: black;
+    font-size: 16px;
+    transition: 0.2s;
+}
+
+.pagination a:hover {
+    background: #000;
+    color: white;
+}
+
+.active>.page-link {
+    background: #000000;
+    color: white;
+    font-weight: bold;
+    border: 1px solid #ddd;
+}
+
+.pagination .page-link:focus,
+.pagination .page-link:active {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.pagination .page-item .page-link {
+    border: 1px solid #ddd; /* 기본 테두리 유지 */
+    transition: 0.2s;
+}
+
+.pagination .page-item .page-link:hover {
+    background: #000;
+    color: white;
+}
+
+.pagination .page-item .page-link:focus,
+.pagination .page-item .page-link:active {
+    outline: none !important;
+    box-shadow: none !important;
+    background: #000 !important; /* 클릭 시에도 검은색 유지 */
+    color: white !important;
 }

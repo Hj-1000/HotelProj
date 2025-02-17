@@ -7,6 +7,7 @@ import com.ntt.ntt.Repository.MemberRepository;
 import com.ntt.ntt.Service.ReservationService;
 import com.ntt.ntt.Service.RoomService;
 import com.ntt.ntt.Util.PaginationUtil;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -31,6 +32,7 @@ import java.util.Optional;
 @RequestMapping("/manager/room/reservation")
 @RequiredArgsConstructor
 @Log4j2
+@Tag(name = "reservationManagerController", description = "관리자 예약 관리 컨트롤러")
 public class ReservationManagerController {
 
     private final ReservationService reservationService;
@@ -154,12 +156,15 @@ public class ReservationManagerController {
     public String updateReservationProc(@RequestParam(value = "reservationId", required = false) Integer reservationId,
                                         @RequestParam(value = "roomId", required = true) Integer roomId,
                                         @RequestParam(value = "reservationEnd", required = false) String reservationEnd,
+                                        @RequestParam(value = "count", required = true) Integer count,
                                         @ModelAttribute ReservationDTO reservationDTO) {
 
         // roomId가 없으면 400 에러 방지
         if (roomId == null) {
             throw new IllegalArgumentException("객실 ID(roomId)가 필요합니다.");
         }
+
+        reservationDTO.setCount(count);
 
         // 예약 ID가 없을 경우, 예약 마감 날짜만 수정
         if (reservationId == null) {
