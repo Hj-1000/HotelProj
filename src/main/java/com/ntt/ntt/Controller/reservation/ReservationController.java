@@ -8,6 +8,7 @@ import com.ntt.ntt.Repository.MemberRepository;
 import com.ntt.ntt.Repository.RoomRepository;
 import com.ntt.ntt.Service.ReservationService;
 import com.ntt.ntt.Service.RoomService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -16,17 +17,16 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 @Controller
-@RequestMapping("/reservation")
 @RequiredArgsConstructor
 @Log4j2
 public class ReservationController {
@@ -38,7 +38,7 @@ public class ReservationController {
 
 
     @PreAuthorize("isAuthenticated()")
-    @PostMapping("/register")
+    @PostMapping("/reservation/register")
     public ResponseEntity<?> registerReservationProc(@AuthenticationPrincipal UserDetails userDetails,
                                                      @RequestBody ReservationDTO reservationDTO) {
         // 1. 로그인 여부 확인
@@ -104,6 +104,51 @@ public class ReservationController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("success", false, "message", "예약 처리 중 오류 발생"));
+        }
+    }
+
+    @Operation(summary = "호텔 예약내역 조회", description = "호텔 예약내역 조회 페이지로 이동한다.")
+    @GetMapping("/myPage/reservationList")
+    public String reservationList(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        if (userDetails == null) {
+            return "redirect:/login";  // 로그인되어있지 않으면 로그인 페이지로 리다이렉트
+        }
+
+        Optional<Member> memberOptional = memberRepository.findByMemberEmail(userDetails.getUsername());
+        if (memberOptional.isEmpty()) {
+            return "redirect:/login"; // 회원 정보가 없으면 로그인 페이지로 리다이렉트
+        }
+
+        Member member = memberOptional.get();
+        List<ReservationDTO> reservations = reservationService.getUserReservations(member.getMemberId());
+
+        // 데이터가 존재하지 않는 경우 빈 리스트 반환
+        if (reservations == null) {reservations = List.of();}
+
+        // Thymeleaf에서 사용하기 위해 Model에 데이터 추가
+        model.addAttribute("reservations", reservations);
+        return "myPage/reservationList";
+    }
+
+
+    //  고객예약 취소 요청
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/myPage/reservation/cancel")
+    public ResponseEntity<?> requestCancelReservation(@AuthenticationPrincipal UserDetails userDetails,
+                                                      @RequestParam Integer reservationId) {
+        Optional<Member> memberOptional = memberRepository.findByMemberEmail(userDetails.getUsername());
+        if (memberOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body("로그인이 필요합니다.");
+        }
+
+        Member member = memberOptional.get();
+
+        try {
+            // 기존 직접 접근 방식 대신 Service의 메서드 호출로 변경
+            reservationService.requestCancelReservation(reservationId, member.getMemberId());
+            return ResponseEntity.ok("예약 취소 요청이 접수되었습니다.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }

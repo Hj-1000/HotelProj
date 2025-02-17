@@ -81,13 +81,32 @@ public class RoomManagerController {
             @PageableDefault(size = 5) Pageable pageable,
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "category", required = false) String category,
-            Model model) {
+            Model model, RedirectAttributes redirectAttributes) {
 
         // 현재 페이지 정보를 Pageable에 반영
         Pageable updatedPageable = PageRequest.of(page, pageable.getPageSize());
 
         // 검색 조건과 페이징 정보를 이용하여 데이터 가져오기
-        Page<RoomDTO> roomDTOS = roomService.searchRooms(keyword, category, updatedPageable);
+        Page<RoomDTO> roomDTOS;
+
+        try {
+            // roomStatus 카테고리 검색 시, "Available" 또는 "Unavailable"만 허용
+            if ("roomStatus".equals(category) && keyword != null) {
+                if (!"Available".equalsIgnoreCase(keyword) && !"Unavailable".equalsIgnoreCase(keyword)) {
+                    log.warn("Invalid room status keyword: {}", keyword);
+                    redirectAttributes.addFlashAttribute("errorMessage", "유효하지 않은 텍스트입니다. 'Available' 또는 'Unavailable'을 입력해주세요.");
+                    return "redirect:/manager/room/list";
+                }
+            }
+
+            // 검색 수행
+            roomDTOS = roomService.searchRooms(keyword, category, updatedPageable);
+
+        } catch (IllegalArgumentException e) {
+            log.warn("검색 중 오류 발생: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "검색 조건이 올바르지 않습니다.");
+            return "redirect:/manager/room/list";
+        }
 
         // 상태 자동 업데이트: 예약 마감일이 지난 경우 예약 불가 처리
         LocalDate today = LocalDate.now();
