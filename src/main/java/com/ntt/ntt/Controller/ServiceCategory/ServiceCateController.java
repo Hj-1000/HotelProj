@@ -63,7 +63,7 @@ public class ServiceCateController {
         return "redirect:/roomService/category/list?hotelId=" + hotelId;  // hotelId를 쿼리 파라미터로 전달 2025-02-11 추가
     }
 
-    @Operation(summary = "전체목록", description = "전체목록을 조회한다.")
+    @Operation(summary = "전체목록", description = "카테고리의 전체목록을 조회한다.")
     @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER')")
     @GetMapping("/list")
     public String listSearch(@RequestParam(required = false) String keyword,
@@ -138,10 +138,13 @@ public class ServiceCateController {
     @Operation(summary = "삭제처리", description = "해당 데이터를 삭제 후 목록페이지로 이동한다.")
     @GetMapping("/delete")
     public String deleteForm(Integer serviceCateId, RedirectAttributes redirectAttributes) {
+        //삭제 전 카테고리 정보 조회
+        ServiceCateDTO serviceCateDTO = serviceCateService.read(serviceCateId);
 
         serviceCateService.delete(serviceCateId);
         redirectAttributes.addFlashAttribute("message", "카테고리 삭제가 완료되었습니다.");
+        Integer hotelId = serviceCateDTO.getHotelId().getHotelId();
 
-        return "redirect:/roomService/category/list";
+        return "redirect:/roomService/category/list?hotelId=" + hotelId;
     }
 }

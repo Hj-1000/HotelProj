@@ -95,7 +95,7 @@ public class ServiceCateService{
     }
     //서비스 카테고리 목록
     /*--------------------------------
-    함수명 : Page<ServiceCateDTO> list(Pageable page)
+    함수명 : Page<ServiceCateDTO> list(Pageable page, String keyword, String searchType, Integer hotelId)
     인수 : 조회할 페이지 정보
     출력 : 해당 데이터들(list)과 page 정보를 전달
     설명 : 요청한 페이지번호에 해당하는 데이터를 조회해서 전달
@@ -151,6 +151,16 @@ public class ServiceCateService{
     --------------------------------*/
     public List<ServiceCateDTO> getAllServiceCate() {
         List<ServiceCate> serviceCate = serviceCateRepository.findAll();
+
+        List<ServiceCateDTO> serviceCateDTOS = serviceCate.stream()
+                .map(a -> new ServiceCateDTO(a.getServiceCateId(), a.getServiceCateName())).collect(Collectors.toList());
+
+        return serviceCateDTOS;
+    }
+
+    //이건 호텔 카테고리 id가 해당 hotelid에 속한것만 가져오는 메서드
+    public List<ServiceCateDTO> listByHotel(Integer hotelId){
+        List<ServiceCate> serviceCate = serviceCateRepository.findByHotel_HotelId(hotelId);
 
         List<ServiceCateDTO> serviceCateDTOS = serviceCate.stream()
                 .map(a -> new ServiceCateDTO(a.getServiceCateId(), a.getServiceCateName())).collect(Collectors.toList());

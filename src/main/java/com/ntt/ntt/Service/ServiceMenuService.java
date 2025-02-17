@@ -88,7 +88,7 @@ public class ServiceMenuService {
 
     //서비스 메뉴 목록
     /*--------------------------------
-    함수명 : Page<serviceMenuDTO> list(Pageable page)
+    함수명 : Page<serviceMenuDTO> list(Pageable page, String keyword, String searchType, Integer serviceCateId, String status)
     인수 : 조회할 페이지 정보
     출력 : 해당 데이터들(list)과 page 정보를 전달
     설명 : 요청한 페이지번호에 해당하는 데이터를 조회해서 전달
