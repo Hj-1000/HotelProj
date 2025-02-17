@@ -143,11 +143,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // 📌 5초마다 새 알림 수 확인 (고정된 숫자 업데이트)
-    setInterval(() => {
-        fetchUnreadNotifications();
-        updateUnreadCount();
-    }, 5000);
 
     // 📌 페이지 로드 시 알림 목록을 불러오기
     fetchNotifications();
