@@ -154,6 +154,7 @@ h2 {
     padding: 10px 15px;
     border-radius: 5px;
     display: inline-block;
+    border: 1px solid #ff4d4d;
     animation: shake 0.6s infinite ease-in-out, backgroundFlash 1.5s infinite ease-in-out;
 }
 
@@ -430,3 +431,4 @@ h2 {
     50% { background-color: #ff9999; }
     100% { background-color: #ffcccc; }
 }
+
