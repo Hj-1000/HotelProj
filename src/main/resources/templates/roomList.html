@@ -74,6 +74,7 @@
             <div id="room-list" class="row">
                 <div class="col-md-4" th:each="room : ${roomList}">
                     <div class="room-card"
+                         th:classappend="${!room.roomStatus} ? 'sold-out' : ''"
                          th:data-room-id="${room.roomId}"
                          th:data-stay-start="${room.stayStart}"
                          th:data-stay-end="${room.stayEnd}">
@@ -86,9 +87,14 @@
                                  src="/img/default_img.jpg"
                                  class="card-img-top"
                                  alt="Default Room Image">
+
                             <!-- 예약 종료-->
                             <div class="sold-out-overlay" th:if="${!room.roomStatus}">
                                 예약 종료
+                            </div>
+
+                            <div class="hover-overlay">
+                                <button class="btn-view-detail" onclick="showDetailAlert()">자세히 보기</button>
                             </div>
                         </div>
                         <div class="room-text">
@@ -143,6 +149,10 @@
 
     <!-- JavaScript -->
     <script>
+
+        function showDetailAlert() {
+            alert("아직 준비중인 서비스입니다.");
+        }
 
         let reservationModal;
 
@@ -293,18 +303,32 @@
             const checkInDate = new Date(checkInInput.value);
             const checkOutDate = new Date(checkOutInput.value);
 
-            if (checkInDate && checkOutDate && checkOutDate > checkInDate) {
+            if (!isNaN(checkInDate.getTime()) && !isNaN(checkOutDate.getTime()) && checkOutDate > checkInDate) {
+                // 총 숙박 일수 계산
                 const stayDays = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
-                dayCountInput.value = `${stayDays}박`;
+
+                // 몇 박 몇 일 계산
+                const nights = stayDays;  // 박 수
+                const days = stayDays + 1;  // 실제 숙박일은 박 + 1일
+
+                // 몇 박 몇 일 형식으로 출력
+                dayCountInput.value = `${nights}박 ${days}일`;
 
                 // 객실 가격 가져오기
                 const roomPriceElement = document.querySelector(".room-card[data-room-id='" + document.getElementById("roomId").value + "'] .room-price");
-                const roomPriceText = roomPriceElement ? roomPriceElement.innerText.replace(/[^\d]/g, "") : "0";
-                const roomPrice = parseInt(roomPriceText, 10);
 
-                if (!isNaN(roomPrice)) {
-                    const totalPrice = roomPrice * stayDays;
-                    totalPriceInput.value = totalPrice.toLocaleString() + " KRW";
+                if (roomPriceElement) {
+                    const roomPriceText = roomPriceElement.innerText.replace(/[^\d]/g, ""); // 숫자만 추출
+                    const roomPrice = parseInt(roomPriceText, 10);
+
+                    if (!isNaN(roomPrice)) {
+                        const totalPrice = roomPrice * nights; // 1박 기준 가격 * 박 수
+                        totalPriceInput.value = totalPrice.toLocaleString() + " KRW";
+                    } else {
+                        totalPriceInput.value = "가격 오류";
+                    }
+                } else {
+                    totalPriceInput.value = "객실 가격 정보 없음";
                 }
             } else {
                 dayCountInput.value = "";

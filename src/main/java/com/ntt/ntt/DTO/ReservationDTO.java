@@ -49,6 +49,7 @@ public class ReservationDTO {
     @Min(1) @Max(6)
     private Integer count;
 
+
     // Entity -> DTO 변환 메서드
     public static ReservationDTO fromEntity(Reservation reservation) {
         RoomDTO roomDTO = reservation.getRoom() != null ? RoomDTO.fromEntity(reservation.getRoom()) : null;
@@ -72,4 +73,5 @@ public class ReservationDTO {
                 reservation.getCount()
         );
     }
+
 }
