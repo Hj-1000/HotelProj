@@ -152,7 +152,7 @@
                 if (imageInput.files.length === 0) { // 이미지가 하나도 없을 경우
                     event.preventDefault(); // 폼 제출 방지
                     event.stopPropagation();
-                    imageInput.classList.add("is-invalid"); // Bootstrap 스타일 적용
+                    imageInput.classList.add("is-invalid");
                 } else {
                     imageInput.classList.remove("is-invalid");
                 }
@@ -248,7 +248,6 @@
             });
         });
 
-        // Bootstrap form validation
         (() => {
             'use strict';
             const forms = document.querySelectorAll('.needs-validation');
