@@ -27,7 +27,7 @@ public class Qna extends BaseEntity {
     private String qnaCategory;
 
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member")  // 외래 키 컬럼명이 memberId일 때
     private Member member;
 
@@ -36,7 +36,7 @@ public class Qna extends BaseEntity {
     private String memberName;
 
     // Qna와 Notification의 관계에 Cascade 처리 추가
-    @OneToMany(mappedBy = "qna", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "qna", cascade = CascadeType.ALL, orphanRemoval = true , fetch = FetchType.LAZY)
     private List<Notification> notifications;
 
 }

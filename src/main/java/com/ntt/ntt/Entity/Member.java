@@ -1,5 +1,6 @@
 package com.ntt.ntt.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ntt.ntt.Constant.Role;
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,7 +11,7 @@ import java.util.List;
 @Table(name="member")
 @Getter
 @Setter
-@ToString
+@ToString(exclude = {"qnaList", "notifications", "replies"}) // 연관 관계 필드 제외
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -36,10 +37,15 @@ public class Member extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToMany(mappedBy = "member")  // 이 부분에서 mappedBy를 사용하여 양방향 관계를 관리
-    private List<Qna> qnas;
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore // 무한 참조 방지
+    private List<Qna> qnaList;
 
-    @OneToMany(mappedBy = "member")  // 이 부분은 Reply와 관련된 부분
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore // 무한 참조 방지
+    private List<Notification> notifications;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore // 무한 참조 방지
     private List<Reply> replies;
-
 }

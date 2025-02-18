@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Table(name = "notification")
 @Getter
 @Setter
-@ToString
+@ToString(exclude = {"member", "qna"}) // 연관 관계 필드 제외
 @AllArgsConstructor
 @Builder
 public class Notification {
@@ -31,9 +31,10 @@ public class Notification {
     @JoinColumn(name = "memberId", nullable = false)
     private Member member; // 알림을 받을 사용자
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "qnaId", nullable = false)
     private Qna qna;
+
 
 
     public Notification() {
