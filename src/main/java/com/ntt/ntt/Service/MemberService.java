@@ -259,7 +259,7 @@ public class MemberService implements UserDetailsService {
         memberRepository.delete(member);
 
         // 회원 탈퇴 완료 후 메시지 추가
-        redirectAttributes.addFlashAttribute("successMessage", "회원탈퇴가 완료되었습니다. :(");
+        redirectAttributes.addFlashAttribute("successMessage", "회원탈퇴가 완료되었습니다. 😢");
     }
 
     // 전체 회원 조회 및 검색기능

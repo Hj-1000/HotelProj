@@ -119,7 +119,7 @@ public class ReservationController {
     @Operation(summary = "호텔 예약내역 조회", description = "호텔 예약내역 조회 페이지로 이동한다.")
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/myPage/reservationList")
-    public String reservationList(@AuthenticationPrincipal UserDetails userDetails,
+    public String reservationListForm(@AuthenticationPrincipal UserDetails userDetails,
                                   @RequestParam(value = "page", defaultValue = "0") int page, // 현재 페이지 (0부터 시작)
                                   @RequestParam(value = "size", defaultValue = "5") int size, // 페이지 크기 (5개)
                                   Model model) {
@@ -171,7 +171,7 @@ public class ReservationController {
     //  고객예약 취소 요청
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/myPage/reservation/cancel")
-    public ResponseEntity<?> requestCancelReservation(@AuthenticationPrincipal UserDetails userDetails,
+    public ResponseEntity<?> requestCancelReservationProc(@AuthenticationPrincipal UserDetails userDetails,
                                                       @RequestParam Integer reservationId) {
         Optional<Member> memberOptional = memberRepository.findByMemberEmail(userDetails.getUsername());
         if (memberOptional.isEmpty()) {
@@ -184,6 +184,38 @@ public class ReservationController {
             // 기존 직접 접근 방식 대신 Service의 메서드 호출로 변경
             reservationService.requestCancelReservation(reservationId, member.getMemberId());
             return ResponseEntity.ok("예약 취소 요청이 접수되었습니다.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // 관리자가 취소 요청을 승인
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/admin/reservation/cancel")
+    public ResponseEntity<?> approveCancelReservationProc(@RequestParam Integer reservationId) {
+        try {
+            reservationService.approveCancelReservation(reservationId);
+            return ResponseEntity.ok("예약이 취소 완료되었습니다.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // 유저가 직접 "취소 완료"된 예약을 삭제
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/myPage/reservation/delete")
+    public ResponseEntity<?> deleteReservationProc(@AuthenticationPrincipal UserDetails userDetails,
+                                               @RequestParam Integer reservationId) {
+        Optional<Member> memberOptional = memberRepository.findByMemberEmail(userDetails.getUsername());
+        if (memberOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body("로그인이 필요합니다.");
+        }
+
+        Member member = memberOptional.get();
+
+        try {
+            reservationService.deleteReservationByUser(reservationId, member.getMemberId());
+            return ResponseEntity.ok("예약 내역이 삭제되었습니다.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

@@ -93,11 +93,11 @@
                 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#unregisterModal">회원탈퇴</button>
             </div>
             <!-- 성공 메시지 출력 -->
-            <div th:if="${successMessage}" class="alert alert-success mt-2">
+            <div th:if="${successMessage}" class="alert alert-success mt-3">
                 <span th:text="${successMessage}"></span>
             </div>
             <!-- 오류 메시지 출력 -->
-            <div th:if="${errorMessage}" class="alert alert-danger mt-2">
+            <div th:if="${errorMessage}" class="alert alert-danger mt-3">
                 <span th:text="${errorMessage}"></span>
             </div>
         </form>

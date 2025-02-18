@@ -340,7 +340,7 @@
                 <input type="hidden" id="editReservationId" name="reservationId">
 
                 <label>예약자 ID:</label>
-                <input type="number" id="editMemberId" name="memberId" min="1"><br>
+                <input type="number" id="editMemberId" name="memberId" min="1" required><br>
 
                 <label>예약자 이름:</label>
                 <input type="text" id="editMemberName" name="memberName"  readonly><br>
@@ -359,10 +359,10 @@
                 </select><br><br>
 
                 <label>체크인 날짜:</label>
-                <input type="date" id="editCheckIn" name="checkInDate"><br>
+                <input type="date" id="editCheckIn" name="checkInDate" required><br>
 
                 <label>체크아웃 날짜:</label>
-                <input type="date" id="editCheckOut" name="checkOutDate"><br>
+                <input type="date" id="editCheckOut" name="checkOutDate" required><br>
 
                 <label>예약마감 날짜:</label>
                 <input type="date" id="editReservationEnd"  name="reservationEnd" ><br>
@@ -390,9 +390,7 @@
 
     <script>
 
-
         /* 예약 마감 기한 수정시 Room_Status 자동 업데이트 */
-
         document.addEventListener("DOMContentLoaded", function () {
             // 수정 모달의 예약 마감 날짜
             const editReservationEndInput = document.getElementById("editReservationEnd");
@@ -770,13 +768,27 @@
             let editCount = document.getElementById("editCount");
             let editButton = document.querySelector(".btn-primary");
 
+            // 입력값 초기화
             editRoomId.value = roomId;
             editReservationId.value = reservationId || "";
             editMemberId.value = memberId || "";
             editCheckIn.value = checkIn || "";
             editCheckOut.value = checkOut || "";
+            editReservationEnd.value = reservationEnd || "";
             editCount.value = count || 1;
 
+            // 예약자 정보를 서버에서 불러와 자동 입력
+            if (memberId) {
+                fetch(`/manager/room/reservation/member/details?memberId=${memberId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        editMemberName.value = data.memberName || "이름 없음";
+                        editMemberEmail.value = data.memberEmail || "이메일 없음";
+                    })
+                    .catch(error => {
+                        console.error("예약자 정보를 불러오는 중 오류 발생:", error);
+                    });
+            }
 
             // reservationEnd가 undefined라면 roomId를 이용해 가져오기
             if (!reservationEnd || reservationEnd === 'null' || reservationEnd === 'undefined' || reservationEnd === '') {
@@ -860,6 +872,7 @@
             if (isRoomExpired) {
                 console.log("예약 기간 만료된 방: 예약 마감 날짜만 수정 가능");
 
+                // 예약자 정보 비활성화
                 editReservationId.value = "";
                 editMemberId.value = "";
                 editMemberName.value = "";
@@ -872,10 +885,23 @@
                 editMemberEmail.disabled = true;
                 editCheckIn.disabled = true;
                 editCheckOut.disabled = true;
-                editCount.disabled = true;
+                editCount.style.display = "none";
                 editReservationEnd.disabled = false;
 
                 editButton.style.backgroundColor = "red";
+
+                // 필수 입력 제거
+                editCount.removeAttribute("required");
+
+                // hidden input 추가 (disabled 상태에서는 값이 제출되지 않기 때문)
+                if (!document.getElementById("editCountHidden")) {
+                    let hiddenInput = document.createElement("input");
+                    hiddenInput.type = "hidden";
+                    hiddenInput.id = "editCountHidden";
+                    hiddenInput.name = "count";
+                    hiddenInput.value = "1"; // 기본값 설정
+                    editCount.parentNode.appendChild(hiddenInput);
+                }
 
             } else {
                 console.log("예약 가능 또는 예약된 방: 모든 정보 수정 가능");
@@ -896,7 +922,23 @@
                 editReservationEnd.disabled = true;
 
                 editButton.style.backgroundColor = "#000000";
+
+                editCount.style.display = "block";
+                editCount.setAttribute("required", "true");
+
+                let hiddenInput = document.getElementById("editCountHidden");
+                if (hiddenInput) {
+                    hiddenInput.remove();
+                }
             }
+
+            // `count` 필드가 예약 만료된 방에서는 필수 입력되지 않도록 변경
+            if (isRoomExpired) {
+                editCount.removeAttribute("required");
+            } else {
+                editCount.setAttribute("required", "true");
+            }
+
             modal.style.display = "block";
             document.body.style.overflow = "hidden";
         }
@@ -920,7 +962,35 @@
                 editForm.addEventListener("submit", function (event) {
                     event.preventDefault(); // 기본 폼 제출 동작 방지
 
+                    let roomId = document.getElementById("editRoomId").value;
+                    let reservationId = document.getElementById("editReservationId").value;
+                    let memberId = document.getElementById("editMemberId").value.trim();
+                    let checkIn = document.getElementById("editCheckIn").value.trim();
+                    let checkOut = document.getElementById("editCheckOut").value.trim();
+                    let reservationEnd = document.getElementById("editReservationEnd").value.trim();
+
+                    // 해당 방의 만료 여부 확인
+                    let isExpired = document.querySelector(`[data-room-id='${roomId}']`).getAttribute("data-is-expired") === 'true';
+
+                    if (isExpired) {
+                        if (!reservationEnd) {
+                            alert("예약 마감 날짜를 입력해주세요.");
+                            return;
+                        }
+                    } else {
+                        if (!memberId || !checkIn || !checkOut) {
+                            alert("예약자 ID, 체크인 날짜, 체크아웃 날짜를 입력해주세요.");
+                            return;
+                        }
+                    }
+
                     let formData = new FormData(editForm);
+
+                    // `count` 값이 정상적으로 포함되어 있는지 확인
+                    if (!formData.has("count") || !formData.get("count")) {
+                        alert("총 인원을 선택해주세요.");
+                        return;
+                    }
 
                     fetch(editForm.action, {
                         method: editForm.method,

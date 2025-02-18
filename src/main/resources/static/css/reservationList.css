@@ -10,7 +10,87 @@
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    height: calc(100vh - 209px); /* 100vh = 화면 전체 높이를 차지하도록 (-209px 는 헤더와 푸터의 높이) */
+    min-height: 100vh;
+    background-color: #f8f9fa; /* 배경 색상을 연한 회색으로 변경 */
+    padding-top: 30px;
+}
+
+/* 카드형 예약 리스트 */
+.reservation-card {
+    display: flex;
+    align-items: center;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+    padding: 15px;
+    transition: transform 0.2s ease-in-out;
+}
+
+.reservation-card:hover {
+    transform: scale(1.02); /* 마우스 호버 시 확대 효과 */
+}
+
+/* 예약 이미지 스타일 */
+.reservation-card img {
+    width: 120px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-right: 15px;
+    border: 1px solid #ddd;
+    transition: transform 0.3s ease;
+}
+
+.reservation-card img:hover {
+    transform: scale(1.1); /* 이미지 확대 효과 */
+}
+
+/* 예약 정보 스타일 */
+.reservation-details {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+/* 예약 상태 스타일 */
+.reservation-status {
+    font-size: 14px;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.status-confirmed {
+    background-color: #28a745;
+    color: white;
+}
+
+.status-pending {
+    background-color: #ffc107;
+    color: black;
+}
+
+.status-canceled {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* 예약 취소 버튼 스타일 */
+.cancel-btn {
+    padding: 7px 12px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 5px;
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    transition: 0.3s ease;
+}
+
+.cancel-btn:hover {
+    background-color: #cc0000;
 }
 
 .mypage-card {
@@ -46,18 +126,51 @@
 }
 
 .room-image {
-    width: 80px;
+    width: 100px;
     height: 80px;
     object-fit: cover;
     border-radius: 5px;
     border: 1px solid #ddd;
 }
 
-/* 테이블 가운데 정렬 */
-td, th {
+/* 객실 타입과 인원수 스타일 */
+.table th, .table td {
     text-align: center;
     vertical-align: middle;
 }
+
+/* 객실 타입 강조 */
+td:nth-child(3) {
+    font-weight: bold;
+    color: #007bff;
+}
+
+/* 총 인원 강조 */
+td:nth-child(5) {
+    font-weight: bold;
+    color: #28a745;
+}
+
+
+.badge {
+    font-size: 14px;
+    padding: 8px 12px;
+    border-radius: 5px;
+}
+
+.bg-success {
+    background-color: #28a745 !important; /* 예약 완료 (초록색) */
+}
+
+.bg-warning {
+    background-color: #ffc107 !important; /* 취소 요청 (노란색) */
+    color: #212529 !important;
+}
+
+.bg-danger {
+    background-color: #dc3545 !important; /* 취소 완료 (빨간색) */
+}
+
 
 /* 공통 페이징 스타일 */
 .pagination {
