@@ -4,7 +4,6 @@ import com.ntt.ntt.Constant.Role;
 import com.ntt.ntt.DTO.CompanyDTO;
 import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.MemberDTO;
-import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Repository.MemberRepository;
 import com.ntt.ntt.Repository.NotificationRepository;
@@ -14,17 +13,19 @@ import com.ntt.ntt.Service.hotel.HotelService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Controller
 @RequiredArgsConstructor
@@ -36,6 +37,7 @@ public class AdminController {
     private final CompanyService companyService;
     private final MemberRepository memberRepository;
     private final NotificationRepository notificationRepository;
+    private final UserDetailsService userDetailsService;
 
     @Operation(summary = "전체회원목록", description = "전체회원목록 페이지로 이동한다.")
     @GetMapping("/admin/memberList")
@@ -78,7 +80,22 @@ public class AdminController {
     @PostMapping("/admin/update")
     public String adminUpdate(@ModelAttribute MemberDTO memberDTO, RedirectAttributes redirectAttributes) {
         try {
+            // 회원 정보 업데이트
             memberService.adminUpdate(memberDTO);
+
+            // 회원 정보가 수정되었으므로, 현재 로그인된 사용자 정보로 Authentication 객체 갱신
+            User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            String username = user.getUsername();
+
+            Set<GrantedAuthority> authorities = new HashSet<>(userDetailsService.loadUserByUsername(username).getAuthorities());
+
+            // 새롭게 갱신된 인증 객체 생성
+            Authentication newAuth = new UsernamePasswordAuthenticationToken(user, user.getPassword(), authorities);
+
+            // 새 인증 객체를 SecurityContext에 설정
+            SecurityContextHolder.getContext().setAuthentication(newAuth);
+
+            // 성공 메시지 설정
             String successMessage = memberDTO.getMemberName() + " 회원의 회원 정보가 성공적으로 수정되었습니다.";
             redirectAttributes.addFlashAttribute("successMessage", successMessage);
             return "redirect:/admin/memberList";
@@ -155,7 +172,22 @@ public class AdminController {
     @PostMapping("/admin/executiveUpdate")
     public String managerUpdate(MemberDTO memberDTO, RedirectAttributes redirectAttributes) {
         try {
+            // 회원 정보 업데이트
             memberService.managerUpdate(memberDTO);
+
+            // 회원 정보가 수정되었으므로, 현재 로그인된 사용자 정보로 Authentication 객체 갱신
+            User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            String username = user.getUsername();
+
+            Set<GrantedAuthority> authorities = new HashSet<>(userDetailsService.loadUserByUsername(username).getAuthorities());
+
+            // 새롭게 갱신된 인증 객체 생성
+            Authentication newAuth = new UsernamePasswordAuthenticationToken(user, user.getPassword(), authorities);
+
+            // 새 인증 객체를 SecurityContext에 설정
+            SecurityContextHolder.getContext().setAuthentication(newAuth);
+
+            // 성공 메시지 설정
             String successMessage = memberDTO.getMemberName() + " 회원의 회원 정보가 성공적으로 수정되었습니다.";
             redirectAttributes.addFlashAttribute("successMessage", successMessage);
             return "redirect:/admin/executiveList";
