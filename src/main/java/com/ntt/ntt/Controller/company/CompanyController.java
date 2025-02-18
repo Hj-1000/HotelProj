@@ -3,10 +3,12 @@ package com.ntt.ntt.Controller.company;
 import com.ntt.ntt.DTO.CompanyDTO;
 import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.HotelDTO;
+import com.ntt.ntt.Service.ImageService;
 import com.ntt.ntt.Service.company.CompanyService;
 import com.ntt.ntt.Service.hotel.HotelService;
 import com.ntt.ntt.Util.PaginationUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -26,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +41,7 @@ public class CompanyController {
     private final CompanyService companyService;
     private final PaginationUtil paginationUtil;
     private final HotelService hotelService;
+    private final ImageService imageService;
 
     //등록폼
     @Operation(summary = "관리자용 본사 등록 폼", description = "본사 등록 폼 페이지로 이동한다.")
@@ -184,9 +188,38 @@ public class CompanyController {
     @Operation(summary = "관리자용 본사 수정 처리", description = "본사를 수정 처리 한다.")
     @PostMapping("/update")
     public String updateProc(CompanyDTO companyDTO, List<MultipartFile> newImageFiles, RedirectAttributes redirectAttributes) {
+
         companyService.update(companyDTO, newImageFiles);
         redirectAttributes.addFlashAttribute("message", "본사 수정이 완료되었습니다.");
-        return "redirect:/company/list";
+
+        Integer companyId = companyDTO.getCompanyId();
+        redirectAttributes.addFlashAttribute("companyId", companyId);
+
+        return "redirect:/company/read?companyId=" + companyId;
+    }
+
+    // 이미지 삭제 (REST API 형식으로 처리)
+    @RequestMapping(value = "/image/delete/{imageId}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public Map<String, String> deleteImage(@PathVariable Integer imageId) {
+        Map<String, String> response = new HashMap<>();
+        try {
+            // 서비스에서 이미지 삭제 호출
+            imageService.deleteImage(imageId);
+
+            // 삭제 성공 시 응답
+            response.put("success", "true");
+            response.put("message", "Image deleted successfully");
+        } catch (EntityNotFoundException e) {
+            // 이미지 없을 때 처리
+            response.put("success", "false");
+            response.put("message", "Image not found with id: " + imageId);
+        } catch (Exception e) {
+            // 기타 예외 처리
+            response.put("success", "false");
+            response.put("message", "Error deleting image");
+        }
+        return response;
     }
 
     //삭제
