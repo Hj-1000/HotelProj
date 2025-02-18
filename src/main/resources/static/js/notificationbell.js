@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const notificationList = document.getElementById('notification-list');
     const unreadCount = document.getElementById('unread-count');
 
+
     let notifications = [];
     let isNotificationsFetched = false;
 
