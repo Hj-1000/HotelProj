@@ -86,7 +86,7 @@
                         <td th:text="${reservation.memberEmail}"></td>
                         <td th:text="${reservation.checkInDate}"></td>
                         <td th:text="${reservation.checkOutDate}"></td>
-                        <td th:text="${reservation.dayCount} + '박'"></td>
+                        <td th:text="${reservation.dayCount} + '박 ' + (${reservation.dayCount + 1}) + '일'"></td>
                         <td th:text="'₩' + ${#numbers.formatInteger(reservation.totalPrice, 1, 'COMMA')}"></td>
                         <td>
                             <span th:class="'status-box ' + (${reservation.reservationStatus == '예약' ? 'status-reserved' : 'status-cancel'})">
@@ -181,7 +181,7 @@
                         <td th:text="${reservation != null ? reservation.checkOutDate : ''}"></td>
 
                         <!-- 숙박일 추가 -->
-                        <td th:text="${reservation != null ? reservation.dayCount + '박' : ''}"></td>
+                        <td th:text="${reservation != null ? reservation.dayCount + '박 ' + (reservation.dayCount + 1) + '일' : ''}"></td>
 
                         <!-- 총 비용 추가 -->
                         <td th:text="${reservation != null ? '₩' + #numbers.formatInteger(reservation.totalPrice, 1, 'COMMA') : ''}"></td>

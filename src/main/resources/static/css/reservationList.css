@@ -151,11 +151,11 @@ td:nth-child(5) {
     color: #28a745;
 }
 
-
 .badge {
     font-size: 14px;
     padding: 8px 12px;
     border-radius: 5px;
+    margin-bottom: 0;
 }
 
 .bg-success {
