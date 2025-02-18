@@ -2,11 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const bell = document.getElementById('notification-bell');
     const notificationList = document.getElementById('notification-list');
     const unreadCount = document.getElementById('unread-count');
-    const qnaSection = document.getElementById('qna-section');  // 추가된 부분
 
-    if (!bell || !notificationList || !unreadCount || !qnaSection) {
-        return; // 오류 메시지 출력 후 스크립트 종료
-    }
 
     let notifications = [];
     let isNotificationsFetched = false;
