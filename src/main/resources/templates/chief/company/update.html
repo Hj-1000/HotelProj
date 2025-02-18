@@ -11,6 +11,22 @@
 
     <script th:inline="javascript">
 
+        $(document).ready(function () {
+
+            // 세션에서 message 값을 가져옴
+            var message = [[${message}]];
+
+            // message가 null이 아니면 알림창을 띄우고 세션에서 삭제
+            if (message !== null && message !== '') {
+                alert(message);
+            }
+
+            $("imgDelBtn").on("click", function () {
+                deleteOldImage()
+            })
+
+        })
+
         // 이미지 미리보기 함수
         function previewImage(event) {
 
@@ -66,6 +82,32 @@
                 }
             }
         }
+
+        // 기존 이미지 삭제 처리 함수
+        function deleteOldImage(imageId) {
+
+            console.log(imageId)
+
+            $.ajax({
+                url: '/company/image/delete/' + imageId,  // 기본 URL 포함
+                method: 'DELETE',
+                success: function(response) {
+                    if (response.success === "true") {
+                        alert("이미지가 삭제되었습니다.");
+                        // 페이지에서 해당 이미지를 삭제
+                        $(".oldImageFiles").hide()
+                        document.getElementById('image-' + imageId).remove();
+                    } else {
+                        alert("이미지 삭제에 실패했습니다.");
+                    }
+                },
+                error: function() {
+                    alert("서버 요청에 실패했습니다.");
+                }
+            });
+        }
+
+
     </script>
 
 </head>
@@ -90,19 +132,22 @@
                         <input type="text" class="form-control" id="companyManager" name="companyManager" th:field="*{companyManager}">
                     </div>
 
-                    <!--2025-01-20 아래에 이미지 원래 올려져있던거 띄우고 삭제, 수정 버튼 추가하기-->
-                    <!-- 기존 이미지 표시 -->
-                    <div th:each="img : ${companyDTO.companyImgDTOList}">
+                    <!-- 기존 이미지 표시 및 삭제 버튼 추가 -->
+                    <div class="oldImageFiles" th:each="img, iterStat : ${companyDTO.companyImgDTOList}">
                         <label>기존 이미지:</label>
-                        <img th:src="@{'/upload/' + ${img.imagePath}}" alt="old" width="100">
-                        <img src="${img.imagePath}" alt="Company Image" width="100">
+                        <div>
+                            <img th:src="@{'/upload/' + ${img.imagePath}}" alt="old" width="100" id="image-{{iterStat.index}}">
+                            <!-- 이미지 삭제 버튼, 이미지 아이디를 전달 -->
+                            <button type="button" class="imgDelBtn" th:onclick="'deleteOldImage(' + ${img.imageId} + ')'" >삭제</button>
+                        </div>
                     </div>
+
 
                     <!-- 새 이미지 업로드 및 미리보기 -->
                     <div>
                         <label for="newImageFiles">새 이미지:</label>
-                        <input type="file" id="newImageFiles" name="imageFiles" multiple accept="image/*" onchange="validateImage(event)">
-                        <small>이미지 파일(PNG, JPG, GIF, BMP, JFIF, WEBP)만 업로드 가능합니다.</small>
+                        <input type="file" id="newImageFiles" name="newImageFiles" multiple accept="image/*" onchange="validateImage(event)">
+                        <small>이미지 파일(PNG, JPG, GIF, BMP, JFIF, WEBP)만 업로드 가능합니다. 최대 5장까지 선택할 수 있습니다.</small>
                     </div>
 
                     <!-- 미리보기 이미지 표시 -->

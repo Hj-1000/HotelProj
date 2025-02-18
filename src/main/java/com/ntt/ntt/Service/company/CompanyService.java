@@ -209,64 +209,46 @@ public class CompanyService {
     }
 
 
-    // 회사 정보 수정 (이미지 수정 포함)
-    // 새로운 이미지 추가 안할때도 기존이미지가 자꾸 삭제됨 이건 추후 수정 예정 :2025-01-22
+    // 정보 수정 (이미지 추가 포함)
     @Transactional
     public void update(CompanyDTO companyDTO, List<MultipartFile> newImageFiles) {
-        // 회사 조회 및 수정
+        // 본사 조회 및 수정
         Optional<Company> companyOpt = companyRepository.findById(companyDTO.getCompanyId());
         if (companyOpt.isPresent()) {
             Company company = companyOpt.get();
 
-            // 회사 정보 수정 (회사 이름과 관리자는 수정)
+            // 본사 정보 수정
             company.setCompanyName(companyDTO.getCompanyName());
-            company.setCompanyManager(companyDTO.getCompanyManager()); // 관리자가 추가된 부분
+            company.setCompanyManager(companyDTO.getCompanyManager());
 
-            // 회사 정보 저장 (이 부분에서 회사 이름과 관리자 저장)
+            // 본사 정보 저장
             companyRepository.save(company);
 
-            // 이미지 수정 처리
+            // 새 이미지 파일이 있을 경우 이미지 처리
             if (newImageFiles != null && !newImageFiles.isEmpty()) {
-                // 새 이미지가 있을 경우, 기존 이미지 삭제 및 새 이미지 업로드
-                List<Image> existingImages = company.getCompanyImageList();  // 회사에 연결된 이미지들 가져오기
-
-                // 기존 이미지 삭제 처리
-                for (Image existingImage : existingImages) {
-                    fileUpload.FileDelete(IMG_LOCATION, existingImage.getImageName());  // 파일 삭제
-                    imageRepository.delete(existingImage);  // 이미지 엔티티 삭제
-                }
-
-                // 회사의 이미지 리스트에서 기존 이미지를 제거 (삭제된 이미지 목록)
-                company.getCompanyImageList().clear();  // 기존 이미지 리스트 비우기
-
-                // 새 이미지들 업로드 처리
+                // 새로운 이미지들 업로드
                 List<String> newFilenames = fileUpload.FileUpload(IMG_LOCATION, newImageFiles);
 
-                // 업로드된 새 이미지들 저장
+                // 새 이미지들 저장
                 for (int i = 0; i < newFilenames.size(); i++) {
                     Image newImage = new Image();
                     newImage.setImageName(newFilenames.get(i));
                     newImage.setImageOriginalName(newImageFiles.get(i).getOriginalFilename());
                     newImage.setImagePath(IMG_LOCATION + newFilenames.get(i));
 
-                    // 이미지와 회사 관계 설정
-                    newImage.setCompany(company);  // 이미지와 회사 연결
+                    // 이미지와 본사 관계 설정
+                    newImage.setCompany(company);  // 이미지와 본사 연결
+                    imageRepository.save(newImage);  // 이미지 저장
 
-                    // 이미지 저장
-                    imageRepository.save(newImage);
-
-                    // 회사와 이미지 연결 (회사 정보에 이미지 추가)
-                    company.getCompanyImageList().add(newImage);  // 이미지를 회사의 이미지 리스트에 추가
+                    // 본사 객체에 새 이미지 추가
+                    company.getCompanyImageList().add(newImage);
                 }
-            } else {
-                // 새 이미지가 없으면 기존 이미지는 삭제하지 않고 그대로 둔다.
-                // company.getCompanyImageList()는 그대로 유지됩니다.
-            }
 
-            // 최종 회사 정보와 이미지 정보 저장
-            companyRepository.save(company);  // 회사 정보 저장 (변경된 회사 정보 및 연결된 이미지 저장)
+                // 이미지 관계 업데이트 후 호텔 저장
+                companyRepository.save(company);
+            }
         } else {
-            throw new RuntimeException("본사를 찾을 수 없습니다.");
+            throw new RuntimeException("본사를 찾을 수 없습니다.");  // 본사를 찾을 수 없는 경우 예외 처리
         }
     }
 

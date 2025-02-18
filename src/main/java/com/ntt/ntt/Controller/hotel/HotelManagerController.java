@@ -3,10 +3,12 @@ package com.ntt.ntt.Controller.hotel;
 import com.ntt.ntt.DTO.CompanyDTO;
 import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.RoomDTO;
+import com.ntt.ntt.Service.ImageService;
 import com.ntt.ntt.Service.RoomService;
 import com.ntt.ntt.Service.hotel.HotelService;
 import com.ntt.ntt.Util.PaginationUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -21,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +37,7 @@ public class HotelManagerController {
     private final RoomService roomService;
 
     private final PaginationUtil paginationUtil;
+    private final ImageService imageService;
 
 
     //등록폼
@@ -224,13 +228,38 @@ public class HotelManagerController {
         hotelService.update(hotelDTO, newImageFiles);
         redirectAttributes.addFlashAttribute("message", "지사 수정이 완료되었습니다.");
 
-        // 등록된 지사의 hotelId 가져오기
-        Integer hotelId = hotelDTO.getHotelId();  // hotelDTO에 hotelId 포함되어 있다고 가정
+        Integer hotelId = hotelDTO.getHotelId();
         redirectAttributes.addFlashAttribute("hotelId", hotelId);
 
-        return "redirect:/manager/hotel/read?hotelId=" + hotelId;  // hotelId 쿼리 파라미터로 전달
-
+        return "redirect:/manager/hotel/read?hotelId=" + hotelId;
     }
+
+    // 이미지 삭제 (REST API 형식으로 처리)
+    @RequestMapping(value = "/image/delete/{imageId}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public Map<String, String> deleteImage(@PathVariable Integer imageId) {
+        Map<String, String> response = new HashMap<>();
+        try {
+            // 서비스에서 이미지 삭제 호출
+            imageService.deleteImage(imageId);
+
+            // 삭제 성공 시 응답
+            response.put("success", "true");
+            response.put("message", "Image deleted successfully");
+        } catch (EntityNotFoundException e) {
+            // 이미지 없을 때 처리
+            response.put("success", "false");
+            response.put("message", "Image not found with id: " + imageId);
+        } catch (Exception e) {
+            // 기타 예외 처리
+            response.put("success", "false");
+            response.put("message", "Error deleting image");
+        }
+        return response;
+    }
+
+
+
 
     //삭제
     @Operation(summary = "관리자용 호텔 삭제", description = "hotelId에 맞는 호텔을 삭제한다.")
