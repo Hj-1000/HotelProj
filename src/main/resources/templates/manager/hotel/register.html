@@ -78,6 +78,136 @@
             }
         }
 
+        //주소입력시 지역 자동설정
+        function setHotelLocationBasedOnAddress(address) {
+
+            address = address.trim().toLowerCase();  // 공백 제거 및 소문자 변환
+
+            let location = '';
+
+            // 서울 지역 그룹핑
+            if (address.includes('강남') || address.includes('역삼') || address.includes('삼성')) {
+                location = '강남/역삼/삼성';
+            } else if (address.includes('신사') || address.includes('청담') || address.includes('압구정')) {
+                location = '신사/청담/압구정';
+            } else if (address.includes('서초') || address.includes('교대') || address.includes('사당')) {
+                location = '서초/교대/사당';
+            } else if (address.includes('잠실') || address.includes('송파') || address.includes('강동')) {
+                location = '잠실/송파/강동';
+            } else if (address.includes('홍대') || address.includes('합정') || address.includes('마포') || address.includes('서대문')) {
+                location = '홍대/합정/마포/서대문';
+            } else if (address.includes('구로') || address.includes('신도림') || address.includes('금천') || address.includes('영등포')) {
+                location = '구로/신도림/금천/영등포';
+            } else if (address.includes('김포공항') || address.includes('강서')) {
+                location = '김포공항/강서';
+            } else if (address.includes('건대입구') || address.includes('성수') || address.includes('여의도')) {
+                location = '건대입구/성수/여의도';
+            } else if (address.includes('종로') || address.includes('광화문') || address.includes('명동') || address.includes('서울 중구')) {
+                location = '종로/광화문/명동/중구';
+            } else if (address.includes('동대문') || address.includes('을지로') || address.includes('성북')) {
+                location = '동대문/을지로/성북';
+            } else if (address.includes('용산') || address.includes('이태원')) {
+                location = '용산/이태원';
+            } else if (address.includes('노원') || address.includes('중랑') || address.includes('도봉')) {
+                location = '노원/중랑/도봉';
+            }
+
+            // 경기도 (주요 도시 개별 표시 + 인근 지역 묶음)
+            else if (address.includes('수원')) {
+                location = '수원';
+            } else if (address.includes('성남')) {
+                location = '성남';
+            } else if (address.includes('고양')) {
+                location = '고양';
+            } else if (address.includes('용인')) {
+                location = '용인';
+            } else if (address.includes('부천')) {
+                location = '부천';
+            } else if (address.includes('광명') || address.includes('시흥')) {
+                location = '광명/시흥';
+            } else if (address.includes('안양') || address.includes('군포') || address.includes('의왕')) {
+                location = '안양/군포/의왕';
+            } else if (address.includes('안산') || address.includes('화성') || address.includes('오산')) {
+                location = '안산/화성/오산';
+            } else if (address.includes('평택') || address.includes('이천') || address.includes('여주')) {
+                location = '평택/이천/여주';
+            } else if (address.includes('의정부') || address.includes('남양주') || address.includes('구리')) {
+                location = '의정부/남양주/구리';
+            } else if (address.includes('파주') || address.includes('양주') || address.includes('동두천')) {
+                location = '파주/양주/동두천';
+            }
+
+            // 인천 (전체 + 세부 지역 그룹)
+            else if (address.includes('인천')) {
+                location = '인천 전체';
+            } else if (address.includes('송도') || address.includes('연수')) {
+                location = '송도/연수';
+            } else if (address.includes('부평') || address.includes('계양')) {
+                location = '부평/계양';
+            } else if (address.includes('인천 중구') || address.includes('강화') || address.includes('옹진')) {
+                location = '중구/강화/옹진';
+            }
+
+            // 강원도 (세부 지역 그룹)
+            else if (address.includes('춘천') || address.includes('홍천')) {
+                location = '춘천/홍천';
+            } else if (address.includes('원주') || address.includes('횡성')) {
+                location = '원주/횡성';
+            } else if (address.includes('강릉') || address.includes('동해') || address.includes('삼척')) {
+                location = '강릉/동해/삼척';
+            } else if (address.includes('속초') || address.includes('양양') || address.includes('고성')) {
+                location = '속초/양양/고성';
+            }
+
+            // 충청도 (세부 지역 그룹)
+            else if (address.includes('대전')) {
+                location = '대전';
+            } else if (address.includes('세종')) {
+                location = '세종';
+            } else if (address.includes('천안') || address.includes('아산')) {
+                location = '천안/아산';
+            } else if (address.includes('청주') || address.includes('충주') || address.includes('제천')) {
+                location = '청주/충주/제천';
+            } else if (address.includes('보령') || address.includes('서산') || address.includes('태안')) {
+                location = '보령/서산/태안';
+            }
+
+            // 전라도 (세부 지역 그룹)
+            else if (address.includes('광주')) {
+                location = '광주';
+            } else if (address.includes('전주') || address.includes('군산') || address.includes('익산')) {
+                location = '전주/군산/익산';
+            } else if (address.includes('여수') || address.includes('순천') || address.includes('광양')) {
+                location = '여수/순천/광양';
+            } else if (address.includes('목포') || address.includes('나주') || address.includes('무안')) {
+                location = '목포/나주/무안';
+            }
+
+            // 경상도 (세부 지역 그룹)
+            else if (address.includes('부산')) {
+                location = '부산';
+            } else if (address.includes('대구')) {
+                location = '대구';
+            } else if (address.includes('울산')) {
+                location = '울산';
+            } else if (address.includes('창원') || address.includes('김해') || address.includes('양산')) {
+                location = '창원/김해/양산';
+            } else if (address.includes('포항') || address.includes('경주')) {
+                location = '포항/경주';
+            } else if (address.includes('구미') || address.includes('안동') || address.includes('문경')) {
+                location = '구미/안동/문경';
+            }
+
+            // 제주도 (세부 지역 그룹)
+            else if (address.includes('제주')) {
+                location = '제주';
+            } else if (address.includes('서귀포')) {
+                location = '서귀포';
+            }
+
+            // hotelLocation에 자동으로 입력
+            document.getElementById('hotelLocation').value = location;
+        }
 
 
 
@@ -107,16 +237,16 @@
                         <label for="hotelName" class="form-label">지사명:</label>
                         <input type="text" class="form-control" id="hotelName" name="hotelName" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="hotelLocation" class="form-label">호텔지역:</label>
-                        <input type="text" class="form-control" id="hotelLocation" name="hotelLocation" required>
-                    </div>
                     <div class="mb-3 mt-3">
                         <label for="hotelAddress" class="form-label">호텔주소:</label>
                         <div class="input-group">
-                            <input type="text" class="form-control" id="hotelAddress" name="hotelAddress" required>
+                            <input type="text" class="form-control" id="hotelAddress" name="hotelAddress" oninput="setHotelLocationBasedOnAddress(this.value)" required>
                             <button type="button" class="btn btn-secondary" onclick="execDaumPostcode()">주소찾기</button>
                         </div>
+                    </div>
+                    <div class="mb-3">
+                        <!--<label for="hotelLocation" class="form-label">호텔지역:</label>-->
+                        <input type="hidden" class="form-control" id="hotelLocation" name="hotelLocation" required>
                     </div>
                     <div class="mb-3">
                         <label for="hotelInfo" class="form-label">호텔상세:</label>
@@ -222,10 +352,13 @@
                                 } else {
                                     addr = data.jibunAddress;
                                 }
-                                //조회한 주소를 html에 id명이 address를 찾아 value에 값을 적용한다.
+                                // 조회한 주소를 html에 id명이 hotelAddress인 곳에 적용
                                 document.getElementById("hotelAddress").value = addr;
+
+                                // 주소 변경 시 setHotelLocationBasedOnAddress 호출
+                                setHotelLocationBasedOnAddress(addr);
                             }
-                        }).open(); //주소검색창 열기
+                        }).open(); // 주소검색창 열기
                     }
                 </script>
 
