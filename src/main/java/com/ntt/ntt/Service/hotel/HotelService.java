@@ -377,13 +377,15 @@ public class HotelService {
 
 
 
-    // 정보 수정 (이미지 수정 포함)
+    // 정보 수정 (이미지 추가 포함)
     @Transactional
     public void update(HotelDTO hotelDTO, List<MultipartFile> newImageFiles) {
-        // 조회 및 수정
+        // 호텔 조회 및 수정
         Optional<Hotel> hotelOpt = hotelRepository.findById(hotelDTO.getHotelId());
         if (hotelOpt.isPresent()) {
             Hotel hotel = hotelOpt.get();
+
+            // 호텔 정보 수정
             hotel.setHotelName(hotelDTO.getHotelName());
             hotel.setHotelLocation(hotelDTO.getHotelLocation());
             hotel.setHotelAddress(hotelDTO.getHotelAddress());
@@ -392,49 +394,38 @@ public class HotelService {
             hotel.setHotelInfo(hotelDTO.getHotelInfo());
             hotel.setHotelCheckIn(hotelDTO.getHotelCheckIn());
             hotel.setHotelCheckOut(hotelDTO.getHotelCheckOut());
-            hotelRepository.save(hotel);  // 이름 저장
 
-            // 이미지 수정 처리
+            // 호텔 정보 저장
+            hotelRepository.save(hotel);
+
+            // 새 이미지 파일이 있을 경우 이미지 처리
             if (newImageFiles != null && !newImageFiles.isEmpty()) {
-                // 이미지를 여러 개 다룰 경우, 기존 이미지 삭제 및 새 이미지 업로드
-                List<Image> existingImages = hotel.getHotelImageList();  // 연결된 이미지들 가져오기
-
-                // 기존 이미지 삭제 처리
-                for (Image existingImage : existingImages) {
-                    fileUpload.FileDelete(IMG_LOCATION, existingImage.getImageName());
-                    imageRepository.delete(existingImage);  // 기존 이미지 삭제
-                }
-
-                // 이미지 리스트에서 삭제된 이미지를 제거
-                hotel.getHotelImageList().clear();  // 이미지를 모두 제거
-
-                // 새 이미지들 업로드 처리
+                // 새로운 이미지들 업로드
                 List<String> newFilenames = fileUpload.FileUpload(IMG_LOCATION, newImageFiles);
 
-                // 업로드된 새 이미지들 저장
+                // 새 이미지들 저장
                 for (int i = 0; i < newFilenames.size(); i++) {
                     Image newImage = new Image();
                     newImage.setImageName(newFilenames.get(i));
                     newImage.setImageOriginalName(newImageFiles.get(i).getOriginalFilename());
                     newImage.setImagePath(IMG_LOCATION + newFilenames.get(i));
 
-                    // 이미지와 회사 관계 설정
-                    newImage.setHotel(hotel);  // 이미지와 회사 연결
+                    // 이미지와 호텔 관계 설정
+                    newImage.setHotel(hotel);  // 이미지와 호텔 연결
+                    imageRepository.save(newImage);  // 이미지 저장
 
-                    // 이미지 저장
-                    imageRepository.save(newImage);
-
-                    // 이미지 연결 (회사 정보에 이미지 추가)
-                    hotel.getHotelImageList().add(newImage);  // 이미지를 회사의 이미지 리스트에 추가
+                    // 호텔 객체에 새 이미지 추가
+                    hotel.getHotelImageList().add(newImage);
                 }
 
-                // 정보 저장 (이미지와의 관계 업데이트)
-                hotelRepository.save(hotel);  // 호텔 정보와 연결된 이미지를 저장
+                // 이미지 관계 업데이트 후 호텔 저장
+                hotelRepository.save(hotel);
             }
         } else {
-            throw new RuntimeException("호텔을 찾을 수 없습니다.");
+            throw new RuntimeException("호텔을 찾을 수 없습니다.");  // 호텔을 찾을 수 없는 경우 예외 처리
         }
     }
+
 
     public HotelDTO findById(Integer hotelId) {
         return hotelRepository.findById(hotelId)
