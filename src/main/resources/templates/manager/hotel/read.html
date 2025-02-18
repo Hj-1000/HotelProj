@@ -83,6 +83,46 @@
             });
         });
 
+        document.addEventListener("DOMContentLoaded", function () {
+            const reservationEndInput = document.getElementById("reservationEnd");
+            const statusAvailable = document.getElementById("statusAvailable");
+            const statusUnavailable = document.getElementById("statusUnavailable");
+            const form = document.querySelector("form");
+
+            function updateRoomStatus() {
+                const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD 형식의 오늘 날짜
+                const reservationEnd = reservationEndInput.value; // 사용자가 선택한 예약 종료 날짜
+
+                if (reservationEnd) {
+                    if (reservationEnd > today) {
+                        // 예약 종료일이 오늘 이후면 예약 가능
+                        statusAvailable.checked = true;
+                        statusUnavailable.checked = false;
+                    } else {
+                        // 예약 종료일이 오늘 이전이면 예약 불가
+                        statusAvailable.checked = false;
+                        statusUnavailable.checked = true;
+                    }
+                }
+
+                // 사용자가 직접 변경하지 못하도록 비활성화
+                statusAvailable.disabled = true;
+                statusUnavailable.disabled = true;
+            }
+
+            // 페이지 로드 시 상태 업데이트 (값이 있을 경우)
+            window.onload = updateRoomStatus;
+
+            // 예약 종료일이 변경될 때마다 상태 업데이트
+            reservationEndInput.addEventListener("change", updateRoomStatus);
+            reservationEndInput.addEventListener("input", updateRoomStatus);
+
+            // 폼 제출 시 roomStatus 값이 서버로 정상적으로 전송되도록 disabled 해제
+            form.addEventListener("submit", function () {
+                statusAvailable.removeAttribute("disabled");
+                statusUnavailable.removeAttribute("disabled");
+            });
+        });
 
     </script>
 
@@ -318,8 +358,8 @@
 
                         <!-- 객실 이미지 업로드 -->
                         <div class="mb-3">
-                            <label for="newImageFiles" class="form-label">객실 이미지 업로드</label>
-                            <input type="file" id="newImageFiles" name="imageFiles" multiple accept="image/*" onchange="validateImage(event)" required>
+                            <label for="imageFile" class="form-label">객실 이미지 업로드</label>
+                            <input type="file" id="imageFile" name="imageFile" multiple accept="image/*" onchange="validateImage(event)" required>
                             <small>PNG, JPG, GIF, BMP, JFIF, WEBP만 업로드 가능합니다. 최대 15장까지 선택할 수 있습니다.</small>
                         </div>
 
