@@ -67,12 +67,24 @@
     var nextButton = document.getElementById('submitButton');  // '다음' 버튼을 찾기
 
     // 세션 만료 시간 가져오기
-    fetch('/user/getSessionExpiry')
-        .then(response => response.json())
+    fetch('/user/getSessionExpiry', {
+        method: "GET",
+        headers: {
+            "X-Requested-With": "XMLHttpRequest"
+        }
+    })
+        .then(response => {
+            if (response.redirected) {
+                // AJAX 요청이 아닐 경우 메인 페이지로 강제 이동
+                window.location.href = response.url;
+                return;
+            }
+            return response.json();
+        })
         .then(expiryTime => {
-            if (expiryTime > 0) {
+            if (expiryTime && expiryTime > 0) {
                 var currentTime = new Date().getTime();
-                var timeLeft = Math.max(0, Math.floor((expiryTime - currentTime) / 1000));  // 인증 코드 만료까지 남은 시간 계산
+                var timeLeft = Math.max(0, Math.floor((expiryTime - currentTime) / 1000)); // 인증 코드 만료까지 남은 시간 계산
 
                 if (timeLeft > 0) {
                     // 타이머 시작

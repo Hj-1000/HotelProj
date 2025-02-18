@@ -6,10 +6,25 @@
 <head>
     <meta charset="UTF-8">
     <title>NTT호텔 - 매니저 등록</title>
+    <style>
+        .custom-link {
+            color: black;
+            text-decoration: none;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+        .custom-link:hover {
+            color: gray; /* 마우스 올리면 회색 */
+        }
+    </style>
 </head>
 <body>
     <div id="wrapper" layout:fragment="content">
         <div class="container-fluid mt-4">
+            <a href="/" class="custom-link"><span>🏚HOME</span></a> /
+            <a href="/admin/memberList" class="custom-link"><span>회원관리</span></a> /
+            <a href="/admin/executiveList" class="custom-link"><span>임원관리</span></a> /
+            <a href="/admin/executiveRegister" class="custom-link"><span>매니저 등록</span></a>
             <h2 class="mb-3">매니저 등록</h2>
             <div class="card p-4">
                 <h5 class="mb-3">매니저 정보 등록</h5>
@@ -38,14 +53,15 @@
                         <div class="col-md-6">
                             <label for="company" class="form-label fw-bold">*본사</label>
                             <select class="form-select" id="company" name="company">
-                                <option value="">전체</option>
+                                <option th:unless="${#lists.isEmpty(companyList)}" value="">본사 선택</option>
+                                <option th:if="${#lists.isEmpty(companyList)}" value="">먼저 본사와 지사를 등록해 주세요</option>
                                 <option th:each="company : ${companyList}" th:value="${company.companyId}" th:text="${company.companyName}"></option>
                             </select>
                         </div>
                         <div class="col-md-6">
                             <label for="hotelSelect" class="form-label fw-bold">*지사</label>
                             <select id="hotelSelect" class="form-select" name="hotelId" required>
-                                <option value="">먼저 본사를 선택하세요.</option>
+                                <option value="">먼저 본사를 선택해 주세요</option>
                             </select>
                         </div>
                         <div class="col-md-12">
@@ -66,14 +82,11 @@
                         $("#company").change(function() {
                             var companyId = $(this).val(); // 선택한 본사의 ID 가져오기
 
-                            // console.log으로 확인
-                            console.log("선택한 본사 ID:", companyId);
-
                             // 회사 ID가 선택되지 않으면 지사 목록 초기화
                             if (!companyId) {
                                 $("#hotelSelect").empty();  // 기존 옵션 제거
-                                $("#hotelSelect").append('<option value="">먼저 본사를 선택하세요</option>');
-                                return;  // 추가적으로 처리할 필요가 없으므로 종료
+                                $("#hotelSelect").append('<option value="">먼저 본사를 선택해 주세요</option>');
+                                return;
                             }
 
                             $.ajax({
@@ -85,15 +98,15 @@
                                     hotelSelect.empty();  // 기존 옵션 제거
 
                                     if (hotels.length > 0) {
-                                        // 호텔 목록이 있을 경우
+                                        // 지사 목록이 있을 경우
                                         hotels.forEach(function(hotel) {
                                             hotelSelect.append(
                                                 `<option value="${hotel.hotelId}">${hotel.hotelName}</option>`
                                             );
                                         });
                                     } else {
-                                        // 지사가 없으면 '지사 목록이 없습니다' 메시지 추가
-                                        hotelSelect.append('<option value="">지사 목록이 없습니다</option>');
+                                        // 지사 목록이 없을 경우
+                                        hotelSelect.append('<option value="">먼저 지사를 등록해 주세요</option>');
                                     }
                                 },
                                 error: function() {
