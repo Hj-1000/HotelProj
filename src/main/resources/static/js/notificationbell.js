@@ -56,6 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (unreadNotifications.length === 0) {
             notificationList.style.display = "none"; // 알림이 없으면 숨김
+            displayNoNotificationsMessage(); // 알림이 없을 때 메시지 표시
         } else {
             unreadNotifications.forEach(notification => {
                 const notificationItem = document.createElement('li');
@@ -71,6 +72,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     e.preventDefault();
                     deleteNotification(notification, notificationItem);
                 });
+
+
 
                 // ✅ 알림을 삭제하는 함수
                 function deleteNotification(notification, notificationItem) {
@@ -98,6 +101,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 notificationList.appendChild(notificationItem);
             });
         }
+    }
+
+    // 📌 알림이 없을 때 메시지를 표시하는 함수
+    function displayNoNotificationsMessage() {
+        const noNotificationsItem = document.createElement('li');
+        noNotificationsItem.classList.add('notification-item');
+        noNotificationsItem.textContent = '알림이 없습니다.';
+        // 메시지 스타일을 검정색으로 설정
+        noNotificationsItem.style.color = 'black'; // 검정색 글씨
+        notificationList.appendChild(noNotificationsItem);
     }
 
     // 📌 새 알림 수 가져오는 함수 (새로고침 없이 알림 숫자 고정)
