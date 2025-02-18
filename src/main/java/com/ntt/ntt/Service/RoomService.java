@@ -441,16 +441,22 @@ public class RoomService {
 
 
     public void updateReservationEnd(Integer roomId, String reservationEnd) {
+        log.info("[updateReservationEnd] 요청됨 - roomId: {}, reservationEnd: {}", roomId, reservationEnd);
+
+
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 방을 찾을 수 없습니다."));
 
         // 예약 마감 날짜가 비어있으면 기본값 설정
         if (reservationEnd == null || reservationEnd.trim().isEmpty()) {
+            log.error("[updateReservationEnd] reservationEnd 값이 없습니다!");
             throw new IllegalArgumentException("예약 마감 날짜가 필요합니다.");
         }
 
         room.setReservationEnd(reservationEnd);
         roomRepository.save(room);
+
+        log.info("[updateReservationEnd] 객실 {}의 예약 마감 날짜가 {}로 업데이트됨", roomId, reservationEnd);
     }
 
 
@@ -463,9 +469,11 @@ public class RoomService {
         LocalDate reservationEndDate = LocalDate.parse(room.getReservationEnd());
 
         if (reservationEndDate.isBefore(today)) {
-            room.setRoomStatus(false); // 예약 불가
+            room.setRoomStatus(false);  // 예약 불가능 상태 (기간 만료)
+            log.info("[updateRoomStatusBasedOnReservationEnd] 객실 {} 예약 마감됨", roomId);
         } else {
-            room.setRoomStatus(true); // 예약 가능
+            room.setRoomStatus(true);  // 예약 가능 상태
+            log.info("[updateRoomStatusBasedOnReservationEnd] 객실 {} 예약 가능", roomId);
         }
 
         roomRepository.save(room);

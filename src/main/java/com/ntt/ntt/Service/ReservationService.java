@@ -11,6 +11,7 @@ import com.ntt.ntt.Repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @Service
 @Transactional
@@ -97,8 +99,14 @@ public class ReservationService {
 
     // 2. 모든 예약 목록 가져오기
     public Page<ReservationDTO> getAllReservations(Pageable pageable) {
-        return reservationRepository.findAll(pageable)
-                .map(ReservationDTO::fromEntity);
+        List<ReservationDTO> filteredReservations = reservationRepository.findAll(pageable)
+                .map(ReservationDTO::fromEntity)
+                .getContent()  // List로 변환
+                .stream()
+                .filter(reservation -> !"취소 완료".equals(reservation.getReservationStatus())) // "취소 완료" 제외
+                .toList();
+
+        return new PageImpl<>(filteredReservations, pageable, filteredReservations.size());
     }
 
     // 3. 특정 방의 예약 정보 조회
@@ -142,13 +150,16 @@ public class ReservationService {
         reservationRepository.save(reservation);
     }
 
-    // 5. 방 예약 삭제 (예약 취소)
+    // 5. 방 예약 삭제 (예약 취소 - 관리자)
     public void deleteReservation(Integer reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 예약을 찾을 수 없습니다."));
 
+        // 예약 상태를 "취소 완료"로 변경
+        reservation.setReservationStatus("취소 완료");
+        reservationRepository.save(reservation);
+
         Room room = reservation.getRoom();
-        reservationRepository.delete(reservation);
 
         // 해당 방의 다른 예약이 없는지 확인 후 상태 변경
         boolean hasOtherReservations = reservationRepository.existsByRoom_RoomId(room.getRoomId());
@@ -157,11 +168,40 @@ public class ReservationService {
             room.setRoomStatus(true); // 다른 예약이 없다면 예약 가능 상태로 변경
             roomRepository.save(room);
         }
+
     }
 
+    // 유저가 "취소 완료" 상태의 예약을 직접 삭제하는 메서드
+    public void deleteReservationByUser(Integer reservationId, Integer memberId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 예약을 찾을 수 없습니다."));
+
+        if (!reservation.getMember().getMemberId().equals(memberId)) {
+            throw new IllegalArgumentException("본인의 예약만 삭제할 수 있습니다.");
+        }
+
+        if (!"취소 완료".equals(reservation.getReservationStatus())) {
+            throw new IllegalArgumentException("취소 완료된 예약만 삭제할 수 있습니다.");
+        }
+
+        // 유저가 직접 삭제할 경우에만 DB에서 제거
+        reservationRepository.delete(reservation);
+    }
+
+    public void approveCancelReservation(Integer reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 예약을 찾을 수 없습니다."));
+
+        if (!"취소 요청".equals(reservation.getReservationStatus())) {
+            throw new IllegalArgumentException("취소 요청된 예약만 승인할 수 있습니다.");
+        }
+
+        // 관리자가 "취소 완료"로만 변경 (DB에서 삭제 X)
+        reservation.setReservationStatus("취소 완료");
+        reservationRepository.save(reservation);
+    }
 
     /* 체크인 날짜가 체크아웃 날짜보다 이전인지 검증메서드 */
-
     private boolean isValidDateRange(String checkInDate, String checkOutDate) {
         try {
             LocalDate checkIn = LocalDate.parse(checkInDate);
@@ -216,7 +256,6 @@ public class ReservationService {
         return reservationsPage.map(ReservationDTO::fromEntity);
     }
 
-
     // 고객 예약 취소 요청
     public void requestCancelReservation(Integer reservationId, Integer memberId) {
         Reservation reservation = reservationRepository.findById(reservationId)
@@ -229,7 +268,5 @@ public class ReservationService {
         reservation.setReservationStatus("취소 요청");
         reservationRepository.save(reservation);
     }
-
-
 
 }

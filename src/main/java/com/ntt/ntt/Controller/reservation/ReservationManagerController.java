@@ -156,29 +156,42 @@ public class ReservationManagerController {
     public String updateReservationProc(@RequestParam(value = "reservationId", required = false) Integer reservationId,
                                         @RequestParam(value = "roomId", required = true) Integer roomId,
                                         @RequestParam(value = "reservationEnd", required = false) String reservationEnd,
-                                        @RequestParam(value = "count", required = true) Integer count,
-                                        @ModelAttribute ReservationDTO reservationDTO) {
+                                        @RequestParam(value = "count", required = false) Integer count,
+                                        @ModelAttribute ReservationDTO reservationDTO,
+                                        RedirectAttributes redirectAttributes) {
 
-        // roomId가 없으면 400 에러 방지
+        log.info("[updateReservationProc] 요청됨 - reservationId: {}, roomId: {}, reservationEnd: {}",
+                reservationId, roomId, reservationEnd);
+
         if (roomId == null) {
-            throw new IllegalArgumentException("객실 ID(roomId)가 필요합니다.");
+            log.error("[updateReservationProc] 객실 ID(roomId)가 없습니다!");
+            redirectAttributes.addFlashAttribute("errorMessage", "객실 ID가 필요합니다.");
+            return "redirect:/manager/room/reservation/list";
         }
 
         reservationDTO.setCount(count);
 
-        // 예약 ID가 없을 경우, 예약 마감 날짜만 수정
-        if (reservationId == null) {
-            roomService.updateReservationEnd(roomId, reservationEnd);
+        try {
+            // 예약 ID가 없으면 예약 마감 날짜만 수정
+            if (reservationId == null) {
+                log.info("[updateReservationProc] 기간 만료된 방 - 예약 마감 날짜만 수정");
+
+                roomService.updateReservationEnd(roomId, reservationEnd);
+                roomService.updateRoomStatusBasedOnReservationEnd(roomId);
+                redirectAttributes.addFlashAttribute("successMessage", "예약 마감 날짜가 성공적으로 수정되었습니다.");
+                return "redirect:/manager/room/reservation/list";
+            }
+
+            // 예약이 존재하는 경우, 예약 정보 수정
+            reservationService.updateReservation(reservationId, reservationDTO, reservationDTO.getMemberId());
             roomService.updateRoomStatusBasedOnReservationEnd(roomId);
+            redirectAttributes.addFlashAttribute("successMessage", "예약이 성공적으로 수정되었습니다.");
+            return "redirect:/manager/room/reservation/list";
+        } catch (Exception e) {
+            log.error("[updateReservationProc] 예약 수정 중 오류 발생", e);
+            redirectAttributes.addFlashAttribute("errorMessage", "예약 수정 중 오류가 발생했습니다.");
             return "redirect:/manager/room/reservation/list";
         }
-
-        reservationService.updateReservation(reservationId, reservationDTO, reservationDTO.getMemberId());
-
-        // 예약 정보 수정 후 객실 상태 자동 업데이트
-        roomService.updateRoomStatusBasedOnReservationEnd(roomId);
-
-        return "redirect:/manager/room/reservation/list?success=update";
     }
 
     // 5. 예약 삭제
