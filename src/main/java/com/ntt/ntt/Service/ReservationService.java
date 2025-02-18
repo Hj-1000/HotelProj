@@ -11,7 +11,6 @@ import com.ntt.ntt.Repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 
 @Service
 @Transactional
@@ -99,14 +97,11 @@ public class ReservationService {
 
     // 2. 모든 예약 목록 가져오기
     public Page<ReservationDTO> getAllReservations(Pageable pageable) {
-        List<ReservationDTO> filteredReservations = reservationRepository.findAll(pageable)
-                .map(ReservationDTO::fromEntity)
-                .getContent()  // List로 변환
-                .stream()
-                .filter(reservation -> !"취소 완료".equals(reservation.getReservationStatus())) // "취소 완료" 제외
-                .toList();
+        Page<Reservation> reservationsPage = reservationRepository.findNonCancelledReservations(pageable);
 
-        return new PageImpl<>(filteredReservations, pageable, filteredReservations.size());
+        log.info("조회된 예약 개수 (Service): {}", reservationsPage.getTotalElements());
+
+        return reservationsPage.map(ReservationDTO::fromEntity);
     }
 
     // 3. 특정 방의 예약 정보 조회

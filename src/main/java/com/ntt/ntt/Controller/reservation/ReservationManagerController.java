@@ -71,7 +71,7 @@ public class ReservationManagerController {
             @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "keyword", required = false) String keyword) {
 
-        log.info("검색 요청 - category: " + category + ", keyword: " + keyword);
+        log.info("예약 목록 페이지 호출 - 검색 category: {}, keyword: {}", category, keyword);
 
         // 객실 목록 (페이징 없이 전체 가져오기)
         List<RoomDTO> allRoomList = roomService.getRoomListWithReservations();
@@ -124,6 +124,8 @@ public class ReservationManagerController {
         // 검색어 정보 유지
         model.addAttribute("category", category);
         model.addAttribute("keyword", keyword);
+
+        log.info("예약 목록 개수: {}", reservationPage.getTotalElements());
 
         return "manager/room/reservation/list";
     }
