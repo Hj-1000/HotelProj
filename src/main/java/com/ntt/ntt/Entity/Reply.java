@@ -7,7 +7,7 @@ import lombok.*;
 @Table(name="reply")
 @Getter
 @Setter
-@ToString
+@ToString(exclude = {"member", "qna"}) // 연관 관계 필드 제외
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -19,11 +19,11 @@ public class Reply extends BaseEntity {
     @Column(length = 255, nullable = false)
     private String replyContent;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "qnaId")
     private Qna qna;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "memberId")
     private Member member;
 }
