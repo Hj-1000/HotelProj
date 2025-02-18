@@ -88,127 +88,134 @@
 
             let location = '';
 
-            // 서울 지역 그룹핑
-            if (address.includes('강남') || address.includes('역삼') || address.includes('삼성')) {
-                location = '강남/역삼/삼성';
-            } else if (address.includes('신사') || address.includes('청담') || address.includes('압구정')) {
-                location = '신사/청담/압구정';
-            } else if (address.includes('서초') || address.includes('교대') || address.includes('사당')) {
-                location = '서초/교대/사당';
-            } else if (address.includes('잠실') || address.includes('송파') || address.includes('강동')) {
-                location = '잠실/송파/강동';
-            } else if (address.includes('홍대') || address.includes('합정') || address.includes('마포') || address.includes('서대문')) {
-                location = '홍대/합정/마포/서대문';
-            } else if (address.includes('구로') || address.includes('신도림') || address.includes('금천') || address.includes('영등포')) {
-                location = '구로/신도림/금천/영등포';
-            } else if (address.includes('김포공항') || address.includes('강서')) {
-                location = '김포공항/강서';
-            } else if (address.includes('건대입구') || address.includes('성수') || address.includes('여의도')) {
-                location = '건대입구/성수/여의도';
-            } else if (address.includes('종로') || address.includes('광화문') || address.includes('명동') || address.includes('서울 중구')) {
-                location = '종로/광화문/명동/중구';
-            } else if (address.includes('동대문') || address.includes('을지로') || address.includes('성북')) {
-                location = '동대문/을지로/성북';
-            } else if (address.includes('용산') || address.includes('이태원')) {
-                location = '용산/이태원';
-            } else if (address.includes('노원') || address.includes('중랑') || address.includes('도봉')) {
+            // 서울 지역 인근 구별 그룹핑
+            if (address.includes('서울 강남구') || address.includes('서울 서초구')) {
+                location = '강남/서초';
+            } else if (address.includes('서울 송파구') || address.includes('서울 강동구')) {
+                location = '송파/강동';
+            } else if (address.includes('서울 마포구') || address.includes('서울 서대문구') || address.includes('서울 은평구')) {
+                location = '마포/서대문/은평';
+            } else if (address.includes('서울 영등포구') || address.includes('서울 동작구') || address.includes('서울 관악구')) {
+                location = '영등포/동작/관악';
+            } else if (address.includes('서울 강서구') || address.includes('서울 양천구')) {
+                location = '강서/양천';
+            } else if (address.includes('서울 성동구') || address.includes('서울 광진구')) {
+                location = '성동/광진';
+            } else if (address.includes('서울 중구') || address.includes('서울 종로구')) {
+                location = '중구/종로';
+            } else if (address.includes('서울 동대문구') || address.includes('서울 성북구')) {
+                location = '동대문/성북';
+            } else if (address.includes('서울 용산구')) {
+                location = '용산';
+            } else if (address.includes('서울 노원구') || address.includes('서울 중랑구') || address.includes('서울 도봉구')) {
                 location = '노원/중랑/도봉';
+            } else if (address.includes('서울 구로구') || address.includes('서울 금천구')) {
+                location = '구로/금천';
+            } else if (address.includes('서울 강북구')) {
+                location = '강북';
             }
 
-            // 경기도 (주요 도시 개별 표시 + 인근 지역 묶음)
-            else if (address.includes('수원')) {
+            // 경기도 (도 이름 없이 도시별 처리)
+            else if (address.includes('경기 수원')) {
                 location = '수원';
-            } else if (address.includes('성남')) {
-                location = '성남';
-            } else if (address.includes('고양')) {
+            } else if (address.includes('경기 고양')) {
                 location = '고양';
-            } else if (address.includes('용인')) {
-                location = '용인';
-            } else if (address.includes('부천')) {
+            } else if (address.includes('경기 부천')) {
                 location = '부천';
-            } else if (address.includes('광명') || address.includes('시흥')) {
+            } else if (address.includes('경기 광명') || address.includes('경기 시흥')) {
                 location = '광명/시흥';
-            } else if (address.includes('안양') || address.includes('군포') || address.includes('의왕')) {
+            } else if (address.includes('경기 성남') || address.includes('경기 용인') || address.includes('경기 광주')) {
+                location = '성남/용인/광주';
+            } else if (address.includes('경기 안양') || address.includes('경기 군포') || address.includes('경기 의왕')) {
                 location = '안양/군포/의왕';
-            } else if (address.includes('안산') || address.includes('화성') || address.includes('오산')) {
+            } else if (address.includes('경기 안산') || address.includes('경기 화성') || address.includes('경기 오산')) {
                 location = '안산/화성/오산';
-            } else if (address.includes('평택') || address.includes('이천') || address.includes('여주')) {
+            } else if (address.includes('경기 평택') || address.includes('경기 이천') || address.includes('경기 여주')) {
                 location = '평택/이천/여주';
-            } else if (address.includes('의정부') || address.includes('남양주') || address.includes('구리')) {
+            } else if (address.includes('경기 의정부') || address.includes('경기 남양주') || address.includes('경기 구리')) {
                 location = '의정부/남양주/구리';
-            } else if (address.includes('파주') || address.includes('양주') || address.includes('동두천')) {
+            } else if (address.includes('경기 파주') || address.includes('경기 양주') || address.includes('경기 동두천')) {
                 location = '파주/양주/동두천';
             }
 
-            // 인천 (전체 + 세부 지역 그룹)
-            else if (address.includes('인천')) {
-                location = '인천 전체';
-            } else if (address.includes('송도') || address.includes('연수')) {
-                location = '송도/연수';
-            } else if (address.includes('부평') || address.includes('계양')) {
+            // 인천
+            else if (address.includes('인천 송도') || address.includes('인천 연수') || address.includes('인천 남동')) {
+                location = '송도/연수/남동';
+            } else if (address.includes('인천 부평') || address.includes('인천 계양')) {
                 location = '부평/계양';
-            } else if (address.includes('인천 중구') || address.includes('강화') || address.includes('옹진')) {
-                location = '중구/강화/옹진';
+            } else if (address.includes('인천 중구') || address.includes('인천 동구') || address.includes('인천 미추홀')) {
+                location = '중구/동구/미추홀';
             }
 
-            // 강원도 (세부 지역 그룹)
-            else if (address.includes('춘천') || address.includes('홍천')) {
-                location = '춘천/홍천';
-            } else if (address.includes('원주') || address.includes('횡성')) {
-                location = '원주/횡성';
-            } else if (address.includes('강릉') || address.includes('동해') || address.includes('삼척')) {
-                location = '강릉/동해/삼척';
-            } else if (address.includes('속초') || address.includes('양양') || address.includes('고성')) {
-                location = '속초/양양/고성';
+            // 부산
+            else if (address.includes('부산 해운대') || address.includes('부산 수영') || address.includes('부산 남구')) {
+                location = '해운대/수영/남구';
+            } else if (address.includes('부산 중구') || address.includes('부산 남포') || address.includes('부산 영도')) {
+                location = '중구/남포/영도';
+            } else if (address.includes('부산 동래') || address.includes('부산 연제') || address.includes('부산 금정')) {
+                location = '동래/연제/금정';
+            } else if (address.includes('부산 사하') || address.includes('부산 강서') || address.includes('부산 사상')) {
+                location = '사하/강서/사상';
             }
 
-            // 충청도 (세부 지역 그룹)
-            else if (address.includes('대전')) {
-                location = '대전';
-            } else if (address.includes('세종')) {
+            // 대구
+            else if (address.includes('대구 중구') || address.includes('대구 동성로') || address.includes('대구 남구')) {
+                location = '중구/동성로/남구';
+            } else if (address.includes('대구 수성구') || address.includes('대구 달서구')) {
+                location = '수성구/달서구';
+            } else if (address.includes('대구 북구') || address.includes('대구 서구') || address.includes('대구 동구')) {
+                location = '북구/서구/동구';
+            }
+
+            // 광주
+            else if (address.includes('광주 동구') || address.includes('광주 서구') || address.includes('광주 남구')) {
+                location = '동구/서구/남구';
+            } else if (address.includes('광주 북구') || address.includes('광주 광산구')) {
+                location = '북구/광산구';
+            }
+
+            // 대전
+            else if (address.includes('대전 유성구') || address.includes('대전 서구') || address.includes('대전 중구')) {
+                location = '유성구/서구/중구';
+            } else if (address.includes('대전 동구') || address.includes('대전 대덕구')) {
+                location = '동구/대덕구';
+            }
+
+            // 울산
+            else if (address.includes('울산 남구') || address.includes('울산 중구') || address.includes('울산 동구')) {
+                location = '남구/중구/동구';
+            } else if (address.includes('울산 북구') || address.includes('울산 울주군')) {
+                location = '북구/울주군';
+            }
+
+            // 세종
+            else if (address.includes('세종')) {
                 location = '세종';
-            } else if (address.includes('천안') || address.includes('아산')) {
-                location = '천안/아산';
-            } else if (address.includes('청주') || address.includes('충주') || address.includes('제천')) {
-                location = '청주/충주/제천';
-            } else if (address.includes('보령') || address.includes('서산') || address.includes('태안')) {
-                location = '보령/서산/태안';
+
+                // 도 이름 유지 (충청도, 전라도, 경상도)
+            } else if (address.includes('충북 청주') || address.includes('충북 충주') || address.includes('충북 제천')) {
+                location = '충북 청주/충주/제천';
+            } else if (address.includes('충남 천안') || address.includes('충남 아산')) {
+                location = '충남 천안/아산';
+
+            } else if (address.includes('전북 전주') || address.includes('전북 군산') || address.includes('전북 익산')) {
+                location = '전북 전주/군산/익산';
+            } else if (address.includes('전남 여수') || address.includes('전남 순천') || address.includes('전남 광양')) {
+                location = '전남 여수/순천/광양';
+
+            } else if (address.includes('경북 포항') || address.includes('경북 경주')) {
+                location = '경북 포항/경주';
+            } else if (address.includes('경남 창원') || address.includes('경남 김해') || address.includes('경남 양산')) {
+                location = '경남 창원/김해/양산';
             }
 
-            // 전라도 (세부 지역 그룹)
-            else if (address.includes('광주')) {
-                location = '광주';
-            } else if (address.includes('전주') || address.includes('군산') || address.includes('익산')) {
-                location = '전주/군산/익산';
-            } else if (address.includes('여수') || address.includes('순천') || address.includes('광양')) {
-                location = '여수/순천/광양';
-            } else if (address.includes('목포') || address.includes('나주') || address.includes('무안')) {
-                location = '목포/나주/무안';
-            }
-
-            // 경상도 (세부 지역 그룹)
-            else if (address.includes('부산')) {
-                location = '부산';
-            } else if (address.includes('대구')) {
-                location = '대구';
-            } else if (address.includes('울산')) {
-                location = '울산';
-            } else if (address.includes('창원') || address.includes('김해') || address.includes('양산')) {
-                location = '창원/김해/양산';
-            } else if (address.includes('포항') || address.includes('경주')) {
-                location = '포항/경주';
-            } else if (address.includes('구미') || address.includes('안동') || address.includes('문경')) {
-                location = '구미/안동/문경';
-            }
-
-            // 제주도 (세부 지역 그룹)
-            else if (address.includes('제주')) {
+            // 제주
+            else if (address.includes('제주 제주시')) {
                 location = '제주';
-            } else if (address.includes('서귀포')) {
+            } else if (address.includes('제주 서귀포시')) {
                 location = '서귀포';
             }
 
-            // hotelLocation에 자동으로 입력
             document.getElementById('hotelLocation').value = location;
         }
 
