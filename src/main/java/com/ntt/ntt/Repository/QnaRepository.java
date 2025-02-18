@@ -16,12 +16,14 @@ public interface QnaRepository extends JpaRepository<Qna, Integer> {
 
 
     // 제목, 내용, 질문 유형으로 검색
-    Page<Qna> findByQnaCategoryContainingOrQnaTitleContainingOrQnaContentContaining(
-            String qnaCategory, String qnaTitle, String qnaContent, Pageable pageable);
+    @Query("SELECT q FROM Qna q " +
+            "WHERE (:qnaCategory IS NULL OR :qnaCategory = '' OR q.qnaCategory LIKE %:qnaCategory%) " +
+            "AND (:keyword IS NULL OR :keyword = '' OR q.qnaTitle LIKE %:keyword% OR q.qnaContent LIKE %:keyword%)")
+    Page<Qna> searchQna(@Param("qnaCategory") String qnaCategory,
+                        @Param("keyword") String keyword,
+                        Pageable pageable);
 
-
-
-       // Qna를 ID로 조회하는 메서드 (JPA에서 자동으로 제공됨)
+    // Qna를 ID로 조회하는 메서드 (JPA에서 자동으로 제공됨)
                 Optional<Qna> findById(Integer id);
 
     //오류

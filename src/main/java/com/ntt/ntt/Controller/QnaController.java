@@ -77,7 +77,7 @@ public class QnaController {
             Model model) {
 
         // 모든 Q&A 게시글 가져오기 (role 상관없이)
-        Page<Qna> qnaPage = qnaService.getQnaPage(page, keyword, qnaCategory, keyword);
+        Page<Qna> qnaPage = qnaService.getQnaPage(page, keyword, qnaCategory);
 
         // 페이지네이션 정보 계산
         Map<String, Integer> pagination = paginationUtil.pagination(qnaPage);
