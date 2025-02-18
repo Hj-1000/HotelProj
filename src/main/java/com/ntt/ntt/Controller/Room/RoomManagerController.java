@@ -261,9 +261,6 @@ public class RoomManagerController {
         return "redirect:/manager/room/list";
     }
 
-
-
-
     // 5. Room 삭제
     @GetMapping("/delete/{roomId}")
     public String deleteRoomForm(@PathVariable Integer roomId, RedirectAttributes redirectAttributes) {

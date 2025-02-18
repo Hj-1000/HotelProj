@@ -246,6 +246,36 @@
 </div>
 <script>
 
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".delete-room-btn").forEach(button => {
+            button.addEventListener("click", function (event) {
+                event.preventDefault();
+
+                let roomId = this.getAttribute("data-room-id");
+                let deleteUrl = `/manager/room/delete/${roomId}`;
+
+                if (confirm("정말 이 방을 삭제하시겠습니까?")) {
+                    fetch(deleteUrl, {
+                        method: "GET",
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === "success") {
+                                alert(data.message);
+                                location.reload(); // 페이지 새로고침
+                            } else {
+                                alert(data.message); // 삭제 실패 메시지 표시
+                            }
+                        })
+                        .catch(error => {
+                            console.error("삭제 요청 중 오류 발생:", error);
+                            alert("삭제 처리 중 오류가 발생했습니다.");
+                        });
+                }
+            });
+        });
+    });
+
     /*  입력값을 소문자로 변환 */
     document.getElementById("searchInput").addEventListener("input", function () {
         this.value = this.value.toLowerCase();
