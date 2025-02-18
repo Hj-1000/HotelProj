@@ -5,7 +5,10 @@ import com.ntt.ntt.Repository.MemberRepository;
 import com.ntt.ntt.Service.EmailService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -226,14 +229,23 @@ public class PasswordResetController {
 
     @Operation(summary = "세션 만료", description = "세션 만료 시간을 전달한다.")
     @GetMapping("/user/getSessionExpiry")
-    @ResponseBody
-    public long getSessionExpiry(HttpSession session) {
+    public ResponseEntity<?> getSessionExpiry(HttpSession session, HttpServletRequest request) {
+        // AJAX 요청인지 확인
+        String requestedWith = request.getHeader("X-Requested-With");
+        boolean isAjax = "XMLHttpRequest".equals(requestedWith);
+
+        if (!isAjax) {
+            // AJAX 요청이 아닐 경우 메인 페이지로 이동
+            return ResponseEntity.status(HttpStatus.FOUND).header("Location", "/").build();
+        }
+
+        // AJAX 요청일 경우 세션 만료 시간 반환
         Long timestamp = (Long) session.getAttribute("resetCodeTimestamp");
         if (timestamp != null) {
-            // 30초 (30000ms) 후 만료되는 시간 계산 -> 테스트하느라 30초로 했는데 실제 적용시에는 3분(180000ms) 로 수정하기
+            // 테스트: 1분 (60000ms) -> 실제 적용시 3분 (180000ms)로 변경
             long expiryTime = timestamp + 60000;
-            return expiryTime;
+            return ResponseEntity.ok(expiryTime);
         }
-        return 0;
+        return ResponseEntity.ok(0);
     }
 }

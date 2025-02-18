@@ -3,10 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <title>NTT호텔 - 임원관리</title>
+    <style>
+        .custom-link {
+            color: black;
+            text-decoration: none;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+        .custom-link:hover {
+            color: gray; /* 마우스 올리면 회색 */
+        }
+    </style>
 </head>
 <body>
 <div layout:fragment="content">
     <div class="container-fluid mt-4">
+        <a href="/" class="custom-link"><span>🏚HOME</span></a> /
+        <a href="/admin/memberList" class="custom-link"><span>회원관리</span></a> /
+        <a href="/admin/executiveList" class="custom-link"><span>임원관리</span></a>
         <h2 class="mb-3">임원관리</h2>
         <div class="card p-4">
             <form th:action="@{/admin/executiveList}" method="get">
