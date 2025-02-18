@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en"
       xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <title>관리자 페이지</title>
@@ -13,7 +14,6 @@
     <link rel ="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/notificationbell.css}">
-
     <link rel="icon" href="/path/to/favicon.ico" type="image/x-icon">
 </head>
 
@@ -86,9 +86,11 @@
                     <li><a href="#" class="nav-link text-white"><i class="fa-regular fa-snowflake"></i> 다국어관리</a></li>
                     <li><a href="/notice/list" class="nav-link text-white"><i class="fa-regular fa-snowflake"></i> 공지사항</a></li>
 
+                    <div sec:authorize="hasRole('ADMIN')">
                     <!-- Q&A와 알림 벨을 같은 라인에 배치 -->
                     <li>
-                        <div class="d-flex align-items-center">
+
+                        <div  class="d-flex align-items-center">
                             <a href="/qna" class="nav-link text-white"><i class="fa-regular fa-snowflake"></i> Q&A</a>
 
                             <div id="notification-container">
@@ -105,7 +107,9 @@
                     </li>
 
                 </div>
+                </div>
             </ul>
+
 
             <!-- CHIEF Menu -->
             <!--<ul class="nav nav-pills flex-column mb-auto" th:if="${#authentication.hasRole('ADMIN') or #authentication.hasRole('CHIEF')}">
