@@ -33,18 +33,10 @@ public class QnaService {
 
 
 
-    public Page<Qna> getQnaPage(int page, String keyword, String qnaCategory, String memberNameKeyword) {
+    public Page<Qna> getQnaPage(int page, String keyword, String qnaCategory) {
         Pageable pageable = PageRequest.of(page - 1, 10, Sort.by(Sort.Order.desc("regDate")));  // 페이지 번호는 1부터 시작하지만, Pageable은 0부터 시작하므로 -1 해줌
-        Page<Qna> qnaPage;
 
-        // keyword와 qnaCategory가 모두 null이거나 빈 문자열일 경우 전체 검색
-        if ((keyword == null || keyword.isEmpty()) && (qnaCategory == null || qnaCategory.isEmpty())) {
-            qnaPage = qnaRepository.findAll(pageable);  // 모든 Q&A 검색
-        } else {
-            // qnaCategory와 keyword를 포함하여 검색
-            qnaPage = qnaRepository.findByQnaCategoryContainingOrQnaTitleContainingOrQnaContentContaining(
-                    qnaCategory, keyword, keyword, pageable);
-        }
+        Page<Qna> qnaPage = qnaRepository.searchQna(qnaCategory, keyword, pageable);
 
         // 마스킹 처리
         qnaPage.getContent().forEach(qna -> {
