@@ -47,23 +47,24 @@
             <div id="timer" class="text-center mt-2 timer">
                 인증 코드 만료까지 남은 시간: <span id="timeLeft"></span>
             </div>
-            <p th:if="${errorMessage}" class="text-danger mt-2" th:text="${errorMessage}"></p>
-            <p id="expiredMessage" class="text-danger mt-2" style="display:none;">인증 코드가 만료되었습니다.<br>인증 코드를 재전송해주세요.</p>
             <div class="d-flex mt-2">
-                <button type="submit" class="btn btn-primary">다음</button>
+                <button type="submit" id="submitButton" class="btn btn-primary">다음</button>
                 <button type="button" class="btn btn-danger ms-2" onclick="location.href='/'">취소</button>
                 <button type="button" id="resendCodeButton" class="btn btn-warning ms-2" onclick="resendCode()">인증 코드 재전송</button>
             </div>
+            <div th:if="${errorMessage}" class="alert alert-danger mt-3" th:text="${errorMessage}"></div>
+            <div id="expiredMessage" class="alert alert-danger mt-3" style="display:none;">인증 코드가 만료되었습니다.<br>인증 코드를 재전송해주세요.</div>
+
         </form>
     </div>
 </div>
 <div th:replace="~{fragments/footer::footer}"></div>
 
 <script>
-
     var timerElement = document.getElementById('timeLeft');
     var expiredMessage = document.getElementById('expiredMessage');
     var resendCodeButton = document.getElementById('resendCodeButton');
+    var nextButton = document.getElementById('submitButton');  // '다음' 버튼을 찾기
 
     // 세션 만료 시간 가져오기
     fetch('/user/getSessionExpiry')
@@ -84,12 +85,14 @@
                         if (timeLeft <= 0) {
                             clearInterval(timer);
                             expiredMessage.style.display = 'block'; // 타이머 종료 후 만료 메시지 표시
+                            nextButton.disabled = true; // '다음' 버튼 비활성화
                         } else {
                             timeLeft--;
                         }
                     }, 1000);
                 } else {
                     expiredMessage.style.display = 'block';
+                    nextButton.disabled = true; // 인증 코드 만료 즉시 '다음' 버튼 비활성화
                 }
             }
         })
@@ -110,7 +113,7 @@
             .then(data => {
                 if (data.success) {
                     alert("인증 코드가 재전송되었습니다.");
-                    location.reload();
+                    window.location.href = window.location.href;
                 } else {
                     alert("오류가 발생했습니다. 다시 시도해주세요.");
                 }
@@ -124,7 +127,6 @@
                 resendCodeButton.textContent = "인증 코드 재전송"; // 원래 텍스트로 복구
             });
     }
-
 </script>
 </body>
 </html>
