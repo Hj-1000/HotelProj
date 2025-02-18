@@ -64,6 +64,7 @@ public class PasswordResetController {
         session.setAttribute("resetCode", resetCode);
         session.setAttribute("resetCodeTimestamp", System.currentTimeMillis());
         session.setAttribute("email", email);
+        session.setAttribute("emailCheck", true);
 
         // 4. 비동기 이메일 전송 (비밀번호 찾기를 위한 이메일 발송 속도가 느려서 비동기 메서드 사용, 이메일이 발송되는 동안에도 컨트롤러는 바로 응답 가능)
         emailService.sendPasswordResetEmail(email, resetCode);
@@ -87,7 +88,16 @@ public class PasswordResetController {
 
     @Operation(summary = "인증 코드 확인폼", description = "인증 코드 입력 페이지로 이동한다.")
     @GetMapping("/user/verifyCode")
-    public String verifyCodeForm(HttpSession session) {
+    public String verifyCodeForm(HttpSession session, Model model) {
+        // 세션에 저장된 emailCheck 정보를 가져와서
+        Boolean emailCheck = (Boolean) session.getAttribute("emailCheck");
+
+        // 이메일 존재 여부 확인을 받지 않은 경우 인증 페이지로 리디렉션
+        if (emailCheck == null || !emailCheck) {
+            model.addAttribute("errorMessage", "찾으려는 이메일을 다시 입력해주세요.");
+            return "redirect:/user/findPassword";
+        }
+
         // 세션에 저장된 인증 코드와 타임스탬프를 가져와서
         String resetCode = (String) session.getAttribute("resetCode");
         Long timestamp = (Long) session.getAttribute("resetCodeTimestamp");
@@ -106,6 +116,7 @@ public class PasswordResetController {
         }
 
         // 인증 코드가 유효하면 verifyCode 페이지를 반환
+        session.removeAttribute("emailCheck");
         return "user/verifyCode";
     }
 
@@ -163,6 +174,7 @@ public class PasswordResetController {
         // 세션에 새로운 코드 및 타임스탬프 저장
         session.setAttribute("resetCode", resetCode);
         session.setAttribute("resetCodeTimestamp", System.currentTimeMillis());
+        session.setAttribute("emailCheck", true);
 
         response.put("success", true);
         return response;
