@@ -42,7 +42,7 @@
         .container1{
             margin: 20px auto 100px auto;
             width: 1000px;
-            height: 250px;
+            height: 370px;
             border:1px solid lightgray;
             border-radius: 10px;
             padding: 30px;
@@ -69,6 +69,17 @@
 
         .hotel-buttons {
             text-align: right;
+        }
+
+        .search-div {
+            margin: auto;
+            text-align: center;
+        }
+
+        .location-link {
+            text-decoration: none;
+            color: #282f32;
+            margin-bottom: 5px
         }
 
     </style>
@@ -156,6 +167,23 @@
         }
 
 
+        document.addEventListener("DOMContentLoaded", function () {
+            var moBtn = document.querySelectorAll(".modalBtn");  // 버튼을 모든 요소로 처리
+            var modalElement = document.getElementById("myModal"); // 모달 요소 가져오기
+            var modal = new bootstrap.Modal(modalElement); // 부트스트랩 Modal 객체 생성
+
+            // 모달 버튼 클릭 시
+            moBtn.forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    console.log("모달 진입좀해라");
+
+                    modal.show(); // 모달 열기
+                });
+            });
+
+        })
+
+
 
     </script>
 
@@ -173,8 +201,8 @@
         <div class="container">
             <div class="container1">
                 <br>
-                <h2 class="d-flex justify-content-center mb-2">어디로 갈까요?</h2>
-                <div class="d-flex justify-content-center" role="search">
+                <h2 class="d-flex justify-content-center mb-3">어디로 갈까요?</h2>
+                <div class="d-flex justify-content-center mt-2" role="search">
                     <button type="button" class="form-control w-60 me-1 modalBtn" style="text-align: left;" aria-label="Search">
                         <i class="fa-solid fa-location-dot"></i>
                         지역 선택
@@ -185,7 +213,29 @@
                     </button>
                 </div>
 
+                <form action="/hotel/list" method="get" class="mt-3">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-6">
+                            <select name="searchType" class="form-select" style="height: 50px;">
+                                <option value="name" th:selected="${searchType == 'name'}">호텔명</option>
+                                <option value="address" th:selected="${searchType == 'address'}">주소</option>
+                                <option value="rating" th:selected="${searchType == 'rating'}">별점</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" name="keyword" class="form-control" placeholder="검색어를 입력하세요" style="height: 50px;">
+                        </div>
+                    </div>
+                    <!-- 조회 버튼 -->
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-dark w-25" style="height: 50px;" th:formaction="@{ /hotel/list(searchType=${searchType}, keyword=${keyword})}">조 회</button>
+                    </div>
+                </form>
+
+
             </div>
+
+
 
 
             <div id="hotel-list" class="row hotel-list">
@@ -288,37 +338,7 @@
             </div>
         </div>
 
-
-
     </section>
-
-
-
-    <div class="row">
-        <div class="col-3"></div>
-        <div class="col-6">
-            <form action="/hotel/list" method="get">
-                <div class="row g-3 align-items-center">
-                    <div class="col-md-3">
-                        <select name="searchType" class="form-select">
-                            <option value="name" th:selected="${searchType == 'name'}">호텔명</option>
-                            <option value="location" th:selected="${searchType == 'location'}">지역</option>
-                            <option value="address" th:selected="${searchType == 'address'}">주소</option>
-                            <option value="rating" th:selected="${searchType == 'rating'}">별점</option>
-                        </select>
-                    </div>
-                    <div class="col-md-7">
-                        <input type="text" name="keyword" class="form-control" placeholder="검색어를 입력하세요">
-                    </div>
-                    <!-- 조회 버튼 -->
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-dark w-25">조회</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-        <div class="col-3"></div>
-    </div>
 
 
 
@@ -326,40 +346,34 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">지역 선택</h4>
+                    <h4 class="modal-title">지역 선택✈</h4>
 
                 </div>
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-3">
                             <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
-                                <button type="button" class="btn btn-secondary">서울</button>
-                                <button type="button" class="btn btn-secondary">부산</button>
-                                <button type="button" class="btn btn-secondary">제주</button>
-                                <button type="button" class="btn btn-secondary">경기</button>
-                                <button type="button" class="btn btn-secondary">인천</button>
-                                <button type="button" class="btn btn-secondary">강원</button>
-                                <button type="button" class="btn btn-secondary">경상</button>
-                                <button type="button" class="btn btn-secondary">전라</button>
-                                <button type="button" class="btn btn-secondary">충청</button>
+                                <button type="button" class="btn btn-secondary su">서울</button>
+                                <button type="button" class="btn btn-secondary bs">부산</button>
+                                <button type="button" class="btn btn-secondary jj">제주</button>
+                                <button type="button" class="btn btn-secondary gk">경기</button>
+                                <button type="button" class="btn btn-secondary ic">인천</button>
+                                <button type="button" class="btn btn-secondary gw">강원</button>
+                                <button type="button" class="btn btn-secondary gs">경상</button>
+                                <button type="button" class="btn btn-secondary je">전라</button>
+                                <button type="button" class="btn btn-secondary cc">충청</button>
                             </div>
                         </div>
                         <div class="col-9">
-                            <form class="d-flex justify-content-center" role="search">
-                                <input type="search" placeholder="지역선택" aria-label="Search">
-                                <button class="btn btn-outline-success" type="submit" >Click</button>
-                            </form>
-                            <ul class="region-list">
-                                <li onclick="selectRegion('강남/역삼/삼성')">강남/역삼/삼성</li>
-                                <li onclick="selectRegion('신사/청담/압구정')">신사/청담/압구정</li>
-                                <li onclick="selectRegion('서초/교대/사당')">서초/교대/사당</li>
-                                <li onclick="selectRegion('잠실/송파/강동')">잠실/송파/강동</li>
-                                <li onclick="selectRegion('홍대/합정/마포/서대문')">홍대/합정/마포/서대문</li>
-                                <li onclick="selectRegion('여의도')">여의도</li>
-                                <li onclick="selectRegion('영등포역')">영등포역</li>
-                                <li onclick="selectRegion('구로/신도림/금천')">구로/신도림/금천</li>
-                                <li onclick="selectRegion('김포공항/강서')">김포공항/강서</li>
-                                <li onclick="selectRegion('건대입구/성수여의도')">건대입구/성수여의도</li>
+                            <ul class="region-list su" >
+                                <a class="location-link" href="/hotel/list?searchType=location&keyword=강남/역삼/삼성">강남/역삼/삼성</a><br>
+                                <a class="location-link" href="/hotel/list?searchType=location&keyword=신사/청담/압구정">신사/청담/압구정</a><br>
+                                <a class="location-link" href="/hotel/list?searchType=location&keyword=서초/교대/사당">서초/교대/사당</a><br>
+                                <a class="location-link" href="/hotel/list?searchType=location&keyword=잠실/송파/강동">잠실/송파/강동</a><br>
+                                <a class="location-link" href="/hotel/list?searchType=location&keyword=홍대/합정/마포/서대문">홍대/합정/마포/서대문</a><br>
+                                <a class="location-link" href="/hotel/list?searchType=location&keyword=구로/신도림/금천/영등포">구로/신도림/금천/영등포</a><br>
+                                <a class="location-link" href="/hotel/list?searchType=location&keyword=김포공항/강서">김포공항/강서</a><br>
+                                <a class="location-link" href="/hotel/list?searchType=location&keyword=건대입구/성수/여의도">건대입구/성수/여의도</a>
                             </ul>
                         </div>
                     </div>
