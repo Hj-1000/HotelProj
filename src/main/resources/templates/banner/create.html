@@ -6,7 +6,18 @@
       layout:decorate="~{layouts/layout}">
 <head>
   <meta charset="UTF-8">
-  <title>배너추가</title>
+  <title>배너등록</title>
+  <style>
+    .custom-link {
+      color: black;
+      text-decoration: none;
+      margin-bottom: 10px;
+      display: inline-block;
+    }
+    .custom-link:hover {
+      color: gray; /* 마우스 올리면 회색 */
+    }
+  </style>
   <!--반응형웹-->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!--부트스트랩-->
@@ -17,7 +28,10 @@
 <body>
   <div layout:fragment="content">
     <div class="container-fluid mt-4">
-      <h2 class="mb-3">배너추가</h2>
+      <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
+      <a href="/banner/list" class="custom-link"><span>배너관리</span></a> /
+      <a href="/banner/create" class="custom-link"><span>배너등록</span></a>
+      <h2 class="mb-3">배너 등록</h2>
       <form th:action="@{/banner/create}" method="post">
         <div class="card p-4">
           <div class="row">

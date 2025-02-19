@@ -6,7 +6,6 @@
 <head>
     <meta charset="UTF-8">
     <title>NTT호텔 - 본사 수정</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         .custom-link {
             color: black;
@@ -129,9 +128,6 @@
         <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
         <a href="#" class="custom-link"><span>호텔관리</span></a> /
         <a href="/company/list" class="custom-link"><span>호텔본사관리</span></a> /
-        <a th:href="@{/company/read(companyId=${companyDTO.companyId})}" class="custom-link">
-            <span>본사상세보기</span>
-        </a> /
         <a th:href="@{/company/update(companyId=${companyDTO.companyId})}" class="custom-link">
             <span>본사수정</span>
         </a>

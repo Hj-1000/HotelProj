@@ -7,6 +7,17 @@
 <head>
   <meta charset="UTF-8">
   <title>배너목록</title>
+    <style>
+        .custom-link {
+            color: black;
+            text-decoration: none;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+        .custom-link:hover {
+            color: gray; /* 마우스 올리면 회색 */
+        }
+    </style>
   <!--반응형웹-->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!--부트스트랩-->
@@ -18,7 +29,9 @@
 
 <div layout:fragment="content">
   <div class="container-fluid mt-4">
-    <h2 class="mb-3">배너목록</h2>
+      <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
+      <a href="#" class="custom-link"><span>배너관리</span></a>
+    <h2 class="mb-3">배너 관리</h2>
     <div class="card p-4">
   <table class="table table-bordered text-center">
     <thead>

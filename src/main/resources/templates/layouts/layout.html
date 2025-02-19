@@ -29,7 +29,6 @@
 
             <!-- User Info Section -->
             <div class="user-info text-white mb-3">
-                <p class="mb-1">호텔명: <span class="fw-bold">NTT호텔</span></p>
                 <p class="mb-1">권한: <span class="fw-bold" th:text="${#strings.setJoin(#authentication.authorities, ', ').replace('ROLE_', '')}"></span></p>
                 <p>ID: <span class="fw-bold" th:text="${#authentication.name}"></span></p>
             </div>
@@ -51,42 +50,46 @@
             <ul class="nav nav-pills flex-column mb-auto" >
                 <div>
                     <li class="nav-item">
-                        <a href="#" class="nav-link text-white dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#admin-member-menu" aria-expanded="false"><i class="bi bi-snow2"></i> 회원관리</a>
+                        <a href="#" class="nav-link text-white dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#admin-member-menu" aria-expanded="false"><i class="bi bi-person"></i> 회원관리</a>
                         <ul class="collapse list-unstyled ps-3" id="admin-member-menu">
                             <!-- 전체회원관리 페이지는 어드민으로 로그인했을때만 보이도록 수정 -->
                             <!-- <li><a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/admin/memberList" class="nav-link text-white">전체회원관리</a></li> -->
                             <!-- ★★★ 다 만든후 아래 지우고 위에꺼 주석해제해서 쓰기 -> 개발 편의성을 위해서 일단은 권한 상관없이 모든 페이지 열람 가능하게 만들어둠 ★★★ -->
                             <li><a href="/admin/memberList" class="nav-link text-white">전체회원관리</a></li>
                             <li><a href="/admin/executiveList" class="nav-link text-white">임원관리</a></li>
-                            <li><a href="/company/list" class="nav-link text-white">호텔본사관리</a></li>
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link text-white dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#admin-store-menu" aria-expanded="false"><i class="bi bi-snow2"></i> 객실관리</a>
+                        <a href="#" class="nav-link text-white dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#admin-hotel-menu" aria-expanded="false"><i class="bi bi-buildings"></i> 호텔관리</a>
+                        <ul class="collapse list-unstyled ps-3" id="admin-hotel-menu">
+                            <li><a href="/company/list" class="nav-link text-white">호텔본사관리</a></li>
+                            <li><a href="/manager/hotel/list" class="nav-link text-white">호텔지사관리</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link text-white dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#admin-store-menu" aria-expanded="false"><i class="bi bi-house"></i> 객실관리</a>
                         <ul class="collapse list-unstyled ps-3" id="admin-store-menu">
                             <li><a href="/manager/room/list" class="nav-link text-white">직/가맹점 객실관리</a></li>
                             <li><a href="/manager/room/reservation/list" class="nav-link text-white">객실별 예약관리</a></li>
                         </ul>
                     </li>
-
                     <li class="nav-item">
-                        <a href="#" class="nav-link text-white dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#admin-service-menu" aria-expanded="false"><i class="bi bi-snow2"></i> 룸 서비스 관리</a>
+                        <a href="#" class="nav-link text-white dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#admin-service-menu" aria-expanded="false"><i class="bi bi-cup-hot"></i> 룸 서비스 관리</a>
                         <ul class="collapse list-unstyled ps-3" id="admin-service-menu">
                             <li><a href="/roomService/category/list" class="nav-link text-white">카테고리 관리</a></li>
                             <li><a href="/roomService/menu/list" class="nav-link text-white">메뉴 관리</a></li>
                         </ul>
                     </li>
-                    <li><a href="/banner/list" class="nav-link text-white"><i class="bi bi-snow2"></i> 배너관리</a></li>
-                    <li><a href="#" class="nav-link text-white"><i class="bi bi-snow2"></i> 비밀번호 변경</a></li>
-                    <li><a href="#" class="nav-link text-white"><i class="bi bi-snow2"></i> 다국어관리</a></li>
-                    <li><a href="/notice/list" class="nav-link text-white"><i class="bi bi-snow2"></i> 공지사항</a></li>
+                    <li><a href="/banner/list" class="nav-link text-white"><i class="bi bi-images"></i> 배너관리</a></li>
+                    <li><a href="#" class="nav-link text-white"><i class="bi bi-translate"></i> 다국어관리</a></li>
+                    <li><a href="/notice/list" class="nav-link text-white"><i class="bi bi-megaphone"></i> 공지사항</a></li>
 
                     <div sec:authorize="hasRole('ADMIN')">
                         <!-- Q&A와 알림 벨을 같은 라인에 배치 -->
                         <li>
 
                             <div  class="d-flex align-items-center">
-                                <a href="/qna" class="nav-link text-white"><i class="bi bi-snow2"></i> Q&A</a>
+                                <a href="/qna" class="nav-link text-white"><i class="bi bi-question-lg"></i> Q&A</a>
 
                                 <div id="notification-container">
                                     <span id="notification-bell">🔔</span>

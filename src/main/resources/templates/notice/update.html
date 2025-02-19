@@ -6,19 +6,31 @@
 <head>
   <meta charset="UTF-8">
   <title>Title</title>
+  <style>
+    .container {
+      margin-top: 20px;
+      margin-bottom: 50px;
+    }
+    .custom-link {
+      color: black;
+      text-decoration: none;
+      margin-bottom: 10px;
+      display: inline-block;
+    }
+    .custom-link:hover {
+      color: gray; /* 마우스 올리면 회색 */
+    }
+  </style>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </head>
-<style>
-  .container {
-    margin-top: 20px;
-    margin-bottom: 50px;
-  }
 
-</style>
 <body>
 <div layout:fragment="content">
+  <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
+  <a href="/notice/list" class="custom-link"><span>공지사항</span></a> /
+  <a th:href="@{/notice/read(noticeId=${noticeDTO.noticeId})}" class="custom-link"><span>공지사항수정</span></a>
 <!--<div th:replace="~{fragments/header::header}"></div>-->
 <div id="container" class="container">
   <div id="row" class="row">
