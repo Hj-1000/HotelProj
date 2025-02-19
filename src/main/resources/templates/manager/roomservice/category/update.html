@@ -6,6 +6,18 @@
 <head>
     <meta charset="UTF-8">
     <title>NTT호텔 - 카테고리 수정</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        .custom-link {
+            color: black;
+            text-decoration: none;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+        .custom-link:hover {
+            color: gray; /* 마우스 올리면 회색 */
+        }
+    </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 
@@ -45,6 +57,11 @@
 <div id="wrapper" layout:fragment="content">
 
     <div class="container-fluid mt-4">
+        <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
+        <a href="#" class="custom-link"><span>룸서비스관리</span></a> /
+        <a href="/roomService/category/list" class="custom-link"><span>카테고리관리</span></a> /
+        <a th:href="@{/roomService/category/read(serviceCateId=${serviceCateDTO.serviceCateId})}" class="custom-link"><span>카테고리상세보기</span></a> /
+        <a th:href="@{/roomService/category/update(serviceCateId=${serviceCateDTO.serviceCateId})}" class="custom-link"><span>카테고리수정</span></a>
         <div class="col-1"></div><!--좌여백-->
         <div class="col-10">
             <h2 class="mb-3">카테고리 수정</h2>

@@ -6,6 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <title>NTT호텔 - 매니저 등록</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         .custom-link {
             color: black;
@@ -21,10 +22,10 @@
 <body>
     <div id="wrapper" layout:fragment="content">
         <div class="container-fluid mt-4">
-            <a href="/" class="custom-link"><span>🏚HOME</span></a> /
-            <a href="/admin/memberList" class="custom-link"><span>회원관리</span></a> /
+            <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
+            <a href="#" class="custom-link"><span>회원관리</span></a> /
             <a href="/admin/executiveList" class="custom-link"><span>임원관리</span></a> /
-            <a href="/admin/executiveRegister" class="custom-link"><span>매니저 등록</span></a>
+            <a href="/admin/executiveRegister" class="custom-link"><span>매니저등록</span></a>
             <h2 class="mb-3">매니저 등록</h2>
             <div class="card p-4">
                 <h5 class="mb-3">매니저 정보 등록</h5>
@@ -203,7 +204,7 @@
                                         alert("이미 가입된 회원입니다.");
                                         return false; // 회원가입 제출 막기
                                     }
-                                    alert("회원가입에 성공하였습니다.");
+                                    alert("매니저 등록에 성공하였습니다.");
                                 })
                         }
                     }

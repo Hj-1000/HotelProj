@@ -98,7 +98,7 @@
                         </td>
 
                         <td>
-                            <form sec:authorize="isAuthenticated()" method="post" action="/manager/room/reservation/delete"
+                            <form sec:authorize="isAuthenticated()" method="post" action="/admin/reservation/cancel"
                                   onsubmit="return confirm('정말 예약을 취소하시겠습니까?');">
                                 <input type="hidden" name="reservationId" th:value="${reservation.reservationId}">
                                 <button type="submit" class="btn btn-danger">예약 취소</button>
