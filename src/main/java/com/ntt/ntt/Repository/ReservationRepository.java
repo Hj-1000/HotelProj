@@ -6,8 +6,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,5 +46,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
 
     // 예약자 이름으로 검색
     Page<Reservation> findByMember_MemberNameContaining(String memberName, Pageable pageable);
+
+    // 취소 완료된 예약 삭제
+    @Query("SELECT r FROM Reservation r WHERE r.reservationStatus = '취소 완료' AND r.cancelConfirmedAt <= :threshold")
+    List<Reservation> findReservationsForDeletion(@Param("threshold") LocalDateTime threshold);
 
 }

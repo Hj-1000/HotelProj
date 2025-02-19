@@ -8,16 +8,21 @@ import com.ntt.ntt.Entity.Room;
 import com.ntt.ntt.Repository.MemberRepository;
 import com.ntt.ntt.Repository.ReservationRepository;
 import com.ntt.ntt.Repository.RoomRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @Service
 @Transactional
@@ -28,6 +33,9 @@ public class ReservationService {
     private final RoomRepository roomRepository;
     private final ReservationRepository reservationRepository;
     private final MemberRepository memberRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     // 1. 방 예약 추가
     public ReservationDTO registerReservation(Integer roomId, Integer memberId, String checkInDate, String checkOutDate, Integer count) {
@@ -183,6 +191,7 @@ public class ReservationService {
         reservationRepository.delete(reservation);
     }
 
+    // 유저 취소 승인 메서드
     public void approveCancelReservation(Integer reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 예약을 찾을 수 없습니다."));
@@ -191,10 +200,27 @@ public class ReservationService {
             throw new IllegalArgumentException("취소 요청된 예약만 승인할 수 있습니다.");
         }
 
-        // 관리자가 "취소 완료"로만 변경 (DB에서 삭제 X)
+        // 현재 시간 저장 후 업데이트
+        LocalDateTime now = LocalDateTime.now();
         reservation.setReservationStatus("취소 완료");
-        reservationRepository.save(reservation);
+
+        reservation.setCancelConfirmedAt(now);
+
+        log.info("[approveCancelReservation] 업데이트 전 - reservationId={}, cancelConfirmedAt={}",
+                reservation.getReservationId(), reservation.getCancelConfirmedAt());
+
+        // 기존 값과 다를 경우에만 업데이트 강제 수행
+
+        reservationRepository.saveAndFlush(reservation);
+
+        // DB에서 강제 재조회하여 변경된 값 확인
+        Reservation updatedReservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new IllegalArgumentException("DB 반영 확인 중 예약을 찾을 수 없습니다."));
+
+        log.info("[approveCancelReservation] DB 업데이트 후 확인: reservationId={}, cancelConfirmedAt={}",
+                updatedReservation.getReservationId(), updatedReservation.getCancelConfirmedAt());
     }
+
 
     /* 체크인 날짜가 체크아웃 날짜보다 이전인지 검증메서드 */
     private boolean isValidDateRange(String checkInDate, String checkOutDate) {
@@ -264,4 +290,29 @@ public class ReservationService {
         reservationRepository.save(reservation);
     }
 
+
+    //1시간마다 실행되어 24시간 지난 "취소 완료" 예약을 자동 삭제
+    @Scheduled(fixedRate = 1000000) // 1시간마다 실행 (3600000ms = 1시간)
+    public void deleteExpiredReservations() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime threshold = now.minusHours(24); // 24시간 지난 데이터 삭제 기준
+
+        log.info("[deleteExpiredReservations] 자동 삭제 실행 - 현재 시간: {}, 삭제 기준 시간: {}", now, threshold);
+
+        List<Reservation> expiredReservations = reservationRepository.findReservationsForDeletion(threshold);
+
+        if (expiredReservations.isEmpty()) {
+            log.warn("[deleteExpiredReservations] 삭제할 만료된 예약이 없습니다.");
+        }
+
+        for (Reservation reservation : expiredReservations) {
+            log.info("[deleteExpiredReservations] 삭제 대상 예약 ID: {}, 취소 승인 시간: {}",
+                    reservation.getReservationId(), reservation.getCancelConfirmedAt());
+        }
+
+        if (!expiredReservations.isEmpty()) {
+            reservationRepository.deleteAll(expiredReservations);
+            log.info("[deleteExpiredReservations] {}개의 만료된 예약을 삭제했습니다.", expiredReservations.size());
+        }
+    }
 }

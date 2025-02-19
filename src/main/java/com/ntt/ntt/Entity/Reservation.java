@@ -3,6 +3,8 @@ package com.ntt.ntt.Entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name="reservation")
 @Getter
@@ -26,6 +28,9 @@ public class Reservation extends BaseEntity {
     // 예약 상태
     @Column(length = 50, nullable = false)
     private String reservationStatus;
+    // 관리자가 취소 완료를 승인한 시간 (자동 삭제 타이머)
+    @Column(name = "cancel_confirmed_at", nullable = true)
+    private LocalDateTime cancelConfirmedAt;
     // 숙박일 수
     @Column(nullable = false)
     private Integer dayCount = 1;

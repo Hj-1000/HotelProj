@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -190,9 +191,12 @@ public class ReservationController {
     }
 
     // 관리자가 취소 요청을 승인
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER')")
     @PostMapping("/admin/reservation/cancel")
     public ResponseEntity<?> approveCancelReservationProc(@RequestParam Integer reservationId) {
+        log.info("[approveCancelReservationProc] 요청 수신 - 관리자 확인 필요");
+        log.info("현재 로그인한 유저: {}", SecurityContextHolder.getContext().getAuthentication().getName());
+
         try {
             reservationService.approveCancelReservation(reservationId);
             return ResponseEntity.ok("예약이 취소 완료되었습니다.");
