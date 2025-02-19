@@ -6,6 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <title>NTT호텔 - 전체회원관리</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         .custom-link {
             color: black;
@@ -21,8 +22,8 @@
 <body>
 <div layout:fragment="content">
     <div class="container-fluid mt-4">
-        <a href="/" class="custom-link"><span>🏚HOME</span></a> /
-        <a href="/admin/memberList" class="custom-link"><span>회원관리</span></a> /
+        <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
+        <a href="#" class="custom-link"><span>회원관리</span></a> /
         <a href="/admin/memberList" class="custom-link"><span>전체회원관리</span></a>
         <h2 class="mb-3">전체회원관리</h2>
         <div class="card p-4">
@@ -98,6 +99,7 @@
                     <thead>
                     <tr>
                         <th>No</th>
+                        <th>회원번호</th>
                         <th>권한</th>
                         <th>아이디</th>
                         <th>이름</th>
@@ -112,6 +114,7 @@
                         <tr style="vertical-align: middle;">
                             <!-- index 출력 -->
                             <td th:text="${index.index + 1}">1</td>
+                            <td th:text="${memberDTO.memberId}">1</td>
                             <td>
                                 <form th:action="@{/admin/update}" method="post">
                                     <input type="hidden" th:value="${memberDTO.memberId}" name="memberId" />
