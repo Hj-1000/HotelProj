@@ -7,6 +7,17 @@
 <head>
     <meta charset="UTF-8">
     <title>배너상세보기</title>
+    <style>
+        .custom-link {
+            color: black;
+            text-decoration: none;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+        .custom-link:hover {
+            color: gray; /* 마우스 올리면 회색 */
+        }
+    </style>
     <!--반응형웹-->
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!--부트스트랩-->
@@ -17,7 +28,11 @@
 <body>
 <div layout:fragment="content">
     <div class="container-fluid mt-4">
-<h2 class="mb-3">배너상세보기</h2>
+        <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
+        <a href="/banner/list" class="custom-link"><span>배너관리</span></a> /
+        <a th:href="@{/banner/{bannerId}(bannerId=${banner.bannerId})}" class="custom-link"><span>배너상세보기</span></a>
+
+<h2 class="mb-3">배너 상세보기</h2>
         <div class="card p-4">
             <div class="row">
                 <div class="col-md-6">

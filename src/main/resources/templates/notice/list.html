@@ -20,6 +20,14 @@
       margin-top: 20px;
       margin-bottom: 100px;
     }
+    .custom-link {
+      color: black;
+      text-decoration: none;
+      margin-bottom: 10px;
+      display: inline-block;
+    }
+    .custom-link:hover {
+      color: gray; /* 마우스 올리면 회색 */
   </style>
 
 
@@ -28,6 +36,8 @@
 <!--<div th:replace="~{fragments/header::header}"></div>-->
 <div layout:fragment="content">
   <div  class="container-fluid mt-4"><!--브라우저 사용 범위-->
+    <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
+    <a href="#" class="custom-link"><span>공지사항</span></a>
     <div id="row" class="row">
 <!--      <div class="col-1"></div>-->
       <!--좌측여백-->
