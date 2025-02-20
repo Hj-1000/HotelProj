@@ -9,7 +9,7 @@ import java.util.List;
 @Table(name="serviceCate")
 @Getter
 @Setter
-@ToString
+@ToString(exclude = "hotel")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

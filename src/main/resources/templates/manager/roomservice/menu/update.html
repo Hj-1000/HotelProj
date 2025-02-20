@@ -159,7 +159,7 @@
 
                             <div class="d-flex justify-content-center">
                                 <button type="submit" class="btn btn-primary">수정</button>  &nbsp&nbsp&nbsp
-                                <a class="btn btn-dark mx-2" onclick="location.href='/roomService/menu/list'">목록</a>
+                                <a class="btn btn-primary" style="background-color: black" th:href="@{/roomService/menu/list(serviceCateId=${serviceMenuDTO.serviceCateId.serviceCateId})}">목록</a>
                                 &nbsp&nbsp&nbsp
                                 <button type="reset" class="btn btn-secondary">초기화</button>
                             </div>
