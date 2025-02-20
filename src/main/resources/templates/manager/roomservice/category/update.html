@@ -61,8 +61,7 @@
         <a href="/roomService/category/list" class="custom-link"><span>카테고리관리</span></a> /
         <a th:href="@{/roomService/category/read(serviceCateId=${serviceCateDTO.serviceCateId})}" class="custom-link"><span>카테고리상세보기</span></a> /
         <a th:href="@{/roomService/category/update(serviceCateId=${serviceCateDTO.serviceCateId})}" class="custom-link"><span>카테고리수정</span></a>
-        <div class="col-1"></div><!--좌여백-->
-        <div class="col-10">
+        <div class="col-12">
             <h2 class="mb-3">카테고리 수정</h2>
             <div class="card">
                 <div class="card-body">
@@ -93,14 +92,13 @@
 
                         <div style="text-align: right">
                             <button type="submit" class="btn btn-primary">수정</button>
-                            <button class="btn btn-primary" style="background-color: black" onclick="location.href='/roomService/category/list' ">목록</button>
+                            <a class="btn btn-primary" style="background-color: black" onclick="location.href='/roomService/category/list' ">목록</a>
                             <button type="reset" class="btn btn-secondary">초기화</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
-        <div class="col-1"></div><!--우여백-->
     </div>
 
 </div>
