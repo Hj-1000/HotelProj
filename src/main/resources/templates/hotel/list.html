@@ -13,7 +13,12 @@
     <link rel ="stylesheet" href="/assets/css/bootstrap.min.css">
     <link rel ="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
 
+    <!-- 부트스트랩 아이콘 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.1/font/bootstrap-icons.css">
+
+
     <link rel="stylesheet" th:href="@{/css/user.css}">
+    <link rel="stylesheet" th:href="@{/css/roomList.css}">
     <link rel="stylesheet" th:href="@{/css/hotelList.css}">
 
     <style>
@@ -28,25 +33,33 @@
             height:100%;
             object-fit:cover;
         }
-        .image-box {
-            width:100%;
-            height:180px;
+
+        .hotel-img {
+            height: 230px;
             overflow:hidden;
             margin:0 auto 5px auto;
         }
+
+        /*.image-box {*/
+        /*    width:100%;*/
+        /*    height:180px;*/
+        /*    overflow:hidden;*/
+        /*    margin:0 auto 5px auto;*/
+        /*}*/
+
         .hotelImg {
             width:100%;
             height:100%;
             object-fit:cover;
         }
-        .container1{
-            margin: 20px auto 100px auto;
-            width: 1000px;
-            height: 370px;
-            border:1px solid lightgray;
-            border-radius: 10px;
-            padding: 30px;
-        }
+        /*.container1{*/
+        /*    margin: 20px auto 100px auto;*/
+        /*    width: 1000px;*/
+        /*    height: 370px;*/
+        /*    border:1px solid lightgray;*/
+        /*    border-radius: 10px;*/
+        /*    padding: 30px;*/
+        /*}*/
         .modal-header {
             display: flex;
             justify-content: center; /* 가로 가운데 정렬 */
@@ -61,26 +74,33 @@
             width: 100px;
         }
 
-        .hotel-card {
-            border:1px solid lightgray;
-            padding: 10px;
-            margin: 10px;
-        }
+        /*.hotel-card {*/
+        /*    border:1px solid lightgray;*/
+        /*    padding: 10px;*/
+        /*    margin: 10px;*/
+        /*}*/
 
-        .hotel-buttons {
-            text-align: right;
-        }
+        /*.hotel-buttons {*/
+        /*    text-align: right;*/
+        /*}*/
 
-        .search-div {
-            margin: auto;
-            text-align: center;
-        }
+        /*.search-div {*/
+        /*    margin: auto;*/
+        /*    text-align: center;*/
+        /*}*/
 
         .location-link {
             text-decoration: none;
             color: #282f32;
             margin-bottom: 5px
         }
+
+        /*.hotel-price {*/
+        /*    font-size: 1.25rem;*/
+        /*    font-weight: bold;*/
+        /*    margin: 0;*/
+        /*    flex-grow: 1;*/
+        /*}*/
 
     </style>
 
@@ -120,14 +140,15 @@
 
             $(".delBtn").hide();
 
-            // 찜 여부 확인 후 버튼 상태 변경
-            $(".hotel-card").each(function () {
-                var hotelId = $(this).find(".hotelId").val();
+            $(".likeBtn").each(function () {
+                var hotelId = $(this).data("hotel-id");
 
                 $.ajax({
-                    url: "/like/check/" + hotelId,
+                    url: "/like/check/" + hotelId, // ✅ hotelId를 URL에 포함
                     type: "GET",
                     success: function (isLiked) {
+                        console.log("찜 여부 확인 결과:", hotelId, isLiked); // ✅ true 또는 false 확인
+
                         var likeBtn = $(".likeBtn[data-hotel-id='" + hotelId + "']");
                         var delBtn = $(".delBtn[data-hotel-id='" + hotelId + "']");
 
@@ -139,53 +160,132 @@
                             delBtn.hide();
                         }
                     },
-                    error: function () {
-                        console.error("찜 여부 확인 실패 (호텔 ID: " + hotelId + ")");
-                    }
-                });
-            });
-
-            // 찜 추가 (이벤트 위임 방식)
-            $(document).on("click", ".likeBtn", function (event) {
-                var hotelId = $(this).data("hotel-id");
-
-                $.ajax({
-                    url: "/like/register",
-                    type: "POST",
-                    contentType: "application/json; charset=utf-8",
-                    data: JSON.stringify({ hotelId: hotelId }),
-                    success: function () {
-                        alert("호텔이 즐겨찾기에 추가되었습니다.");
-                        location.reload();
-                    },
                     error: function (xhr) {
-                        console.error("찜 등록 실패:", xhr.responseText);
-                        alert("찜 등록 실패: " + xhr.responseText);
+                        console.error("찜 여부 확인 AJAX 요청 실패:", xhr.status, xhr.responseText);
                     }
                 });
             });
 
-            // 찜 삭제 (이벤트 위임 방식)
-            $(document).on("click", ".delBtn", function (event) {
-                var hotelId = $(this).data("hotel-id");
-
-                $.ajax({
-                    url: "/like/delete",
-                    type: "POST",
-                    contentType: "application/json; charset=utf-8",
-                    data: JSON.stringify({ hotelId: hotelId }),
-                    success: function () {
-                        alert("즐겨찾기에서 삭제되었습니다.");
-                        location.reload();
-                    },
-                    error: function (xhr) {
-                        console.error("삭제 실패:", xhr.responseText);
-                        alert("삭제 실패: " + xhr.responseText);
-                    }
-                });
-            });
+            // // 찜 여부 확인 후 버튼 상태 변경
+            // $(".hotel-card").each(function () {
+            //     var hotelId = $(this).find(".hotelId").val();
+            //
+            //     $.ajax({
+            //         url: "/like/check/" + hotelId,
+            //         type: "GET",
+            //         success: function (isLiked) {
+            //             var likeBtn = $(".likeBtn[data-hotel-id='" + hotelId + "']");
+            //             var delBtn = $(".delBtn[data-hotel-id='" + hotelId + "']");
+            //
+            //             if (isLiked) {
+            //                 likeBtn.hide();
+            //                 delBtn.show();
+            //             } else {
+            //                 likeBtn.show();
+            //                 delBtn.hide();
+            //             }
+            //         },
+            //         error: function () {
+            //             console.error("찜 여부 확인 실패 (호텔 ID: " + hotelId + ")");
+            //         }
+            //     });
+            // });
+            //
+            // // 찜 추가 (이벤트 위임 방식)
+            // $(document).on("click", ".likeBtn", function (event) {
+            //     var hotelId = $(this).data("hotel-id");
+            //
+            //     $.ajax({
+            //         url: "/like/register",
+            //         type: "POST",
+            //         contentType: "application/json; charset=utf-8",
+            //         data: JSON.stringify({ hotelId: hotelId }),
+            //         success: function () {
+            //             alert("호텔이 즐겨찾기에 추가되었습니다.");
+            //             location.reload();
+            //         },
+            //         error: function (xhr) {
+            //             console.error("찜 등록 실패:", xhr.responseText);
+            //             alert("찜 등록 실패: " + xhr.responseText);
+            //         }
+            //     });
+            // });
+            //
+            // // 찜 삭제 (이벤트 위임 방식)
+            // $(document).on("click", ".delBtn", function (event) {
+            //     var hotelId = $(this).data("hotel-id");
+            //
+            //     $.ajax({
+            //         url: "/like/delete",
+            //         type: "POST",
+            //         contentType: "application/json; charset=utf-8",
+            //         data: JSON.stringify({ hotelId: hotelId }),
+            //         success: function () {
+            //             alert("즐겨찾기에서 삭제되었습니다.");
+            //             location.reload();
+            //         },
+            //         error: function (xhr) {
+            //             console.error("삭제 실패:", xhr.responseText);
+            //             alert("삭제 실패: " + xhr.responseText);
+            //         }
+            //     });
+            // });
 
         }
+
+        $(document).on("click", ".likeBtn", function (event) {
+            var hotelId = $(this).data("hotel-id");
+
+            console.log("찜 버튼 클릭됨! 호텔 ID:", hotelId);
+
+            if (!hotelId) {
+                console.error("호텔 ID가 올바르게 설정되지 않았습니다.");
+                alert("오류: 호텔 ID를 찾을 수 없습니다.");
+                return;
+            }
+
+            $.ajax({
+                url: "/like/register",
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ hotelId: hotelId }),
+                beforeSend: function () {
+                    console.log("AJAX 요청 전송 중...");
+                },
+                success: function () {
+                    console.log("찜 등록 성공!");
+                    alert("해당 호텔이 스크랩 되었습니다.");
+                    location.reload();
+                },
+                error: function (xhr) {
+                    console.error("찜 등록 실패:", xhr.status, xhr.responseText);
+                    alert("찜 등록 실패: " + xhr.responseText);
+                }
+            });
+        });
+
+
+        function delLike(btn) {
+            var hotelId = $(btn).closest(".hotel-card").find(".hotelId").val();
+            var paramData = { hotelId: hotelId };
+
+            $.ajax({
+                url: "/like/delete",
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(paramData),
+                success: function () {
+                    alert("스크랩이 취소 되었습니다.");
+                    $(btn).hide();
+                    $(btn).siblings(".likeBtn").show();
+                },
+                error: function (xhr) {
+                    console.error("삭제 실패:", xhr.responseText);
+                    alert("삭제 실패: " + xhr.responseText);
+                }
+            });
+        }
+
 
 
         document.addEventListener("DOMContentLoaded", function () {
@@ -220,17 +320,18 @@
     <!-- hotel List Section -->
     <section class="py-5">
         <div class="container">
-            <div class="container1">
+            <div class="container1 mt-5 mb-5">
                 <br>
                 <h2 class="d-flex justify-content-center mb-3">어디로 갈까요?</h2>
                 <div class="d-flex justify-content-center mt-2" role="search">
                     <button type="button" class="form-control w-60 me-1 modalBtn" style="text-align: left;" aria-label="Search">
-                        <i class="fa-solid fa-location-dot"></i>
-                        지역 선택
+                        <!--<i class="fa-solid fa-location-dot"></i>-->
+                        <h5 style="padding-top: 10px;"><i class="bi bi-geo-alt-fill"></i> 지역 선택</h5>
                     </button>
                     <button class="btn btn-outline-success mapBtn" type="button">
-                        <i class="fa-solid fa-location-arrow"></i> <br>
-                        <span style="font-size: small">내 주변</span>
+                        <!--<i class="fa-solid fa-location-arrow"></i> <br>-->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" class="size-20 pc:size-22"><path fill="currentColor" d="M18.74 4.022a.975.975 0 0 1 1.257 1.257l-6.059 16.047c-.308.816-1.45.848-1.803.052l-2.06-6.938a.98.98 0 0 0-.495-.495l-6.938-2.06c-.797-.354-.764-1.496.051-1.804z"></path><path fill="currentColor" fill-rule="evenodd" d="m11.485 13.92 1.606 5.406 5.093-13.49-13.49 5.093 5.406 1.605.088.04c.56.249 1.009.697 1.258 1.257zm-8.843-2.036c-.797-.353-.764-1.495.051-1.803l16.048-6.059a.975.975 0 0 1 1.256 1.257l-6.059 16.047c-.308.816-1.45.848-1.803.052l-2.06-6.938a.98.98 0 0 0-.495-.495z" clip-rule="evenodd"></path></svg>
+                        <br><span style="font-size: small">내 주변</span>
                     </button>
                 </div>
 
@@ -259,18 +360,86 @@
 
 
 
-            <div id="hotel-list" class="row hotel-list">
+            <div id="hotel-list">
+
+                <!-- 호텔이 있을 경우 -->
+                <div th:if="${hotelDTOS != null or !#lists.isEmpty(hotelDTOS)}" class="row hotel-list">
+                    <div class="col-md-4" th:each="data : ${hotelDTOS}">
+                        <div class="room-card">
+                            <div class="room-image">
+                                <!--등록한 사진이 있을 때-->
+                                <th:block th:if="${data.hotelImgDTOList != 0}">
+                                    <div class="room-image hotel-img">
+                                        <!-- 이미지 경로(path) -->
+                                        <img th:if="${data.hotelImgDTOList != null and !data.hotelImgDTOList.isEmpty()}"
+                                             th:src="@{'/upload/' + ${data.hotelImgDTOList[0].imagePath}}"
+                                             alt="hotel Image"
+                                             class="card-img-top hotelImg" width="100%" >
+                                    </div>
+                                </th:block>
+                                <!--등록한 사진이 없을 때-->
+                                <th:block th:unless="${data.hotelImgDTOList.size() != 0}">
+                                    <div class="image-box">
+                                        <img src="/img/default_img.jpg" alt="noImage" class="card-img-top" style="width: 300px"/>
+                                    </div>
+                                </th:block>
+
+                                <div class="hover-overlay">
+                                    <a th:href="@{/hotel/read(hotelId=${data.hotelId})}" class="btn btn-hover">자세히 보기</a>
+                                </div>
+                            </div>
+                            <div class="room-text">
+                                <div class="d-flex justify-content-start gap-2 mb-2">
+                                    <!-- 지역버튼 -->
+                                    <div style="display: flex; gap: 5px;">
+                                        <a th:href="@{'/hotel/list?searchType=location&keyword=' + ${data.hotelLocation}}" style="text-decoration: none">
+                                            <div class="badge bg-secondary" th:text="${data.hotelLocation}">지역</div>
+                                        </a>
+                                    </div>
+                                </div>
+                                <h4 th:text="${data.hotelName}" class="card-title mb-2"></h4>
+                                <p th:text="'체크인-체크아웃: ' + ${data.hotelCheckIn} + '시 ~ ' + ${data.hotelCheckOut} + '시'" class="card-text"></p>
+                                <input type="hidden" class="hotelId" th:value="${data.hotelId}">
+                                <div class="room-actions" style="margin-top: -5px">
+
+                                    <p class="room-price mb-0"
+                                       th:text="${data.CheapestRoomPrice != null ? data.CheapestRoomPrice + ' KRW' + '~' : '가격 미정'}"></p>
+
+                                    <button class="btn btn-outline-danger likeBtn"  th:data-hotel-id="${data.hotelId}" onclick="addLike()" style="width: 50px; height: 50px">
+                                        <!--<i class="fa-regular fa-heart"></i>-->
+
+                                        <i class="bi bi-heart" style="margin: auto; text-align: center"></i>
+
+                                    </button>
+                                    <button class="btn btn-outline-danger delBtn"  th:data-hotel-id="${data.hotelId}" onclick="delLike(this)" style="width: 50px; height: 50px">
+                                        <!--<i class="fa fa-heart" aria-hidden="true"></i>-->
+
+                                        <i class="bi bi-heart-fill" style="margin: auto; text-align: center"></i>
+
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- 호텔이 없을 경우 -->
+                <div th:if="${hotelDTOS == null or #lists.isEmpty(hotelDTOS)}" class="text-center mt-4">
+                    <p class="text-muted">등록 된 호텔이 없습니다.</p>
+                </div>
 
                 <!--반복문-->
+<!--
                 <th:block th:each="data : ${hotelDTOS}">
-                    <!-- Card -->
+                    &lt;!&ndash; Card &ndash;&gt;
                     <div class="col-md-4">
                         <a th:href="@{/hotel/read(hotelId=${data.hotelId})}">
                             <div class="hotel-card">
-                                <!--등록한 사진이 있을 때-->
+                                &lt;!&ndash;등록한 사진이 있을 때&ndash;&gt;
                                 <th:block th:if="${data.hotelImgDTOList != 0}">
                                     <div class="image-box">
-                                        <!-- 이미지 경로(path) -->
+                                        &lt;!&ndash; 이미지 경로(path) &ndash;&gt;
                                         <img th:if="${data.hotelImgDTOList != null and !data.hotelImgDTOList.isEmpty()}"
                                              th:src="@{'/upload/' + ${data.hotelImgDTOList[0].imagePath}}"
                                              alt="hotel Image"
@@ -278,7 +447,7 @@
                                     </div>
                                 </th:block>
 
-                                <!--등록한 사진이 없을 때-->
+                                &lt;!&ndash;등록한 사진이 없을 때&ndash;&gt;
                                 <th:block th:unless="${data.hotelImgDTOList.size() != 0}">
                                     <div class="image-box">
                                         <img src="/img/default_img.jpg" alt="noImage" class="hotelImg" style="width: 300px"/>
@@ -290,18 +459,24 @@
                                     </a>
                                     <div class="hotel-details">
                                         <h4 th:text="${data.hotelName}">호텔 이름</h4>
-                                        <!--                                    <p th:text="${data.hotelInfo}">호텔 설명</p>-->
+                                        &lt;!&ndash;                                    <p th:text="${data.hotelInfo}">호텔 설명</p>&ndash;&gt;
                                         <p> 체크인-체크아웃: <span th:text="${data.hotelCheckIn}"></span>시 - <span th:text="${data.hotelCheckOut}"></span>시</p>
                                         <input type="hidden" class="hotelId" th:value="${data.hotelId}">
                                         <div class="hotel-actions">
-                                            <!--나중에 룸이랑 연결했을 때 사용-->
-                                            <p class="hotel-price mb-0">300,000 KRW ~</p>
+                                            &lt;!&ndash;나중에 룸이랑 연결했을 때 사용&ndash;&gt;
+                                            <p class="hotel-price mb-0" th:text="${data.CheapestRoomPrice}+'KRW ~'"></p>
                                             <div class="hotel-buttons">
-                                                <button class="btn btn-outline-danger likeBtn"  th:data-hotel-id="${data.hotelId}" onclick="addLike()">
-                                                    <i class="fa-regular fa-heart"></i>
+                                                <button class="btn btn-outline-danger likeBtn"  th:data-hotel-id="${data.hotelId}" onclick="addLike()" style="padding: 15px; border: white">
+                                                    &lt;!&ndash;<i class="fa-regular fa-heart"></i>&ndash;&gt;
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
+                                                        <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15"/>
+                                                    </svg>
                                                 </button>
-                                                <button class="btn btn-outline-danger delBtn"  th:data-hotel-id="${data.hotelId}" onclick="addLike()">
-                                                    <i class="fa fa-heart" aria-hidden="true"></i>
+                                                <button class="btn btn-outline-danger delBtn"  th:data-hotel-id="${data.hotelId}" onclick="addLike()" style="padding: 15px; border: white">
+                                                    &lt;!&ndash;<i class="fa fa-heart" aria-hidden="true"></i>&ndash;&gt;
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
+                                                        <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"/>
+                                                    </svg>
                                                 </button>
                                             </div>
                                         </div>
@@ -314,6 +489,7 @@
 
 
                 </th:block>
+-->
 
 
 
@@ -375,10 +551,14 @@
                         <div class="col-3">
                             <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
                                 <button type="button" class="btn btn-secondary" data-target="su">서울</button>
-                                <button type="button" class="btn btn-secondary" data-target="bs">부산</button>
-                                <button type="button" class="btn btn-secondary" data-target="jj">제주</button>
                                 <button type="button" class="btn btn-secondary" data-target="gk">경기</button>
                                 <button type="button" class="btn btn-secondary" data-target="ic">인천</button>
+                                <button type="button" class="btn btn-secondary" data-target="jj">제주</button>
+                                <button type="button" class="btn btn-secondary" data-target="bs">부산</button>
+                                <button type="button" class="btn btn-secondary" data-target="dg">대구</button>
+                                <button type="button" class="btn btn-secondary" data-target="gj">광주</button>
+                                <button type="button" class="btn btn-secondary" data-target="dj">대전</button>
+                                <button type="button" class="btn btn-secondary" data-target="us">울산</button>
                                 <button type="button" class="btn btn-secondary" data-target="gw">강원</button>
                                 <button type="button" class="btn btn-secondary" data-target="gs">경상</button>
                                 <button type="button" class="btn btn-secondary" data-target="je">전라</button>
@@ -387,78 +567,102 @@
                         </div>
                         <div class="col-9">
                             <!-- 서울 -->
-                            <ul class="region-list su" style="display: none;">
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=강남/서초">강남/서초</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=송파/강동">송파/강동</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=마포/서대문/은평">마포/서대문/은평</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=영등포/동작/관악">영등포/동작/관악</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=강서/양천">강서/양천</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=성동/광진">성동/광진</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=중구/종로">중구/종로</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=동대문/성북">동대문/성북</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=용산">용산</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=노원/중랑/도봉">노원/중랑/도봉</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=구로/금천">구로/금천</a><br>
+                            <ul class="region-list su list-group" style="display: none;">
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=강남/역삼/삼성">강남/역삼/삼성</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=신사/청담/압구정">신사/청담/압구정</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=서초/교대/사당">서초/교대/사당</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=잠실/송파/강동">잠실/송파/강동</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=홍대/합정/마포/서대문">홍대/합정/마포/서대문</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=구로/신도림/금천/영등포">구로/신도림/금천/영등포</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=김포공항/강서/양천">김포공항/강서/양천</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=건대입구/성수/성동">건대입구/성수/성동</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=종로/광화문/명동/중구">종로/광화문/명동/중구</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=동대문/을지로/성북">동대문/을지로/성북</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=용산/이태원/여의도">용산/이태원/여의도</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=노원/중랑/도봉/강북">노원/중랑/도봉/강북</a>
                             </ul>
+
                             <!-- 부산 -->
-                            <ul class="region-list bs" style="display: none;">
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=해운대/수영/남구">해운대/수영/남구</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=중구/남포/영도">중구/남포/영도</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=동래/연제/금정">동래/연제/금정</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=사하/강서/사상">사하/강서/사상</a><br>
+                            <ul class="region-list bs list-group" style="display: none;">
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=해운대/수영/남구">해운대/수영/남구</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=중구/남포/영도">중구/남포/영도</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=동래/연제/금정">동래/연제/금정</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=사하/강서/사상">사하/강서/사상</a>
                             </ul>
                             <!-- 제주 -->
-                            <ul class="region-list jj" style="display: none;">
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=제주">제주</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=서귀포">서귀포</a><br>
+                            <ul class="region-list jj list-group" style="display: none;">
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=제주">제주</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=서귀포">서귀포</a>
                             </ul>
                             <!-- 경기 -->
-                            <ul class="region-list gk" style="display: none;">
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=수원">수원</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=고양">고양</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=부천">부천</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=광명/시흥">광명/시흥</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=성남/용인/광주">성남/용인/광주</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=안양/군포/의왕">안양/군포/의왕</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=안산/화성/오산">안산/화성/오산</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=평택/이천/여주">평택/이천/여주</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=의정부/남양주/구리">의정부/남양주/구리</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=파주/양주/동두천">파주/양주/동두천</a><br>
+                            <ul class="region-list gk list-group" style="display: none;">
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=수원">수원</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=고양">고양</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=부천">부천</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=광명/시흥">광명/시흥</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=성남/용인/광주">성남/용인/광주</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=안양/군포/의왕">안양/군포/의왕</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=안산/화성/오산">안산/화성/오산</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=평택/이천/여주">평택/이천/여주</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=의정부/남양주/구리">의정부/남양주/구리</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=파주/양주/동두천">파주/양주/동두천</a>
                             </ul>
                             <!-- 인천 -->
-                            <ul class="region-list ic" style="display: none;">
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=송도/연수/남동">송도/연수/남동</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=부평/계양">부평/계양</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=중구/동구/미추홀">중구/동구/미추홀</a><br>
+                            <ul class="region-list ic list-group" style="display: none;">
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=송도/연수/남동">송도/연수/남동</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=부평/계양">부평/계양</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=중구/동구/미추홀">중구/동구/미추홀</a>
                             </ul>
+
+                            <!-- 대구 -->
+                            <ul class="region-list dg list-group" style="display: none;">
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=중구/동성로/남구">중구/동성로/남구</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=수성구/달서구">수성구/달서구</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=북구/서구/동구">북구/서구/동구</a>
+                            </ul>
+
+                            <!-- 광주 -->
+                            <ul class="region-list gj list-group" style="display: none;">
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=동구/서구/남구">동구/서구/남구</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=북구/광산구">북구/광산구</a>
+                            </ul>
+
+                            <!-- 대전 -->
+                            <ul class="region-list dj list-group" style="display: none;">
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=유성구/서구/중구">유성구/서구/중구</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=동구/대덕구">동구/대덕구</a>
+                            </ul>
+
+                            <!-- 울산 -->
+                            <ul class="region-list us list-group" style="display: none;">
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=남구/중구/동구">남구/중구/동구</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=북구/울주군">북구/울주군</a>
+                            </ul>
+
                             <!-- 강원 -->
-                            <ul class="region-list gw" style="display: none;">
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=춘천/홍천">춘천/홍천</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=원주/횡성">원주/횡성</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=강릉/동해/삼척">강릉/동해/삼척</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=속초/양양/고성">속초/양양/고성</a><br>
+                            <ul class="region-list gw list-group" style="display: none;">
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=춘천/홍천">춘천/홍천</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=원주/횡성">원주/횡성</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=강릉/동해/삼척">강릉/동해/삼척</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=속초/양양/고성">속초/양양/고성</a>
                             </ul>
                             <!-- 경상 -->
-                            <ul class="region-list gs" style="display: none;">
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=대구">대구</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=울산">울산</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=창원/김해/양산">창원/김해/양산</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=포항/경주">포항/경주</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=구미/안동/문경">구미/안동/문경</a><br>
+                            <ul class="region-list gs list-group" style="display: none;">
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=포항/경주">포항/경주</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=구미/안동/문경">구미/안동/문경</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=창원/김해/양산">창원/김해/양산</a>
                             </ul>
                             <!-- 전라 -->
-                            <ul class="region-list je" style="display: none;">
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=광주">광주</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=전주/군산/익산">전주/군산/익산</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=여수/순천/광양">여수/순천/광양</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=목포/나주/무안">목포/나주/무안</a><br>
+                            <ul class="region-list je list-group" style="display: none;">
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=전주/군산/익산">전주/군산/익산</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=여수/순천/광양">여수/순천/광양</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=목포/나주/무안">목포/나주/무안</a>
                             </ul>
                             <!-- 충청 -->
-                            <ul class="region-list cc" style="display: none;">
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=대전">대전</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=천안/아산/당진">천안/아산/당진</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=충주/제천">충주/제천</a><br>
-                                <a class="location-link" href="/hotel/list?searchType=location&keyword=보령/서천">보령/서천</a><br>
+                            <ul class="region-list cc list-group" style="display: none;">
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=대전">청주/충주/제천</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=천안/아산/당진">천안/아산/당진</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=보령/서천">보령/서천</a>
                             </ul>
                         </div>
                     </div>

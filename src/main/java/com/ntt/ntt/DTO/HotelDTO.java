@@ -53,15 +53,25 @@ public class HotelDTO {
 
     private LocalDateTime modDate;
 
+    private Integer cheapestRoomPrice; // 가장 저렴한 roomPrice (Integer로 변경) 2025-02-19 추가
+
     @Builder.Default
     private List<ImageDTO> hotelImgDTOList = new ArrayList<>(); //이미지 2025-01-21추가
 
     private Integer companyId; //회사 연결 (회사 안에 들어있는 호텔) 2025-01-22 추가
     private String companyName; //회사 연결 (회사 안에 들어있는 호텔) 2025-01-22 추가
 
+    // 생성자 (hotelId, hotelName을 받는 생성자 추가)
     public HotelDTO(Integer hotelId, String hotelName) {
         this.hotelId = hotelId;
         this.hotelName = hotelName;
+    }
+
+    // 가장 저렴한 방 가격을 보여주기 위한 생성사 추가 2025-02-19
+    public HotelDTO(Integer hotelId, String hotelName, Integer cheapestRoomPrice) {
+        this.hotelId = hotelId;
+        this.hotelName = hotelName;
+        this.cheapestRoomPrice = cheapestRoomPrice;
     }
 
     // Hotel 엔티티를 받는 생성자 추가
