@@ -1,10 +1,14 @@
 package com.ntt.ntt.Controller.ServiceMenu;
 
 import com.ntt.ntt.Constant.ServiceMenuStatus;
+import com.ntt.ntt.DTO.RoomDTO;
 import com.ntt.ntt.DTO.ServiceCateDTO;
 import com.ntt.ntt.DTO.ServiceMenuDTO;
+import com.ntt.ntt.Entity.Room;
 import com.ntt.ntt.Entity.ServiceMenu;
+import com.ntt.ntt.Repository.RoomRepository;
 import com.ntt.ntt.Service.ReservationService;
+import com.ntt.ntt.Service.RoomService;
 import com.ntt.ntt.Service.ServiceCateService;
 import com.ntt.ntt.Service.ServiceMenuService;
 import com.ntt.ntt.Util.PaginationUtil;
@@ -35,7 +39,8 @@ import java.util.Map;
 public class ServiceMenuUserController {
     private final ServiceMenuService serviceMenuService;
     private final ServiceCateService serviceCateService;
-    private final PaginationUtil paginationUtil;
+    private final RoomRepository roomRepository;
+    private final RoomService roomService;
 
     @Operation(summary = "유저의 메뉴 목록", description = "등록되어 있는 메뉴를 조회한다.")
     @GetMapping("/myPage/menu/list")
@@ -47,8 +52,18 @@ public class ServiceMenuUserController {
             // 로그인을 하지 않으면 로그인 페이지로 이동
             return "redirect:/login";
         }
+
+        Integer hotelId = null;
+
+        if (roomId != null) {
+            RoomDTO roomDTO = roomService.readRoom(roomId);
+            hotelId = roomDTO.getHotelId().getHotelId();
+        }
+
         model.addAttribute("reservationId", reservationId);
         model.addAttribute("roomId", roomId);
+        model.addAttribute("hotelId", hotelId);
+
         List<ServiceMenuDTO> serviceMenuDTOS = serviceMenuService.listUserMenu();
         List<ServiceCateDTO> serviceCateDTOS = serviceCateService.getAllServiceCate();
         model.addAttribute("serviceCateDTOS", serviceCateDTOS);

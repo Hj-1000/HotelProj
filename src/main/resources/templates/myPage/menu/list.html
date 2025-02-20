@@ -248,6 +248,7 @@
 
     <!-- 카테고리 선택 전 보여줄 안내 카드 -->
     <div id="categorySelectionCard" class="row justify-content-center">
+        <input type="hidden" id="hotelId" th:value="${hotelId}">
         <div class="col-md-6">
             <div class="card text-center" id="loadingCard">
                 <div class="card-body">
@@ -301,7 +302,9 @@
     });
 
     function fetchCategories() {
-        fetch("/api/categories")
+        const hotelId = document.getElementById('hotelId').value;
+
+        fetch(`/api/categories?hotelId=${hotelId}`)
             .then(response => response.json())
             .then(categories => {
                 const categoryContainer = document.getElementById("categoryButtons");
@@ -312,7 +315,7 @@
                     button.classList.add("btn", "btn-outline-primary", "category-btn");
                     button.onclick = () => {
                         fetchMenus(category.serviceCateId);
-                        setActiveCategoryButton(button);  // 버튼을 클릭할 때 선택 상태로 변경
+                        setActiveCategoryButton(button);
                     };
                     categoryContainer.appendChild(button);
                 });
