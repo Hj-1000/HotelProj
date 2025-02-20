@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -175,10 +176,13 @@ public class ReservationService {
     }
 
     // 유저가 "취소 완료" 상태의 예약을 직접 삭제하는 메서드
-    public void deleteReservationByUser(Integer reservationId, Integer memberId) {
-        Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 예약을 찾을 수 없습니다."));
+    public boolean deleteReservationByUser(Integer reservationId, Integer memberId) {
+        Optional<Reservation> optionalReservation = reservationRepository.findById(reservationId);
+        if (optionalReservation.isEmpty()) {
+            return false; //  이미 삭제된 경우 false 반환
+        }
 
+        Reservation reservation = optionalReservation.get();
         if (!reservation.getMember().getMemberId().equals(memberId)) {
             throw new IllegalArgumentException("본인의 예약만 삭제할 수 있습니다.");
         }
@@ -187,8 +191,9 @@ public class ReservationService {
             throw new IllegalArgumentException("취소 완료된 예약만 삭제할 수 있습니다.");
         }
 
-        // 유저가 직접 삭제할 경우에만 DB에서 제거
         reservationRepository.delete(reservation);
+        reservationRepository.flush();
+        return true; // 정상적으로 삭제되었을 경우 true 반환
     }
 
     // 유저 취소 승인 메서드
@@ -200,24 +205,20 @@ public class ReservationService {
             throw new IllegalArgumentException("취소 요청된 예약만 승인할 수 있습니다.");
         }
 
-        // 현재 시간 저장 후 업데이트
-        LocalDateTime now = LocalDateTime.now();
         reservation.setReservationStatus("취소 완료");
-
-        reservation.setCancelConfirmedAt(now);
+        reservation.setCancelConfirmedAt(LocalDateTime.now());
 
         log.info("[approveCancelReservation] 업데이트 전 - reservationId={}, cancelConfirmedAt={}",
                 reservation.getReservationId(), reservation.getCancelConfirmedAt());
 
-        // 기존 값과 다를 경우에만 업데이트 강제 수행
-
+        // 변경사항을 즉시 반영
         reservationRepository.saveAndFlush(reservation);
 
-        // DB에서 강제 재조회하여 변경된 값 확인
+        // DB 반영 확인을 위해 강제 재조회
         Reservation updatedReservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("DB 반영 확인 중 예약을 찾을 수 없습니다."));
 
-        log.info("[approveCancelReservation] DB 업데이트 후 확인: reservationId={}, cancelConfirmedAt={}",
+        log.info("[approveCancelReservation] 업데이트 후 확인 - reservationId={}, cancelConfirmedAt={}",
                 updatedReservation.getReservationId(), updatedReservation.getCancelConfirmedAt());
     }
 
@@ -268,14 +269,32 @@ public class ReservationService {
 
     // 특정 사용자의 예약 내역 조회 (모든 예약 가져오기)
     public Page<ReservationDTO> getUserReservations(Integer memberId, Pageable pageable) {
+        LocalDateTime now = LocalDateTime.now();
+
         Page<Reservation> reservationsPage = reservationRepository.findAllByMember_MemberId(memberId, pageable);
+        log.info("조회된 예약 개수: {}", reservationsPage.getTotalElements());
 
-        // 로그로 예약 개수 출력 (기존 기능 유지)
-        log.info("조회된 예약 개수 (Service): {}", reservationsPage.getTotalElements());
+        return reservationsPage.map(reservation -> {
+            ReservationDTO dto = ReservationDTO.fromEntity(reservation);
 
-        // Page<Reservation>을 Page<ReservationDTO>로 변환
-        return reservationsPage.map(ReservationDTO::fromEntity);
+            // "취소 완료" 상태일 때만 남은 시간 계산
+            if ("취소 완료".equals(reservation.getReservationStatus()) && reservation.getCancelConfirmedAt() != null) {
+                LocalDateTime expirationTime = reservation.getCancelConfirmedAt().plusMinutes(1); // 1분 후 삭제 테스트
+                long timeRemaining = ChronoUnit.SECONDS.between(now, expirationTime);
+
+                if (timeRemaining < 0) {
+                    timeRemaining = 0L; // 자동 삭제 시간이 지나면 0
+                }
+
+                dto.setTimeRemaining(timeRemaining);
+            } else {
+                dto.setTimeRemaining(0L);
+            }
+
+            return dto;
+        });
     }
+
 
     // 고객 예약 취소 요청
     public void requestCancelReservation(Integer reservationId, Integer memberId) {
@@ -291,11 +310,11 @@ public class ReservationService {
     }
 
 
-    //1시간마다 실행되어 24시간 지난 "취소 완료" 예약을 자동 삭제
-    @Scheduled(fixedRate = 1000000) // 1시간마다 실행 (3600000ms = 1시간)
+    //1분마다 실행되어 1분이 지난 "취소 완료" 예약을 자동 삭제
+    @Scheduled(fixedRate = 60000) // 1시간마다 실행 (3600000ms = 1시간)
     public void deleteExpiredReservations() {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime threshold = now.minusHours(24); // 24시간 지난 데이터 삭제 기준
+        LocalDateTime threshold = now.minusMinutes(1); // 1분이 지난 데이터 삭제 기준
 
         log.info("[deleteExpiredReservations] 자동 삭제 실행 - 현재 시간: {}, 삭제 기준 시간: {}", now, threshold);
 

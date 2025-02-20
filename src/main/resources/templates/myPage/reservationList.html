@@ -7,6 +7,7 @@
   <meta charset="UTF-8">
   <title>NTT호텔</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="stylesheet" th:href="@{/css/user.css}">
   <link rel="stylesheet" th:href="@{/css/reservationList.css}">
@@ -29,8 +30,6 @@
 <div layout:fragment="content" class="mypage-container">
   <div class="container">
     <h2 class="text-center mb-4">호텔 예약/결제내역</h2>
-
-    <span class="countdown-timer" data-time-remaining="86400">(자동 삭제까지 남은 시간: <span>00:00:00</span>)</span>
 
     <!-- 예약이 없을 경우 메시지 표시 -->
     <div th:if="${reservations == null or #lists.isEmpty(reservations)}" class="alert alert-warning text-center">
@@ -79,12 +78,6 @@
                   <span th:case="'취소 요청'" class="badge bg-warning text-dark">취소 요청중</span>
                   <span th:case="'취소 완료'" class="badge bg-danger">
                       취소 완료
-                      <br>
-                      <span th:if="${reservation.timeRemaining > 0}"
-                            th:data-time-remaining="${reservation.timeRemaining}"
-                            class="countdown-timer">
-                            (자동 삭제까지 남은 시간: <span>00:00:00</span>)
-                      </span>
                   </span>
                   <span th:case="*" class="badge bg-secondary">알 수 없음</span>
               </span>
@@ -101,21 +94,25 @@
           </td>
           <td>
             <button type="button"
-                    class="btn btn-primary btn-sm delete-btn"
+                    class="btn btn-primary btn-sm"
                     th:data-reservation-id="${reservation.reservationId}">
               신청
             </button>
           </td>
-          <td>
-            <!-- "취소 완료" 상태일 때만 보이는 삭제 버튼 -->
-            <button type="button"
-                    class="btn btn-secondary btn-sm delete-btn"
-                    th:data-reservation-id="${reservation.reservationId}"
-                    th:if="${reservation.reservationStatus == '취소 완료'}">
-              삭제
-            </button>
-          </td>
+          <td class="text-center">
+            <!-- 삭제 아이콘 -->
+            <i class="bi bi-trash-fill delete-icon"
+               role="button"
+               th:data-reservation-id="${reservation.reservationId}"
+               th:if="${reservation.reservationStatus == '취소 완료'}"
+               style="font-size: 1.5rem; cursor: pointer;"></i>
 
+            <div th:if="${reservation.reservationStatus == '취소 완료' and reservation.timeRemaining > 0}"
+                 th:data-time-remaining="${reservation.timeRemaining}"
+                 class="countdown-timer text-danger small mt-1">
+              <span>00:00</span>
+            </div>
+          </td>
         </tr>
         </tbody>
       </table>
@@ -155,27 +152,70 @@
 
   <script>
 
-    /* 타이머 확인 */
     document.addEventListener("DOMContentLoaded", function () {
+      document.querySelectorAll(".delete-icon").forEach(icon => {
+        icon.addEventListener("click", function () {
+          const reservationId = this.getAttribute("data-reservation-id");
+          let rowElement = this.closest("tr");
+
+          if (!confirm("해당 예약 내역을 삭제하시겠습니까?")) {
+            return;
+          }
+
+          fetch("/myPage/reservation/delete", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({ reservationId: reservationId })
+          })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error("서버 응답 오류: " + response.status);
+              }
+              return response.json();
+            })
+            .then(data => {
+              if (data.success) {
+                alert(data.message);
+                rowElement.remove();
+              } else {
+                throw new Error(data.message);
+              }
+            })
+            .catch(error => {
+              console.error("삭제 중 오류 발생:", error);
+              alert("삭제 중 오류가 발생했습니다: " + error.message);
+            });
+        });
+      });
+
+      // 예약 자동 삭제 카운트다운 타이머
       document.querySelectorAll(".countdown-timer").forEach(timer => {
-        const timeRemaining = parseInt(timer.getAttribute("data-time-remaining"), 10);
-        if (isNaN(timeRemaining) || timeRemaining <= 0) return; // 남은 시간이 없으면 실행 안 함
+        let timeRemaining = parseInt(timer.getAttribute("data-time-remaining"), 10); // 초 단위 값
+
+        if (isNaN(timeRemaining) || timeRemaining <= 0) {
+          timer.innerText = "삭제됨";
+          return;
+        }
 
         function updateTimer() {
+          if (timeRemaining <= 0) {
+            timer.innerText = "삭제됨";
+            return;
+          }
+
           const hours = Math.floor(timeRemaining / 3600);
           const minutes = Math.floor((timeRemaining % 3600) / 60);
           const seconds = timeRemaining % 60;
-          timer.querySelector("span").innerText = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        }
 
-        console.log(timeRemaining);
+          timer.querySelector("span").innerText = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+          timeRemaining--;
+        }
 
         updateTimer();
         setInterval(updateTimer, 1000);
       });
-    });
 
-    document.addEventListener("DOMContentLoaded", function () {
+      // 예약 취소 버튼 이벤트 리스너 등록
       document.querySelectorAll(".cancel-btn").forEach(button => {
         button.addEventListener("click", function () {
           const reservationId = this.getAttribute("data-reservation-id");
@@ -186,49 +226,24 @@
 
           fetch("/myPage/reservation/cancel", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded"
-            },
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: "reservationId=" + encodeURIComponent(reservationId)
           })
                   .then(response => response.text())
                   .then(data => {
                     alert(data); // 서버 응답 메시지 표시
 
-                    // 현재 페이지 번호를 유지하며 새로고침
-                    const currentPage = new URLSearchParams(window.location.search).get("page") || 0;
+                    // 현재 페이지 번호 유지하며 새로고침
+                    const currentPage = new
+
+                    URLSearchParams(window.location.search).get("page") || 0;
                     window.location.href = "/myPage/reservationList?page=" + currentPage;
                   })
                   .catch(error => {
                     console.error("예약 취소 오류:", error);
                     alert("예약 취소 중 오류가 발생했습니다.");
                   });
-        });
-      });
-    });
-    // 유저가 직접 삭제 버튼 클릭 시 목록에서 제거
-    document.querySelectorAll(".delete-btn").forEach(button => {
-      button.addEventListener("click", function () {
-        const reservationId = this.getAttribute("data-reservation-id");
-
-        if (!confirm("해당 예약 내역을 삭제하시겠습니까?")) {
-          return;
-        }
-
-        fetch("/myPage/reservation/delete", {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: "reservationId=" + encodeURIComponent(reservationId)
-        })
-                .then(response => response.text())
-                .then(data => {
-                  alert(data);
-                  location.reload(); // 페이지 새로고침
-                })
-                .catch(error => {
-                  console.error("삭제 오류:", error);
-                  alert("삭제 중 오류가 발생했습니다.");
-                });
+        }, { once: true }); // 이벤트 중복 방지
       });
     });
   </script>
