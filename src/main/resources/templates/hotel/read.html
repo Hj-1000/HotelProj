@@ -12,6 +12,10 @@
     <link rel ="stylesheet" href="/assets/fonts/fontawesome-all.min.css">
     <link rel ="stylesheet" href="/assets/css/bootstrap.min.css">
     <link rel ="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
+
+    <!-- 부트스트랩 아이콘 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.1/font/bootstrap-icons.css">
+
     <link rel="stylesheet" th:href="@{/css/user.css}">
     <link rel="stylesheet" th:href="@{/css/roomList.css}">
 
@@ -327,10 +331,7 @@
 
                             <div class="mb-3">
 
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt" viewBox="0 0 16 16">
-                                    <path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A32 32 0 0 1 8 14.58a32 32 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10"></path>
-                                    <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4m0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6"></path>
-                                </svg>
+                                <i class="bi bi-geo-alt-fill"></i>
 
                                 <span th:text="${hotelDTO.hotelAddress}">주소</span>
 
@@ -343,12 +344,14 @@
                                 <div>
                                     <!-- 찜 추가 버튼 (처음에는 보이게 설정) -->
                                     <button class="btn btn-outline-danger likeBtn" th:data-hotel-id="${hotelDTO.hotelId}" onclick="addLike()" style="width: 120px; display: none;">
-                                        스크랩 <i class="fa-regular fa-heart"></i>
+                                        스크랩 <!--<i class="fa-regular fa-heart"></i>-->
+                                        <i class="bi bi-bookmark"></i>
                                     </button>
 
                                     <!-- 찜 삭제 버튼 (처음에는 숨김) -->
                                     <button class="btn btn-danger delBtn" th:data-hotel-id="${hotelDTO.hotelId}" onclick="delLike()" style="width: 120px; display: none;">
-                                        스크랩 <i class="fa fa-heart" aria-hidden="true"></i>
+                                        스크랩 <!--<i class="fa fa-heart" aria-hidden="true"></i>-->
+                                        <i class="bi bi-bookmark-fill"></i>
                                     </button>
                                 </div>
                             </div>
@@ -357,7 +360,8 @@
                                 <div>
                                     <!-- 찜 추가 버튼 (비회원용) -->
                                     <button class="btn btn-outline-danger nya" style="width: 120px; display: none;" onclick="addLike()">
-                                        스크랩 <i class="fa-regular fa-heart"></i>
+                                        스크랩 <!--<i class="fa-regular fa-heart"></i>-->
+                                        <i class="bi bi-bookmark"></i>
                                     </button>
                                 </div>
                             </div>
@@ -368,12 +372,43 @@
                 </div>
 
 
+                <div th:if="${hotelDTOS != null and !#lists.isEmpty(hotelDTOS)}" class="row">
+                    <div class="col-md-3" th:each="data : ${hotelDTOS}">
+                        <div class="card image-hover-container">
+                            <div class="image-container">
+
+                                <!-- Hover 시 나타나는 예약 버튼 -->
+                                <div class="hover-overlay">
+                                    <a th:href="@{/hotel/read(hotelId=${data.hotelId})}" class="btn btn-hover">자세히 보기</a>
+                                </div>
+                            </div>
+                            <div class="card-body text-left">
+                                <!-- 상태 버튼 -->
+                                <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                                    <a th:href="@{'/hotel/list?searchType=location&keyword=' + ${data.hotelLocation}}" style="text-decoration: none">
+                                        <div class="badge bg-secondary" th:text="${data.hotelLocation}">지역</div>
+                                    </a>
+                                </div>
+                                <!-- 객실 타입 버튼 -->
+                            </div>
+                            <h4 th:text="${data.hotelName}" class="card-title">호텔 이름</h4>
+                            <p class="card-text"> 체크인-체크아웃: <span th:text="${data.hotelCheckIn}"></span>시 - <span th:text="${data.hotelCheckOut}"></span>시</p>
+                            <input type="hidden" class="hotelId" th:value="${data.hotelId}">
+                            <div class="hotel-actions">
+                                <p th:text="${data.CheapestRoomPrice} + ' KRW~ ' " class="card-text money"> 0 KRW</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
 
                 <!-- 객실 리뷰부분 -->
                 <div class="card border-light-shadow" style="width: 950px; margin: auto; padding-top: 17px; padding-bottom: 20px;">
                     <div style="width: 950px; margin: auto">
                         <div style="margin-bottom: -20px">
-                            <h4 style="margin-bottom: -24px">&ensp;객실 리뷰</h4> <span>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;(<span class="roomReview">2,298</span>)&ensp; <i class="fa-solid fa-star"></i> <span class="hotelRating">4.9</span>점</span>
+                            <h4 style="margin-bottom: -24px">&ensp;객실 리뷰</h4> <span>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;(<span class="roomReview">2,298</span>)&ensp; <i class="bi bi-star-fill"></i> <span class="hotelRating">4.9</span>점</span>
                         </div>
                         <div style="text-align: right; margin-bottom: 15px; margin-top: -10px; font-size: small">
                             전체보기>&emsp;
@@ -384,47 +419,53 @@
                                 <div class="card border-light-shadow review-card" style="margin: -3px; padding: 15px; height: 150px">
                                     <!-- 객실 리뷰 -->
                                     <!--별점-->
-                                    <p> <i class="fa-solid fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-solid fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-solid fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-solid fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-solid fa-star"></i>
+                                    <p>
+                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star-fill"></i>
                                     </p>
                                     <!--th:if 별점이 i점 이라면~-->
-                                    <!--<p> <i class="fa-solid fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-solid fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-solid fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-solid fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-regular fa-star"></i>
+                                    <!--<p>
+                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star"></i>
                                     </p>
-                                    <p> <i class="fa-solid fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-solid fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-solid fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-regular fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-regular fa-star"></i>
+                                    <p>
+                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star"></i>
                                     </p>
-                                    <p> <i class="fa-solid fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-solid fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-regular fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-regular fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-regular fa-star"></i>
+                                    <p>
+                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star"></i>
                                     </p>
-                                    <p> <i class="fa-solid fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-regular fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-regular fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-regular fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-regular fa-star"></i>
+                                    <p>
+                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star"></i>
                                     </p>-->
                                     좋아요
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="card border-light-shadow review-card" style="margin: -3px; padding: 15px; height: 150px">
-                                    <p> <i class="fa-solid fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-regular fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-regular fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-regular fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-regular fa-star"></i>
+                                    <p>
+                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star"></i>
                                     </p>
                                     <!-- 객실 리뷰 -->
                                     바퀴벌레나옴
@@ -433,11 +474,12 @@
                             <div class="col-4">
                                 <div class="card border-light-shadow review-card" style="margin: -3px; padding: 15px; height: 150px">
                                     <!-- 객실 리뷰 -->
-                                    <p> <i class="fa-solid fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-solid fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-solid fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-solid fa-star" style="margin-right: -3px"></i>
-                                        <i class="fa-regular fa-star"></i>
+                                    <p>
+                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star"></i>
                                     </p>
                                     좋네요
                                 </div>

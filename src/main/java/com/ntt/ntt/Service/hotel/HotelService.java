@@ -214,10 +214,8 @@ public class HotelService {
 //        return hotelDTOS;
 //    }
 
-    //일반회원 목록
     @Transactional(readOnly = true)
     public Page<HotelDTO> list(Pageable page, String keyword, String searchType, boolean exactMatch) {
-
         int currentPage = page.getPageNumber();
         int pageSize = 9;
         Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.DESC, "hotelId"));
@@ -256,11 +254,22 @@ public class HotelService {
                     .collect(Collectors.toList());
 
             hotelDTO.setHotelImgDTOList(imgDTOList); // 이미지 DTO 리스트 설정
+
+            // 가장 저렴한 roomPrice 찾기
+            Integer cheapestRoomPrice = entity.getRooms().stream()
+                    .mapToInt(Room::getRoomPrice)  // roomPrice를 int로 추출
+                    .min()  // 최솟값 찾기
+                    .orElse(0); // 방이 없다면 기본값 0
+
+            hotelDTO.setCheapestRoomPrice(cheapestRoomPrice); // 가장 저렴한 가격 설정
+
             return hotelDTO;
         });
 
         return hotelDTOS;
     }
+
+
 //    public Page<HotelDTO> list(Pageable page, String keyword, String searchType, boolean exactMatch) {
 //
 //        int currentPage = page.getPageNumber();  // Page.getPageNumber()는 0부터 시작
