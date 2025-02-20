@@ -21,9 +21,12 @@
             justify-content: center;
             gap: 20px;
             margin-top: 30px;
+            margin-bottom: 10px;
+            min-height: calc(100vh - 317px); /* 100vh = 화면 전체 높이를 차지하도록 (-209px 는 헤더와 푸터의 높이) */
         }
         .card {
             width: 300px;
+            height: 480px;
             border: none;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
@@ -69,7 +72,6 @@
 
 
 </div>
-<hr>
 <!-- 푸터 -->
 <div th:replace="~{fragments/footer::footer}"></div>
 </body>

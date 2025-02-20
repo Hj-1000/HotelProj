@@ -30,11 +30,11 @@
     </style>
 </head>
 <body>
-    <div th:replace="~{fragments/header::header}"></div>
-    <!--본문-->
-    <div layout:fragment="content" class="register-container">
-        <div class="card register-card">
-            <h5 class="card-title text-center mb-4 fw-bold">회원가입</h5>
+<div th:replace="~{fragments/header::header}"></div>
+<!--본문-->
+<div layout:fragment="content" class="register-container">
+    <div class="card register-card">
+        <h5 class="card-title text-center mb-4 fw-bold">회원가입</h5>
         <form action="/register" method="post" onsubmit="return registerCheck();">
             <div class="mb-3 mt-3">
                 <label for="memberName" class="form-label fw-bold">*이름 :</label>
@@ -51,14 +51,17 @@
             <div class="mb-3">
                 <label for="memberPassword" class="form-label fw-bold">*비밀번호 :</label>
                 <input type="password" class="form-control" id="memberPassword" name="memberPassword" placeholder="비밀번호는 6~12자 이내로 입력해주세요." required>
+                <small id="passwordMessage" style="display: none;"></small>
             </div>
             <div class="mb-3">
                 <label for="memberPasswordCheck" class="form-label fw-bold">*비밀번호 확인 :</label>
                 <input type="password" class="form-control" id="memberPasswordCheck" name="memberPasswordCheck" placeholder="비밀번호를 한번 더 입력해주세요." required>
+                <small id="passwordCheckMessage" style="display: none;"></small>
             </div>
             <div class="mb-3">
                 <label for="memberPhone" class="form-label fw-bold">전화번호 :</label>
                 <input type="tel" pattern="[0-9]*" class="form-control" id="memberPhone" name="memberPhone" placeholder="'-' 없이 숫자만 입력해주세요.">
+                <small id="phoneCheckMessage" style="display: none;"></small>
             </div>
             <p>* 표시는 필수 입력 항목입니다.</p>
             <button type="submit" class="btn btn-primary">회원가입</button>
@@ -111,25 +114,44 @@
                     });
             }
 
-            // 비밀번호 및 이메일 체크
+            // 비밀번호 및 이메일, 전화번호 체크
             function registerCheck() {
                 var email = document.getElementById('memberEmailInput').value;
+                var passwordMessage = document.getElementById('passwordMessage');
+                var passwordCheckMessage = document.getElementById('passwordCheckMessage');
+                var phoneCheckMessage = document.getElementById('phoneCheckMessage');
                 var p1 = document.getElementById('memberPassword').value;
                 var p2 = document.getElementById('memberPasswordCheck').value;
+                var p3 = document.getElementById('memberPhone').value;
 
                 if (p1.length < 6) {
-                    alert('비밀번호는 6글자 이상이어야 합니다.');
+                    passwordMessage.style.display = "block";
+                    passwordMessage.style.color = "red";
+                    passwordMessage.innerText = "비밀번호는 6글자 이상이어야 합니다.";
                     return false;
                 }
 
                 if (p1.length > 12) {
-                    alert('비밀번호는 12글자 이내여야 합니다.');
+                    passwordMessage.style.display = "block";
+                    passwordMessage.style.color = "red";
+                    passwordMessage.innerText = "비밀번호는 12글자 이내여야 합니다.";
                     return false;
                 }
 
                 if (p1 != p2) {
-                    alert("비밀번호가 일치하지 않습니다.");
+                    passwordCheckMessage.style.display = "block";
+                    passwordCheckMessage.style.color = "red";
+                    passwordCheckMessage.innerText = "비밀번호가 일치하지 않습니다.";
                     return false;
+
+                }
+
+                if (p3.length !== 11 && p3.length !== 0) {
+                    phoneCheckMessage.style.display = "block";
+                    phoneCheckMessage.style.color = "red";
+                    phoneCheckMessage.innerText = "전화번호를 확인해주세요. 전화번호는 11자리여야 합니다.";
+                    return false;
+
                 } else {
                     fetch('/checkEmail?email=' + encodeURIComponent(email), {
                         method: 'GET',
@@ -150,10 +172,11 @@
             document.getElementById("memberPhone").addEventListener("input", function (event) {
                 this.value = this.value.replace(/[^0-9]/g, "");
             });
+
         </script>
 
-        </div>
     </div>
-    <div th:replace="~{fragments/footer::footer}"></div>
+</div>
+<div th:replace="~{fragments/footer::footer}"></div>
 </body>
 </html>

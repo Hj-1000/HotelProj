@@ -21,7 +21,9 @@
         .container{
             margin-top: 20px;
             margin-bottom: 100px;
+            min-height: calc(100vh - 329px); /* 100vh = 화면 전체 높이를 차지하도록 (-209px 는 헤더와 푸터의 높이) */
         }
+
     </style>
 
 
@@ -94,5 +96,6 @@
         </div><!--row 행 끝-->
     </div><!--container 끝-->
 </div>
+<div th:replace="~{fragments/footer::footer}"></div>
 </body>
 </html>

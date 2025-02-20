@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <title>Q&A - 목록</title>
@@ -10,12 +10,18 @@
     <link rel="stylesheet" th:href="@{/css/user.css}">
     <style>
 
-
         body {
             font-family: Arial, sans-serif;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+        }
+
+        .list-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 209px); /* 100vh = 화면 전체 높이를 차지하도록 (-209px 는 헤더와 푸터의 높이) */
         }
 
         .container {
@@ -109,6 +115,7 @@
 <div th:replace="~{fragments/header::header}"></div>
 
 <!-- 본문 -->
+<div layout:fragment="content" class="list-container">
 <div class="container">
     <h1>Q&A 목록</h1>
 
@@ -170,7 +177,8 @@
             </li>
         </ul>
     </div>
-
+</div>
+</div>
 <!-- 푸터 -->
 <div th:replace="~{fragments/footer::footer}"></div>
 </body>

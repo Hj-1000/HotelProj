@@ -76,15 +76,32 @@ public class MemberService implements UserDetailsService {
             throw new IllegalStateException("이미 가입된 회원입니다");
         }
 
+        // 전화번호 포맷팅
+        String formattedPhone = formatPhoneNumber(memberDTO.getMemberPhone());
+
         // 입력한 이메일이 존재하지 않으면 회원가입 성공
         String password = passwordEncoder.encode(memberDTO.getMemberPassword());
         Member member = modelMapper.map(memberDTO, Member.class);
         member.setMemberName(memberDTO.getMemberName());
-        member.setMemberPhone(memberDTO.getMemberPhone());
+        member.setMemberPhone(formattedPhone); // 포맷팅된 전화번호 저장
         member.setMemberPassword(password); // 암호화된 비밀번호 저장
         member.setMemberStatus("활성"); // 회원가입시 memberStatus 는 기본적으로 '활성' 상태로 가입
         member.setRole(Role.USER); // 일반회원은 회원가입시 USER 권한으로 가입
         memberRepository.save(member);
+    }
+
+    // 전화번호 포맷팅 메소드
+    private String formatPhoneNumber(String phoneNumber) {
+        // 전화번호에서 숫자만 남기기
+        String cleaned = phoneNumber.replaceAll("[^\\d]", "");
+
+        // 하이픈 추가
+        if (cleaned.length() == 11) {
+            return cleaned.replaceAll("(\\d{3})(\\d{4})(\\d{4})", "$1-$2-$3");
+        }
+
+        // 11자리가 아니면 그대로 반환 (예외 처리 추가 가능)
+        return phoneNumber;
     }
 
     // 관리자 회원가입
@@ -97,11 +114,13 @@ public class MemberService implements UserDetailsService {
             throw new IllegalStateException("이미 가입된 회원입니다");
         }
 
+        String formattedPhone = formatPhoneNumber(memberDTO.getMemberPhone());
+
         // 입력한 이메일이 존재하지 않으면 회원가입 성공
         String password = passwordEncoder.encode(memberDTO.getMemberPassword());
         Member member = modelMapper.map(memberDTO, Member.class);
         member.setMemberName(memberDTO.getMemberName());
-        member.setMemberPhone(memberDTO.getMemberPhone());
+        member.setMemberPhone(formattedPhone);
         member.setMemberPassword(password);
         member.setMemberStatus("활성");
         member.setRole(memberDTO.getRole()); // 관리자는 회원가입시 선택한 권한으로 가입
@@ -118,11 +137,13 @@ public class MemberService implements UserDetailsService {
             throw new IllegalStateException("이미 가입된 회원입니다");
         }
 
+        String formattedPhone = formatPhoneNumber(memberDTO.getMemberPhone());
+
         // 입력한 이메일이 존재하지 않으면 회원가입 성공
         String password = passwordEncoder.encode(memberDTO.getMemberPassword());
         Member member = modelMapper.map(memberDTO, Member.class);
         member.setMemberName(memberDTO.getMemberName());
-        member.setMemberPhone(memberDTO.getMemberPhone());
+        member.setMemberPhone(formattedPhone);
         member.setMemberPassword(password); // 암호화된 비밀번호 저장
         member.setMemberStatus("활성"); // 회원가입시 memberStatus 는 기본적으로 '활성' 상태로 가입
         member.setRole(Role.MANAGER); // MANAGER 권한으로 가입
@@ -162,9 +183,11 @@ public class MemberService implements UserDetailsService {
                 member.setMemberPassword(passwordEncoder.encode(memberDTO.getNewPassword()));
             }
 
+            String formattedPhone = formatPhoneNumber(memberDTO.getMemberPhone());
+
             // 이름, 전화번호도 업데이트
             member.setMemberName(memberDTO.getMemberName());
-            member.setMemberPhone(memberDTO.getMemberPhone());
+            member.setMemberPhone(formattedPhone);
 
             return memberRepository.save(member);
         }
