@@ -1,10 +1,7 @@
 package com.ntt.ntt.Service;
 
 
-import com.ntt.ntt.DTO.ServiceCartDetailDTO;
-import com.ntt.ntt.DTO.ServiceCartItemDTO;
-import com.ntt.ntt.DTO.ServiceCartOrderDTO;
-import com.ntt.ntt.DTO.ServiceOrderDTO;
+import com.ntt.ntt.DTO.*;
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Entity.ServiceCart;
 import com.ntt.ntt.Entity.ServiceCartItem;
@@ -163,8 +160,8 @@ public class ServiceCartService {
         serviceCartItemRepository.delete(serviceCartItem);
     }
 
-    //장바구니에서 들어온 주문
-    public Integer orderServiceCartItem(List<ServiceCartOrderDTO> serviceCartOrderDTOList, String memberEmail) {
+    //장바구니에서 들어온 주문 //todo: roomId도 받게 만들었는데 잘되는지 확인 꼭 필요함
+    public Integer orderServiceCartItem(List<ServiceCartOrderDTO> serviceCartOrderDTOList, String memberEmail, Integer roomId) {
         //serviceCartOrderDTOList에는 serviceCartItemId가 들어있음
 
         List<ServiceOrderDTO> serviceOrderDTOList = new ArrayList<>();
@@ -182,7 +179,7 @@ public class ServiceCartService {
             serviceOrderDTOList.add(serviceOrderDTO);
         }
         Integer serviceOrderId =
-                serviceOrderService.orders(serviceOrderDTOList, memberEmail); //장바구니 아이템을 저장
+                serviceOrderService.orders(serviceOrderDTOList, memberEmail, roomId); //장바구니 아이템을 저장
 
         for (ServiceCartOrderDTO serviceCartOrderDTO : serviceCartOrderDTOList) {
             ServiceCartItem serviceCartItem =

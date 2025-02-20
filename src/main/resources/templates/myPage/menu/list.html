@@ -271,6 +271,8 @@
         <h5 class="cart-header">장바구니</h5>
         <button type="button" class="btn btn-success" onclick="order()">주문하기</button><!--주문 이벤트-->
         <table class="table table-bordered" id="cartTable">
+            <input type="hidden" id="reservationId" th:value="${reservationId}">
+            <input type="hidden" id="roomId" th:value="${roomId}">
             <thead>
             <tr>
                 <th>메뉴</th>
@@ -489,11 +491,15 @@
                 count: parseInt(count)
             });
         });
+        const roomId = document.getElementById("roomId").value;
 
         fetch("/api/cart/orders", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ orderDTOList: orderItems })
+            body: JSON.stringify({
+                orderDTOList: orderItems,
+                roomId : parseInt(roomId)
+            })
         })
             .then(response => {
                 if (!response.ok) {

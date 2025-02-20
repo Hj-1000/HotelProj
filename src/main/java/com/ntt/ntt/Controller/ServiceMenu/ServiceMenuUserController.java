@@ -4,6 +4,7 @@ import com.ntt.ntt.Constant.ServiceMenuStatus;
 import com.ntt.ntt.DTO.ServiceCateDTO;
 import com.ntt.ntt.DTO.ServiceMenuDTO;
 import com.ntt.ntt.Entity.ServiceMenu;
+import com.ntt.ntt.Service.ReservationService;
 import com.ntt.ntt.Service.ServiceCateService;
 import com.ntt.ntt.Service.ServiceMenuService;
 import com.ntt.ntt.Util.PaginationUtil;
@@ -38,12 +39,16 @@ public class ServiceMenuUserController {
 
     @Operation(summary = "유저의 메뉴 목록", description = "등록되어 있는 메뉴를 조회한다.")
     @GetMapping("/myPage/menu/list")
-    public String list(Model model, Principal principal) {
+    public String list(@RequestParam(required = false) Integer reservationId,  // 예약 ID 파라미터
+                       @RequestParam(required = false) Integer roomId,
+                       Model model,
+                       Principal principal) {
         if (principal == null || principal.getName() == null) {
             // 로그인을 하지 않으면 로그인 페이지로 이동
             return "redirect:/login";
         }
-
+        model.addAttribute("reservationId", reservationId);
+        model.addAttribute("roomId", roomId);
         List<ServiceMenuDTO> serviceMenuDTOS = serviceMenuService.listUserMenu();
         List<ServiceCateDTO> serviceCateDTOS = serviceCateService.getAllServiceCate();
         model.addAttribute("serviceCateDTOS", serviceCateDTOS);
