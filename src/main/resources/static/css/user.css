@@ -64,7 +64,6 @@ header {
 
 /* 룸 추천 */
 
-
 .recommended-wrap {
     position: relative;
 }
@@ -193,4 +192,12 @@ h5 {
 .details-link:hover {
     background-color: #fff;
     color: #000;
+}
+
+.room-description {
+    display: block;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

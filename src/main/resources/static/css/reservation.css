@@ -75,6 +75,10 @@ h2 {
 }
 
 /* 관리자 페이지 (예약 현황) */
+
+.reservation-text {
+}
+
 #reservedTab {
     border-right: 0;
     border-bottom: 0;
@@ -177,6 +181,18 @@ h2 {
 /* 객실 목록 제목 */
 .room-header h2 {
     text-align: center;
+}
+
+.no-data-message {
+    margin-top: 2rem;
+    font-size: 1.2rem;
+    color: #555;
+    font-weight: bold;
+    padding: 2.5rem;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* 색상 설명 (TIP) */
@@ -431,4 +447,5 @@ h2 {
     50% { background-color: #ff9999; }
     100% { background-color: #ffcccc; }
 }
+
 

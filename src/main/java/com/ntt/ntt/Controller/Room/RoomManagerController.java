@@ -22,6 +22,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -205,12 +207,11 @@ public class RoomManagerController {
     public String updateRoomProc(@PathVariable Integer roomId,
                                  @ModelAttribute RoomDTO roomDTO,
                                  @RequestParam(value = "imageFile", required = false) List<MultipartFile> imageFile,
-                                 @RequestParam(value = "deleteImages", required = false) List<Integer> deleteImages, // ✅ 추가
+                                 @RequestParam(value = "deleteImages", required = false) List<String> deleteImagesStr, // ✅ 문자열 리스트로 받음
                                  RedirectAttributes redirectAttributes) {
 
         log.info("Updating Room with ID: {}", roomId);
 
-        // 객실 상태 자동 변경 (예약 마감일 기준)
         LocalDate today = LocalDate.now();
         LocalDate newReservationEnd = roomDTO.getReservationEnd() != null ? LocalDate.parse(roomDTO.getReservationEnd()) : null;
 
@@ -220,12 +221,27 @@ public class RoomManagerController {
             roomDTO.setRoomStatus(true); // 예약 가능
         }
 
-        // 기존 이미지 삭제 로직 추가
-        if (deleteImages != null && !deleteImages.isEmpty()) {
-            List<Integer> uniqueDeleteImages = deleteImages.stream().distinct().collect(Collectors.toList()); // 중복 제거
+        // 문자열 리스트 → 정수 리스트 변환
+        List<Integer> deleteImages = new ArrayList<>();
+        if (deleteImagesStr != null && !deleteImagesStr.isEmpty()) {
+            try {
+                deleteImages = deleteImagesStr.stream()
+                        .flatMap(str -> Arrays.stream(str.split(","))) // 쉼표(,)로 구분된 경우 분리
+                        .map(String::trim) // 공백 제거
+                        .map(Integer::parseInt) // 정수 변환
+                        .distinct() // 중복 제거
+                        .collect(Collectors.toList());
+            } catch (NumberFormatException e) {
+                log.warn("삭제할 이미지 ID 변환 오류: {}", deleteImagesStr, e);
+                redirectAttributes.addFlashAttribute("errorMessage", "이미지 ID 변환 중 오류 발생");
+                return "redirect:/manager/room/update/" + roomId;
+            }
+        }
 
-            for (Integer imageId : uniqueDeleteImages) {
-                if (imageRepository.existsById(imageId)) { // 존재 여부 체크
+        // 기존 이미지 삭제 로직
+        if (!deleteImages.isEmpty()) {
+            for (Integer imageId : deleteImages) {
+                if (imageRepository.existsById(imageId)) {
                     try {
                         imageService.deleteImage(imageId);
                         log.info("삭제된 이미지 ID: {}", imageId);
@@ -238,7 +254,6 @@ public class RoomManagerController {
             }
         }
 
-        // 수정 후 남아있는 이미지 개수 확인
         int remainingImages = imageRepository.countByRoom_RoomId(roomId);
         log.info("남아있는 이미지 개수: {}", remainingImages);
         boolean hasNewImages = (imageFile != null && !imageFile.isEmpty());
@@ -248,8 +263,7 @@ public class RoomManagerController {
             return "redirect:/manager/room/update/" + roomId;
         }
 
-        // 새 이미지가 존재하는 경우에만 업데이트
-        if (imageFile != null && !imageFile.isEmpty()) {
+        if (hasNewImages) {
             log.info("새로운 이미지 저장 시작");
             roomService.updateRoom(roomId, roomDTO, imageFile, deleteImages);
         } else {
@@ -260,6 +274,7 @@ public class RoomManagerController {
         redirectAttributes.addFlashAttribute("successMessage", "객실 정보가 성공적으로 수정되었습니다.");
         return "redirect:/manager/room/list";
     }
+
 
     // 5. Room 삭제
     @GetMapping("/delete/{roomId}")

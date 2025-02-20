@@ -309,9 +309,8 @@ public class ReservationService {
         reservationRepository.save(reservation);
     }
 
-
     //1분마다 실행되어 1분이 지난 "취소 완료" 예약을 자동 삭제
-    @Scheduled(fixedRate = 60000) // 1시간마다 실행 (3600000ms = 1시간)
+    @Scheduled(fixedRate = 60000) // 1분 간격으로 실행 (3600000ms = 1시간)
     public void deleteExpiredReservations() {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime threshold = now.minusMinutes(1); // 1분이 지난 데이터 삭제 기준
