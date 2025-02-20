@@ -36,11 +36,12 @@ public class ServiceMenuController {
 
     @Operation(summary = "등록폼", description = "등록폼 페이지로 이동한다.")
     @GetMapping("/register")
-    public String registerForm(Model model){
+    public String registerForm(@RequestParam(required = false) Integer serviceCateId, Model model){
         //검증처리가 필요하면 빈 MenuDTO를 생성해서 전달한다.
         List<ServiceCateDTO> serviceCateDTOS = serviceCateService.getAllServiceCate();
         model.addAttribute("serviceCateDTOS", serviceCateDTOS);
         model.addAttribute("serviceMenuDTO", new ServiceMenuDTO());
+        model.addAttribute("selectServiceCateId", serviceCateId);
         return "/manager/roomservice/menu/register";
     }
 

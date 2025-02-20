@@ -39,6 +39,10 @@
                 $('.modal-title').text("간편 등록하기");
                 $("#saveChanges").show();
                 modal.find("input").show();
+
+                //모달로 열었을 때 현재 보는 페이지의 serviceCateId인게 자동으로 카테고리 선택되게끔 하였음 2025-02-20
+                const currentServiceCateId = [[${serviceCateId}]];
+                $("#modalServiceCateId").val(currentServiceCateId);
             });
 
             // 이미지 미리보기
@@ -254,7 +258,7 @@
                 <!-- 추가 버튼 -->
                 <div class="text-end mt-3">
                     <a class="btn btn-primary" th:href="@{/roomService/category/list}">카테고리 관리</a>
-                    <button class="btn btn-primary" style="background-color: black" onclick="location.href='/roomService/menu/register'">등록</button>
+                    <a th:href="@{/roomService/menu/register(serviceCateId=${serviceCateId})}" class="btn btn-primary" style="background-color: black">등록</a>
                     <button type="button" class="btn btn-primary modalBtn">간편 등록</button>
                 </div>
 
@@ -303,11 +307,14 @@
                     <!-- Modal body -->
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="serviceCateId" class="form-label">카테고리:</label>
-                            <select class="form-control" id="serviceCateId" name="serviceCateId" required>
+                            <label for="modalServiceCateId" class="form-label">카테고리:</label>
+                            <select class="form-control" id="modalServiceCateId" name="serviceCateId" required>
                                 <option value="" disabled selected>카테고리를 선택하세요</option>
                                 <th:block th:each="serviceCateDTOS : ${serviceCateDTOS}">
-                                    <option th:value="${serviceCateDTOS.serviceCateId}" th:text="${serviceCateDTOS.serviceCateName}"></option>
+                                    <option th:value="${serviceCateDTOS.serviceCateId}"
+                                            th:text="${serviceCateDTOS.serviceCateName}"
+                                            th:selected="${serviceCateDTOS.serviceCateId == serviceCateId}">
+                                    </option>
                                 </th:block>
                             </select>
                         </div>

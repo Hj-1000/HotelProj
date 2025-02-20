@@ -98,7 +98,7 @@ public class HotelService {
         int pageSize = page.getPageSize(); // 페이지 사이즈 그대로 사용
         Pageable pageable = PageRequest.of(
                 currentPage, pageSize,
-                Sort.by(Sort.Direction.DESC, "hotelId") // 최신순으로 정렬
+                Sort.by(Sort.Direction.ASC, "hotelId") // 최신순으로 정렬
         );
 
         // 2. 검색타입에 따른 호텔 조회
@@ -218,7 +218,7 @@ public class HotelService {
     public Page<HotelDTO> list(Pageable page, String keyword, String searchType, boolean exactMatch) {
         int currentPage = page.getPageNumber();
         int pageSize = 9;
-        Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.DESC, "hotelId"));
+        Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.ASC, "hotelId"));
 
         Page<Hotel> hotels = null;
 
