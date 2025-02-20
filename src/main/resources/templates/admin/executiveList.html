@@ -108,7 +108,6 @@
                 <table class="table table-bordered text-center">
                     <thead>
                     <tr>
-                        <th>No</th>
                         <th>회원번호</th>
                         <th>임원권한</th>
                         <th>아이디</th>
@@ -121,10 +120,8 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <th:block th:each="hotelDTO, index : ${hotelMemberIds}">
+                    <th:block th:each="hotelDTO : ${hotelMemberIds}">
                         <tr style="vertical-align: middle;">
-                            <!-- index 출력 -->
-                            <td th:text="${index.index + 1}">1</td>
                             <td th:text="${hotelDTO.member != null ? hotelDTO.member.memberId : 'N/A'}">1</td>
                             <td>
                                 <form th:action="@{/admin/executiveUpdate}" method="post">
@@ -141,11 +138,11 @@
                             <input type="text" class="form-control" id="memberName" name="memberName" placeholder="이름" th:value="${hotelDTO.member != null ? hotelDTO.member.memberName : 'N/A'}" hidden="hidden">
                             <td th:text="${hotelDTO.member != null ? hotelDTO.hotelName : 'N/A'}">지사명</td>
                             <td th:text="${hotelDTO.member != null ? hotelDTO.member.memberPhone : 'N/A'}">전화번호</td>
-                            <td th:text="${hotelDTO.regDate != null ? #temporals.format(hotelDTO.modDate, 'yyyy-MM-dd HH:mm:ss') : 'N/A'}">가입일</td>
+                            <td th:text="${hotelDTO.regDate != null ? #temporals.format(hotelDTO.modDate, 'yyyy-MM-dd HH:mm') : 'N/A'}">가입일</td>
                             <td>
                                 <select class="form-select" name="memberStatus">
-                                    <option value="활성" th:selected="${hotelDTO.member != null && hotelDTO.member.memberStatus == '활성'}">활성</option>
-                                    <option value="비활성" th:selected="${hotelDTO.member != null && hotelDTO.member.memberStatus == '비활성'}">비활성</option>
+                                    <option value="활성" th:selected="${hotelDTO.member != null && hotelDTO.member.memberStatus == '활성'}">🟢 활성</option>
+                                    <option value="비활성" th:selected="${hotelDTO.member != null && hotelDTO.member.memberStatus == '비활성'}">🔴 비활성</option>
                                 </select>
                             </td>
                             <td>

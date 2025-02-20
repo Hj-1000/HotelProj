@@ -153,6 +153,12 @@ public class PasswordResetController {
         return "user/verifyCode"; // 코드 입력 페이지로 돌아감
     }
 
+    // /user/resendCode url 접근 방지용
+    @GetMapping("/user/resendCode")
+    public String resendCodeF() {
+        return "redirect:/";
+    }
+
     @Operation(summary = "인증 코드 재전송", description = "이메일로 발송할 랜덤 코드를 다시 생성해 발송한다.")
     @PostMapping("/user/resendCode")
     @ResponseBody
@@ -235,7 +241,7 @@ public class PasswordResetController {
         boolean isAjax = "XMLHttpRequest".equals(requestedWith);
 
         if (!isAjax) {
-            // AJAX 요청이 아닐 경우 메인 페이지로 이동
+            // AJAX 요청이 아닐 경우 메인 페이지로 이동(url 을 통해 /getSessionExpiry 페이지 접근 방지용)
             return ResponseEntity.status(HttpStatus.FOUND).header("Location", "/").build();
         }
 

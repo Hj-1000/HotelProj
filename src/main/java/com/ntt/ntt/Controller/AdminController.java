@@ -58,6 +58,9 @@ public class AdminController {
             // 필터링된 회원 리스트 가져오기
             List<MemberDTO> filteredMembers = memberService.getFilteredMembers(role, email, status, name, phone, startDate, endDate);
 
+            // memberId 기준 내림차순 정렬
+            filteredMembers.sort(Comparator.comparing(MemberDTO::getMemberId).reversed());
+
             // 페이징 처리
             int startIdx = page * size;
             int endIdx = Math.min(startIdx + size, filteredMembers.size());
@@ -74,6 +77,12 @@ public class AdminController {
             e.printStackTrace();
         }
         return "admin/memberList";
+    }
+
+    // /admin/update url 접근 방지용
+    @GetMapping("/admin/update")
+    public String adminUpdateF() {
+        return "redirect:/";
     }
 
     @Operation(summary = "회원정보 수정", description = "사용자의 회원정보를 새로 입력한 값으로 업데이트한다.")
@@ -148,6 +157,9 @@ public class AdminController {
                             company.getCompanyId(), hotelId, role, email, status, name, phone, startDate, endDate));
                 }
             }
+
+            // 호텔 리스트를 hotelId 기준으로 내림차순 정렬
+            filteredHotels.sort(Comparator.comparing(HotelDTO::getHotelId).reversed());
 
             // 페이징 처리
             int startIdx = page * size;
