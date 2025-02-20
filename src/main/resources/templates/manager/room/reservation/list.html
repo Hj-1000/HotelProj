@@ -12,7 +12,6 @@
 </head>
 <body>
 <div layout:fragment="content" class="wrap mt-4">
-
     <!-- 객실 목록 -->
     <th:block sec:authorize="hasAnyRole('ADMIN', 'CHIEF', 'MANAGER')">
         <div class="room-section">
@@ -47,7 +46,7 @@
             <input type="hidden" name="memberId" id="memberId" th:value="${memberId}">
         </form>
 
-        <!-- 모든 방 목록 (예약된 방 포함) -->
+        <!-- 모든 객실 목록 -->
         <div class="admin-section">
             <h2 class="text-center">객실 관리 현황</h2>
             <div class="table-tabs">
@@ -55,69 +54,75 @@
                 <div id="allTab" class="table-tab" onclick="changeTab('all')">모든 객실</div>
             </div>
 
-            <!-- 예약된 방만 표시 -->
-            <div id="reservedTable" class="tab-content active">
-                <table class="reservation-table">
-                    <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>객실 이름</th>
-                        <th>객실 타입</th>
-                        <th>ID</th>
-                        <th>이름</th>
-                        <th>총 인원</th>
-                        <th>이메일</th>
-                        <th>체크인 날짜</th>
-                        <th>체크아웃 날짜</th>
-                        <th>숙박일</th>
-                        <th>총 비용</th>
-                        <th>상태</th>
-                        <th>관리</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="reservation, iterStat : ${reservationPage.content}">
-                        <td th:text="${currentPage * reservationPage.size + iterStat.index + 1}"></td>
-                        <td th:text="${reservation.room.roomName}"></td>
-                        <td th:text="${reservation.room.roomType}"></td>
-                        <td th:text="${reservation.memberId}"></td>
-                        <td th:text="${reservation.memberName}"></td>
-                        <td th:text="${reservation.count}"></td>
-                        <td th:text="${reservation.memberEmail}"></td>
-                        <td th:text="${reservation.checkInDate}"></td>
-                        <td th:text="${reservation.checkOutDate}"></td>
-                        <td th:text="${reservation.dayCount} + '박 ' + (${reservation.dayCount + 1}) + '일'"></td>
-                        <td th:text="'₩' + ${#numbers.formatInteger(reservation.totalPrice, 1, 'COMMA')}"></td>
-                        <td>
+            <!-- 예약된 객실만 표시 -->
+            <div id="reservedTable" class="tab-content  active">
+                <th:block th:if="${reservationPage.totalElements == 0}">
+                    <p class="alert alert-warning text-center no-data-message">현재 예약 내역이 없습니다.</p>
+                </th:block>
+
+                <th:block th:unless="${reservationPage.totalElements ==0}">
+                    <table class="reservation-table">
+                        <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>객실 이름</th>
+                            <th>객실 타입</th>
+                            <th>ID</th>
+                            <th>이름</th>
+                            <th>총 인원</th>
+                            <th>이메일</th>
+                            <th>체크인 날짜</th>
+                            <th>체크아웃 날짜</th>
+                            <th>숙박일</th>
+                            <th>총 비용</th>
+                            <th>상태</th>
+                            <th>관리</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="reservation, iterStat : ${reservationPage.content}">
+                            <td th:text="${currentPage * reservationPage.size + iterStat.index + 1}"></td>
+                            <td th:text="${reservation.room.roomName}"></td>
+                            <td th:text="${reservation.room.roomType}"></td>
+                            <td th:text="${reservation.memberId}"></td>
+                            <td th:text="${reservation.memberName}"></td>
+                            <td th:text="${reservation.count}"></td>
+                            <td th:text="${reservation.memberEmail}"></td>
+                            <td th:text="${reservation.checkInDate}"></td>
+                            <td th:text="${reservation.checkOutDate}"></td>
+                            <td th:text="${reservation.dayCount} + '박 ' + (${reservation.dayCount + 1}) + '일'"></td>
+                            <td th:text="'₩' + ${#numbers.formatInteger(reservation.totalPrice, 1, 'COMMA')}"></td>
+                            <td>
                             <span th:class="'status-box ' + (${reservation.reservationStatus == '예약' ? 'status-reserved' : 'status-cancel'})">
                                 <th:block th:if="${reservation.reservationStatus == '예약'}">예약</th:block>
                                 <th:block th:if="${reservation.reservationStatus == '취소 요청'}">
                                     <span class="cancel-text">취소</span> 요청
                                 </th:block>
                             </span>
-                        </td>
-                        <td>
-                            <th:block th:if="${reservation.reservationStatus == '취소 요청'}">
-                                <button type="button"
-                                        class="btn btn-danger cancel-approval-btn"
-                                        th:data-reservation-id="${reservation.reservationId}">
-                                    예약 취소
-                                </button>
-                            </th:block>
-                            <th:block th:if="${reservation.reservationStatus == '예약'}">
-                                <form sec:authorize="isAuthenticated()" method="post" action="/manager/room/reservation/delete"
-                                      onsubmit="return confirm('정말 예약을 강제 취소하시겠습니까?');">
-                                    <input type="hidden" name="reservationId" th:value="${reservation.reservationId}">
-                                    <button type="submit" class="btn btn-danger">강제 취소</button>
-                                </form>
-                            </th:block>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+                            </td>
+                            <td>
+                                <th:block th:if="${reservation.reservationStatus == '취소 요청'}">
+                                    <button type="button"
+                                            class="btn btn-danger cancel-approval-btn"
+                                            th:data-reservation-id="${reservation.reservationId}">
+                                        예약 취소
+                                    </button>
+                                </th:block>
+                                <th:block th:if="${reservation.reservationStatus == '예약'}">
+                                    <form sec:authorize="isAuthenticated()" method="post" action="/manager/room/reservation/delete"
+                                          onsubmit="return confirm('정말 예약을 강제 취소하시겠습니까?');">
+                                        <input type="hidden" name="reservationId" th:value="${reservation.reservationId}">
+                                        <button type="submit" class="btn btn-danger">강제 취소</button>
+                                    </form>
+                                </th:block>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </th:block>
 
-                <!-- 예약된 방 검색바 -->
-                <div class="search-bar text-center mt-3">
+                <!-- 예약된 객실 검색바 -->
+                <div class="search-bar text-center mt-3" th:if="${reservationPage.totalElements > 0}">
                     <form id="searchForm" th:action="@{/manager/room/reservation/list}" method="get">
                         <select name="category">
                             <option value="">-- 검색선택 --</option>
@@ -130,8 +135,8 @@
                     </form>
                 </div>
 
-                <!-- 예약된 방 페이징 버튼 추가 -->
-                <div class="pagination">
+                <!-- 예약된 객실 페이징 버튼 추가 -->
+                <div class="pagination" th:if="${reservationPage.totalElements > 0}">
                     <a th:if="${reservationPage.hasPrevious()}"
                        th:href="@{/manager/room/reservation/list(page=${reservationPage.number - 1}, size=${reservationPage.size}, category=${category}, keyword=${keyword})}">〈 이전</a>
 
@@ -147,70 +152,75 @@
             </div>
 
             <div id="allTable" class="tab-content">
-                <table class="reservation-table">
-                    <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>객실 이름</th>
-                        <th>객실 타입</th>
-                        <th>ID</th>
-                        <th>이름</th>
-                        <th>총 인원</th>
-                        <th>이메일</th>
-                        <th>체크인 날짜</th>
-                        <th>체크아웃 날짜</th>
-                        <th>숙박일</th>
-                        <th>총 비용</th>
-                        <th>예약마감 날짜</th>
-                        <th>상태</th>
-                        <th>관리</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="room, iterStat : ${roomPage.content}" th:with="reservation=${reservationMap[room.roomId]}">
-                        <td th:text="${roomPage.number * roomPage.size + iterStat.index + 1}"></td>
-                        <td th:text="${room.roomName}"></td>
-                        <td th:text="${room.roomType}"></td>
+                <th:block th:if="${roomPage.totalElements == 0}">
+                    <p class="alert alert-warning text-center no-data-message">현재 만들어진 객실이 없습니다.</p>
+                </th:block>
 
-                        <!-- 예약자 ID -->
-                        <td th:text="${reservation != null ? reservation.memberId : ''}"></td>
+                <th:block th:unless="${roomPage.totalElements == 0}">
+                    <table class="reservation-table">
+                        <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>객실 이름</th>
+                            <th>객실 타입</th>
+                            <th>ID</th>
+                            <th>이름</th>
+                            <th>총 인원</th>
+                            <th>이메일</th>
+                            <th>체크인 날짜</th>
+                            <th>체크아웃 날짜</th>
+                            <th>숙박일</th>
+                            <th>총 비용</th>
+                            <th>예약마감 날짜</th>
+                            <th>상태</th>
+                            <th>관리</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="room, iterStat : ${roomPage.content}" th:with="reservation=${reservationMap[room.roomId]}">
+                            <td th:text="${roomPage.number * roomPage.size + iterStat.index + 1}"></td>
+                            <td th:text="${room.roomName}"></td>
+                            <td th:text="${room.roomType}"></td>
 
-                        <!-- 예약자 이름 -->
-                        <td th:text="${reservation != null ? reservation.memberName : ''}"></td>
+                            <!-- 예약자 ID -->
+                            <td th:text="${reservation != null ? reservation.memberId : ''}"></td>
 
-                        <!-- 총 인원 (예약된 경우만 표시) -->
-                        <td th:text="${reservation != null ? reservation.count : ''}"></td>
+                            <!-- 예약자 이름 -->
+                            <td th:text="${reservation != null ? reservation.memberName : ''}"></td>
 
-                        <!-- 예약자 이메일 -->
-                        <td th:text="${reservation != null ? reservation.memberEmail : ''}"></td>
+                            <!-- 총 인원 (예약된 경우만 표시) -->
+                            <td th:text="${reservation != null ? reservation.count : ''}"></td>
 
-                        <!-- 체크인 및 체크아웃 날짜 -->
-                        <td th:text="${reservation != null ? reservation.checkInDate : ''}"></td>
-                        <td th:text="${reservation != null ? reservation.checkOutDate : ''}"></td>
+                            <!-- 예약자 이메일 -->
+                            <td th:text="${reservation != null ? reservation.memberEmail : ''}"></td>
 
-                        <!-- 숙박일 추가 -->
-                        <td th:text="${reservation != null ? reservation.dayCount + '박 ' + (reservation.dayCount + 1) + '일' : ''}"></td>
+                            <!-- 체크인 및 체크아웃 날짜 -->
+                            <td th:text="${reservation != null ? reservation.checkInDate : ''}"></td>
+                            <td th:text="${reservation != null ? reservation.checkOutDate : ''}"></td>
 
-                        <!-- 총 비용 추가 -->
-                        <td th:text="${reservation != null ? '₩' + #numbers.formatInteger(reservation.totalPrice, 1, 'COMMA') : ''}"></td>
+                            <!-- 숙박일 추가 -->
+                            <td th:text="${reservation != null ? reservation.dayCount + '박 ' + (reservation.dayCount + 1) + '일' : ''}"></td>
 
-                        <!-- 예약 마감 날짜 -->
-                        <td th:text="${room.reservationEnd != null ? room.reservationEnd : 'N/A'}"></td>
+                            <!-- 총 비용 추가 -->
+                            <td th:text="${reservation != null ? '₩' + #numbers.formatInteger(reservation.totalPrice, 1, 'COMMA') : ''}"></td>
 
-                        <!-- 예약 상태 -->
-                        <td>
-                            <span th:if="${room.isExpired}">기간 만료</span>
-                            <span th:unless="${room.isExpired}">
+                            <!-- 예약 마감 날짜 -->
+                            <td th:text="${room.reservationEnd != null ? room.reservationEnd : 'N/A'}"></td>
+
+                            <!-- 예약 상태 -->
+                            <td>
+                                <span th:if="${room.isExpired}">기간 만료</span>
+                                <span th:unless="${room.isExpired}">
                                     <span th:if="${reservation != null}">예약</span>
                                     <span th:unless="${reservation != null}">빈방</span>
                                 </span>
-                        </td>
+                            </td>
 
-                        <!-- 수정 버튼 -->
-                        <td>
-                            <button th:classappend="${room.isExpired ? 'btn-danger' : (reservation != null ? 'btn-warning' : 'btn-primary')}"
-                                    th:text="${room.isExpired ? '수정' : (reservation != null ? '수정' : '등록')}"
-                                    th:attr="data-room-id=${room.roomId},
+                            <!-- 수정 버튼 -->
+                            <td>
+                                <button th:classappend="${room.isExpired ? 'btn-danger' : (reservation != null ? 'btn-warning' : 'btn-primary')}"
+                                        th:text="${room.isExpired ? '수정' : (reservation != null ? '수정' : '등록')}"
+                                        th:attr="data-room-id=${room.roomId},
                                  data-reservation-id=${reservation != null ? reservation.reservationId : '-1'},
                                  data-member-id=${reservation != null ? reservation.memberId : ''},
                                  data-checkin=${reservation != null ? reservation.checkInDate : ''},
@@ -218,44 +228,45 @@
                                  data-reservationEnd=${room.reservationEnd},
                                  data-is-expired=${room.isExpired},
                                  data-count=${reservation != null ? reservation.count : 1}"
-                                    onclick="
-                        if (this.getAttribute('data-is-expired') === 'true') {
-                            openEditModal(
-                                this.getAttribute('data-room-id'),
-                                this.getAttribute('data-reservation-id'),
-                                this.getAttribute('data-member-id'),
-                                this.getAttribute('data-checkin'),
-                                this.getAttribute('data-checkout'),
-                                this.getAttribute('data-reservationEnd'),
-                                this.getAttribute('data-is-expired'),
-                                this.getAttribute('data-count')
-                            );
-                        } else if (this.getAttribute('data-reservation-id') !== '-1') {
-                            openEditModal(
-                                this.getAttribute('data-room-id'),
-                                this.getAttribute('data-reservation-id'),
-                                this.getAttribute('data-member-id'),
-                                this.getAttribute('data-checkin'),
-                                this.getAttribute('data-checkout'),
-                                this.getAttribute('data-reservationEnd'),
-                                'false',
-                                this.getAttribute('data-count')
-                            );
-                        } else {
-                            openRegisterModal(
-                                this.getAttribute('data-room-id'),
-                                this.getAttribute('data-reservationEnd')
-                            );
-                        }
+                                        onclick="
+                                if (this.getAttribute('data-is-expired') === 'true') {
+                                    openEditModal(
+                                        this.getAttribute('data-room-id'),
+                                        this.getAttribute('data-reservation-id'),
+                                        this.getAttribute('data-member-id'),
+                                        this.getAttribute('data-checkin'),
+                                        this.getAttribute('data-checkout'),
+                                        this.getAttribute('data-reservationEnd'),
+                                        this.getAttribute('data-is-expired'),
+                                        this.getAttribute('data-count')
+                                    );
+                                } else if (this.getAttribute('data-reservation-id') !== '-1') {
+                                    openEditModal(
+                                        this.getAttribute('data-room-id'),
+                                        this.getAttribute('data-reservation-id'),
+                                        this.getAttribute('data-member-id'),
+                                        this.getAttribute('data-checkin'),
+                                        this.getAttribute('data-checkout'),
+                                        this.getAttribute('data-reservationEnd'),
+                                        'false',
+                                        this.getAttribute('data-count')
+                                    );
+                                } else {
+                                    openRegisterModal(
+                                        this.getAttribute('data-room-id'),
+                                        this.getAttribute('data-reservationEnd')
+                                    );
+                                }
                         ">
-                            </button>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </th:block>
 
                 <!-- 모든 방 검색바 -->
-                <div class="search-bar text-center mt-3">
+                <div class="search-bar text-center mt-3" th:if="${roomPage.totalElements > 0}">
                     <form id="allRoomSearchForm" th:action="@{/manager/room/reservation/list}" method="get">
                         <select name="category">
                             <option value="">-- 검색선택 --</option>
@@ -267,29 +278,25 @@
                     </form>
                 </div>
 
-                <!-- 모든 방 페이지네이션-->
-                <div class="pagination-container">
-                    <div class="pagination">
-                        <a th:if="${roomPage.hasPrevious()}"
-                           th:href="@{/manager/room/reservation/list(page=${roomPage.number - 1}, size=${roomPage.size}, category=${category}, keyword=${keyword})}">
-                            〈 이전
-                        </a>
+                <!-- 모든 객실 페이지네이션-->
+                <div class="pagination" th:if="${roomPage.totalElements > 0}">
+                    <a th:if="${roomPage.hasPrevious()}"
+                       th:href="@{/manager/room/reservation/list(page=${roomPage.number - 1}, size=${roomPage.size}, category=${category}, keyword=${keyword})}">
+                        〈 이전
+                    </a>
 
-                        <th:block th:each="i : ${#numbers.sequence(0, roomPage.totalPages - 1)}">
-                            <a th:href="@{/manager/room/reservation/list(page=${i}, size=${roomPage.size}, category=${category}, keyword=${keyword})}"
-                               th:text="${i + 1}"
-                               th:class="${i == roomPage.number} ? 'active' : ''"></a>
-                        </th:block>
+                    <th:block th:each="i : ${#numbers.sequence(0, roomPage.totalPages - 1)}">
+                        <a th:href="@{/manager/room/reservation/list(page=${i}, size=${roomPage.size}, category=${category}, keyword=${keyword})}"
+                           th:text="${i + 1}"
+                           th:class="${i == roomPage.number} ? 'active' : ''"></a>
+                    </th:block>
 
-                        <a th:if="${roomPage.hasNext()}"
-                           th:href="@{/manager/room/reservation/list(page=${roomPage.number + 1}, size=${roomPage.size}, category=${category}, keyword=${keyword})}">
-                            다음 〉
-                        </a>
-                    </div>
+                    <a th:if="${roomPage.hasNext()}"
+                       th:href="@{/manager/room/reservation/list(page=${roomPage.number + 1}, size=${roomPage.size}, category=${category}, keyword=${keyword})}">
+                        다음 〉
+                    </a>
                 </div>
             </div>
-
-
         </div>
     </th:block>
 

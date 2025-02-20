@@ -26,7 +26,6 @@
                       </div>
                     </div>
 
-
 <!--                    <div class="bnr_wrapper carousel-inner">-->
 <!--                <div class="carousel-item active">-->
 <!--                    <img src="/img/bg_wedding.jpg" class="d-block w-100" alt="Wedding">-->
@@ -104,7 +103,7 @@
                             <h5 th:text="${room.roomName}" class="card-title">객실 이름</h5>
                             <p th:text="'예약 기간: ' + ${room.reservationStart} + ' ~ ' + ${room.reservationEnd}" class="card-text">예약 기간</p>
                             <p th:text="'숙박 기간: ' + ${room.stayStart} + ' ~ ' + ${room.stayEnd}" class="card-text">숙박 기간</p>
-                            <p th:text=" ${room.roomInfo}" class="card-text"></p>
+                            <p th:text=" ${room.roomInfo}" class="card-text room-description"></p>
                             <p th:text="${room.formattedRoomPrice} + ' ' " class="card-text money"> 0 KRW</p>
                         </div>
                     </div>

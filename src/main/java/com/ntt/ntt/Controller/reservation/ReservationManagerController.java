@@ -216,7 +216,7 @@ public class ReservationManagerController {
     @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER')")
     @GetMapping("/member/details")
     @ResponseBody
-    public ResponseEntity<?> getMemberDetails(@RequestParam("memberId") Integer memberId) {
+    public ResponseEntity<?> getMemberDetailsForm(@RequestParam("memberId") Integer memberId) {
         Optional<Member> member = memberRepository.findById(memberId);
         if (member.isPresent()) {
             return ResponseEntity.ok(Map.of(

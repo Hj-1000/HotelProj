@@ -2,6 +2,7 @@
 <html lang="en"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layouts/layout}">
 <head>
     <meta charset="UTF-8">
@@ -34,11 +35,11 @@
             margin: 0 auto;
         }
 
-        .search-bar {
-            margin-top: 1.5rem;
+        h1 {
+            margin-bottom: 1rem;
+            font-weight: bold;
         }
 
-        /* 버튼을 세로 정렬 */
         .button-group {
             display: flex;
             flex-direction: column;
@@ -46,15 +47,17 @@
             gap: .5rem;
         }
 
-        .register-btn {
+        .register-wrap{
             text-align: right;
+            margin-bottom: 1.5rem;
+        }
+
+        .register-wrap .register-btn {
             padding: 0.5rem 1.25rem;
-            float: right;
             margin-bottom: 1rem;
             font-size: 1rem;
             font-weight: bold;
             background: #000000;
-            border: 1px solid #ffffff;
             border-radius: 5px;
             color: #ffffff;
             text-decoration: none;
@@ -65,6 +68,26 @@
             border: 1px solid #000000;
             color: #000000;
 
+        }
+
+        .card {
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            background: #fff;
+            margin-bottom: 2rem;
+        }
+
+        .no-room-message {
+            margin-top: 2rem;
+            font-size: 1.2rem;
+            color: #555;
+            font-weight: bold;
+            padding: 2.5rem;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         /* 공통 페이징 스타일 */
@@ -126,111 +149,129 @@
 </head>
 <body>
 <div layout:fragment="content">
-    <div class="container list-wrapper">
-        <h1 class="text-center">객실 목록</h1>
-        <a href="/manager/room/register" class="register-btn">등록</a>
+    <th:block sec:authorize="hasAnyRole('ADMIN', 'CHIEF', 'MANAGER')">
+        <div class="container list-wrapper">
+            <h1 class="text-center">객실 목록</h1>
 
-        <!-- 에러 메시지 -->
-        <div th:if="${errorMessage}" class="alert alert-danger text-center">
-            <span th:text="${errorMessage}"></span>
-        </div>
+            <div class="card">
+                <div class="register-wrap">
+                    <a href="/manager/room/register" class="register-btn">등록</a>
+                </div>
+                <!-- 에러 메시지 -->
+                <div th:if="${errorMessage}" class="alert alert-danger text-center">
+                    <span th:text="${errorMessage}"></span>
+                </div>
 
-        <!-- 객실 목록 테이블 -->
-        <table class="table table-bordered table-hover">
-            <thead class="table-dark">
-            <tr>
-                <th scope="col">이미지</th>
-                <th scope="col">객실 ID</th>
-                <th scope="col">객실 이름</th>
-                <th scope="col">객실 타입</th>
-                <th scope="col">가격</th>
-                <th scope="col">상태</th>
-                <th scope="col">예약 기간</th>
-                <th scope="col">숙박 기간</th>
-                <th scope="col">기능</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="room : ${list.content}">
-                <!-- 이미지 -->
-                <td class="align-middle text-center">
-                    <img th:if="${room.roomImageDTOList != null and !room.roomImageDTOList.isEmpty()}"
-                         th:src="@{'/upload/' + ${room.roomImageDTOList[0].imagePath}}"
-                         alt="Room Image"
-                         class="room-image">
-                    <span th:if="${room.roomImageDTOList == null or room.roomImageDTOList.isEmpty()}">이미지 없음</span>
-                </td>
-
-                <!-- 나머지 -->
-                <td class="align-middle text-center" th:text="${room.roomId}"></td>
-                <td class="align-middle text-center" th:text="${room.roomName}"></td>
-                <td class="align-middle text-center" th:text="${room.roomType}"></td>
-                <td class="align-middle text-center" th:text="${room.formattedRoomPrice} + ' KRW'"></td>
-                <td class="align-middle text-center">
-                    <span th:if="${room.roomStatus != null and room.roomStatus}" class="badge bg-success">Available</span>
-                    <span th:if="${room.roomStatus == null or !room.roomStatus}" class="badge bg-danger">Unavailable</span>
-                </td>
-                <td class="align-middle text-center" th:text="${room.reservationStart} + ' ~ ' + ${room.reservationEnd}">예약 기간 없음</td>
-                <td class="align-middle text-center" th:text="${room.stayStart} + ' ~ ' + ${room.stayEnd}">숙박 기간 없음</td>
-                <td class="align-middle text-center">
-                    <div class="button-group">
-                        <a th:href="@{/manager/room/{roomId}(roomId=${room.roomId})}" class="btn btn-info btn-sm">보기</a>
-                        <a th:href="@{/manager/room/update/{roomId}(roomId=${room.roomId})}" class="btn btn-warning btn-sm">수정</a>
-                        <a th:href="@{/manager/room/delete/{roomId}(roomId=${room.roomId})}"
-                           onclick="return confirm('진짜로 삭제할꺼야?')"
-                           class="btn btn-danger btn-sm">삭제</a>
+                <!-- 객실 목록이 없을 때 표시 -->
+                <th:block th:if="${list.totalElements == 0}">
+                    <div class="alert alert-warning text-center no-room-message">
+                        현재 만들어진 객실이 없습니다.
                     </div>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+                </th:block>
 
-    <!-- 검색 바 -->
-    <div class="search-bar text-center">
-        <form id="searchForm" th:action="@{/manager/room/list}" method="get">
-            <select name="category" id="category">
-                <option value="">-- 검색선택 --</option>
-                <option value="roomName" th:selected="${category == 'roomName'}">객실 이름</option>
-                <option value="roomType" th:selected="${category == 'roomType'}">객실 타입</option>
-                <option value="roomStatus" th:selected="${category == 'roomStatus'}">상태</option>
-            </select>
-            <input type="text" name="keyword" id="searchInput" placeholder="검색어를 입력하세요" th:value="${keyword}">
-            <button type="submit">검색</button>
-        </form>
-    </div>
+                <!-- 객실 목록 테이블 -->
+                <th:block th:unless="${list.totalElements == 0}">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-dark">
+                        <tr>
+                            <th scope="col">이미지</th>
+                            <th scope="col">객실 ID</th>
+                            <th scope="col">객실 이름</th>
+                            <th scope="col">객실 타입</th>
+                            <th scope="col">가격</th>
+                            <th scope="col">상태</th>
+                            <th scope="col">예약 기간</th>
+                            <th scope="col">숙박 기간</th>
+                            <th scope="col">기능</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="room : ${list.content}">
+                            <!-- 이미지 -->
+                            <td class="align-middle text-center">
+                                <img th:if="${room.roomImageDTOList != null and !room.roomImageDTOList.isEmpty()}"
+                                     th:src="@{'/upload/' + ${room.roomImageDTOList[0].imagePath}}"
+                                     alt="Room Image"
+                                     class="room-image">
+                                <span th:if="${room.roomImageDTOList == null or room.roomImageDTOList.isEmpty()}">이미지 없음</span>
+                            </td>
 
-    <!-- 페이지네이션 -->
-    <div class="d-flex justify-content-center">
-        <ul class="pagination">
-            <!-- 처음 페이지 -->
-            <li class="page-item" th:if="${currentPage > 1}">
-                <a class="page-link" th:href="@{/manager/room/list(page=0, keyword=${keyword}, category=${category})}">처음</a>
-            </li>
+                            <!-- 나머지 -->
+                            <td class="align-middle text-center" th:text="${room.roomId}"></td>
+                            <td class="align-middle text-center" th:text="${room.roomName}"></td>
+                            <td class="align-middle text-center" th:text="${room.roomType}"></td>
+                            <td class="align-middle text-center" th:text="${room.formattedRoomPrice} + ' KRW'"></td>
+                            <td class="align-middle text-center">
+                                <span th:if="${room.roomStatus != null and room.roomStatus}" class="badge bg-success">Available</span>
+                                <span th:if="${room.roomStatus == null or !room.roomStatus}" class="badge bg-danger">Unavailable</span>
+                            </td>
+                            <td class="align-middle text-center" th:text="${room.reservationStart} + ' ~ ' + ${room.reservationEnd}">예약 기간 없음</td>
+                            <td class="align-middle text-center" th:text="${room.stayStart} + ' ~ ' + ${room.stayEnd}">숙박 기간 없음</td>
+                            <td class="align-middle text-center">
+                                <div class="button-group">
+                                    <a th:href="@{/manager/room/{roomId}(roomId=${room.roomId})}" class="btn btn-info btn-sm">보기</a>
+                                    <a th:href="@{/manager/room/update/{roomId}(roomId=${room.roomId})}" class="btn btn-warning btn-sm">수정</a>
+                                    <a th:href="@{/manager/room/delete/{roomId}(roomId=${room.roomId})}"
+                                       onclick="return confirm('진짜로 삭제할꺼야?')"
+                                       class="btn btn-danger btn-sm">삭제</a>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </th:block>
 
-            <!-- 이전 페이지 -->
-            <li class="page-item" th:if="${currentPage > 1}">
-                <a class="page-link" th:href="@{/manager/room/list(page=${currentPage - 2}, keyword=${keyword}, category=${category})}">이전</a>
-            </li>
+                <th:block th:unless="${list.totalElements == 0}">
+                    <!-- 검색 바 -->
+                    <div class="search-bar text-center">
+                        <form id="searchForm" th:action="@{/manager/room/list}" method="get">
+                            <select name="category" id="category">
+                                <option value="">-- 검색선택 --</option>
+                                <option value="roomName" th:selected="${category == 'roomName'}">객실 이름</option>
+                                <option value="roomType" th:selected="${category == 'roomType'}">객실 타입</option>
+                                <option value="roomStatus" th:selected="${category == 'roomStatus'}">상태</option>
+                            </select>
+                            <input type="text" name="keyword" id="searchInput" placeholder="검색어를 입력하세요" th:value="${keyword}">
+                            <button type="submit">검색</button>
+                        </form>
+                    </div>
+                </th:block>
+                <th:block th:unless="${list.totalElements == 0}">
+                    <!-- 페이지네이션 -->
+                    <div class="d-flex justify-content-center">
+                        <ul class="pagination">
+                            <!-- 처음 페이지 -->
+                            <li class="page-item" th:if="${currentPage > 1}">
+                                <a class="page-link" th:href="@{/manager/room/list(page=0, keyword=${keyword}, category=${category})}">처음</a>
+                            </li>
 
-            <!-- 페이지 번호 -->
-            <th:block th:each="page : ${#numbers.sequence(startPage, endPage)}">
-                <li class="page-item" th:classappend="${currentPage == page} ? 'active'">
-                    <a class="page-link" th:href="@{/manager/room/list(page=${page - 1}, keyword=${keyword}, category=${category})}" th:text="${page}"></a>
-                </li>
-            </th:block>
+                            <!-- 이전 페이지 -->
+                            <li class="page-item" th:if="${currentPage > 1}">
+                                <a class="page-link" th:href="@{/manager/room/list(page=${currentPage - 2}, keyword=${keyword}, category=${category})}">이전</a>
+                            </li>
 
-            <!-- 다음 페이지 -->
-            <li class="page-item" th:if="${currentPage < lastPage}">
-                <a class="page-link" th:href="@{/manager/room/list(page=${currentPage}, keyword=${keyword}, category=${category})}">다음</a>
-            </li>
+                            <!-- 페이지 번호 -->
+                            <th:block th:each="page : ${#numbers.sequence(startPage, endPage)}">
+                                <li class="page-item" th:classappend="${currentPage == page} ? 'active'">
+                                    <a class="page-link" th:href="@{/manager/room/list(page=${page - 1}, keyword=${keyword}, category=${category})}" th:text="${page}"></a>
+                                </li>
+                            </th:block>
 
-            <!-- 마지막 페이지 -->
-            <li class="page-item" th:if="${currentPage < lastPage}">
-                <a class="page-link" th:href="@{/manager/room/list(page=${lastPage - 1}, keyword=${keyword}, category=${category})}">마지막</a>
-            </li>
-        </ul>
-    </div>
+                            <!-- 다음 페이지 -->
+                            <li class="page-item" th:if="${currentPage < lastPage}">
+                                <a class="page-link" th:href="@{/manager/room/list(page=${currentPage}, keyword=${keyword}, category=${category})}">다음</a>
+                            </li>
+
+                            <!-- 마지막 페이지 -->
+                            <li class="page-item" th:if="${currentPage < lastPage}">
+                                <a class="page-link" th:href="@{/manager/room/list(page=${lastPage - 1}, keyword=${keyword}, category=${category})}">마지막</a>
+                            </li>
+                        </ul>
+                    </div>
+                </th:block>
+            </div>
+        </div>
+    </th:block>
     <script th:inline="javascript">
         document.addEventListener("DOMContentLoaded", function () {
             let successMessage = /*[[${successMessage} ?: '' ]]*/ "";  // Null 방지
