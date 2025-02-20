@@ -31,42 +31,42 @@
                 <form action="/admin/executiveRegister" method="post" onsubmit="return registerCheck();">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label for="memberName" class="form-label fw-bold">*이름</label>
+                            <label for="memberName" class="form-label fw-bold">*매니저 이름</label>
                             <input type="text" class="form-control" id="memberName" name="memberName" placeholder="이름" required>
                         </div>
                         <div class="col-md-6">
                             <label for="memberEmailInput" class="form-label fw-bold">*이메일 :</label>
                             <div class="input-group">
-                                <input type="email" class="form-control" id="memberEmailInput" name="memberEmail" required>
+                                <input type="email" class="form-control" id="memberEmailInput" name="memberEmail" placeholder="이메일 형식에 맞춰서 작성해주세요." required>
                                 <button type="button" class="btn btn-secondary" onclick="emailCheck()">중복확인</button>
                             </div>
                             <small id="emailCheckMessage" style="display: none;"></small>
                         </div>
                         <div class="col-md-6">
                             <label for="memberPassword" class="form-label fw-bold">*비밀번호</label>
-                            <input type="password" class="form-control" id="memberPassword" name="memberPassword" placeholder="비밀번호는 6~12자의 영문, 숫자, 기호" required>
+                            <input type="password" class="form-control" id="memberPassword" name="memberPassword" placeholder="비밀번호는 6~12자 이내로 입력해주세요." required>
                         </div>
                         <div class="col-md-6">
                             <label for="memberPasswordCheck" class="form-label fw-bold">*비밀번호 확인</label>
-                            <input type="password" class="form-control" id="memberPasswordCheck" name="memberPasswordCheck" placeholder="비밀번호는 6~12자의 영문, 숫자, 기호" required>
+                            <input type="password" class="form-control" id="memberPasswordCheck" name="memberPasswordCheck" placeholder="비밀번호를 한번 더 입력해주세요." required>
                         </div>
                         <div class="col-md-6">
                             <label for="company" class="form-label fw-bold">*본사</label>
                             <select class="form-select" id="company" name="company">
                                 <option th:unless="${#lists.isEmpty(companyList)}" value="">본사 선택</option>
-                                <option th:if="${#lists.isEmpty(companyList)}" value="">먼저 본사와 지사를 등록해 주세요</option>
+                                <option th:if="${#lists.isEmpty(companyList)}" value="">먼저 본사와 지사를 등록해 주세요.</option>
                                 <option th:each="company : ${companyList}" th:value="${company.companyId}" th:text="${company.companyName}"></option>
                             </select>
                         </div>
                         <div class="col-md-6">
                             <label for="hotelSelect" class="form-label fw-bold">*지사</label>
                             <select id="hotelSelect" class="form-select" name="hotelId" required>
-                                <option value="">먼저 본사를 선택해 주세요</option>
+                                <option value="">먼저 본사를 선택해 주세요.</option>
                             </select>
                         </div>
                         <div class="col-md-12">
                             <label for="memberPhone" class="form-label fw-bold">전화번호</label>
-                            <input type="text" class="form-control" id="memberPhone" name="memberPhone" placeholder="연락처">
+                            <input type="text" class="form-control" id="memberPhone" name="memberPhone" placeholder="'-' 없이 숫자만 입력해주세요.">
                         </div>
                     </div>
                     <div class="text-end mt-4">
@@ -85,7 +85,7 @@
                             // 회사 ID가 선택되지 않으면 지사 목록 초기화
                             if (!companyId) {
                                 $("#hotelSelect").empty();  // 기존 옵션 제거
-                                $("#hotelSelect").append('<option value="">먼저 본사를 선택해 주세요</option>');
+                                $("#hotelSelect").append('<option value="">먼저 본사를 선택해 주세요.</option>');
                                 return;
                             }
 
@@ -106,7 +106,7 @@
                                         });
                                     } else {
                                         // 지사 목록이 없을 경우
-                                        hotelSelect.append('<option value="">먼저 지사를 등록해 주세요</option>');
+                                        hotelSelect.append('<option value="">먼저 지사를 등록해 주세요.</option>');
                                     }
                                 },
                                 error: function() {
@@ -150,7 +150,7 @@
                         if (!emailPattern.test(email)) {
                             messageElement.style.display = "block";
                             messageElement.style.color = "red";
-                            messageElement.innerText = "이메일 형식에 맞춰 입력해주세요.";
+                            messageElement.innerText = "이메일 형식에 맞춰서 작성해주세요.";
                             return;
                         }
 
@@ -176,7 +176,7 @@
                             });
                     }
 
-                    // 비밀번호 및 인증코드, 이메일 체크
+                    // 비밀번호 및 이메일 체크
                     function registerCheck() {
                         var email = document.getElementById('memberEmailInput').value;
                         var p1 = document.getElementById('memberPassword').value;
@@ -185,6 +185,11 @@
                         // 비밀번호 길이 체크
                         if (p1.length < 6) {
                             alert('비밀번호는 6글자 이상이어야 합니다.');
+                            return false;
+                        }
+
+                        if (p1.length > 12) {
+                            alert('비밀번호는 12글자 이내여야 합니다.');
                             return false;
                         }
 

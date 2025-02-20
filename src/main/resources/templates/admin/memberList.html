@@ -97,7 +97,6 @@
                 <table class="table table-bordered text-center" id="memberTable">
                     <thead>
                     <tr>
-                        <th>No</th>
                         <th>회원번호</th>
                         <th>권한</th>
                         <th>아이디</th>
@@ -109,10 +108,8 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <th:block th:each="memberDTO, index : ${memberDTOList}">
+                    <th:block th:each="memberDTO : ${memberDTOList}">
                         <tr style="vertical-align: middle;">
-                            <!-- index 출력 -->
-                            <td th:text="${index.index + 1}">1</td>
                             <td th:text="${memberDTO.memberId}">1</td>
                             <td>
                                 <form th:action="@{/admin/update}" method="post">
@@ -128,11 +125,11 @@
                             <td th:text="${memberDTO.memberName}">신짱구</td>
                             <input type="text" class="form-control" id="memberName" name="memberName" placeholder="이름" th:value="${memberDTO.memberName}" hidden="hidden">
                             <td th:text="${memberDTO.memberPhone}">010-2345-6789</td>
-                            <td th:text="${#temporals.format(memberDTO.regDate, 'yyyy-MM-dd HH:mm:ss')}">2023-01-01</td>
+                            <td th:text="${#temporals.format(memberDTO.regDate, 'yyyy-MM-dd HH:mm')}">2023-01-01</td>
                             <td>
                                 <select class="form-select" name="memberStatus">
-                                    <option value="활성" th:selected="${memberDTO.memberStatus == '활성'}">활성</option>
-                                    <option value="비활성" th:selected="${memberDTO.memberStatus == '비활성'}">비활성</option>
+                                    <option value="활성" th:selected="${memberDTO.memberStatus == '활성'}">🟢 활성</option>
+                                    <option value="비활성" th:selected="${memberDTO.memberStatus == '비활성'}">🔴 비활성</option>
                                 </select>
                             </td>
                             <td>
@@ -168,8 +165,9 @@
                 </div>
 
                 <!-- 회원정보 수정 성공시 메시지 -->
-                <div id="successMessage" th:if="${successMessage}" class="alert alert-success" role="alert">
+                <div id="successMessage" th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
                     <span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
 
                 <script>
