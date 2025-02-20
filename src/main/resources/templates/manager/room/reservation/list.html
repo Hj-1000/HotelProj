@@ -96,13 +96,21 @@
                                 </th:block>
                             </span>
                         </td>
-
                         <td>
-                            <form sec:authorize="isAuthenticated()" method="post" action="/admin/reservation/cancel"
-                                  onsubmit="return confirm('정말 예약을 취소하시겠습니까?');">
-                                <input type="hidden" name="reservationId" th:value="${reservation.reservationId}">
-                                <button type="submit" class="btn btn-danger">예약 취소</button>
-                            </form>
+                            <th:block th:if="${reservation.reservationStatus == '취소 요청'}">
+                                <button type="button"
+                                        class="btn btn-danger cancel-approval-btn"
+                                        th:data-reservation-id="${reservation.reservationId}">
+                                    예약 취소
+                                </button>
+                            </th:block>
+                            <th:block th:if="${reservation.reservationStatus == '예약'}">
+                                <form sec:authorize="isAuthenticated()" method="post" action="/manager/room/reservation/delete"
+                                      onsubmit="return confirm('정말 예약을 강제 취소하시겠습니까?');">
+                                    <input type="hidden" name="reservationId" th:value="${reservation.reservationId}">
+                                    <button type="submit" class="btn btn-danger">강제 취소</button>
+                                </form>
+                            </th:block>
                         </td>
                     </tr>
                     </tbody>
@@ -385,10 +393,42 @@
                 }
             });
         </script>
-
     </div>
 
     <script>
+
+        /* 예약취소 요청시 비동기 요청*/
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".cancel-approval-btn").forEach(button => {
+                button.addEventListener("click", function () {
+                    const reservationId = this.getAttribute("data-reservation-id");
+
+                    if (!confirm("정말 예약을 취소하시겠습니까?")) {
+                        return;
+                    }
+
+                    fetch("/admin/reservation/cancel", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                        body: new URLSearchParams({ reservationId: reservationId })
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.text().then(text => { throw new Error(text) });
+                            }
+                            return response.text();
+                        })
+                        .then(data => {
+                            alert(data);
+                            location.reload();  // 현재 페이지 새로고침 (이전 페이지 유지)
+                        })
+                        .catch(error => {
+                            console.error("예약 취소 승인 오류:", error);
+                            alert("예약 취소 승인 중 오류가 발생했습니다.");
+                        });
+                });
+            });
+        });
 
         /* 예약 마감 기한 수정시 Room_Status 자동 업데이트 */
         document.addEventListener("DOMContentLoaded", function () {
@@ -445,7 +485,6 @@
         });
 
         /* 객실 목록 간편 예약 관리 */
-
         document.addEventListener("DOMContentLoaded", function () {
             document.querySelectorAll(".room-box").forEach(room => {
                 room.addEventListener("click", function () {
@@ -805,14 +844,14 @@
             editReservationEnd.value = reservationEnd;
 
             if (!roomId || roomId === 'null' || roomId === 'undefined') {
-                console.error("[오류] `roomId`가 존재하지 않습니다.");
+                console.error(" `roomId`가 존재하지 않습니다.");
                 alert("객실 정보를 찾을 수 없습니다.");
                 return;
             }
 
             let roomElement = document.querySelector(`[data-room-id='${roomId}']`);
             if (!roomElement) {
-                console.error("[오류] 해당 객실 정보를 찾을 수 없습니다.");
+                console.error(" 해당 객실 정보를 찾을 수 없습니다.");
                 return;
             }
 
@@ -821,7 +860,8 @@
             let roomType = roomElement.getAttribute("data-room-type") || "";
 
             if (!stayStart || !stayEnd) {
-                console.error("[오류] 숙박 가능 기간 정보가 없습니다.");
+                console.error("" +
+                    " 숙박 가능 기간 정보가 없습니다.");
                 return;
             }
 
@@ -1088,7 +1128,7 @@
 
             let roomElement = document.querySelector(`[data-room-id='${roomId}']`);
             if (!roomElement) {
-                console.error("[오류] 해당 객실 정보를 찾을 수 없습니다.");
+                console.error(" 해당 객실 정보를 찾을 수 없습니다.");
                 return;
             }
 
@@ -1097,7 +1137,7 @@
             let roomType = roomElement.getAttribute("data-room-type"); // 객실 타입 가져오기
 
             if (!stayStart || !stayEnd) {
-                console.error("[오류] 숙박 가능 기간 정보가 없습니다.");
+                console.error(" 숙박 가능 기간 정보가 없습니다.");
                 return;
             }
 
@@ -1186,7 +1226,6 @@
         });
 
         /* cancel 상하 반복 */
-
         document.addEventListener("DOMContentLoaded", function() {
             const cancelRequests = document.querySelectorAll(".status-cancel");
 

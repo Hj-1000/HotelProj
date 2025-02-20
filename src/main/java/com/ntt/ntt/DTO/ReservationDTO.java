@@ -58,18 +58,25 @@ public class ReservationDTO {
 
     // Entity -> DTO 변환 메서드
     public static ReservationDTO fromEntity(Reservation reservation) {
+        if (reservation == null) {
+            throw new IllegalArgumentException("Reservation entity가 null입니다.");
+        }
+
         RoomDTO roomDTO = reservation.getRoom() != null ? RoomDTO.fromEntity(reservation.getRoom()) : null;
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime cancelConfirmedTime = reservation.getCancelConfirmedAt();
-        Long remainingTime = null;
+        Long remainingTime = 0L; // 기본값을 0으로 설정
 
         if ("취소 완료".equals(reservation.getReservationStatus()) && cancelConfirmedTime != null) {
-            remainingTime = Duration.between(now, cancelConfirmedTime.plusHours(24)).toSeconds(); // 초 단위 남은 시간 계산
-            if (remainingTime < 0) remainingTime = 0L; // 0 이하가 되면 0으로 설정
+            remainingTime = Duration.between(now, cancelConfirmedTime.plusMinutes(1)).toSeconds(); // 1분 후 삭제
+
+            if (remainingTime < 0) {
+                remainingTime = 0L; // 자동 삭제된 경우 0으로 설정
+            }
         }
 
-        log.info("[fromEntity] 변환 과정 - reservationId={}, cancelConfirmedAt={}, remainingTime={}",
+        log.info("[fromEntity] 변환 - reservationId={}, cancelConfirmedAt={}, remainingTime={}",
                 reservation.getReservationId(), cancelConfirmedTime, remainingTime);
 
         return new ReservationDTO(
@@ -93,5 +100,4 @@ public class ReservationDTO {
                 remainingTime
         );
     }
-
 }

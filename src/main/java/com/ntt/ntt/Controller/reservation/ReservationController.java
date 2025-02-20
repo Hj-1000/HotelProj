@@ -121,9 +121,9 @@ public class ReservationController {
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/myPage/reservationList")
     public String reservationListForm(@AuthenticationPrincipal UserDetails userDetails,
-                                  @RequestParam(value = "page", defaultValue = "0") int page, // 현재 페이지 (0부터 시작)
-                                  @RequestParam(value = "size", defaultValue = "5") int size, // 페이지 크기 (5개)
-                                  Model model) {
+                                      @RequestParam(value = "page", defaultValue = "0") int page, // 현재 페이지 (0부터 시작)
+                                      @RequestParam(value = "size", defaultValue = "5") int size, // 페이지 크기 (5개)
+                                      Model model) {
         if (userDetails == null) {
             return "redirect:/login";  // 로그인되어있지 않으면 로그인 페이지로 리다이렉트
         }
@@ -173,7 +173,7 @@ public class ReservationController {
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/myPage/reservation/cancel")
     public ResponseEntity<?> requestCancelReservationProc(@AuthenticationPrincipal UserDetails userDetails,
-                                                      @RequestParam Integer reservationId) {
+                                                          @RequestParam Integer reservationId) {
         Optional<Member> memberOptional = memberRepository.findByMemberEmail(userDetails.getUsername());
         if (memberOptional.isEmpty()) {
             return ResponseEntity.badRequest().body("로그인이 필요합니다.");
@@ -208,20 +208,31 @@ public class ReservationController {
     // 유저가 직접 "취소 완료"된 예약을 삭제
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/myPage/reservation/delete")
-    public ResponseEntity<?> deleteReservationProc(@AuthenticationPrincipal UserDetails userDetails,
-                                               @RequestParam Integer reservationId) {
+    public ResponseEntity<Map<String, Object>> deleteReservationProc(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam Integer reservationId) {
+
         Optional<Member> memberOptional = memberRepository.findByMemberEmail(userDetails.getUsername());
         if (memberOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body("로그인이 필요합니다.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("success", false, "message", "로그인이 필요합니다."));
         }
 
         Member member = memberOptional.get();
 
         try {
-            reservationService.deleteReservationByUser(reservationId, member.getMemberId());
-            return ResponseEntity.ok("예약 내역이 삭제되었습니다.");
+            boolean isDeleted = reservationService.deleteReservationByUser(reservationId, member.getMemberId());
+
+            //  이미 삭제된 예약도 성공 처리
+            if (!isDeleted) {
+                log.warn("삭제 요청했지만 이미 삭제된 예약 ID: {}", reservationId);
+            }
+
+            return ResponseEntity.ok(Map.of("success", true, "message", "예약 내역이 삭제되었습니다."));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }
     }
+
+
 }
