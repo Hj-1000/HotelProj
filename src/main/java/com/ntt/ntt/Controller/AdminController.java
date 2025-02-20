@@ -59,7 +59,7 @@ public class AdminController {
             List<MemberDTO> filteredMembers = memberService.getFilteredMembers(role, email, status, name, phone, startDate, endDate);
 
             // memberId 기준 내림차순 정렬
-            filteredMembers.sort(Comparator.comparing(MemberDTO::getMemberId).reversed());
+            // filteredMembers.sort(Comparator.comparing(MemberDTO::getMemberId).reversed());
 
             // 페이징 처리
             int startIdx = page * size;
@@ -159,7 +159,7 @@ public class AdminController {
             }
 
             // 호텔 리스트를 hotelId 기준으로 내림차순 정렬
-            filteredHotels.sort(Comparator.comparing(HotelDTO::getHotelId).reversed());
+            // filteredHotels.sort(Comparator.comparing(HotelDTO::getHotelId).reversed());
 
             // 페이징 처리
             int startIdx = page * size;

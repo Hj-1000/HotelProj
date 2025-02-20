@@ -97,7 +97,8 @@
                     </div>
                 </div>
                 <div class="text-center mt-3">
-                    <button type="submit" class="btn btn-primary" style="background-color: black">조회</button>
+                    <button type="submit" class="btn btn-dark">
+                        <i class="bi bi-search"></i> 조회</button>
                 </div>
             </form>
         </div>
@@ -108,15 +109,16 @@
                 <table class="table table-bordered text-center">
                     <thead>
                     <tr>
-                        <th>회원번호</th>
-                        <th>임원권한</th>
-                        <th>아이디</th>
-                        <th>이름</th>
-                        <th>담당지사</th>
-                        <th>연락처</th>
-                        <th>가입일</th>
-                        <th>상태</th>
-                        <th>수정</th>
+                        <th style="background-color: #f8f9fa; width: 6%">회원번호</th>
+                        <th style="background-color: #f8f9fa; width: 10%">임원권한</th>
+                        <th style="background-color: #f8f9fa; width: 15%">아이디</th>
+                        <th style="background-color: #f8f9fa; width: 9%">이름</th>
+                        <th style="background-color: #f8f9fa; width: 10%">소속본사</th>
+                        <th style="background-color: #f8f9fa; width: 10%">담당지사</th>
+                        <th style="background-color: #f8f9fa; width: 12%">연락처</th>
+                        <th style="background-color: #f8f9fa; width: 12%">가입일</th>
+                        <th style="background-color: #f8f9fa; width: 10%">상태</th>
+                        <th style="background-color: #f8f9fa; width: 6%">수정</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -130,13 +132,19 @@
                                         <option th:each="role : ${roles}"
                                                 th:value="${role}"
                                                 th:text="${role}"
-                                                th:selected="${hotelDTO.member != null && hotelDTO.member.role == role}"></option>
+                                                th:selected="${hotelDTO.member != null && hotelDTO.member.role == role}">
+                                        </option>
                                     </select>
                             </td>
                             <td th:text="${hotelDTO.member != null ? hotelDTO.member.memberEmail : 'N/A'}">아이디</td>
                             <td th:text="${hotelDTO.member != null ? hotelDTO.member.memberName : 'N/A'}">회원 이름</td>
                             <input type="text" class="form-control" id="memberName" name="memberName" placeholder="이름" th:value="${hotelDTO.member != null ? hotelDTO.member.memberName : 'N/A'}" hidden="hidden">
-                            <td th:text="${hotelDTO.member != null ? hotelDTO.hotelName : 'N/A'}">지사명</td>
+                            <td>
+                                <a th:href="@{/company/read(companyId=${hotelDTO.companyId})}" th:text="${hotelDTO.member != null ? hotelDTO.companyName : 'N/A'}">본사명</a>
+                            </td>
+                            <td>
+                                <a th:href="@{/manager/hotel/read(hotelId=${hotelDTO.hotelId})}" th:text="${hotelDTO.member != null ?  hotelDTO.hotelName : 'N/A'}">지사명</a>
+                            </td>
                             <td th:text="${hotelDTO.member != null ? hotelDTO.member.memberPhone : 'N/A'}">전화번호</td>
                             <td th:text="${hotelDTO.regDate != null ? #temporals.format(hotelDTO.modDate, 'yyyy-MM-dd HH:mm') : 'N/A'}">가입일</td>
                             <td>
@@ -178,8 +186,9 @@
                 </div>
 
                 <!-- 회원정보 수정 성공시 메시지 -->
-                <div id="successMessage" th:if="${successMessage}" class="alert alert-success" role="alert">
+                <div id="successMessage" th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
                     <span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
 
                 <script>
@@ -282,7 +291,8 @@
 
                 <!-- 등록 버튼 -->
                 <div class="text-end">
-                    <button class="btn btn-primary" style="background-color: black" onclick="location.href='/admin/executiveRegister'">등록</button>
+                    <button class="btn btn-dark" onclick="location.href='/admin/executiveRegister'">
+                        <i class="bi bi-person-plus-fill"></i> 매니저 등록</button>
                 </div>
             </div>
         </div>
