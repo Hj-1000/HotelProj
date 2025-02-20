@@ -34,6 +34,10 @@
             $(".modalBtn").click(function () {
                 var myModal = new bootstrap.Modal(document.getElementById('myModal'));
                 myModal.show();
+
+                // 현재 페이지 hotelId를 모달 select에 반영
+                const currentHotelId = [[${hotelId}]];
+                $("#modalHotelId").val(currentHotelId);
             });
 
             // 이미지 미리보기 기능
@@ -168,8 +172,9 @@
 
                 </div> <!-- row 끝 -->
                 <!-- 추가 버튼 -->
+                <!--등록 버튼 누를 때 해당하는 hotelId를 받을 수 있게 url 변경 2025-02-20-->
                 <div class="text-end mt-3">
-                    <button class="btn btn-primary" style="background-color: black" onclick="location.href='/roomService/category/register' ">등록</button>
+                    <a th:href="@{/roomService/category/register(hotelId=${hotelId})}" class="btn btn-primary">등록</a>
                     <button type="button" class="btn btn-primary modalBtn">간편 등록</button>
                 </div>
                 <!-- 페이지네이션 -->
@@ -221,10 +226,13 @@
                     <div class="modal-body">
                         <!--지사명을 통해 지사ID 가져오기 2025-02-11 추가-->
                         <div class="mb-3 mt-3">
-                            <label for="hotelId" class="form-label">지사명:</label>
-                            <select id="hotelId" name="hotelId" class="form-select">
+                            <label for="modalHotelId" class="form-label">지사명:</label>
+                            <select id="modalHotelId" name="hotelId" class="form-select">
                                 <th:block th:each="hotelDTOS : ${hotelDTOS}">
-                                    <option th:value="${hotelDTOS.hotelId}" th:text="${hotelDTOS.hotelName}">뒤에바</option>
+                                    <option th:value="${hotelDTOS.hotelId}"
+                                            th:text="${hotelDTOS.hotelName}"
+                                            th:selected="${hotelDTOS.hotelId == hotelId}">
+                                    </option>
                                 </th:block>
                             </select>
                         </div>

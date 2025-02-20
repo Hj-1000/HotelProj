@@ -92,7 +92,7 @@
 
                         <div style="text-align: right">
                             <button type="submit" class="btn btn-primary">수정</button>
-                            <a class="btn btn-primary" style="background-color: black" onclick="location.href='/roomService/category/list' ">목록</a>
+                            <a class="btn btn-primary" style="background-color: black" th:href="@{/roomService/category/list(hotelId=${serviceCateDTO.hotelId.hotelId})}">목록</a>
                             <button type="reset" class="btn btn-secondary">초기화</button>
                         </div>
                     </form>

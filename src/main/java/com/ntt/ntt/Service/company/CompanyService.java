@@ -90,7 +90,7 @@ public class CompanyService {
         int pageSize = 10;
         Pageable pageable = PageRequest.of(
                 currentPage, pageSize,
-                Sort.by(Sort.Direction.DESC, "companyId")
+                Sort.by(Sort.Direction.ASC, "companyId")
         );
 
         // 2. 검색타입에 따른 회사 조회
