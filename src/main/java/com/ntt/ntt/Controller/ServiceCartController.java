@@ -1,8 +1,11 @@
 package com.ntt.ntt.Controller;
 
+import com.ntt.ntt.DTO.ReservationDTO;
 import com.ntt.ntt.DTO.ServiceCartDetailDTO;
 import com.ntt.ntt.DTO.ServiceCartItemDTO;
 import com.ntt.ntt.DTO.ServiceCartOrderDTO;
+import com.ntt.ntt.Service.ReservationService;
+import com.ntt.ntt.Service.RoomService;
 import com.ntt.ntt.Service.ServiceCartItemService;
 import com.ntt.ntt.Service.ServiceCartService;
 import jakarta.validation.Valid;
@@ -17,6 +20,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
+import javax.lang.model.type.IntersectionType;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +32,8 @@ import java.util.Map;
 public class ServiceCartController {
     private final ServiceCartService serviceCartService;
     private final ServiceCartItemService serviceCartItemService;
+    private final ReservationService reservationService;
+    private final RoomService roomService;
 
     //카트 컨트롤러 역시 데이터를받아 동적으로 만들것
     // 장바구니 조회
@@ -87,6 +93,8 @@ public class ServiceCartController {
             this.message = message;
         }
     }
+    //장바구니 페이지를 만들 때 필요한 컨트롤러인데
+    //이번에는 유저의 주문 페이지에 장바구니를 동적으로 만들었기에 필요하지 않을 듯 보임
     @GetMapping("/myPage/cart")
     public String orderHistory(Principal principal ,Model model) {
         List<ServiceCartDetailDTO> serviceCartDetailDTOList =
@@ -96,7 +104,7 @@ public class ServiceCartController {
         model.addAttribute("serviceCartDetailDTOList", serviceCartDetailDTOList);
         return "myPage/cart/history";
     }
-
+    // 장바구니에 담긴 수량을 변경하는 기능
     @PutMapping("/api/updateCartItem")
     public ResponseEntity<?> updateCartItem(@RequestBody @Valid ServiceCartItemDTO serviceCartItemDTO,
                                             BindingResult bindingResult, Principal principal) {
@@ -132,8 +140,7 @@ public class ServiceCartController {
         }
     }
 
-
-
+    //장바구니에 담긴 아이템을 삭제하는 기능
     @DeleteMapping("/api/cartItem/{serviceCartItemId}")
     public ResponseEntity deleteCartItem(@PathVariable("serviceCartItemId") Integer serviceCartItemId,
                                          Principal principal) {
@@ -147,12 +154,18 @@ public class ServiceCartController {
 
         return new ResponseEntity<Integer>(serviceCartItemId,HttpStatus.OK);
     }
-
+    //장바구니에 담긴 아이템을 주문내역 페이지로 보내는 주문기능을 담당
+//todo : 장바구니에서 주문을 위한 기능인데 roomId를 받기로 수정했음 잘 작동한다면 이 멘트를 삭제할 것
     @PostMapping("/api/cart/orders")
-    public ResponseEntity orderServiceCartItem(@RequestBody ServiceCartOrderDTO serviceCartOrderDTO, BindingResult bindingResult,
-                                               Principal principal) {
+    public ResponseEntity<?> orderServiceCartItem(@RequestBody ServiceCartOrderDTO serviceCartOrderDTO,
+                                               BindingResult bindingResult,
+                                               Principal principal,
+                                               Model model) {
+
+        Integer roomId = serviceCartOrderDTO.getRoomId();
         String memberEmail = principal.getName();
         log.info("컨트롤러로 들어온 serviceCartOrderDTO : " + serviceCartOrderDTO);
+        log.info("예약정보로 알게된 roomId : " + roomId);
         //리스트 형태로 serviceCartOderDTO를 담을건데
         // ServiceCartOrderDTO에는 자기 자신을 리스트 형태로 이미 담아놓는 메서드가 존재함
         List<ServiceCartOrderDTO> serviceCartOrderDTOList =
@@ -166,7 +179,12 @@ public class ServiceCartController {
                 return new ResponseEntity<String>("주문권한이 없습니다.", HttpStatus.FORBIDDEN);
             }
         }
-        Integer serviceOrderId = serviceCartService.orderServiceCartItem(serviceCartOrderDTOList, memberEmail);
+        ReservationDTO reservation = new ReservationDTO();
+        reservation.setRoomId(roomId);
+
+        Integer serviceOrderId = serviceCartService.orderServiceCartItem(serviceCartOrderDTOList, memberEmail, roomId);
+
+        model.addAttribute("roomId", roomId);
         return new ResponseEntity<Integer>(serviceOrderId, HttpStatus.OK);
     }
 

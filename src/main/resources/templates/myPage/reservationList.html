@@ -95,7 +95,9 @@
           <td>
             <button type="button"
                     class="btn btn-primary btn-sm"
-                    th:data-reservation-id="${reservation.reservationId}">
+                    th:data-reservation-id="${reservation.reservationId}"
+                    th:data-room-id="${reservation.room.roomId}"
+                    th:onclick="|window.location.href='/myPage/menu/list?reservationId=' + ${reservation.reservationId} + '&roomId=' + ${reservation.room.roomId}|">
               신청
             </button>
           </td>
