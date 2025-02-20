@@ -36,12 +36,13 @@ public class ServiceCateController {
 
     @Operation(summary = "등록폼", description = "등록폼 페이지로 이동한다.")
     @GetMapping("/register")
-    public String registerForm(Model model){
+    public String registerForm(@RequestParam(required = false) Integer hotelId, Model model){
         //검증처리가 필요하면 빈 CateDTO를 생성해서 전달한다.
         model.addAttribute("serviceCateDTO", new ServiceCateDTO());
 
         //hotelDTO hotelName 전달하기
         List<HotelDTO> hotelDTOS = serviceCateService.getAllHotel();
+        model.addAttribute("selectedHotelId", hotelId);
         model.addAttribute("hotelDTOS", hotelDTOS);
         model.addAttribute("hotelDTO", new HotelDTO());
 

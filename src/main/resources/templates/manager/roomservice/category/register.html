@@ -17,11 +17,8 @@
             color: gray; /* 마우스 올리면 회색 */
         }
     </style>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-
     <script th:inline="javascript">
-
+        src="https://code.jquery.com/jquery-3.6.0.min.js"
         // 이미지 미리보기 함수
         function previewImage(event) {
             console.log("수정 진입");
@@ -59,7 +56,17 @@
                 alert('이미지를 첨부해 주세요!');
             }
         }
+        function goToList() {
+            const selectedHotelId = document.getElementById('hotelId').value;
+            if (!selectedHotelId) {
+                alert('지사를 선택해 주세요.');
+                return;
+            }
+            window.location.href = `/roomService/category/list?hotelId=${selectedHotelId}`;
+        }
     </script>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+
 
 </head>
 <body>
@@ -78,11 +85,16 @@
                         <!--지사명을 통해 지사ID 가져오기 2025-02-11 추가-->
                         <div class="mb-3 mt-3">
                             <label for="hotelId" class="form-label">지사명:</label>
-                            <select id="hotelId" name="hotelId" class="form-select">
-                                <th:block th:each="hotelDTOS : ${hotelDTOS}">
-                                    <option th:value="${hotelDTOS.hotelId}" th:text="${hotelDTOS.hotelName}">뒤에바</option>
-                                </th:block>
-                            </select>
+                            <th:block>
+                                <select id="hotelId" name="hotelId" class="form-select">
+                                    <th:block th:each="hotelDTOS : ${hotelDTOS}">
+                                        <option th:value="${hotelDTOS.hotelId}"
+                                                th:text="${hotelDTOS.hotelName}"
+                                                th:selected="${hotelDTOS.hotelId == selectedHotelId}">
+                                        </option>
+                                    </th:block>
+                                </select>
+                            </th:block>
                         </div>
                         <div class="mb-3 mt-3">
                             <label for="serviceCateName" class="form-label">카테고리 명:</label>
@@ -107,7 +119,7 @@
 
                         <div style="text-align: right">
                             <button type="submit" class="btn btn-primary">등록</button>
-                            <button class="btn btn-primary" style="background-color: black" onclick="location.href='/roomService/category/list' ">목록</button>
+                            <button type="button" class="btn btn-primary" style="background-color: black" onclick="goToList()">목록</button>
                             <button type="reset" class="btn btn-secondary">초기화</button>
                         </div>
                     </form>
@@ -115,7 +127,7 @@
             </div>
         </div>
     </div>
-
 </div>
+
 </body>
 </html>

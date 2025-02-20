@@ -52,7 +52,8 @@ public class Hotel extends BaseEntity {
             orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Image> hotelImageList;
 
-    @OneToMany(mappedBy = "hotel", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "hotel", cascade = CascadeType.REMOVE,
+            orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<LikeHotel> likeHotels;
 
     public Hotel(Integer hotelId) {
@@ -66,12 +67,12 @@ public class Hotel extends BaseEntity {
     private Company company;
 
     //2024-02-10 양방향 삭제를 위해 추가
-    @OneToMany(mappedBy = "hotelId", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "hotelId", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     @ToString.Exclude //무한루프방지
     private List<Room> rooms;
 
     //2024-02-11 양방향 삭제를 위해 추가
-    @OneToMany(mappedBy = "hotel", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "hotel", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     @ToString.Exclude //무한루프방지
     private List<ServiceCate> serviceCate;
 

@@ -91,10 +91,11 @@
                     <div class="mb-3">
                         <label for="serviceCateId" class="form-label">카테고리:</label>
                         <select class="form-control" id="serviceCateId" name="serviceCateId" required>
-                            <option value="" disabled selected>카테고리를 선택하세요</option>
                             <!-- 카테고리 목록을 반복하여 선택 항목으로 표시 -->
                             <th:block th:each="serviceCateDTOS : ${serviceCateDTOS}">
-                                <option th:value="${serviceCateDTOS.serviceCateId}" th:text="${serviceCateDTOS.serviceCateName}"></option>
+                                <option th:value="${serviceCateDTOS.serviceCateId}"
+                                        th:text="${serviceCateDTOS.serviceCateName}"
+                                        th:selected="${serviceCateDTOS.serviceCateId == selectServiceCateId}"></option>
                             </th:block>
                         </select>
                     </div>
@@ -142,7 +143,7 @@
 
                     <div style="text-align: right">
                         <button type="submit" class="btn btn-primary mx-2">등록</button>
-                        <button class="btn btn-dark mx-2" onclick="location.href='/roomService/menu/list'">목록</button>
+                        <a class="btn btn-primary" style="background-color: black" th:href="@{/roomService/menu/list(serviceCateId=${serviceMenuDTO.serviceCateId})}">목록</a>
                         <button type="reset" class="btn btn-secondary mx-2">초기화</button>
                     </div>
 
