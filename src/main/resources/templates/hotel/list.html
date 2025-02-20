@@ -138,6 +138,14 @@
                 alert(message);
             }
 
+            const priceElement = document.getElementById("formattedPrice");
+            if (priceElement && priceElement.innerText) {
+                const price = parseInt(priceElement.innerText, 10);
+                if (!isNaN(price)) {
+                    priceElement.innerText = price.toLocaleString();
+                }
+            }
+
             $(".delBtn").hide();
 
             $(".likeBtn").each(function () {
