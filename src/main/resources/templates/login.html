@@ -21,12 +21,25 @@
 
         .login-card {
             width: 100%;
-            max-width: 410px; /* 카드 너비 */
+            max-width: 420px; /* 카드 너비 */
             padding: 20px;
             border-radius: 10px; /* 모서리 둥글게 */
             border: 1px solid #ddd; /* 테두리 색상 */
             box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* 그림자 추가 */
         }
+
+        .button-group button {
+            margin-right: 3px; /* 버튼들 사이 1px 간격 */
+        }
+
+        .button-group button:last-child {
+            margin-right: 0; /* 마지막 버튼은 마진 제거 */
+        }
+
+        .button-group button:first-child {
+            margin-left: 1px;
+        }
+
     </style>
 </head>
 <body>
@@ -44,12 +57,14 @@
                     <label for="password" class="form-label">비밀번호 :</label>
                     <input type="password" class="form-control" id="password" name="password">
                 </div>
+                <div class="button-group">
                     <button type="submit" class="btn btn-primary">로그인</button>
-                    <button type="button" class="btn btn-secondary" onclick="location.href='/selectrole'">회원가입</button>
-                    <button type="button" class="btn btn-secondary" onclick="location.href='/user/findPassword'">비밀번호 찾기</button>
-                    <button type="button" class="btn btn-danger" onclick="location.href='/'">취소</button>
+                    <button type="button" class="btn btn-secondary">회원가입</button>
+                    <button type="button" class="btn btn-secondary">비밀번호 찾기</button>
+                    <button type="button" class="btn btn-danger">취소</button>
+                </div>
                 <div th:if="${session.loginError}" class="alert alert-danger mt-3 alert-dismissible fade show" role="alert">
-                    <!-- 왜인지 시큐리티, 멤버서비스에서 \n 으로 줄바꿈이 안되어서... 일단 꼼수로 %%% 문자를 줄바꿈 처리하도록 만들어놓음 -->
+                    <!-- 시큐리티, 멤버 서비스에서 줄바꿈 하는걸 모르겠어서... 일단 '%%%' 라는 문자를 줄바꿈으로 처리하도록 만들어놓음 -->
                     <span th:utext="${session.loginError.replace('%%%', '<br/>')}"></span>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>

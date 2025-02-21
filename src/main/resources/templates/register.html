@@ -16,7 +16,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: calc(100vh - 209px); /* 100vh = 화면 전체 높이를 차지하도록 (-209px 는 헤더와 푸터의 높이) */
+            margin-top: 20px;
+            margin-bottom: 20px;
+            min-height: calc(100vh - 249px); /* 100vh = 화면 전체 높이 (-209px 는 헤더와 푸터의 높이) */
         }
 
         .register-card {
@@ -27,6 +29,7 @@
             border: 1px solid #ddd; /* 테두리 색상 */
             box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* 그림자 추가 */
         }
+
     </style>
 </head>
 <body>
@@ -42,10 +45,7 @@
             </div>
             <div class="mb-3">
                 <label for="memberEmailInput" class="form-label fw-bold">*이메일 :</label>
-                <div class="input-group">
-                    <input type="email" class="form-control" id="memberEmailInput" name="memberEmail" placeholder="이메일 형식에 맞춰서 작성해주세요." required>
-                    <button type="button" class="btn btn-secondary" onclick="emailCheck()">중복확인</button>
-                </div>
+                <input type="email" class="form-control" id="memberEmailInput" name="memberEmail" placeholder="이메일 형식에 맞춰서 작성해주세요." required>
                 <small id="emailCheckMessage" style="display: none;"></small>
             </div>
             <div class="mb-3">
@@ -69,12 +69,10 @@
         </form>
 
         <script type="text/javascript">
-
-            // 이메일 중복확인
+            // 이메일 체크
             function emailCheck() {
                 var email = document.getElementById('memberEmailInput').value;
                 var messageElement = document.getElementById('emailCheckMessage');
-                // 이메일 형식 체크
                 var emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]{1,}$/;
 
                 if (!email) {
@@ -84,7 +82,6 @@
                     return;
                 }
 
-                // 이메일 형식이 맞지 않으면 메시지 표시
                 if (!emailPattern.test(email)) {
                     messageElement.style.display = "block";
                     messageElement.style.color = "red";
@@ -114,67 +111,102 @@
                     });
             }
 
-            // 비밀번호 및 이메일, 전화번호 체크
-            function registerCheck() {
-                var email = document.getElementById('memberEmailInput').value;
-                var passwordMessage = document.getElementById('passwordMessage');
-                var passwordCheckMessage = document.getElementById('passwordCheckMessage');
-                var phoneCheckMessage = document.getElementById('phoneCheckMessage');
+            // 비밀번호 및 비밀번호 확인 체크
+            function passwordCheck() {
                 var p1 = document.getElementById('memberPassword').value;
                 var p2 = document.getElementById('memberPasswordCheck').value;
-                var p3 = document.getElementById('memberPhone').value;
+                var passwordMessage = document.getElementById('passwordMessage');
+                var passwordCheckMessage = document.getElementById('passwordCheckMessage');
 
-                if (p1.length < 6) {
+                if(p1.length === 0) {
+                    passwordMessage.style.display = "none";
+                } else if (p1.length < 6) {
                     passwordMessage.style.display = "block";
                     passwordMessage.style.color = "red";
                     passwordMessage.innerText = "비밀번호는 6글자 이상이어야 합니다.";
-                    return false;
-                }
-
-                if (p1.length > 12) {
+                } else if (p1.length > 12) {
                     passwordMessage.style.display = "block";
                     passwordMessage.style.color = "red";
                     passwordMessage.innerText = "비밀번호는 12글자 이내여야 합니다.";
-                    return false;
+                } else {
+                    passwordMessage.style.display = "block";
+                    passwordMessage.style.color = "green";
+                    passwordMessage.innerText = "사용 가능한 비밀번호입니다.";
                 }
 
-                if (p1 != p2) {
+                if(p2.length === 0) {
+                    passwordCheckMessage.style.display = "none";
+                } else if (p2.length < 6) {
+                    passwordCheckMessage.style.display = "block";
+                    passwordCheckMessage.style.color = "red";
+                    passwordCheckMessage.innerText = "비밀번호를 확인해주세요.";
+                } else if (p2.length > 12) {
+                    passwordCheckMessage.style.display = "block";
+                    passwordCheckMessage.style.color = "red";
+                    passwordCheckMessage.innerText = "비밀번호를 확인해주세요.";
+                } else if (p1 !== p2) {
                     passwordCheckMessage.style.display = "block";
                     passwordCheckMessage.style.color = "red";
                     passwordCheckMessage.innerText = "비밀번호가 일치하지 않습니다.";
-                    return false;
-
-                }
-
-                if (p3.length !== 11 && p3.length !== 0) {
-                    phoneCheckMessage.style.display = "block";
-                    phoneCheckMessage.style.color = "red";
-                    phoneCheckMessage.innerText = "전화번호를 확인해주세요. 전화번호는 11자리여야 합니다.";
-                    return false;
-
                 } else {
-                    fetch('/checkEmail?email=' + encodeURIComponent(email), {
-                        method: 'GET',
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.exists) {
-                                // 이메일이 이미 존재하는 경우 alert 띄우기
-                                alert("이미 가입된 회원입니다.");
-                                return false; // 회원가입 제출 막기
-                            }
-                            alert("회원가입에 성공하였습니다. 로그인 페이지로 이동합니다.");
-                        })
+                    passwordCheckMessage.style.display = "block";
+                    passwordCheckMessage.style.color = "green";
+                    passwordCheckMessage.innerText = "비밀번호가 일치합니다.";
                 }
             }
 
-            // 전화번호 입력 시 숫자만 허용
-            document.getElementById("memberPhone").addEventListener("input", function (event) {
+            // 전화번호 체크
+            function phoneCheck() {
+                var phone = document.getElementById('memberPhone').value;
+                var phoneCheckMessage = document.getElementById('phoneCheckMessage');
+                if(phone.length === 0) {
+                    phoneCheckMessage.style.display = "none";
+                } else if (phone.length !== 11) {
+                    phoneCheckMessage.style.display = "block";
+                    phoneCheckMessage.style.color = "red";
+                    phoneCheckMessage.innerText = "전화번호는 11자리여야 합니다.";
+                } else {
+                    phoneCheckMessage.innerText = "";
+                    phoneCheckMessage.style.display = "none";
+                }
+            }
+
+            // 자동 체크 이벤트 리스너 추가
+            document.getElementById('memberEmailInput').addEventListener("blur", emailCheck);
+            document.getElementById('memberPassword').addEventListener("blur", passwordCheck);
+            document.getElementById('memberPasswordCheck').addEventListener("blur", passwordCheck);
+            document.getElementById('memberPhone').addEventListener("blur", phoneCheck);
+            document.getElementById('memberPhone').addEventListener("input", function(event) {
+                // 전화번호 입력 시 숫자만 허용
                 this.value = this.value.replace(/[^0-9]/g, "");
             });
 
-        </script>
+            // 회원가입 폼 제출 전 알림창
+            function registerCheck() {
+                var emailCheckMessage = document.getElementById('emailCheckMessage').innerText;
+                var passwordMessage = document.getElementById('passwordMessage').innerText;
+                var passwordCheckMessage = document.getElementById('passwordCheckMessage').innerText;
+                var phoneCheckMessage = document.getElementById('phoneCheckMessage').innerText;
 
+                if(emailCheckMessage === "이미 사용 중인 이메일입니다." || emailCheckMessage === "이메일 형식에 맞춰서 작성해주세요." || emailCheckMessage === "이메일을 입력하세요.") {
+                    alert("이메일을 확인해주세요.");
+                    return false;
+                }
+                if(passwordMessage === "비밀번호는 6글자 이상이어야 합니다." || passwordMessage === "비밀번호는 12글자 이내여야 합니다.") {
+                    alert("비밀번호를 확인해주세요.");
+                    return false;
+                }
+                if(passwordCheckMessage === "비밀번호가 일치하지 않습니다.") {
+                    alert("비밀번호를 확인해주세요.");
+                    return false;
+                }
+                if(document.getElementById('memberPhone').value && phoneCheckMessage === "전화번호는 11자리여야 합니다.") {
+                    alert("전화번호를 확인해주세요.");
+                    return false;
+                }
+                return true;
+            }
+        </script>
     </div>
 </div>
 <div th:replace="~{fragments/footer::footer}"></div>

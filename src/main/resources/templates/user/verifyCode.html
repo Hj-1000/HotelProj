@@ -73,58 +73,68 @@
     var resendCodeButton = document.getElementById('resendCodeButton');
     var nextButton = document.getElementById('submitButton');  // '다음' 버튼을 찾기
 
+    document.getElementById('verificationCode').addEventListener("input", function() {
+        // 인증코드 입력 시 영어와 숫자만 허용
+        this.value = this.value.replace(/[^a-zA-Z0-9]/g, "");
+    });
+
     // 세션 만료 시간 가져오기
-    fetch('/user/getSessionExpiry', {
-        method: "GET",
-        headers: {
-            "X-Requested-With": "XMLHttpRequest"
-        }
-    })
-        .then(response => {
-            if (response.redirected) {
-                // AJAX 요청이 아닐 경우 메인 페이지로 강제 이동
-                window.location.href = response.url;
-                return;
+    function startTimer() {
+        fetch('/user/getSessionExpiry', {
+            method: "GET",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
             }
-            return response.json();
         })
-        .then(expiryTime => {
-            if (expiryTime && expiryTime > 0) {
-                var currentTime = new Date().getTime();
-                var timeLeft = Math.max(0, Math.floor((expiryTime - currentTime) / 1000)); // 인증 코드 만료까지 남은 시간 계산
-
-                if (timeLeft > 0) {
-                    // 타이머 시작
-                    var timer = setInterval(function() {
-                        var minutes = Math.floor(timeLeft / 60);
-                        var seconds = timeLeft % 60;
-                        seconds = seconds < 10 ? '0' + seconds : seconds;
-                        timerElement.textContent = " " + minutes + ":" + seconds;
-
-                        if (timeLeft <= 0) {
-                            clearInterval(timer);
-                            expiredMessage.style.display = 'block'; // 타이머 종료 후 만료 메시지 표시
-                            nextButton.disabled = true; // '다음' 버튼 비활성화
-                        } else {
-                            timeLeft--;
-                        }
-                    }, 1000);
-                } else {
-                    expiredMessage.style.display = 'block';
-                    nextButton.disabled = true; // 인증 코드 만료 즉시 '다음' 버튼 비활성화
+            .then(response => {
+                if (response.redirected) {
+                    // AJAX 요청이 아닐 경우 메인 페이지로 강제 이동
+                    window.location.href = response.url;
+                    return;
                 }
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching expiry time:', error);
-        });
+                return response.json();
+            })
+            .then(expiryTime => {
+                if (expiryTime && expiryTime > 0) {
+                    var currentTime = new Date().getTime();
+                    var timeLeft = Math.max(0, Math.floor((expiryTime - currentTime) / 1000)); // 인증 코드 만료까지 남은 시간 계산
+
+                    if (timeLeft > 0) {
+                        // 타이머 시작
+                        var timer = setInterval(function () {
+                            var minutes = Math.floor(timeLeft / 60);
+                            var seconds = timeLeft % 60;
+                            seconds = seconds < 10 ? '0' + seconds : seconds;
+                            timerElement.textContent = " " + minutes + ":" + seconds;
+
+                            if (timeLeft <= 0) {
+                                clearInterval(timer);
+                                expiredMessage.style.display = 'block'; // 타이머 종료 후 만료 메시지 표시
+                                nextButton.disabled = true; // '다음' 버튼 비활성화
+                            } else {
+                                timeLeft--;
+                            }
+                        }, 1000);
+                    } else {
+                        expiredMessage.style.display = 'block';
+                        nextButton.disabled = true; // 인증 코드 만료 즉시 '다음' 버튼 비활성화
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching expiry time:', error);
+            });
+    }
+
+    // 페이지 로드 시 타이머 시작
+    window.onload = startTimer;
 
     // 인증 코드 재전송 함수
     function resendCode() {
         resendCodeButton.disabled = true; // 코드 재전송 버튼 중복 클릭 방지를 위해 한번 클릭하면 비활성화
         resendCodeButton.textContent = "재전송 중..."; // 로딩 메시지 표시
 
-        fetch('/user/resendCode', { // PasswordResetController 의 인증 코드 재전송 메서드 실행
+        fetch('/user/resendCode', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }
         })
