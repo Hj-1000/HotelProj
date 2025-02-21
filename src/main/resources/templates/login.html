@@ -51,17 +51,17 @@
             <form action="/login" method="post">
                 <div class="mb-3">
                     <label for="memberEmail" class="form-label">이메일 :</label>
-                    <input type="email" class="form-control" id="memberEmail" name="memberEmail">
+                    <input type="email" class="form-control" id="memberEmail" name="memberEmail" placeholder="이메일 주소를 입력해주세요.">
                 </div>
                 <div class="mb-3">
                     <label for="password" class="form-label">비밀번호 :</label>
-                    <input type="password" class="form-control" id="password" name="password">
+                    <input type="password" class="form-control" id="password" name="password" placeholder="비밀번호를 입력해주세요.">
                 </div>
                 <div class="button-group">
                     <button type="submit" class="btn btn-primary">로그인</button>
-                    <button type="button" class="btn btn-secondary">회원가입</button>
-                    <button type="button" class="btn btn-secondary">비밀번호 찾기</button>
-                    <button type="button" class="btn btn-danger">취소</button>
+                    <button type="button" class="btn btn-secondary" onclick="location.href='/selectrole'">회원가입</button>
+                    <button type="button" class="btn btn-secondary" onclick="location.href='/user/findPassword'">비밀번호 찾기</button>
+                    <button type="button" class="btn btn-danger" onclick="location.href='/'">취소</button>
                 </div>
                 <div th:if="${session.loginError}" class="alert alert-danger mt-3 alert-dismissible fade show" role="alert">
                     <!-- 시큐리티, 멤버 서비스에서 줄바꿈 하는걸 모르겠어서... 일단 '%%%' 라는 문자를 줄바꿈으로 처리하도록 만들어놓음 -->
