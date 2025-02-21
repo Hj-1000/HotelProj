@@ -25,8 +25,8 @@ public class ServiceOrder extends BaseEntity {
     private Member member;
     //외부키 roomId
     @ManyToOne
-    @JoinColumn(name = "roomId")
-    private Room room;
+    @JoinColumn(name = "reservationId")
+    private Reservation reservation;
 
     @OneToMany(mappedBy = "serviceOrder", cascade = CascadeType.ALL,
             orphanRemoval = true, fetch = FetchType.LAZY)

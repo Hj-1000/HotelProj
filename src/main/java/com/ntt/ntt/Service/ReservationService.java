@@ -8,6 +8,7 @@ import com.ntt.ntt.Entity.Room;
 import com.ntt.ntt.Repository.MemberRepository;
 import com.ntt.ntt.Repository.ReservationRepository;
 import com.ntt.ntt.Repository.RoomRepository;
+import com.ntt.ntt.Repository.ServiceOrderRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -34,6 +36,7 @@ public class ReservationService {
     private final RoomRepository roomRepository;
     private final ReservationRepository reservationRepository;
     private final MemberRepository memberRepository;
+    private final ServiceOrderRepository serviceOrderRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -277,6 +280,9 @@ public class ReservationService {
         return reservationsPage.map(reservation -> {
             ReservationDTO dto = ReservationDTO.fromEntity(reservation);
 
+            Integer totalServiceOrderPrice = serviceOrderRepository.getTotalOrderPriceByReservation(reservation.getReservationId());
+            dto.setTotalServiceOrderPrice(totalServiceOrderPrice != null ? totalServiceOrderPrice : 0);
+
             // "취소 완료" 상태일 때만 남은 시간 계산
             if ("취소 완료".equals(reservation.getReservationStatus()) && reservation.getCancelConfirmedAt() != null) {
                 LocalDateTime expirationTime = reservation.getCancelConfirmedAt().plusMinutes(1); // 1분 후 삭제 테스트
@@ -333,4 +339,5 @@ public class ReservationService {
             log.info("[deleteExpiredReservations] {}개의 만료된 예약을 삭제했습니다.", expiredReservations.size());
         }
     }
+
 }

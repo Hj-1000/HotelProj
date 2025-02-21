@@ -22,9 +22,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
     // 특정 방의 모든 예약 정보 가져오기 (필요 시 사용)
     List<Reservation> findAllByRoom_RoomId(Integer roomId);
 
+
     // 특정 회원의 모든 예약 정보 가져오기
     @Query("SELECT r FROM Reservation r WHERE r.member.memberId = :memberId")
     Page<Reservation> findAllByMember_MemberId(Integer memberId, Pageable pageable);
+
+    // 특정회원의 이메일로 예약 정보 가져오기
+    List<Reservation> findByMember_MemberEmail(String memberEmail);
 
     // 특정 방이 예약되었는지 여부 확인
     boolean existsByRoom_RoomId(Integer roomId);
@@ -50,5 +54,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
     // 취소 완료된 예약 삭제
     @Query("SELECT r FROM Reservation r WHERE r.reservationStatus = '취소 완료' AND r.cancelConfirmedAt <= :threshold")
     List<Reservation> findReservationsForDeletion(@Param("threshold") LocalDateTime threshold);
+
+
 
 }

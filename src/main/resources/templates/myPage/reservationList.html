@@ -71,7 +71,13 @@
           <td>
             <span th:if="${reservation.totalPrice != null}" th:text="'₩' + ${#numbers.formatInteger(reservation.totalPrice, 1, 'COMMA')}"></span>
             <span th:unless="${reservation.totalPrice != null}">-</span>
+            <!-- 룸서비스 금액 표시 -->
+            <div th:if="${reservation.totalServiceOrderPrice != null and reservation.totalServiceOrderPrice > 0}"
+                 class="text-primary mt-2">
+              <small>룸서비스 금액: <span th:text="'₩' +${#numbers.formatInteger(reservation.totalServiceOrderPrice, 1, 'COMMA')}"></span></small>
+            </div>
           </td>
+
           <td>
               <span th:switch="${reservation.reservationStatus}">
                   <span th:case="'예약'" class="badge bg-success">예약 완료</span>
