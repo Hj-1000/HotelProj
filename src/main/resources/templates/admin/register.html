@@ -72,6 +72,8 @@
                 <select id="role" name="role" class="form-select" hidden="hidden">
                     <option value="ADMIN">어드민</option>
                     <option value="CHIEF">호텔장</option>
+                    <option value="MANAGER">매니저</option>
+                    <option value="USER">유저</option>
                 </select>
             </div>
             <p>* 표시는 필수 입력 항목입니다.</p>
@@ -187,10 +189,20 @@
             function codeCheck() {
                 var code = document.getElementById('code').value;
                 var codeCheckMessage = document.getElementById('codeCheckMessage');
+                var roleSelect = document.getElementById('role');
+
                 if (code === "나는어드민") {
+                    codeCheckMessage.innerText = "";
                     roleSelect.value = "ADMIN";  // 어드민 자동 선택
                 } else if (code === "나는호텔장") {
+                    codeCheckMessage.innerText = "";
                     roleSelect.value = "CHIEF";  // 호텔장 자동 선택
+                } else if (code === "나는매니저") {
+                    codeCheckMessage.innerText = "";
+                    roleSelect.value = "MANAGER";  // 호텔장 자동 선택
+                } else if (code === "나는유저") {
+                    codeCheckMessage.innerText = "";
+                    roleSelect.value = "USER";  // 호텔장 자동 선택
                 } else {
                     codeCheckMessage.style.display = "block";
                     codeCheckMessage.style.color = "red";
@@ -237,6 +249,7 @@
                     alert("인증코드를 확인해주세요.");
                     return false;
                 }
+                alert("회원가입에 성공하였습니다. 로그인 페이지로 이동합니다.");
                 return true;
             }
         </script>

@@ -52,6 +52,7 @@
           <th>예약 관리</th>
           <th>룸 서비스</th>
           <th>삭제</th>
+          <th>결제</th>
         </tr>
         </thead>
         <tbody>
@@ -61,20 +62,21 @@
                  alt="Room Image" class="room-image">
             <span th:if="${reservation.room.roomImageDTOList == null or #lists.isEmpty(reservation.room.roomImageDTOList)}">이미지 없음</span>
           </td>
-          <td th:text="${reservation.room.roomName}"></td>
+          <td class="roomName" th:text="${reservation.room.roomName}"></td>
           <td th:text="${reservation.room.roomType}"></td>
           <td th:text="${reservation.count} + '명'"></td>
           <td>
             <span th:text="${reservation.checkInDate}"></span> ~
             <span th:text="${reservation.checkOutDate}"></span>
+            <span class="payBy" th:text="${reservation.memberName}" hidden="hidden"></span>
           </td>
           <td>
-            <span th:if="${reservation.totalPrice != null}" th:text="'₩' + ${#numbers.formatInteger(reservation.totalPrice, 1, 'COMMA')}"></span>
+            <span id="roomPrice" th:if="${reservation.totalPrice != null}" th:text="'₩' + ${#numbers.formatInteger(reservation.totalPrice, 1, 'COMMA')}"></span>
             <span th:unless="${reservation.totalPrice != null}">-</span>
             <!-- 룸서비스 금액 표시 -->
             <div th:if="${reservation.totalServiceOrderPrice != null and reservation.totalServiceOrderPrice > 0}"
                  class="text-primary mt-2">
-              <small>룸서비스 금액: <span th:text="'₩' +${#numbers.formatInteger(reservation.totalServiceOrderPrice, 1, 'COMMA')}"></span></small>
+              <small>룸서비스 금액: <span class="roomServicePrice" th:text="'₩' +${#numbers.formatInteger(reservation.totalServiceOrderPrice, 1, 'COMMA')}"></span></small>
             </div>
           </td>
 
@@ -121,6 +123,9 @@
               <span>00:00</span>
             </div>
           </td>
+          <td>
+            <button type="button" class="btn btn-primary" onclick="requestPay()">결제</button>
+          </td>
         </tr>
         </tbody>
       </table>
@@ -158,7 +163,62 @@
     </div>
   </div>
 
-  <script>
+  <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
+  <script th:inline="javascript">
+    function requestPay(event) {
+      IMP.init("imp67611643");
+
+      var row = event.target.closest("tr");
+
+      var roomName = row.querySelector(".roomName")?.textContent?.trim() || "호텔 객실";
+
+      // 객실 가격 가져오기
+      var roomPrice = row.querySelector("#roomPrice")?.textContent?.replace("₩", "").replace(",", "").trim() || "0";
+
+      // 서비스 가격 가져오기 (ID 대신 class 사용)
+      var roomServicePriceElement = row.querySelector(".roomServicePrice");
+      var roomServicePrice = roomServicePriceElement ? roomServicePriceElement.textContent.replace("₩", "").replace(",", "").trim() : "0";
+
+      console.log("roomPrice:", roomPrice);
+      console.log("roomServicePrice 요소:", roomServicePriceElement);
+      console.log("roomServicePrice 값:", roomServicePrice);
+
+      roomPrice = parseInt(roomPrice) || 0;
+      roomServicePrice = parseInt(roomServicePrice) || 0;
+      let ttotalPrice = roomPrice + roomServicePrice;
+
+      console.log("최종 결제 금액:", ttotalPrice);
+
+      if (ttotalPrice <= 0) {
+        alert("결제 금액이 올바르지 않습니다.");
+        return;
+      }
+
+      var merchantUid = "order_" + new Date().getTime();
+
+      IMP.request_pay({
+        pg: "html5_inicis",
+        pay_method: "card",
+        merchant_uid: merchantUid,
+        name: roomName,
+        amount: ttotalPrice,
+        buyer_name: row.querySelector(".payBy")?.textContent?.trim() || "구매자",
+      }, function (rsp) {
+        if (rsp.success) {
+          alert("결제가 완료되었습니다.");
+          location.reload();
+        } else {
+          alert("결제 실패: " + rsp.error_msg);
+        }
+      });
+    }
+
+    // 모든 결제 버튼에 이벤트 리스너 추가
+    document.addEventListener("DOMContentLoaded", function () {
+      document.querySelectorAll(".btn-primary").forEach(button => {
+        button.addEventListener("click", requestPay);
+      });
+    });
 
     document.addEventListener("DOMContentLoaded", function () {
       document.querySelectorAll(".delete-icon").forEach(icon => {
