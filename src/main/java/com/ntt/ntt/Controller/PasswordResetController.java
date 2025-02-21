@@ -60,19 +60,22 @@ public class PasswordResetController {
             return "user/findPassword"; // 다시 비밀번호 찾기 페이지로 돌아감
         }
 
-        // 2. 이메일로 발송할 랜덤 코드 생성
+        // 2. 회원의 이름(memberName)을 가져오기
+        String memberName = member.get().getMemberName();
+
+        // 3. 이메일로 발송할 랜덤 코드 생성
         String resetCode = generateRandomCode();
 
-        // 3. 세션에 코드 저장 (비동기 메서드는 즉시 실행되므로, 세션 저장을 먼저 함)
+        // 4. 세션에 코드 저장 (비동기 메서드는 즉시 실행되므로, 세션 저장을 먼저 함)
         session.setAttribute("resetCode", resetCode);
         session.setAttribute("resetCodeTimestamp", System.currentTimeMillis());
         session.setAttribute("email", email);
         session.setAttribute("emailCheck", true);
 
-        // 4. 비동기 이메일 전송 (비밀번호 찾기를 위한 이메일 발송 속도가 느려서 비동기 메서드 사용, 이메일이 발송되는 동안에도 컨트롤러는 바로 응답 가능)
-        emailService.sendPasswordResetEmail(email, resetCode);
+        // 5. 비동기 이메일 전송 (비밀번호 찾기를 위한 이메일 발송 속도가 느려서 비동기 메서드 사용, 이메일이 발송되는 동안에도 컨트롤러는 바로 응답 가능)
+        emailService.sendPasswordResetEmail(email, resetCode, memberName);
 
-        // 5. 코드 입력 페이지로 리디렉션
+        // 6. 코드 입력 페이지로 리디렉션
         return "redirect:/user/verifyCode"; // 코드 입력 페이지로 리디렉션
     }
 
@@ -174,11 +177,23 @@ public class PasswordResetController {
             return response;
         }
 
+        // 이메일을 통해 Member 객체 찾기
+        Optional<Member> memberOpt = memberRepository.findByMemberEmail(email);
+
+        if (memberOpt.isEmpty()) {
+            response.put("success", false);
+            response.put("message", "이메일에 해당하는 회원 정보가 없습니다.");
+            return response;
+        }
+
+        Member member = memberOpt.get();
+        String memberName = member.getMemberName(); // 회원 이름 가져오기
+
         // 랜덤 코드 생성
         String resetCode = generateRandomCode();
 
         // 이메일 전송
-        emailService.sendPasswordResetEmail(email, resetCode);
+        emailService.sendPasswordResetEmail(email, resetCode, memberName);
 
         // 세션에 새로운 코드 및 타임스탬프 저장
         session.setAttribute("resetCode", resetCode);

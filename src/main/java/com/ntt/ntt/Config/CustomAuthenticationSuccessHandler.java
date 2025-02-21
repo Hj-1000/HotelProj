@@ -17,6 +17,9 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
                                         Authentication authentication)
             throws IOException, ServletException {
 
+        // 로그인 전 사용자가 보고 있는 페이지 저장
+        String redirectUrl = request.getHeader("Referer");
+
         //로그인에 사용한 정보를 읽어와서 저장
         //UserDetails을 사용자가 오버라이딩 변경을 하면 해당정보를 전달
         UserDetails user = (UserDetails) authentication.getPrincipal();
@@ -30,7 +33,12 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         } else if (role.equals("ROLE_MANAGER")) {
             response.sendRedirect("/manager/room/list"); // MANAGER 권한 사용자가 로그인시 객실관리 페이지로 리다이렉트
         } else if (role.equals("ROLE_USER")) {
-            response.sendRedirect("/"); // USER 권한 사용자가 로그인시 메인페이지로 리다이렉트
+            // USER 권한 사용자가 로그인시 메인페이지가 아닌 원래 보고 있던 페이지로 리다이렉트
+            if (redirectUrl != null && !redirectUrl.contains("/login")) {
+                response.sendRedirect(redirectUrl); // 사용자가 로그인 전에 보고 있던 페이지로 리다이렉트
+            } else {
+                response.sendRedirect("/"); // 로그인 후 기본 메인페이지로 리다이렉트
+            }
         } else {
             response.sendRedirect("/login?error"); // 기본 로그인 페이지로 리다이렉트
         }

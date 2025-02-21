@@ -138,6 +138,14 @@
                 alert(message);
             }
 
+            const priceElement = document.getElementById("formattedPrice");
+            if (priceElement && priceElement.innerText) {
+                const price = parseInt(priceElement.innerText, 10);
+                if (!isNaN(price)) {
+                    priceElement.innerText = price.toLocaleString();
+                }
+            }
+
             $(".delBtn").hide();
 
             $(".likeBtn").each(function () {
@@ -266,7 +274,14 @@
 
 
         function delLike(btn) {
-            var hotelId = $(btn).closest(".hotel-card").find(".hotelId").val();
+            var hotelId = $(btn).data("hotel-id");
+            console.log("호텔 ID:", hotelId); // 여기서 호텔 ID가 제대로 출력되는지 확인
+
+            if (!hotelId) {
+                alert("삭제할 호텔 ID가 없습니다.");
+                return;
+            }
+
             var paramData = { hotelId: hotelId };
 
             $.ajax({
@@ -285,6 +300,7 @@
                 }
             });
         }
+
 
 
 
