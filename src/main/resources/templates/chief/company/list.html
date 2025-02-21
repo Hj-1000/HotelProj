@@ -18,47 +18,10 @@
         }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script th:src="@{/js/company.js}"></script>
+
 
     <script th:inline="javascript">
-
-        // 이미지 파일 검사
-        function validateImage(event) {
-            var files = event.target.files;
-            var maxSize = 10 * 1024 * 1024; // 10MB 제한
-            var allowedExt = ["jpg", "jpeg", "gif", "png", "bmp", "jfif", "webp"];
-
-            // 파일 개수 검사: 최대 1개까지만 허용
-            if (files.length > 1) {
-                alert("본사 이미지는 1장만 업로드할 수 있습니다.");
-                event.target.value = ""; // 입력 필드 초기화
-                return;
-            } else if (files.length == 0) {
-                alert("본사 이미지는 최소 1장 이상 업로드해야 합니다.");
-                event.target.value = ""; // 입력 필드 초기화
-                return;
-            }
-
-            for (var i = 0; i < files.length; i++) {
-                var file = files[i];
-                var fileName = file.name;
-                var fileSize = file.size;
-                var fileExt = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
-
-                // 확장자 검사
-                if (!allowedExt.includes(fileExt)) {
-                    alert("이미지 파일(PNG, JPG, GIF, BMP, JFIF, WEBP)만 업로드 가능합니다.");
-                    event.target.value = ""; // 입력 필드 초기화
-                    return;
-                }
-
-                // 파일 크기 검사
-                if (fileSize > maxSize) {
-                    alert("파일 크기가 10MB를 초과할 수 없습니다.");
-                    event.target.value = ""; // 입력 필드 초기화
-                    return;
-                }
-            }
-        }
 
 
         $(document).ready(function () {
@@ -105,62 +68,7 @@
                     return;
                 }
             });
-
-            // $(".delBtn").off.on("click" , function (e) {
-            //
-            //     e.preventDefault()
-            //     if (confirm("정말 해당 본사를 삭제하시겠습니까??") == true) {    //확인
-            //
-            //         let a = $(this).find('span:eq(0)')  //jquery
-            //         console.log(a)
-            //         deleteCompany(a);
-            //
-            //     } else {}
-            //
-            // }) //delBtn 끝
-
         })
-
-
-        // 삭제버튼을 눌렀을때 진행하는
-        // function deleteCompany(obj){
-        //
-        //     var companyId = [[${companyId}]]    //아이템의 아이디를 가져온다.
-        ///company/remove/" + companyId
-        // /company/list"
-        //
-        //     console.log(companyId)
-        //
-        //     // alert(url);
-        //
-        //     $.ajax({
-        //         url :url,
-        //         type : "get" ,
-        //         dataType : "json",
-        //         success : function (result) {
-        //
-        //            /company/list';
-        //         },
-        //         error : function (result, status, error) {
-        //
-        //             if(result.status == '401'){
-        //                 // alert(result.responseText+'로그인 후 이용해주세요');
-        //                 alert('로그인 후 이용해주세요');
-        //                 location.href = '/user/login';
-        //             }else if(result.status == '200') {
-        //                 alert(result.responseText + " 글을 삭제 완료 했습니다")
-        //                /company/list';
-        //             }else {
-        //                 /*여긴 또 잘 지워짐 ㅇㅅㅇ*/
-        //                 // alert("글을 삭제 완료 했습니다")
-        //                 alert("확인요망 : " + result.responseText )
-        //                 alert("확인요망 : " + result.status )
-        //                 location.href=url1;
-        //             }
-        //         }
-        //     })
-        //     //삭제버튼은 버튼자체의 태그를 갖는다.
-        // }
 
     </script>
 

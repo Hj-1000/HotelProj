@@ -321,6 +321,24 @@
         })
 
 
+        // 현재 선택된 버튼을 추적하는 변수
+        var currentButton = null;
+
+        function changeButtonClass(button) {
+            // 만약 이미 선택된 버튼이 있다면
+            if (currentButton) {
+                // 그 버튼의 클래스를 다시 btn-light로 변경
+                currentButton.classList.remove('btn-dark');
+                currentButton.classList.add('btn-light');
+            }
+
+            // 현재 클릭한 버튼을 'btn-dark'로 변경
+            button.classList.remove('btn-light');
+            button.classList.add('btn-dark'); // 또는 'btn-secondary'로 변경 가능
+
+            // 현재 버튼을 추적
+            currentButton = button;
+        }
 
     </script>
 
@@ -566,19 +584,19 @@
                     <div class="row">
                         <div class="col-3">
                             <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
-                                <button type="button" class="btn btn-secondary" data-target="su">서울</button>
-                                <button type="button" class="btn btn-secondary" data-target="gk">경기</button>
-                                <button type="button" class="btn btn-secondary" data-target="ic">인천</button>
-                                <button type="button" class="btn btn-secondary" data-target="jj">제주</button>
-                                <button type="button" class="btn btn-secondary" data-target="bs">부산</button>
-                                <button type="button" class="btn btn-secondary" data-target="dg">대구</button>
-                                <button type="button" class="btn btn-secondary" data-target="gj">광주</button>
-                                <button type="button" class="btn btn-secondary" data-target="dj">대전</button>
-                                <button type="button" class="btn btn-secondary" data-target="us">울산</button>
-                                <button type="button" class="btn btn-secondary" data-target="gw">강원</button>
-                                <button type="button" class="btn btn-secondary" data-target="gs">경상</button>
-                                <button type="button" class="btn btn-secondary" data-target="je">전라</button>
-                                <button type="button" class="btn btn-secondary" data-target="cc">충청</button>
+                                <button type="button" class="btn btn-light" data-target="su" onclick="changeButtonClass(this)">서울</button>
+                                <button type="button" class="btn btn-light" data-target="gk" onclick="changeButtonClass(this)">경기</button>
+                                <button type="button" class="btn btn-light" data-target="ic" onclick="changeButtonClass(this)">인천</button>
+                                <button type="button" class="btn btn-light" data-target="jj" onclick="changeButtonClass(this)">제주</button>
+                                <button type="button" class="btn btn-light" data-target="bs" onclick="changeButtonClass(this)">부산</button>
+                                <button type="button" class="btn btn-light" data-target="dg" onclick="changeButtonClass(this)">대구</button>
+                                <button type="button" class="btn btn-light" data-target="gj" onclick="changeButtonClass(this)">광주</button>
+                                <button type="button" class="btn btn-light" data-target="dj" onclick="changeButtonClass(this)">대전</button>
+                                <button type="button" class="btn btn-light" data-target="us" onclick="changeButtonClass(this)">울산</button>
+                                <button type="button" class="btn btn-light" data-target="gw" onclick="changeButtonClass(this)">강원</button>
+                                <button type="button" class="btn btn-light" data-target="gs" onclick="changeButtonClass(this)">경상</button>
+                                <button type="button" class="btn btn-light" data-target="je" onclick="changeButtonClass(this)">전라</button>
+                                <button type="button" class="btn btn-light" data-target="cc" onclick="changeButtonClass(this)">충청</button>
                             </div>
                         </div>
                         <div class="col-9">
@@ -685,9 +703,9 @@
                 </div>
 
 
-                <div class="modal-footer">
+                <!--<div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-bs-dismiss="modal" aria-label="Close">닫기</button>
-                </div>
+                </div>-->
             </div>
         </div>
     </div>
