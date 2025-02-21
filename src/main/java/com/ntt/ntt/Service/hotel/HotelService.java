@@ -65,6 +65,8 @@ public class HotelService {
     //등록
     public void register(HotelDTO hotelDTO, List<MultipartFile> imageFiles, String memberEmail) {
 
+        /* Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new IllegalStateException("본사가 존재하지 않습니다.")); */
         // 로그인한 회원 정보 조회
         Member member = memberRepository.findByMemberEmail(memberEmail)
                 .orElseThrow(() -> new RuntimeException("Member not found"));
@@ -218,7 +220,7 @@ public class HotelService {
     public Page<HotelDTO> list(Pageable page, String keyword, String searchType, boolean exactMatch) {
         int currentPage = page.getPageNumber();
         int pageSize = 9;
-        Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.ASC, "hotelId"));
+        Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.DESC, "hotelId"));
 
         Page<Hotel> hotels = null;
 

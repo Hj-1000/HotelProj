@@ -50,10 +50,12 @@ public class Hotel extends BaseEntity {
 
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL,
             orphanRemoval = true, fetch = FetchType.LAZY)
+    @ToString.Exclude
     private List<Image> hotelImageList;
 
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.REMOVE,
             orphanRemoval = true, fetch = FetchType.LAZY)
+    @ToString.Exclude
     private Set<LikeHotel> likeHotels;
 
     public Hotel(Integer hotelId) {

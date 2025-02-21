@@ -75,9 +75,9 @@ public class CompanyService {
 
         // 1. Company 먼저 저장
         companyRepository.save(company);
-
         // 2. imageFiles를 ImageService를 통해 저장
         imageService.registerCompanyImage(company.getCompanyId(), imageFiles);
+        companyRepository.flush(); // 🔹 즉시 DB 반영하여 트랜잭션 지연 문제 방지
     }
 
 
