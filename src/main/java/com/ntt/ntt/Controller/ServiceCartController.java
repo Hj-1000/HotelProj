@@ -154,18 +154,18 @@ public class ServiceCartController {
 
         return new ResponseEntity<Integer>(serviceCartItemId,HttpStatus.OK);
     }
+
     //장바구니에 담긴 아이템을 주문내역 페이지로 보내는 주문기능을 담당
-//todo : 장바구니에서 주문을 위한 기능인데 roomId를 받기로 수정했음 잘 작동한다면 이 멘트를 삭제할 것
     @PostMapping("/api/cart/orders")
     public ResponseEntity<?> orderServiceCartItem(@RequestBody ServiceCartOrderDTO serviceCartOrderDTO,
                                                BindingResult bindingResult,
                                                Principal principal,
                                                Model model) {
 
-        Integer roomId = serviceCartOrderDTO.getRoomId();
+        Integer reservationId = serviceCartOrderDTO.getReservationId();
         String memberEmail = principal.getName();
         log.info("컨트롤러로 들어온 serviceCartOrderDTO : " + serviceCartOrderDTO);
-        log.info("예약정보로 알게된 roomId : " + roomId);
+        log.info("예약정보로 알게된 reservaionId : " + reservationId);
         //리스트 형태로 serviceCartOderDTO를 담을건데
         // ServiceCartOrderDTO에는 자기 자신을 리스트 형태로 이미 담아놓는 메서드가 존재함
         List<ServiceCartOrderDTO> serviceCartOrderDTOList =
@@ -180,11 +180,11 @@ public class ServiceCartController {
             }
         }
         ReservationDTO reservation = new ReservationDTO();
-        reservation.setRoomId(roomId);
+        reservation.setReservationId(reservationId);
 
-        Integer serviceOrderId = serviceCartService.orderServiceCartItem(serviceCartOrderDTOList, memberEmail, roomId);
+        Integer serviceOrderId = serviceCartService.orderServiceCartItem(serviceCartOrderDTOList, memberEmail, reservationId);
 
-        model.addAttribute("roomId", roomId);
+        model.addAttribute("reservationId", reservationId);
         return new ResponseEntity<Integer>(serviceOrderId, HttpStatus.OK);
     }
 

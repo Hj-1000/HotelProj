@@ -3,6 +3,7 @@ package com.ntt.ntt.Controller;
 import com.ntt.ntt.DTO.ReservationDTO;
 import com.ntt.ntt.DTO.ServiceOrderDTO;
 import com.ntt.ntt.DTO.ServiceOrderHistoryDTO;
+import com.ntt.ntt.Service.ReservationService;
 import com.ntt.ntt.Service.RoomService;
 import com.ntt.ntt.Service.ServiceOrderService;
 import com.ntt.ntt.Util.PaginationUtil;
@@ -34,19 +35,20 @@ public class ServiceOrderController {
 
     private final ServiceOrderService serviceOrderService;
     private final RoomService roomService; // roomId를 불러오기 위함
+    private final ReservationService reservationService;
     private final PaginationUtil paginationUtil;
     //주문하기는 상품의 읽기 페이지에서
     //사용자가 볼 수 잇으므로, 따로 get으로 읽기 페이지는 만들지 않는다.
     //대신 그 페이지에서 보내주는 데이터를 바탕으로 orders orderItem에
     // 데이터를 입력하는 역할을 한다.
 
-    //todo: roomId도 받게끔 수정했음 잘되는지 확인이 필요
+    //로그인한 Member 정보와 참조하는 reservationId에 따라 작동하는 주문 컨트롤러
     @PostMapping("/api/order")
-    public ResponseEntity order(@Valid ServiceOrderDTO serviceOrderDTO, Integer roomId, BindingResult bindingResult, Principal principal) {
+    public ResponseEntity order(@Valid ServiceOrderDTO serviceOrderDTO, Integer reservationId, BindingResult bindingResult, Principal principal) {
         //만약에 아이템 id가 없다면
         //만약에 수량이 없다면
         //유효성 검사
-        log.info("주문컨트롤러로 들어온 roomId" + roomId);
+        log.info("주문컨트롤러로 들어온 reservationId" + reservationId);
         log.info("컨트롤러로 들어온 serviceOrderDTO: " + serviceOrderDTO);
         if (bindingResult.hasErrors()) {
             StringBuffer sb = new StringBuffer();
@@ -61,7 +63,7 @@ public class ServiceOrderController {
         //주문은 로그인한 사용자 물론 판매자 또한 다른 사람이 만든 아이템, 자기 아이템을 살 수 있음
         //먼저 저장을 한다
         Integer result =
-                serviceOrderService.createOrder(serviceOrderDTO, principal.getName(), roomId);
+                serviceOrderService.createOrder(serviceOrderDTO, principal.getName(), reservationId);
 
         log.info("result: " + result);
 

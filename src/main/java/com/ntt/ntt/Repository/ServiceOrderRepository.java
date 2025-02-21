@@ -21,4 +21,12 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Inte
     public Integer totalCount(@Param("memberEmail") String memberEmail);
 
     public List<ServiceOrder> findByMember_MemberIdOrderByRegDateDesc(String memberEmail, Pageable pageable);
+
+    //예약페이지에 룸서비스 주문금액을 추가하기 위해 쿼리문 추가 2025-02-21
+    //이 메서드는 roomId를 기준으로 모든 주문 항목의 총 금액을 가져옴.
+    @Query("SELECT COALESCE(SUM(soi.count * soi.orderPrice), 0) " +
+            "FROM ServiceOrder so " +
+            "JOIN so.serviceOrderItemList soi " +
+            "WHERE so.reservation.reservationId = :reservationId")
+    Integer getTotalOrderPriceByReservation(@Param("reservationId") Integer reservationId);
 }

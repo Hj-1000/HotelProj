@@ -494,14 +494,14 @@
                 count: parseInt(count)
             });
         });
-        const roomId = document.getElementById("roomId").value;
+        const reservationId = document.getElementById("reservationId").value;
 
         fetch("/api/cart/orders", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 orderDTOList: orderItems,
-                roomId : parseInt(roomId)
+                reservationId : parseInt(reservationId)
             })
         })
             .then(response => {

@@ -74,8 +74,8 @@ public class ServiceOrderService {
             serviceOrderRepository.deleteById(serviceOrderId);
         }
     }
-    //todo: 이제 멤버뿐만아니라 roomId도 받아서 셋해야함
-    public Integer createOrder(ServiceOrderDTO serviceOrderDTO, String memberEmail , Integer roomId) {
+
+    public Integer createOrder(ServiceOrderDTO serviceOrderDTO, String memberEmail , Integer reservationId) {
         //현재 선택한 serviceMenuId 는 serviceOrderDTO로 들어온다. 이 값으로 판매중인 serviceMenu Entity를 가져온다.
         ServiceMenu serviceMenu =
                 serviceMenuRepository.findById(serviceOrderDTO.getServiceMenuId()).orElseThrow(EntityNotFoundException::new);
@@ -85,7 +85,7 @@ public class ServiceOrderService {
         Member member =
                 memberRepository.findByEmail(memberEmail);
 
-        Room room = roomRepository.findById(roomId).orElseThrow(EntityNotFoundException::new);
+        Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(EntityNotFoundException::new);
 
         //조건 : 현재 판매중인 item의 수량이 구매하려는 수량보다 크거나 같아야 함
         if (serviceMenu.getServiceMenuQuantity() >= serviceOrderDTO.getCount()) {
@@ -102,7 +102,7 @@ public class ServiceOrderService {
             //주문 아이템들이 들어갈 주문 테이블을 만든다. 주문 아이템들이 참조하는 주문
             ServiceOrder serviceOrder = new ServiceOrder();
             serviceOrder.setMember(member); //구매한 사람의 id로 찾아온 entity객체
-            serviceOrder.setRoom(room); //예약을 통해 방의 정보를 가져옴
+            serviceOrder.setReservation(reservation); //예약을 통해 방의 정보를 가져옴
             serviceOrder.setServiceOrderItemList(serviceOrderItem); //주문목록 이건 새로 만든 setOrderItemList이다.
 
             serviceOrder.setServiceOrderStatus(ServiceOrderStatus.COMPLETED); //주문상태
@@ -127,11 +127,11 @@ public class ServiceOrderService {
 
     }
 
-    public Integer orders(List<ServiceOrderDTO> serviceOrderDTOList, String memberEmail, Integer roomId) {
+    public Integer orders(List<ServiceOrderDTO> serviceOrderDTOList, String memberEmail, Integer reservationId) {
         //주문을 했다면 판매하고 있는 상품의 수량을 변경
 
         Member member = memberRepository.findByEmail(memberEmail);
-        Room room = roomRepository.findById(roomId).orElseThrow(EntityNotFoundException::new);
+        Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(EntityNotFoundException::new);
         List<ServiceOrderItem> serviceOrderItemList = new ArrayList<>();
         ServiceOrder serviceOrder = new ServiceOrder();
 
@@ -151,7 +151,7 @@ public class ServiceOrderService {
             serviceOrderItemList.add(serviceOrderItem);
         }
         serviceOrder.setMember(member);
-        serviceOrder.setRoom(room);
+        serviceOrder.setReservation(reservation);
         serviceOrder.setServiceOrderStatus(ServiceOrderStatus.COMPLETED);
         serviceOrder.setRegDate(LocalDateTime.now());
         serviceOrder.setServiceOrderItemList(serviceOrderItemList);

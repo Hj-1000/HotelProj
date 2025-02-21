@@ -19,28 +19,19 @@ import java.time.LocalDateTime;
 public class ReservationDTO {
 
     private Integer reservationId;
-
     private String checkInDate;
-
     private String checkOutDate;
-
     private Integer totalPrice;
-
     private String reservationStatus;
-
     private Integer memberId;
-
     private String memberName;
-
     private String memberEmail;
-
     private Integer roomId;
-
     private RoomDTO room;
-
     private LocalDateTime regDate;
-
     private LocalDateTime modDate;
+
+    private Integer totalServiceOrderPrice; // 서비스 주문 총 가격
 
     // 방 예약 여부
     private Boolean reserved;
@@ -56,7 +47,10 @@ public class ReservationDTO {
     // 남은 시간(초 단위)
     private Long timeRemaining;
 
-    // Entity -> DTO 변환 메서드
+    private static Integer calculateTotalServiceOrderPrice(Reservation reservation) {
+        return 0; // 기본값을 0으로 설정 (추후 로직을 추가 가능)
+    }
+
     public static ReservationDTO fromEntity(Reservation reservation) {
         if (reservation == null) {
             throw new IllegalArgumentException("Reservation entity가 null입니다.");
@@ -76,8 +70,10 @@ public class ReservationDTO {
             }
         }
 
-        log.info("[fromEntity] 변환 - reservationId={}, cancelConfirmedAt={}, remainingTime={}",
-                reservation.getReservationId(), cancelConfirmedTime, remainingTime);
+        Integer totalServiceOrderPrice = calculateTotalServiceOrderPrice(reservation);
+
+        log.info("[fromEntity] 변환 - reservationId={}, cancelConfirmedAt={}, remainingTime={}, totalServiceOrderPrice={}",
+                reservation.getReservationId(), cancelConfirmedTime, remainingTime, totalServiceOrderPrice);
 
         return new ReservationDTO(
                 reservation.getReservationId(),
@@ -92,6 +88,7 @@ public class ReservationDTO {
                 roomDTO,
                 reservation.getRegDate(),
                 reservation.getModDate(),
+                totalServiceOrderPrice, //
                 roomDTO != null && roomDTO.getReservationEnd() != null && LocalDate.parse(roomDTO.getReservationEnd()).isAfter(LocalDate.now()),
                 roomDTO != null ? roomDTO.getReservationEnd() : "",
                 reservation.getDayCount(),
