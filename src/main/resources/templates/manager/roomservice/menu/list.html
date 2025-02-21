@@ -257,8 +257,8 @@
 
                 <!-- 추가 버튼 -->
                 <div class="text-end mt-3">
-                    <a class="btn btn-primary" th:href="@{/roomService/category/list}">카테고리 관리</a>
-                    <a th:href="@{/roomService/menu/register(serviceCateId=${serviceCateId})}" class="btn btn-primary" style="background-color: black">등록</a>
+                    <a class="btn btn-primary" style="background-color: purple" th:href="@{/roomService/category/list}">카테고리 관리</a>
+                    <a th:href="@{/roomService/menu/register(serviceCateId=${serviceCateId})}" class="btn btn-success">등록</a>
                     <button type="button" class="btn btn-primary modalBtn">간편 등록</button>
                 </div>
 
@@ -357,7 +357,7 @@
                     <!-- Modal footer -->
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">닫기</button>
-                        <button type="submit" class="btn btn-primary">등록</button>
+                        <button type="submit" class="btn btn-success">등록</button>
                     </div>
                 </form>
             </div>
