@@ -2,7 +2,8 @@
 <html lang="en"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/layout}">
+      layout:decorate="~{layouts/layout}"
+>
 <head>
     <meta charset="UTF-8">
     <title>NTT호텔 - 매니저 등록</title>
@@ -13,214 +14,269 @@
             margin-bottom: 10px;
             display: inline-block;
         }
+
         .custom-link:hover {
             color: gray; /* 마우스 올리면 회색 */
         }
+
     </style>
 </head>
 <body>
-    <div id="wrapper" layout:fragment="content">
-        <div class="container-fluid mt-4">
-            <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
-            <a href="#" class="custom-link"><span>회원관리</span></a> /
-            <a href="/admin/executiveList" class="custom-link"><span>임원관리</span></a> /
-            <a href="/admin/executiveRegister" class="custom-link"><span>매니저등록</span></a>
-            <h2 class="mb-3">매니저 등록</h2>
-            <div class="card p-4">
-                <h5 class="mb-3">매니저 정보 등록</h5>
-                <form action="/admin/executiveRegister" method="post" onsubmit="return registerCheck();">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label for="memberName" class="form-label fw-bold">*매니저 이름</label>
-                            <input type="text" class="form-control" id="memberName" name="memberName" placeholder="이름" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="memberEmailInput" class="form-label fw-bold">*이메일 :</label>
-                            <div class="input-group">
-                                <input type="email" class="form-control" id="memberEmailInput" name="memberEmail" placeholder="이메일 형식에 맞춰서 작성해주세요." required>
-                                <button type="button" class="btn btn-secondary" onclick="emailCheck()">중복확인</button>
-                            </div>
-                            <small id="emailCheckMessage" style="display: none;"></small>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="memberPassword" class="form-label fw-bold">*비밀번호</label>
-                            <input type="password" class="form-control" id="memberPassword" name="memberPassword" placeholder="비밀번호는 6~12자 이내로 입력해주세요." required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="memberPasswordCheck" class="form-label fw-bold">*비밀번호 확인</label>
-                            <input type="password" class="form-control" id="memberPasswordCheck" name="memberPasswordCheck" placeholder="비밀번호를 한번 더 입력해주세요." required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="company" class="form-label fw-bold">*본사</label>
-                            <select class="form-select" id="company" name="company">
-                                <option th:unless="${#lists.isEmpty(companyList)}" value="">본사 선택</option>
-                                <option th:if="${#lists.isEmpty(companyList)}" value="">먼저 본사와 지사를 등록해 주세요.</option>
-                                <option th:each="company : ${companyList}" th:value="${company.companyId}" th:text="${company.companyName}"></option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="hotelSelect" class="form-label fw-bold">*지사</label>
-                            <select id="hotelSelect" class="form-select" name="hotelId" required>
-                                <option value="">먼저 본사를 선택해 주세요.</option>
-                            </select>
-                        </div>
-                        <div class="col-md-12">
-                            <label for="memberPhone" class="form-label fw-bold">전화번호</label>
-                            <input type="text" class="form-control" id="memberPhone" name="memberPhone" placeholder="'-' 없이 숫자만 입력해주세요.">
-                        </div>
+<div id="wrapper" layout:fragment="content">
+    <div class="container-fluid mt-4">
+        <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
+        <a href="#" class="custom-link"><span>회원관리</span></a> /
+        <a href="/admin/executiveList" class="custom-link"><span>임원관리</span></a> /
+        <a href="/admin/executiveRegister" class="custom-link"><span>매니저등록</span></a>
+        <h2 class="mb-3">매니저 등록</h2>
+        <div class="card p-4">
+            <h5 class="mb-3">매니저 정보 등록</h5>
+            <form action="/admin/executiveRegister" method="post" onsubmit="return registerCheck();">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="memberName" class="form-label fw-bold">*매니저 이름 :</label>
+                        <input type="text" class="form-control" id="memberName" name="memberName" placeholder="이름" required>
                     </div>
-                    <div class="text-end mt-4">
-                        <p>* 표시는 필수 입력 항목입니다.</p>
-                        <button type="submit" class="btn btn-dark me-2">등록</button>
-                        <button type="reset" class="btn btn-secondary" onclick="location.href='/admin/executiveList'">취소</button>
+                    <div class="col-md-6">
+                        <label for="memberEmailInput" class="form-label fw-bold">*이메일 :</label>
+                        <input type="email" class="form-control" id="memberEmailInput" name="memberEmail" placeholder="이메일 형식에 맞춰서 작성해주세요." required>
+                        <small id="emailCheckMessage" style="display: none;"></small>
                     </div>
-                </form>
-                <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-                <script type="text/javascript">
-                    $(document).ready(function() {
-                        // #company 선택 시 실행
-                        $("#company").change(function() {
-                            var companyId = $(this).val(); // 선택한 본사의 ID 가져오기
+                    <div class="col-md-6">
+                        <label for="memberPassword" class="form-label fw-bold">*비밀번호 :</label>
+                        <input type="password" class="form-control" id="memberPassword" name="memberPassword" placeholder="비밀번호는 6~12자 이내로 입력해주세요." required>
+                        <small id="passwordMessage" style="display: none;"></small>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="memberPasswordCheck" class="form-label fw-bold">*비밀번호 확인 :</label>
+                        <input type="password" class="form-control" id="memberPasswordCheck" name="memberPasswordCheck" placeholder="비밀번호를 한번 더 입력해주세요." required>
+                        <small id="passwordCheckMessage" style="display: none;"></small>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="company" class="form-label fw-bold">*본사</label>
+                        <select class="form-select" id="company" name="company">
+                            <option th:unless="${#lists.isEmpty(companyList)}" value="">본사 선택</option>
+                            <option th:if="${#lists.isEmpty(companyList)}" value="">먼저 본사와 지사를 등록해 주세요.</option>
+                            <option th:each="company : ${companyList}" th:value="${company.companyId}" th:text="${company.companyName}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="hotelSelect" class="form-label fw-bold">*지사</label>
+                        <select id="hotelSelect" class="form-select" name="hotelId" required>
+                            <option value="">먼저 본사를 선택해 주세요.</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="memberPhone" class="form-label fw-bold">전화번호</label>
+                        <input type="text" class="form-control" id="memberPhone" name="memberPhone" placeholder="'-' 없이 숫자만 입력해주세요.">
+                        <small id="phoneCheckMessage" style="display: none;"></small>
+                    </div>
+                </div>
+                <div class="text-end mt-4">
+                    <p>* 표시는 필수 입력 항목입니다.</p>
+                    <button type="submit" class="btn btn-dark me-2">등록</button>
+                    <button type="reset" class="btn btn-secondary" onclick="location.href='/admin/executiveList'">취소</button>
+                </div>
+            </form>
 
-                            // 회사 ID가 선택되지 않으면 지사 목록 초기화
-                            if (!companyId) {
-                                $("#hotelSelect").empty();  // 기존 옵션 제거
-                                $("#hotelSelect").append('<option value="">먼저 본사를 선택해 주세요.</option>');
-                                return;
-                            }
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+            <script type="text/javascript">
+                $(document).ready(function() {
+                    // #company 선택 시 실행
+                    $("#company").change(function() {
+                        var companyId = $(this).val(); // 선택한 본사의 ID 가져오기
 
-                            $.ajax({
-                                url: "/admin/hotels",  // 본사에 해당하는 지사를 가져오는 API
-                                type: "GET",
-                                data: { companyId: companyId },  // 선택한 회사 ID 전송
-                                success: function(hotels) {
-                                    var hotelSelect = $("#hotelSelect");
-                                    hotelSelect.empty();  // 기존 옵션 제거
-
-                                    if (hotels.length > 0) {
-                                        // 지사 목록이 있을 경우
-                                        hotels.forEach(function(hotel) {
-                                            hotelSelect.append(
-                                                `<option value="${hotel.hotelId}">${hotel.hotelName}</option>`
-                                            );
-                                        });
-                                    } else {
-                                        // 지사 목록이 없을 경우
-                                        hotelSelect.append('<option value="">먼저 지사를 등록해 주세요.</option>');
-                                    }
-                                },
-                                error: function() {
-                                    alert("지사 목록을 불러오는 중 오류가 발생했습니다.");
-                                }
-                            });
-                        });
-                    });
-
-                    $(document).ready(function() {
-                        $("#company").change(function() {
-                            var companyId = $(this).val();
-                            // 멤버 ID를 hidden 필드에 설정 (예: 세션에서 가져오기)
-                            var memberId = "멤버의 실제 ID"; // 이 값을 서버에서 받아올 필요가 있음
-                            $("#memberId").val(memberId);
-                        });
-
-                        // 지사 선택 후 서버로 보내기
-                        $("form").submit(function() {
-                            var hotelId = $("#hotelSelect").val();
-                            var memberId = $("#memberId").val();
-                            // 서버로 보내는 로직 추가
-                        });
-                    });
-
-                    // 이메일 중복확인
-                    function emailCheck() {
-                        var email = document.getElementById('memberEmailInput').value;
-                        var messageElement = document.getElementById('emailCheckMessage');
-                        // 이메일 형식 체크
-                        var emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]{1,}$/;
-
-                        if (!email) {
-                            messageElement.style.display = "block";
-                            messageElement.style.color = "red";
-                            messageElement.innerText = "이메일을 입력하세요.";
+                        // 회사 ID가 선택되지 않으면 지사 목록 초기화
+                        if (!companyId) {
+                            $("#hotelSelect").empty();  // 기존 옵션 제거
+                            $("#hotelSelect").append('<option value="">먼저 본사를 선택해 주세요.</option>');
                             return;
                         }
 
-                        // 이메일 형식이 맞지 않으면 메시지 표시
-                        if (!emailPattern.test(email)) {
-                            messageElement.style.display = "block";
-                            messageElement.style.color = "red";
-                            messageElement.innerText = "이메일 형식에 맞춰서 작성해주세요.";
-                            return;
-                        }
+                        $.ajax({
+                            url: "/admin/hotels",  // 본사에 해당하는 지사를 가져오는 API
+                            type: "GET",
+                            data: { companyId: companyId },  // 선택한 회사 ID 전송
+                            success: function(hotels) {
+                                var hotelSelect = $("#hotelSelect");
+                                hotelSelect.empty();  // 기존 옵션 제거
 
-                        fetch('/checkEmail?email=' + encodeURIComponent(email), {
-                            method: 'GET',
-                        })
-                            .then(response => response.json())
-                            .then(data => {
-                                messageElement.style.display = "block";
-                                if (data.exists) {
-                                    messageElement.style.color = "red";
-                                    messageElement.innerText = "이미 사용 중인 이메일입니다.";
+                                if (hotels.length > 0) {
+                                    // 지사 목록이 있을 경우
+                                    hotels.forEach(function(hotel) {
+                                        hotelSelect.append(
+                                            `<option value="${hotel.hotelId}">${hotel.hotelName}</option>`
+                                        );
+                                    });
                                 } else {
-                                    messageElement.style.color = "green";
-                                    messageElement.innerText = "사용 가능한 이메일입니다.";
+                                    // 지사 목록이 없을 경우
+                                    hotelSelect.append('<option value="">먼저 지사를 등록해 주세요.</option>');
                                 }
-                            })
-                            .catch(error => {
-                                console.error("에러 발생:", error);
-                                messageElement.style.display = "block";
-                                messageElement.style.color = "red";
-                                messageElement.innerText = "중복 확인 중 오류가 발생했습니다.";
-                            });
-                    }
-
-                    // 비밀번호 및 이메일 체크
-                    function registerCheck() {
-                        var email = document.getElementById('memberEmailInput').value;
-                        var p1 = document.getElementById('memberPassword').value;
-                        var p2 = document.getElementById('memberPasswordCheck').value;
-
-                        // 비밀번호 길이 체크
-                        if (p1.length < 6) {
-                            alert('비밀번호는 6글자 이상이어야 합니다.');
-                            return false;
-                        }
-
-                        if (p1.length > 12) {
-                            alert('비밀번호는 12글자 이내여야 합니다.');
-                            return false;
-                        }
-
-                        // 비밀번호 확인
-                        if (p1 != p2) {
-                            alert("비밀번호가 일치하지 않습니다.");
-                            return false;
-                        } else {
-                            fetch('/checkEmail?email=' + encodeURIComponent(email), {
-                                method: 'GET',
-                            })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.exists) {
-                                        // 이메일이 이미 존재하는 경우 alert 띄우기
-                                        alert("이미 가입된 회원입니다.");
-                                        return false; // 회원가입 제출 막기
-                                    }
-                                    alert("매니저 등록에 성공하였습니다.");
-                                })
-                        }
-                    }
-
-                    // 전화번호 입력 시 숫자만 허용
-                    document.getElementById("memberPhone").addEventListener("input", function (event) {
-                        this.value = this.value.replace(/[^0-9]/g, "");
+                            },
+                            error: function() {
+                                alert("지사 목록을 불러오는 중 오류가 발생했습니다.");
+                            }
+                        });
                     });
-                </script>
+                });
 
-            </div>
+                $(document).ready(function() {
+                    $("#company").change(function() {
+                        var companyId = $(this).val();
+                        // 멤버 ID를 hidden 필드에 설정 (예: 세션에서 가져오기)
+                        var memberId = "멤버의 실제 ID"; // 이 값을 서버에서 받아올 필요가 있음
+                        $("#memberId").val(memberId);
+                    });
+
+                    // 지사 선택 후 서버로 보내기
+                    $("form").submit(function() {
+                        var hotelId = $("#hotelSelect").val();
+                        var memberId = $("#memberId").val();
+                        // 서버로 보내는 로직 추가
+                    });
+                });
+
+                // 이메일 체크
+                function emailCheck() {
+                    var email = document.getElementById('memberEmailInput').value;
+                    var messageElement = document.getElementById('emailCheckMessage');
+                    var emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]{1,}$/;
+
+                    if (!email) {
+                        messageElement.style.display = "block";
+                        messageElement.style.color = "red";
+                        messageElement.innerText = "이메일을 입력하세요.";
+                        return;
+                    }
+
+                    if (!emailPattern.test(email)) {
+                        messageElement.style.display = "block";
+                        messageElement.style.color = "red";
+                        messageElement.innerText = "이메일 형식에 맞춰서 작성해주세요.";
+                        return;
+                    }
+
+                    fetch('/checkEmail?email=' + encodeURIComponent(email), {
+                        method: 'GET',
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            messageElement.style.display = "block";
+                            if (data.exists) {
+                                messageElement.style.color = "red";
+                                messageElement.innerText = "이미 사용 중인 이메일입니다.";
+                            } else {
+                                messageElement.style.color = "green";
+                                messageElement.innerText = "사용 가능한 이메일입니다.";
+                            }
+                        })
+                        .catch(error => {
+                            console.error("에러 발생:", error);
+                            messageElement.style.display = "block";
+                            messageElement.style.color = "red";
+                            messageElement.innerText = "중복 확인 중 오류가 발생했습니다.";
+                        });
+                }
+
+                // 비밀번호 및 비밀번호 확인 체크
+                function passwordCheck() {
+                    var p1 = document.getElementById('memberPassword').value;
+                    var p2 = document.getElementById('memberPasswordCheck').value;
+                    var passwordMessage = document.getElementById('passwordMessage');
+                    var passwordCheckMessage = document.getElementById('passwordCheckMessage');
+
+                    if(p1.length === 0) {
+                        passwordMessage.style.display = "none";
+                    } else if (p1.length < 6) {
+                        passwordMessage.style.display = "block";
+                        passwordMessage.style.color = "red";
+                        passwordMessage.innerText = "비밀번호는 6글자 이상이어야 합니다.";
+                    } else if (p1.length > 12) {
+                        passwordMessage.style.display = "block";
+                        passwordMessage.style.color = "red";
+                        passwordMessage.innerText = "비밀번호는 12글자 이내여야 합니다.";
+                    } else {
+                        passwordMessage.style.display = "block";
+                        passwordMessage.style.color = "green";
+                        passwordMessage.innerText = "사용 가능한 비밀번호입니다.";
+                    }
+
+                    if(p2.length === 0) {
+                        passwordCheckMessage.style.display = "none";
+                    } else if (p2.length < 6) {
+                        passwordCheckMessage.style.display = "block";
+                        passwordCheckMessage.style.color = "red";
+                        passwordCheckMessage.innerText = "비밀번호를 확인해주세요.";
+                    } else if (p2.length > 12) {
+                        passwordCheckMessage.style.display = "block";
+                        passwordCheckMessage.style.color = "red";
+                        passwordCheckMessage.innerText = "비밀번호를 확인해주세요.";
+                    } else if (p1 !== p2) {
+                        passwordCheckMessage.style.display = "block";
+                        passwordCheckMessage.style.color = "red";
+                        passwordCheckMessage.innerText = "비밀번호가 일치하지 않습니다.";
+                    } else {
+                        passwordCheckMessage.style.display = "block";
+                        passwordCheckMessage.style.color = "green";
+                        passwordCheckMessage.innerText = "비밀번호가 일치합니다.";
+                    }
+                }
+
+                // 전화번호 체크
+                function phoneCheck() {
+                    var phone = document.getElementById('memberPhone').value;
+                    var phoneCheckMessage = document.getElementById('phoneCheckMessage');
+                    if(phone.length === 0) {
+                        phoneCheckMessage.style.display = "none";
+                    } else if (phone.length !== 11) {
+                        phoneCheckMessage.style.display = "block";
+                        phoneCheckMessage.style.color = "red";
+                        phoneCheckMessage.innerText = "전화번호는 11자리여야 합니다.";
+                    } else {
+                        phoneCheckMessage.innerText = "";
+                        phoneCheckMessage.style.display = "none";
+                    }
+                }
+
+                // 자동 체크 이벤트 리스너 추가
+                document.getElementById('memberEmailInput').addEventListener("blur", emailCheck);
+                document.getElementById('memberPassword').addEventListener("blur", passwordCheck);
+                document.getElementById('memberPasswordCheck').addEventListener("blur", passwordCheck);
+                document.getElementById('memberPhone').addEventListener("blur", phoneCheck);
+                document.getElementById('memberPhone').addEventListener("input", function(event) {
+                    // 전화번호 입력 시 숫자만 허용
+                    this.value = this.value.replace(/[^0-9]/g, "");
+                });
+
+                // 회원가입 폼 제출 전 알림창
+                function registerCheck() {
+                    var emailCheckMessage = document.getElementById('emailCheckMessage').innerText;
+                    var passwordMessage = document.getElementById('passwordMessage').innerText;
+                    var passwordCheckMessage = document.getElementById('passwordCheckMessage').innerText;
+                    var phoneCheckMessage = document.getElementById('phoneCheckMessage').innerText;
+
+                    if(emailCheckMessage === "이미 사용 중인 이메일입니다." || emailCheckMessage === "이메일 형식에 맞춰서 작성해주세요." || emailCheckMessage === "이메일을 입력하세요.") {
+                        alert("이메일을 확인해주세요.");
+                        return false;
+                    }
+                    if(passwordMessage === "비밀번호는 6글자 이상이어야 합니다." || passwordMessage === "비밀번호는 12글자 이내여야 합니다.") {
+                        alert("비밀번호를 확인해주세요.");
+                        return false;
+                    }
+                    if(passwordCheckMessage === "비밀번호가 일치하지 않습니다.") {
+                        alert("비밀번호를 확인해주세요.");
+                        return false;
+                    }
+                    if(document.getElementById('memberPhone').value && phoneCheckMessage === "전화번호는 11자리여야 합니다.") {
+                        alert("전화번호를 확인해주세요.");
+                        return false;
+                    }
+                    return true;
+                }
+            </script>
+
         </div>
     </div>
+</div>
 </body>
 </html>
