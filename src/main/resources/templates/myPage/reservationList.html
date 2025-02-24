@@ -56,7 +56,9 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="reservation, iterStat : ${reservations}">
+        <tr th:each="reservation, iterStat : ${reservations}"
+            th:data-reservation-id="${reservation.reservationId}"
+            th:data-room-id="${reservation.room.roomId}">
           <td class="align-middle text-center">
             <img th:src="@{'/upload/' + ${reservation.room.roomImageDTOList[0].imagePath}}"
                  alt="Room Image" class="room-image">
@@ -68,7 +70,7 @@
           <td>
             <span th:text="${reservation.checkInDate}"></span> ~
             <span th:text="${reservation.checkOutDate}"></span>
-            <span class="payBy" th:text="${reservation.memberName}" hidden="hidden"></span>
+            <span class="payBy" th:text="${reservation.memberId}" hidden="hidden"></span>
           </td>
           <td>
             <span id="roomPrice" th:if="${reservation.totalPrice != null}" th:text="'₩' + ${#numbers.formatInteger(reservation.totalPrice, 1, 'COMMA')}"></span>
@@ -124,7 +126,7 @@
             </div>
           </td>
           <td>
-            <button type="button" class="btn btn-primary" onclick="requestPay()">결제</button>
+            <button type="button" class="btn btn-primary" onclick="requestPay(event)">결제</button>
           </td>
         </tr>
         </tbody>
@@ -171,25 +173,17 @@
       var row = event.target.closest("tr");
 
       var roomName = row.querySelector(".roomName")?.textContent?.trim() || "호텔 객실";
-
-      // 객실 가격 가져오기
       var roomPrice = row.querySelector("#roomPrice")?.textContent?.replace("₩", "").replace(",", "").trim() || "0";
-
-      // 서비스 가격 가져오기 (ID 대신 class 사용)
       var roomServicePriceElement = row.querySelector(".roomServicePrice");
       var roomServicePrice = roomServicePriceElement ? roomServicePriceElement.textContent.replace("₩", "").replace(",", "").trim() : "0";
-
-      console.log("roomPrice:", roomPrice);
-      console.log("roomServicePrice 요소:", roomServicePriceElement);
-      console.log("roomServicePrice 값:", roomServicePrice);
+      var reservationId = row.getAttribute("data-reservation-id");
+      var roomId = row.getAttribute("data-room-id");
 
       roomPrice = parseInt(roomPrice) || 0;
       roomServicePrice = parseInt(roomServicePrice) || 0;
-      let ttotalPrice = roomPrice + roomServicePrice;
+      let totalPrice = roomPrice + roomServicePrice;
 
-      console.log("최종 결제 금액:", ttotalPrice);
-
-      if (ttotalPrice <= 0) {
+      if (totalPrice <= 0) {
         alert("결제 금액이 올바르지 않습니다.");
         return;
       }
@@ -201,24 +195,79 @@
         pay_method: "card",
         merchant_uid: merchantUid,
         name: roomName,
-        amount: ttotalPrice,
+        amount: totalPrice,
         buyer_name: row.querySelector(".payBy")?.textContent?.trim() || "구매자",
       }, function (rsp) {
         if (rsp.success) {
           alert("결제가 완료되었습니다.");
-          location.reload();
+
+          // 결제 정보 서버에 전송
+          var paymentDTO = {
+            roomPrice: totalPrice,
+            roomServicePrice: roomServicePrice,
+            memberId: row.querySelector(".payBy")?.textContent?.trim() || "구매자", // 예약한 멤버의 ID
+            reservationId: reservationId,
+            roomId: roomId
+          };
+
+          fetch("/payment", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(paymentDTO),
+          })
+                  .then(response => response.json())
+                  .then(data => {
+                    if (data.success) {
+                      location.reload();
+                    } else {
+                      alert("서버에 결제 정보 저장 실패");
+                    }
+                  })
+                  .catch(error => {
+                    console.error("결제 정보 저장 중 오류 발생:", error);
+                    alert("결제 정보 저장 중 오류가 발생했습니다.");
+                  });
+
         } else {
           alert("결제 실패: " + rsp.error_msg);
+
+          console.log(paymentDTO);
+
+          // 결제 정보 서버에 전송
+          var paymentDTO = {
+            roomPrice: totalPrice,
+            roomServicePrice: roomServicePrice,
+            memberId: row.querySelector(".payBy")?.textContent?.trim() || "구매자", // 예약한 멤버의 ID
+            reservationId: reservationId,
+            roomId: roomId
+          };
+
+          console.log(paymentDTO);
+
+          fetch("/payment", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(paymentDTO),
+          })
+                  .then(response => response.json())
+                  .then(data => {
+                    if (data.success) {
+                      /*location.reload();*/
+                    } else {
+                      alert("서버에 결제 정보 저장 실패");
+                    }
+                  })
+                  .catch(error => {
+                    console.error("결제 정보 저장 중 오류 발생:", error);
+                    alert("결제 정보 저장 중 오류가 발생했습니다.");
+                  });
         }
       });
     }
-
-    // 모든 결제 버튼에 이벤트 리스너 추가
-    document.addEventListener("DOMContentLoaded", function () {
-      document.querySelectorAll(".btn-primary").forEach(button => {
-        button.addEventListener("click", requestPay);
-      });
-    });
 
     document.addEventListener("DOMContentLoaded", function () {
       document.querySelectorAll(".delete-icon").forEach(icon => {
