@@ -79,14 +79,14 @@
     <div class="container-fluid mt-4">
         <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
         <a href="#" class="custom-link"><span>룸서비스관리</span></a> /
-        <a href="/roomService/menu/list" class="custom-link"><span>서비스메뉴관리</span></a> /
-        <a href="/roomService/menu/register" class="custom-link"><span>메뉴등록</span></a>
+        <a href="/manager/roomService/menu/list" class="custom-link"><span>서비스메뉴관리</span></a> /
+        <a href="/manager/roomService/menu/register" class="custom-link"><span>메뉴등록</span></a>
         <h2 class="mb-3">메뉴 등록</h2>
 
         <!-- 폼 -->
         <div class="card p-4 mb-4">
             <div class="row g-3 align-items-center">
-                <form action="/roomService/menu/register" method="post" enctype="multipart/form-data" onsubmit="validateForm(event)">
+                <form action="/manager/roomService/menu/register" method="post" enctype="multipart/form-data" onsubmit="validateForm(event)">
 
                     <div class="mb-3">
                         <label for="serviceCateId" class="form-label">카테고리:</label>
@@ -143,7 +143,7 @@
 
                     <div style="text-align: right">
                         <button type="submit" class="btn btn-success mx-2">등록</button>
-                        <a class="btn btn-primary" style="background-color: black" th:href="@{/roomService/menu/list(serviceCateId=${serviceMenuDTO.serviceCateId})}">목록</a>
+                        <a class="btn btn-primary" style="background-color: black" th:href="@{/manager/roomService/menu/list(serviceCateId=${serviceMenuDTO.serviceCateId})}">목록</a>
                         <button type="reset" class="btn btn-secondary mx-2">초기화</button>
                     </div>
 
