@@ -28,7 +28,7 @@ import java.util.Map;
 @Controller
 @Log4j2
 @RequiredArgsConstructor
-@RequestMapping("/roomService/category") //url roomService아래에
+@RequestMapping("manager/roomService/category") //url roomService아래에
 @Tag(name = "ServiceCateController", description = "룸서비스 카테고리 정보")
 public class ServiceCateController {
     private final ServiceCateService serviceCateService;
@@ -61,7 +61,7 @@ public class ServiceCateController {
         Integer hotelId = serviceCateDTO.getHotelId().getHotelId();  // 2025-02-11 추가
 
         redirectAttributes.addFlashAttribute("message", "카테고리 등록이 완료되었습니다.");
-        return "redirect:/roomService/category/list?hotelId=" + hotelId;  // hotelId를 쿼리 파라미터로 전달 2025-02-11 추가
+        return "redirect:/manager/roomService/category/list?hotelId=" + hotelId;  // hotelId를 쿼리 파라미터로 전달 2025-02-11 추가
     }
 
     @Operation(summary = "전체목록", description = "카테고리의 전체목록을 조회한다.")
@@ -133,7 +133,7 @@ public class ServiceCateController {
                              RedirectAttributes redirectAttributes) {
         serviceCateService.update(serviceCateDTO, imageFiles);
         redirectAttributes.addFlashAttribute("message", "카테고리 수정이 완료되었습니다.");
-        return "redirect:/roomService/category/read?serviceCateId="+ serviceCateDTO.getServiceCateId();
+        return "redirect:/manager/roomService/category/read?serviceCateId="+ serviceCateDTO.getServiceCateId();
     }
 
     @Operation(summary = "삭제처리", description = "해당 데이터를 삭제 후 목록페이지로 이동한다.")
@@ -146,6 +146,6 @@ public class ServiceCateController {
         redirectAttributes.addFlashAttribute("message", "카테고리 삭제가 완료되었습니다.");
         Integer hotelId = serviceCateDTO.getHotelId().getHotelId();
 
-        return "redirect:/roomService/category/list?hotelId=" + hotelId;
+        return "redirect:/manager/roomService/category/list?hotelId=" + hotelId;
     }
 }

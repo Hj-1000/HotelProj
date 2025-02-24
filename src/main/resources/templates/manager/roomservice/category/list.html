@@ -68,7 +68,7 @@
             // ✅ [폼 제출 시 이미지 검증 및 카테고리명 유효성 검사]
             $("form").submit(function (event) {
                 // 폼이 간편 등록 모달 폼인지 확인
-                if ($(this).closest('form').attr('action') === "/roomService/category/register") {
+                if ($(this).closest('form').attr('action') === "/manager/roomService/category/register") {
                     let imageFiles = $("#newImageFiles")[0].files;
                     let categoryName = $("#serviceCateName").val().trim();
 
@@ -117,11 +117,11 @@
     <div class="container-fluid mt-4">
         <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
         <a href="#" class="custom-link"><span>룸서비스관리</span></a> /
-        <a href="/roomService/category/list" class="custom-link"><span>카테고리관리</span></a>
+        <a href="/manager/roomService/category/list" class="custom-link"><span>카테고리관리</span></a>
         <h2 class="mb-3">서비스 카테고리 관리</h2>
         <!-- 검색 영역 -->
         <div class="card p-4 mb-4">
-            <form action="/roomService/category/list" method="get">
+            <form action="/manager/roomService/category/list" method="get">
                 <input type="hidden" name="hotelId" th:value="${hotelId}">
                 <div class="row g-3 align-items-center">
                     <h5 class="card-title">카테고리 찾기</h5>
@@ -158,12 +158,12 @@
                         <th:block th:each="data:${serviceCateDTOS}">
                             <div class="col">
                                 <div class="card">
-                                    <a th:href="@{/roomService/category/read(serviceCateId=${data.serviceCateId})}">
+                                    <a th:href="@{/manager/roomService/category/read(serviceCateId=${data.serviceCateId})}">
                                         <img th:src="@{'/upload/' + ${data.serviceCateImageDTOList[0].imagePath}}" class="card-img-top" alt="카테고리 이미지">
                                     </a>
                                     <div class="card-body">
-                                        <h5 class="card-title" th:href="@{/roomService/category/read(serviceCateId=${data.serviceCateId})}" th:text="${data.serviceCateName}">한식</h5>
-                                        <a th:href="@{/roomService/category/delete(serviceCateId=${data.serviceCateId})}" class="badge bg-danger delBtn">삭제</a>
+                                        <h5 class="card-title" th:href="@{/manager/roomService/category/read(serviceCateId=${data.serviceCateId})}" th:text="${data.serviceCateName}">한식</h5>
+                                        <a th:href="@{/manager/roomService/category/delete(serviceCateId=${data.serviceCateId})}" class="badge bg-danger delBtn">삭제</a>
                                     </div> <!-- 카드 본문 끝 -->
                                 </div> <!-- 카드 끝 -->
                             </div> <!-- col 끝 -->
@@ -174,31 +174,31 @@
                 <!-- 추가 버튼 -->
                 <!--등록 버튼 누를 때 해당하는 hotelId를 받을 수 있게 url 변경 2025-02-20-->
                 <div class="text-end mt-3">
-                    <a th:href="@{/roomService/category/register(hotelId=${hotelId})}" class="btn btn-success">등록</a>
+                    <a th:href="@{/manager/roomService/category/register(hotelId=${hotelId})}" class="btn btn-success">등록</a>
                     <button type="button" class="btn btn-primary modalBtn">간편 등록</button>
                 </div>
                 <!-- 페이지네이션 -->
                 <div class="d-flex justify-content-center">
                     <ul class="pagination">
                         <li class="page-item" th:unless="${pageInfo.startPage == 1}">
-                            <a class="page-link" th:href="@{/roomService/category/list(page=1, hotelId=${hotelId})}">시작</a>
+                            <a class="page-link" th:href="@{/manager/roomService/category/list(page=1, hotelId=${hotelId})}">시작</a>
                         </li>
                         <li class="page-item" th:unless="${pageInfo.currentPage == 1}">
-                            <a class="page-link" th:href="@{/roomService/category/list(page=${pageInfo.prevPage}, hotelId=${hotelId})}">이전</a>
+                            <a class="page-link" th:href="@{/manager/roomService/category/list(page=${pageInfo.prevPage}, hotelId=${hotelId})}">이전</a>
                         </li>
                         <th:block th:each="num : ${#numbers.sequence(pageInfo.startPage, pageInfo.endPage, 1)}">
                             <li class="page-item" th:unless="${num == pageInfo.currentPage}">
-                                <a class="page-link" th:href="@{/roomService/category/list(page=${num}, hotelId=${hotelId})}" th:text="${num}">1</a>
+                                <a class="page-link" th:href="@{/manager/roomService/category/list(page=${num}, hotelId=${hotelId})}" th:text="${num}">1</a>
                             </li>
                             <li class="page-item active" th:if="${num == pageInfo.currentPage}">
-                                <a class="page-link" th:href="@{/roomService/category/list(page=${num}, hotelId=${hotelId})}" th:text="${num}">[[${num}]]</a>
+                                <a class="page-link" th:href="@{/manager/roomService/category/list(page=${num}, hotelId=${hotelId})}" th:text="${num}">[[${num}]]</a>
                             </li>
                         </th:block>
                         <li class="page-item" th:unless="${pageInfo.currentPage >= pageInfo.lastPage}">
-                            <a class="page-link" th:href="@{/roomService/category/list(page=${pageInfo.nextPage}, hotelId=${hotelId})}">다음</a>
+                            <a class="page-link" th:href="@{/manager/roomService/category/list(page=${pageInfo.nextPage}, hotelId=${hotelId})}">다음</a>
                         </li>
                         <li class="page-item" th:unless="${pageInfo.endPage == pageInfo.lastPage}">
-                            <a class="page-link" th:href="@{/roomService/category/list(page=${pageInfo.lastPage}, hotelId=${hotelId})}">끝</a>
+                            <a class="page-link" th:href="@{/manager/roomService/category/list(page=${pageInfo.lastPage}, hotelId=${hotelId})}">끝</a>
                         </li>
                     </ul>
                 </div>
@@ -221,7 +221,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
-                <form action="/roomService/category/register" method="post" enctype="multipart/form-data">
+                <form action="/manager/roomService/category/register" method="post" enctype="multipart/form-data">
                     <!-- Modal body -->
                     <div class="modal-body">
                         <!--지사명을 통해 지사ID 가져오기 2025-02-11 추가-->
