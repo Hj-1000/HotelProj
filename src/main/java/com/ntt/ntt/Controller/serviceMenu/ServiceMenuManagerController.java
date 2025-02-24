@@ -42,7 +42,7 @@ public class ServiceMenuManagerController {
         model.addAttribute("serviceCateDTOS", serviceCateDTOS);
         model.addAttribute("serviceMenuDTO", new ServiceMenuDTO());
         model.addAttribute("selectServiceCateId", serviceCateId);
-        return "/manager/roomservice/menu/register";
+        return "/manager/roomService/menu/register";
     }
 
     @Operation(summary = "등록창", description = "데이터 등록 후 목록페이지로 이동한다.")
@@ -161,7 +161,7 @@ public class ServiceMenuManagerController {
         model.addAttribute("status", status); // 선택한 상태값 전달
         model.addAttribute("serviceCateId", serviceCateId);
 
-        return "/manager/roomservice/menu/list";
+        return "/manager/roomService/menu/list";
     }
 
 
@@ -172,13 +172,13 @@ public class ServiceMenuManagerController {
             ServiceMenuDTO serviceMenuDTO =
                     serviceMenuService.read(serviceMenuId);
             model.addAttribute("serviceMenuDTO", serviceMenuDTO);
-            return "/manager/roomservice/menu/read";
+            return "/manager/roomService/menu/read";
         } catch (EntityNotFoundException e) {
             model.addAttribute("error", "해당 카테고리를 찾을 수 없습니다");
-            return "/manager/roomservice/menu/list";
+            return "/manager/roomService/menu/list";
         } catch (Exception e) {
             model.addAttribute("error", "서버 오류가 발생했습니다.");
-            return "/manager/roomservice/menu/list";
+            return "/manager/roomService/menu/list";
         }
     }
     @Operation(summary = "수정폼", description = "해당 데이터를 조회 후 수정폼페이지로 이동한다.")
@@ -189,7 +189,7 @@ public class ServiceMenuManagerController {
         model.addAttribute("serviceMenuDTO",serviceMenuDTO);
 
 
-        return "/manager/roomservice/menu/update";
+        return "/manager/roomService/menu/update";
     }
 
     @Operation(summary = "수정창", description = "수정할 내용을 데이터베이스에 저장 후 목록페이지로 이동한다.")

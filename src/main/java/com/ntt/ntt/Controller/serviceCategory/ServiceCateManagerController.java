@@ -46,7 +46,7 @@ public class ServiceCateManagerController {
         model.addAttribute("hotelDTOS", hotelDTOS);
         model.addAttribute("hotelDTO", new HotelDTO());
 
-        return "/manager/roomservice/category/register";
+        return "/manager/roomService/category/register";
     }
 
     @Operation(summary = "등록창", description = "데이터 등록 후 목록페이지로 이동한다.")
@@ -96,7 +96,7 @@ public class ServiceCateManagerController {
         model.addAttribute("hotelDTOS", hotelDTOS);
         model.addAttribute("hotelDTO", new HotelDTO());
 
-        return "/manager/roomservice/category/list";
+        return "/manager/roomService/category/list";
     }
 
 
@@ -107,13 +107,13 @@ public class ServiceCateManagerController {
             ServiceCateDTO serviceCateDTO =
                     serviceCateService.read(serviceCateId);
             model.addAttribute("serviceCateDTO", serviceCateDTO);
-            return "/manager/roomservice/category/read";
+            return "/manager/roomService/category/read";
         } catch (EntityNotFoundException e) {
             model.addAttribute("error", "해당 카테고리를 찾을 수 없습니다");
-            return "/manager/roomservice/category/list";
+            return "/manager/roomService/category/list";
         } catch (Exception e) {
             model.addAttribute("error", "서버 오류가 발생했습니다.");
-            return "/manager/roomservice/category/list";
+            return "/manager/roomService/category/list";
         }
     }
     @Operation(summary = "수정폼", description = "해당 데이터를 조회 후 수정폼페이지로 이동한다.")
@@ -124,7 +124,7 @@ public class ServiceCateManagerController {
         model.addAttribute("serviceCateDTO",serviceCateDTO);
 
 
-        return "/manager/roomservice/category/update";
+        return "/manager/roomService/category/update";
     }
 
     @Operation(summary = "수정창", description = "수정할 내용을 데이터베이스에 저장 후 목록페이지로 이동한다.")
