@@ -1,4 +1,4 @@
-package com.ntt.ntt.Controller.ServiceCategory;
+package com.ntt.ntt.Controller.serviceCategory;
 
 import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.ServiceCateDTO;
@@ -29,8 +29,8 @@ import java.util.Map;
 @Log4j2
 @RequiredArgsConstructor
 @RequestMapping("manager/roomService/category") //url roomService아래에
-@Tag(name = "ServiceCateController", description = "룸서비스 카테고리 정보")
-public class ServiceCateController {
+@Tag(name = "ServiceCateManagerController", description = "룸서비스 카테고리 정보")
+public class ServiceCateManagerController {
     private final ServiceCateService serviceCateService;
     private final PaginationUtil paginationUtil;
 

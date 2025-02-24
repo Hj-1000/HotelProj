@@ -1,12 +1,13 @@
-package com.ntt.ntt.Controller;
+package com.ntt.ntt.Controller.serviceOrder;
 
-import com.ntt.ntt.DTO.ReservationDTO;
 import com.ntt.ntt.DTO.ServiceOrderDTO;
 import com.ntt.ntt.DTO.ServiceOrderHistoryDTO;
 import com.ntt.ntt.Service.ReservationService;
 import com.ntt.ntt.Service.RoomService;
 import com.ntt.ntt.Service.ServiceOrderService;
 import com.ntt.ntt.Util.PaginationUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -22,7 +23,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.security.Principal;
 import java.util.List;
@@ -31,6 +31,7 @@ import java.util.Optional;
 @Controller
 @RequiredArgsConstructor
 @Log4j2
+@Tag(name = "ServiceOrderController", description = "유저가 주문 관련 컨트롤러")
 public class ServiceOrderController {
 
     private final ServiceOrderService serviceOrderService;
@@ -43,6 +44,7 @@ public class ServiceOrderController {
     // 데이터를 입력하는 역할을 한다.
 
     //로그인한 Member 정보와 참조하는 reservationId에 따라 작동하는 주문 컨트롤러
+    @Operation(summary = "주문기능", description = "장바구니의 주문기능")
     @PostMapping("/api/order")
     public ResponseEntity order(@Valid ServiceOrderDTO serviceOrderDTO, Integer reservationId, BindingResult bindingResult, Principal principal) {
         //만약에 아이템 id가 없다면

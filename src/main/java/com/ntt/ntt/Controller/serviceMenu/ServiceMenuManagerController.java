@@ -1,4 +1,4 @@
-package com.ntt.ntt.Controller.ServiceMenu;
+package com.ntt.ntt.Controller.serviceMenu;
 
 import com.ntt.ntt.Constant.ServiceMenuStatus;
 import com.ntt.ntt.DTO.ServiceCateDTO;
@@ -28,8 +28,8 @@ import java.util.Map;
 @Log4j2
 @RequiredArgsConstructor
 @RequestMapping("manager/roomService/menu") //url roomService아래에
-@Tag(name = "serviceMenuController", description = "룸서비스 메뉴 정보")
-public class ServiceMenuController {
+@Tag(name = "serviceMenuManagerController", description = "룸서비스 메뉴 정보")
+public class ServiceMenuManagerController {
     private final ServiceMenuService serviceMenuService;
     private final ServiceCateService serviceCateService;
     private final PaginationUtil paginationUtil;
@@ -55,7 +55,7 @@ public class ServiceMenuController {
 
         //등록된 메뉴의 카테고리Id 가져오기
         Integer serviceCateId = serviceMenuDTO.getServiceCateId().getServiceCateId();
-        return "redirect:manager/roomService/menu/list?serviceCateId=" + serviceCateId;
+        return "redirect:/manager/roomService/menu/list?serviceCateId=" + serviceCateId;
     }
 
 
@@ -198,7 +198,7 @@ public class ServiceMenuController {
                              RedirectAttributes redirectAttributes) {
         serviceMenuService.update(serviceMenuDTO, imageFiles);
         redirectAttributes.addFlashAttribute("message", "메뉴 수정이 완료되었습니다.");
-        return "redirect:manager/roomService/menu/read?serviceMenuId="+ serviceMenuDTO.getServiceMenuId();
+        return "redirect:/manager/roomService/menu/read?serviceMenuId="+ serviceMenuDTO.getServiceMenuId();
     }
 
     @Operation(summary = "삭제처리", description = "해당 데이터를 삭제 후 목록페이지로 이동한다.")
@@ -212,6 +212,6 @@ public class ServiceMenuController {
         redirectAttributes.addFlashAttribute("message", "메뉴 삭제가 완료되었습니다.");
 
         Integer serviceCateId = serviceMenuDTO.getServiceCateId().getServiceCateId();
-        return "redirect:manager/roomService/menu/list?serviceCateId=" + serviceCateId;
+        return "redirect:/manager/roomService/menu/list?serviceCateId=" + serviceCateId;
     }
 }
