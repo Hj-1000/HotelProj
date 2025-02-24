@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ServiceMenuStatus {
-    SELL("판매중"), PREPARE("준비중"), SOLD_OUT("매진");
+    SELL("판매중"), SOLD_OUT("매진");
 
     private final String description;
 }
