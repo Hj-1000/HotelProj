@@ -58,6 +58,8 @@
             <div th:each="order, stat : ${orders.content}" class="card mb-3">
                 <div class="card-header">
                     주문번호: <span th:text="${stat.index + 1 + (page * orders.size)}"></span>
+                    방이름: <span class="badge bg-primary ms-2" th:text="${order.reservationDTO.room.roomName}"></span>
+                    방 예약 날짜 : <span th:text="${#temporals.format(order.reservationDTO.regDate, 'yyyy-MM-dd')}"></span>
                     <span class="badge bg-secondary ms-2" th:text="${order.serviceOrderStatus}"></span>
                 </div>
                 <ul class="list-group list-group-flush">

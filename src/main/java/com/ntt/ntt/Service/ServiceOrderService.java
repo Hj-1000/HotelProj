@@ -11,6 +11,7 @@ import groovy.util.logging.Log4j2;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +33,7 @@ public class ServiceOrderService {
     private final MemberRepository memberRepository;
     private final RoomRepository roomRepository; //2025-02-18 room과 결합
     private final ReservationRepository reservationRepository;
+    private final ModelMapper modelMapper;
 
 
     //주문 ServiceOrder, ServiceOrderItem
@@ -181,6 +183,7 @@ public class ServiceOrderService {
             serviceOrderHistoryDTO.setServiceOrderId(serviceOrder.getServiceOrderId());
             serviceOrderHistoryDTO.setRegDate(serviceOrder.getRegDate());
             serviceOrderHistoryDTO.setServiceOrderStatus(serviceOrder.getServiceOrderStatus());
+            serviceOrderHistoryDTO.setReservationDTO(modelMapper.map(serviceOrder.getReservation(), ReservationDTO.class));
 
             List<ServiceOrderItem> serviceOrderItemList = serviceOrder.getServiceOrderItemList();
 

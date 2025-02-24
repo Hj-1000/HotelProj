@@ -23,8 +23,11 @@ public class ServiceOrderHistoryDTO {
 
     private ServiceOrderStatus serviceOrderStatus; //주문 상태
 
+    private ReservationDTO reservationDTO; // 부모객체 불러오기 위함 2025-02-24추가 천현종
+
     private List<ServiceOrderItemDTO> serviceOrderItemDTOList = new ArrayList<>();
     //구매이력에 담길 구매 아이템들
+
 
 
 
