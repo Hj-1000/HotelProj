@@ -16,10 +16,15 @@ import java.math.BigDecimal;
 public class PaymentDTO {
 
     private Integer roomPrice;
-    private String roomServiceName;
+
     private Integer roomServicePrice;
+
+    private Integer totalPrice;
+
     private Integer memberId;
+
     private Integer roomId;
-    private Integer reservationId; // 예약 ID 추가
+
+    private Integer reservationId;
 
     }
