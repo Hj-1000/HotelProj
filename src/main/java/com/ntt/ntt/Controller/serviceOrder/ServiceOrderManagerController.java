@@ -6,6 +6,7 @@ import com.ntt.ntt.Util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -14,6 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+
 
 import java.security.Principal;
 import java.util.Map;
@@ -51,7 +53,8 @@ public class ServiceOrderManagerController {
     }
 
 //    @GetMapping("/manager/order/list")
-//    public String orderHistory(Model model) {
+//    public String orderHistory(@PathVariable("page") Optional<Integer> page,
+//                               Principal principal, Model model) {
 //        if (principal == null) {
 //            log.info("로그인을 하지않은 접속오류");
 //            return "redirect:/login";
@@ -71,6 +74,6 @@ public class ServiceOrderManagerController {
 //        // HTML에서 getContent()를 호출할 것임
 //        model.addAttribute("page", currentPage);
 //        model.addAttribute("maxPage", 5);
-//        return "myPage/order/history";
+//        return "/manager/roomService/order/list";
 //    }
 }
