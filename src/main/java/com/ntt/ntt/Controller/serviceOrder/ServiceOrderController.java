@@ -35,8 +35,6 @@ import java.util.Optional;
 public class ServiceOrderController {
 
     private final ServiceOrderService serviceOrderService;
-    private final RoomService roomService; // roomId를 불러오기 위함
-    private final ReservationService reservationService;
     private final PaginationUtil paginationUtil;
     //주문하기는 상품의 읽기 페이지에서
     //사용자가 볼 수 잇으므로, 따로 get으로 읽기 페이지는 만들지 않는다.

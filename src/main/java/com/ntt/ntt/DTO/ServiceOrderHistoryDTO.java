@@ -25,6 +25,8 @@ public class ServiceOrderHistoryDTO {
 
     private ReservationDTO reservationDTO; // 부모객체 불러오기 위함 2025-02-24추가 천현종
 
+    private MemberDTO memberDTO; //주문의 멤버 정보를 불러오기 위함 2025-02-24추가 천현종
+
     private List<ServiceOrderItemDTO> serviceOrderItemDTOList = new ArrayList<>();
     //구매이력에 담길 구매 아이템들
 
