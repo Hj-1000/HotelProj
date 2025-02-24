@@ -18,19 +18,21 @@ public class Payment extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer paymentId; // 결제 ID
 
-    @Column(nullable = true)
     private Integer roomPrice; // 객실 가격
 
-    private String roomServiceName; // 룸 서비스 이름
-
-    @Column(nullable = true)
     private Integer roomServicePrice; // 룸 서비스 가격
 
-    @Column(nullable = true)
-    private Integer memberId; // 회원 ID
+    private Integer totalPrice; // 총 결제금액
 
-    @Column(nullable = true)
-    private Integer roomId; // 객실 ID
+    @ManyToOne(fetch = FetchType.LAZY) // Member와 Many-to-One 관계
+    @JoinColumn(name = "memberId")
+    private Member member;
 
-    private Integer reservationId;
+    @ManyToOne(fetch = FetchType.LAZY) // Member와 Many-to-One 관계
+    @JoinColumn(name = "roomId")
+    private Room roomId; // 객실 ID
+
+    @ManyToOne(fetch = FetchType.LAZY) // Member와 Many-to-One 관계
+    @JoinColumn(name = "reservationId")
+    private Reservation reservationId;
 }

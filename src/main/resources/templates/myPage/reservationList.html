@@ -107,6 +107,7 @@
                     class="btn btn-primary btn-sm"
                     th:data-reservation-id="${reservation.reservationId}"
                     th:data-room-id="${reservation.room.roomId}"
+                    th:disabled="${reservation.reservationStatus != '예약'}"
                     th:onclick="|window.location.href='/myPage/menu/list?reservationId=' + ${reservation.reservationId} + '&roomId=' + ${reservation.room.roomId}|">
               신청
             </button>
@@ -126,7 +127,10 @@
             </div>
           </td>
           <td>
-            <button type="button" class="btn btn-primary" onclick="requestPay(event)">결제</button>
+            <button type="button"
+                    class="btn btn-primary"
+                    th:disabled="${reservation.reservationStatus != '예약' or reservation.isPaid}"
+                    onclick="requestPay(event)">결제</button>
           </td>
         </tr>
         </tbody>
@@ -181,6 +185,7 @@
 
       roomPrice = parseInt(roomPrice) || 0;
       roomServicePrice = parseInt(roomServicePrice) || 0;
+
       let totalPrice = roomPrice + roomServicePrice;
 
       if (totalPrice <= 0) {
@@ -203,8 +208,9 @@
 
           // 결제 정보 서버에 전송
           var paymentDTO = {
-            roomPrice: totalPrice,
+            roomPrice: roomPrice,
             roomServicePrice: roomServicePrice,
+            totalPrice: totalPrice,
             memberId: row.querySelector(".payBy")?.textContent?.trim() || "구매자", // 예약한 멤버의 ID
             reservationId: reservationId,
             roomId: roomId
@@ -237,8 +243,9 @@
 
           // 결제 정보 서버에 전송
           var paymentDTO = {
-            roomPrice: totalPrice,
+            roomPrice: roomPrice,
             roomServicePrice: roomServicePrice,
+            totalPrice: totalPrice,
             memberId: row.querySelector(".payBy")?.textContent?.trim() || "구매자", // 예약한 멤버의 ID
             reservationId: reservationId,
             roomId: roomId
