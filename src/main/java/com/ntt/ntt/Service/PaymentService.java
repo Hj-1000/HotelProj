@@ -31,24 +31,42 @@ public class PaymentService {
     // 결제 정보 저장 메소드
     public Payment savePayment(PaymentDTO paymentDTO) {
         // 해당 ID로 Member, Room, Reservation 엔티티를 조회
-        Member member = memberRepository.findById(paymentDTO.getMemberId()).orElseThrow(() -> new RuntimeException("Member not found"));
-        Room room = roomRepository.findById(paymentDTO.getRoomId()).orElseThrow(() -> new RuntimeException("Room not found"));
-        Reservation reservation = reservationRepository.findById(paymentDTO.getReservationId()).orElseThrow(() -> new RuntimeException("Reservation not found"));
+        Member member = memberRepository.findById(paymentDTO.getMemberId())
+                .orElseThrow(() -> new RuntimeException("Member not found"));
+        Room room = roomRepository.findById(paymentDTO.getRoomId())
+                .orElseThrow(() -> new RuntimeException("Room not found"));
+        Reservation reservation = reservationRepository.findById(paymentDTO.getReservationId())
+                .orElseThrow(() -> new RuntimeException("Reservation not found"));
 
-        // Payment 엔티티에 값 설정
-        Payment payment = new Payment();
-        payment.setRoomPrice(paymentDTO.getRoomPrice());
-        payment.setRoomServicePrice(paymentDTO.getRoomServicePrice());
-        payment.setTotalPrice(paymentDTO.getTotalPrice());
-        payment.setMember(member);
-        payment.setRoomId(room);
-        payment.setReservationId(reservation);
-        payment.setRegDate(LocalDateTime.now());
-        payment.setModDate(LocalDateTime.now());
+        // 기존 결제 정보 조회 (reservationId로 조회)
+        Payment existingPayment = paymentRepository.findByReservation(reservation);
 
-        // Payment 엔티티 저장
-        paymentRepository.save(payment);
-        return payment;
+        if (existingPayment != null) {
+            // 기존 결제 정보가 있으면 새로운 값을 기존 값에 더함
+            existingPayment.setRoomPrice(paymentDTO.getRoomPrice());
+            existingPayment.setRoomServicePrice(existingPayment.getRoomServicePrice() + paymentDTO.getRoomServicePrice()); // 기존값 + 새로운값
+            existingPayment.setTotalPrice(paymentDTO.getTotalPrice());
+            existingPayment.setModDate(LocalDateTime.now());
+
+            // 업데이트 후 저장
+            paymentRepository.save(existingPayment);
+            return existingPayment;
+        } else {
+            // 기존 결제 정보가 없으면 새로 결제 정보 저장
+            Payment payment = new Payment();
+            payment.setRoomPrice(paymentDTO.getRoomPrice());
+            payment.setRoomServicePrice(paymentDTO.getRoomServicePrice());
+            payment.setTotalPrice(paymentDTO.getTotalPrice());
+            payment.setMember(member);
+            payment.setRoom(room);
+            payment.setReservation(reservation);
+            payment.setRegDate(LocalDateTime.now());
+            payment.setModDate(LocalDateTime.now());
+
+            // 새로운 결제 정보 저장
+            paymentRepository.save(payment);
+            return payment;
+        }
     }
 }
 

@@ -55,6 +55,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
     @Query("SELECT r FROM Reservation r WHERE r.reservationStatus = '취소 완료' AND r.cancelConfirmedAt <= :threshold")
     List<Reservation> findReservationsForDeletion(@Param("threshold") LocalDateTime threshold);
 
-
+    // 결제 정보 조회
+    @Query("SELECT r FROM Reservation r LEFT JOIN FETCH r.payments WHERE r.member.memberId = :memberId")
+    Page<Reservation> findAllByMember_MemberIdWithPayments(Integer memberId, Pageable pageable);
 
 }

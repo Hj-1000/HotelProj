@@ -25,14 +25,14 @@ public class Payment extends BaseEntity {
     private Integer totalPrice; // 총 결제금액
 
     @ManyToOne(fetch = FetchType.LAZY) // Member와 Many-to-One 관계
-    @JoinColumn(name = "memberId")
+    @JoinColumn(name = "member_id")
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY) // Member와 Many-to-One 관계
-    @JoinColumn(name = "roomId")
-    private Room roomId; // 객실 ID
+    @JoinColumn(name = "room_id")
+    private Room room; // 객실 ID
 
     @ManyToOne(fetch = FetchType.LAZY) // Member와 Many-to-One 관계
-    @JoinColumn(name = "reservationId")
-    private Reservation reservationId;
+    @JoinColumn(name = "reservation_id")
+    private Reservation reservation;
 }

@@ -1,5 +1,6 @@
 package com.ntt.ntt.DTO;
 
+import com.ntt.ntt.Entity.Payment;
 import com.ntt.ntt.Entity.Reservation;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -47,6 +48,11 @@ public class ReservationDTO {
     // 남은 시간(초 단위)
     private Long timeRemaining;
 
+    // Payment 정보 추가
+    private Integer roomPrice;
+    private Integer roomServicePrice;
+    private Integer paymentTotalPrice;
+
     private static Integer calculateTotalServiceOrderPrice(Reservation reservation) {
         return 0; // 기본값을 0으로 설정 (추후 로직을 추가 가능)
     }
@@ -72,6 +78,18 @@ public class ReservationDTO {
 
         Integer totalServiceOrderPrice = calculateTotalServiceOrderPrice(reservation);
 
+        // 결제 정보 (Payment) 추가
+        Integer roomPrice = 0;
+        Integer roomServicePrice = 0;
+        Integer paymentTotalPrice = 0;
+
+        if (reservation.getPayments() != null && !reservation.getPayments().isEmpty()) {
+            Payment payment = reservation.getPayments().get(0); // 첫 번째 결제 정보
+            roomPrice = payment.getRoomPrice();
+            roomServicePrice = payment.getRoomServicePrice();
+            paymentTotalPrice = payment.getTotalPrice();
+        }
+
         log.info("[fromEntity] 변환 - reservationId={}, cancelConfirmedAt={}, remainingTime={}, totalServiceOrderPrice={}",
                 reservation.getReservationId(), cancelConfirmedTime, remainingTime, totalServiceOrderPrice);
 
@@ -94,7 +112,10 @@ public class ReservationDTO {
                 reservation.getDayCount(),
                 reservation.getCount(),
                 cancelConfirmedTime,
-                remainingTime
+                remainingTime,
+                roomPrice,
+                roomServicePrice,
+                paymentTotalPrice
         );
     }
 }
