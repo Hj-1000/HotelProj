@@ -83,7 +83,7 @@ public class CompanyService {
 
 
     //목록
-    public Page<CompanyDTO> list(Pageable page, String keyword, String searchType) {
+    public Page<CompanyDTO> listByAdmin(Pageable page, String keyword, String searchType) {
 
         // 1. 페이지 정보 재가공
         int currentPage = page.getPageNumber() - 1;
@@ -135,6 +135,42 @@ public class CompanyService {
             companyDTO.setHotelCount(hotelCount);
 
             companyDTO.setCompanyImgDTOList(imgDTOList); // 이미지 DTO 리스트 설정
+            return companyDTO;
+        });
+
+        return companyDTOS;
+    }
+
+
+    //목록
+    public Page<CompanyDTO> listByChief(Pageable pageable, String keyword, String searchType, Integer memberId) {
+        int currentPage = pageable.getPageNumber() - 1;
+        int pageSize = 10;
+        Pageable adjustedPageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.ASC, "companyId"));
+
+        Page<Company> companies;
+
+        if (keyword != null && !keyword.isEmpty()) {
+            String keywordLike = "%" + keyword + "%";
+
+            if ("name".equals(searchType)) {
+                companies = companyRepository.findByCompanyNameLikeAndMember_MemberId(keywordLike, memberId, adjustedPageable);
+            } else if ("manager".equals(searchType)) {
+                companies = companyRepository.findByCompanyManagerLikeAndMember_MemberId(keywordLike, memberId, adjustedPageable);
+            } else if ("both".equals(searchType)) {
+                companies = companyRepository.findByCompanyNameLikeOrCompanyManagerLikeAndMember_MemberId(keywordLike, keywordLike, memberId, adjustedPageable);
+            } else {
+                companies = companyRepository.findByCompanyNameLikeOrCompanyManagerLikeAndMember_MemberId(keywordLike, keywordLike, memberId, adjustedPageable);
+            }
+        } else {
+            companies = companyRepository.findByMember_MemberId(memberId, adjustedPageable);
+        }
+
+        // Company -> CompanyDTO 변환 후 호텔 수 설정
+        Page<CompanyDTO> companyDTOS = companies.map(entity -> {
+            CompanyDTO companyDTO = modelMapper.map(entity, CompanyDTO.class);
+            int hotelCount = hotelRepository.countByCompany_CompanyId(companyDTO.getCompanyId());
+            companyDTO.setHotelCount(hotelCount);
             return companyDTO;
         });
 

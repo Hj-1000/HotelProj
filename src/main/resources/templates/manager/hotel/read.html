@@ -170,10 +170,10 @@
                         <thead class="table-head">
                         <tr>
                             <th style="width: 20%"></th>
-                            <th style="width: 10%"></th>
+                            <th style="width: 15%"></th>
                             <th style="width: 30%"></th>
                             <th style="width: 10%"></th>
-                            <th style="width: 30%"></th>
+                            <th style="width: 25%"></th>
                         </tr>
                         </thead>
                         <tbody>
@@ -226,9 +226,10 @@
 
             <!-- 버튼 -->
             <div class="text-end mt-3">
-                <a class="btn btn-primary" style="background-color: black" th:href="@{/manager/hotel/list(companyId=${hotelDTO.companyId})}">목록</a>
+                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="btn btn-primary" style="background-color: black" href="/admin/hotel/list">전체 지사</a> <!--관리자용-->
+                <a class="btn btn-primary" style="background-color: black" th:href="@{/manager/hotel/list(companyId=${hotelDTO.companyId})}">지사 관리</a>
                 <a class="btn btn-warning" th:href="@{/manager/roomService/category/list(hotelId=${hotelDTO.hotelId})}">룸서비스</a>
-                <button type="button" class="btn btn-success modalBtn">객실 등록</button>
+                <a href="/manager/room/register" class="btn btn-success modalBtn">객실 등록</a>
                 <a class="btn btn-primary" th:href="@{/manager/hotel/update(hotelId=${hotelDTO.hotelId})}">수정</a>
                 <a class="btn btn-danger" th:href="@{/manager/hotel/delete(hotelId=${hotelDTO.hotelId})}">삭제</a>
             </div>

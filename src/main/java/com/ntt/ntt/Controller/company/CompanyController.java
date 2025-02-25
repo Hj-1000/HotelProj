@@ -3,12 +3,15 @@ package com.ntt.ntt.Controller.company;
 import com.ntt.ntt.DTO.CompanyDTO;
 import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.HotelDTO;
+import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Service.ImageService;
+import com.ntt.ntt.Service.MemberService;
 import com.ntt.ntt.Service.company.CompanyService;
 import com.ntt.ntt.Service.hotel.HotelService;
 import com.ntt.ntt.Util.PaginationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -33,15 +36,15 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/company")
+@RequestMapping("/chief/company")
 @AllArgsConstructor
 @Log4j2
 public class CompanyController {
 
     private final CompanyService companyService;
     private final PaginationUtil paginationUtil;
-    private final HotelService hotelService;
     private final ImageService imageService;
+    private final MemberService memberService;
 
     //등록폼
     @Operation(summary = "관리자용 본사 등록 폼", description = "본사 등록 폼 페이지로 이동한다.")
@@ -74,15 +77,24 @@ public class CompanyController {
     }
 
     //목록
-    @Operation(summary = "관리자용 본사 목록", description = "본사 목록 페이지로 이동한다.")
+    @Operation(summary = "호텔장 용 본사 목록", description = "본사 목록 페이지로 이동한다.")
     @GetMapping("/list")
     public String list(@RequestParam(required = false) String keyword,
                        @RequestParam(required = false) String searchType,
                        @PageableDefault(page = 1) Pageable page,
-                       Model model) {
+                       Model model,
+                       Authentication authentication) {
+
+        // 로그인한 사용자의 memberId를 가져오는 방법
+        Integer memberId = getLoggedInMemberId(authentication); // 로그인한 사용자의 memberId를 가져오는 메서드 호출
+
+        // memberId가 null이라면 로그인 실패 처리 (옵션)
+        if (memberId == null) {
+            return "redirect:/login"; // 로그인 페이지로 리다이렉트
+        }
 
         // 검색 기능을 포함한 서비스 호출
-        Page<CompanyDTO> companyDTOS = companyService.list(page, keyword, searchType);
+        Page<CompanyDTO> companyDTOS = companyService.listByChief(page, keyword, searchType, memberId);
 
         // 페이지 정보 계산
         Map<String, Integer> pageInfo = paginationUtil.pagination(companyDTOS);
@@ -112,24 +124,32 @@ public class CompanyController {
         return "/chief/company/list";
     }
 
-//    @GetMapping("/read")
-//    public String read(@RequestParam Integer companyId, Model model, RedirectAttributes redirectAttributes) {
-//        try {
-//            // 서비스에서 CompanyDTO 객체를 받아옴
-//            CompanyDTO companyDTO = companyService.read(companyId);
-//            // companyDTO를 모델에 추가
-//            model.addAttribute("companyDTO", companyDTO);
-//            // "read" 뷰로 이동
-//            return "/chief/company/read";
-//
-//        } catch (NullPointerException e) {
-//            redirectAttributes.addFlashAttribute("message", "해당 본사 정보를 찾을 수 없습니다.");
-//            return "redirect:/company/list";  // 회사 정보가 없을 경우 목록으로 이동
-//        } catch (Exception e) {
-//            redirectAttributes.addFlashAttribute("message", "서버 오류가 발생했습니다.");
-//            return "redirect:/company/list";  // 기타 예외 처리
-//        }
-//    }
+    // 로그인한 사용자의 memberId를 가져오는 메서드
+    private Integer getLoggedInMemberId(Authentication authentication) {
+        // authentication이 null이 아니고, 인증된 사용자가 있는지 확인
+        if (authentication == null || authentication.getPrincipal() == null) {
+            throw new RuntimeException("로그인된 사용자가 없습니다.");
+        }
+
+        // authentication.getName()을 memberName으로 대체
+        String memberEmail = authentication.getName();
+
+        // memberEmail이 null이거나 비어있을 경우 처리
+        if (memberEmail == null || memberEmail.isEmpty()) {
+            throw new RuntimeException("회원 정보가 존재하지 않습니다.");
+        }
+
+        // memberName을 통해 Member 조회
+        Member member = memberService.findMemberByMemberEmail(memberEmail);
+
+        // member가 null인 경우 처리
+        if (member == null) {
+            throw new RuntimeException("회원 정보가 존재하지 않습니다.");
+        }
+
+        return member.getMemberId(); // memberId 반환
+    }
+
 
 
     //읽기

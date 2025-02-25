@@ -8,7 +8,6 @@
     <title>NTT호텔 - 본사관리</title>
     <style>
         .custom-link {
-            color: black;
             text-decoration: none;
             margin-bottom: 10px;
             display: inline-block;
@@ -79,11 +78,11 @@
     <div class="container-fluid mt-4">
         <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
         <a href="#" class="custom-link"><span>호텔관리</span></a> /
-        <a href="/chief/company/list" class="custom-link"><span>호텔본사관리</span></a>
+        <a href="/admin/company/list" class="custom-link"><span>호텔본사관리</span></a>
         <h2 class="mb-3">호텔 본사 관리</h2>
         <!-- 검색 영역 -->
         <div class="card p-4 mb-4">
-            <form action="/chief/company/list" method="get">
+            <form action="/admin/company/list" method="get">
                 <div class="row g-3 align-items-center">
                     <h5 class="card-title">본사 찾기</h5>
                     <div class="col-md-6">
@@ -150,7 +149,7 @@
                                 <a th:href="@{/chief/company/update(companyId=${data.companyId})}"  class="btn btn-warning btn-sm">수정</a>
 
                                 <!--삭제 버튼 누르면 해당 본사 삭제됨-->
-                                <a th:href="@{/chief/company/delete(companyId=${data.companyId})}" style="text-decoration: none; color: black" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')">삭제</a>
+                                <a th:href="@{/chief/company/delete(companyId=${data.companyId})}" style="text-decoration: none" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')">삭제</a>
                             </td>
                         </tr>
                     </th:block>
@@ -175,24 +174,24 @@
                 <div class="d-flex justify-content-center">
                     <ul class="pagination">
                         <li class="page-item" th:unless="${pageInfo.startPage == 1}">
-                            <a class="page-link" th:href="@{/chief/company/list(page=1)}">시작</a>
+                            <a class="page-link" th:href="@{/admin/company/list(page=1)}">시작</a>
                         </li>
                         <li class="page-item" th:unless="${pageInfo.currentPage == 1}">
-                            <a class="page-link" th:href="@{/chief/company/list(page=${pageInfo.prevPage})}">이전</a>
+                            <a class="page-link" th:href="@{/admin/company/list(page=${pageInfo.prevPage})}">이전</a>
                         </li>
                         <th:block th:each="num : ${#numbers.sequence(pageInfo.startPage, pageInfo.endPage, 1)}">
                             <li class="page-item" th:unless="${num == pageInfo.currentPage}">
-                                <a class="page-link" th:href="@{/chief/company/list(page=${num})}" th:text="${num}">1</a>
+                                <a class="page-link" th:href="@{/admin/company/list(page=${num})}" th:text="${num}">1</a>
                             </li>
                             <li class="page-item active" th:if="${num == pageInfo.currentPage}">
-                                <a class="page-link" th:href="@{/chief/company/list(page=${num})}" th:text="${num}">[[${num}]]</a>
+                                <a class="page-link" th:href="@{/admin/company/list(page=${num})}" th:text="${num}">[[${num}]]</a>
                             </li>
                         </th:block>
                         <li class="page-item" th:unless="${pageInfo.currentPage >= pageInfo.lastPage}">
-                            <a class="page-link" th:href="@{/chief/company/list(page=${pageInfo.nextPage})}">다음</a>
+                            <a class="page-link" th:href="@{/admin/company/list(page=${pageInfo.nextPage})}">다음</a>
                         </li>
                         <li class="page-item" th:unless="${pageInfo.endPage == pageInfo.lastPage}">
-                            <a class="page-link" th:href="@{/chief/company/list(page=${pageInfo.lastPage})}">끝</a>
+                            <a class="page-link" th:href="@{/admin/company/list(page=${pageInfo.lastPage})}">끝</a>
                         </li>
                     </ul>
                 </div>

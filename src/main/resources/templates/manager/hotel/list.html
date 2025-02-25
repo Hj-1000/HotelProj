@@ -140,7 +140,7 @@
                             </td>
                             <td th:text="${data.companyName}" class="align-middle text-center">본사명</td>
                             <td class="align-middle text-center">
-                                <a th:href="@{/manager/hotel/read(hotelId=${data.hotelId})}" style="text-decoration: none" th:text="${data.hotelName}" >지사명</a>
+                                <a th:href="@{/manager/hotel/read(hotelId=${data.hotelId})}" style="text-decoration: none; color: black" th:text="${data.hotelName}" >지사명</a>
                             </td>
                             <td th:text="${data.hotelAddress}" class="align-middle text-center">주소</td>
                             <td th:text="${data.hotelPhone}" class="align-middle text-center">전화번호</td>
@@ -151,7 +151,7 @@
                             <td class="align-middle text-center">
                                 <a th:href="@{/manager/hotel/read(hotelId=${data.hotelId})}" class="btn btn-info btn-sm">보기</a>
                                 <a th:href="@{/manager/hotel/update(hotelId=${data.hotelId})}"  class="btn btn-warning btn-sm">수정</a>
-                                <a th:href="@{/manager/hotel/delete(hotelId=${data.hotelId})}" style="text-decoration: none" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')">삭제</a>
+                                <a th:href="@{/manager/hotel/delete(hotelId=${data.hotelId})}" style="text-decoration: none; color: black" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')">삭제</a>
                             </td>
                         </tr>
                     </th:block>

@@ -79,7 +79,7 @@ public class HotelManagerController {
 
 
     //목록
-    @Operation(summary = "관리자용 호텔 목록", description = "전체 호텔 목록 페이지로 이동한다.")
+    @Operation(summary = "호텔장 호텔 목록", description = "본사에 소속 된 목록 페이지로 이동한다.")
     @GetMapping("/list")
     public String list(@RequestParam(required = false) Integer companyId,
                        @RequestParam(required = false) String keyword,
