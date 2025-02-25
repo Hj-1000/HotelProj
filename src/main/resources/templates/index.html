@@ -11,6 +11,162 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" th:href="@{/css/user.css}">
     <link rel="stylesheet" th:href="@{/css/map.css}">
+    <link rel="stylesheet" th:href="@{/css/hotelList.css}">
+    <link rel="stylesheet" th:href="@{/css/roomList.css}">
+
+    <!--jquery - ajax 사용을 위해 추가 2025-02-25-->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script th:inline="javascript">
+
+        $(document).ready(function() {
+            // 세션에서 message 값을 가져옴
+            var message = [[${message}]];
+
+            // message가 null이 아니면 알림창을 띄우고 세션에서 삭제
+            if (message !== null && message !== '') {
+                alert(message);
+            }
+
+            const priceElement = document.getElementById("formattedPrice");
+            if (priceElement && priceElement.innerText) {
+                const price = parseInt(priceElement.innerText, 10);
+                if (!isNaN(price)) {
+                    priceElement.innerText = price.toLocaleString();
+                }
+            }
+
+            $(".delBtn").hide();
+
+            $(".likeBtn").each(function () {
+                var hotelId = $(this).data("hotel-id");
+
+                $.ajax({
+                    url: "/like/check/" + hotelId,
+                    type: "GET",
+                    success: function (isLiked) {
+                        console.log("찜 여부 확인 결과:", hotelId, isLiked);
+
+                        var likeBtn = $(".likeBtn[data-hotel-id='" + hotelId + "']");
+                        var delBtn = $(".delBtn[data-hotel-id='" + hotelId + "']");
+
+                        if (isLiked) {
+                            likeBtn.hide();
+                            delBtn.show();
+                        } else {
+                            likeBtn.show();
+                            delBtn.hide();
+                        }
+                    },
+                    error: function (xhr) {
+                        console.error("찜 여부 확인 AJAX 요청 실패:", xhr.status, xhr.responseText);
+                    }
+                });
+            });
+
+            $(document).on("click", ".likeBtn", function (event) {
+                var hotelId = $(this).data("hotel-id");
+
+                console.log("찜 버튼 클릭됨! 호텔 ID:", hotelId);
+
+                $.ajax({
+                    url: "/like/register",
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({ hotelId: hotelId }),
+                    beforeSend: function () {
+                        console.log("AJAX 요청 전송 중...");
+                    },
+                    success: function () {
+                        console.log("찜 등록 성공!");
+                        alert("해당 호텔이 스크랩 되었습니다.");
+                        location.reload();
+                    },
+                    error: function (xhr) {
+                        console.error("찜 등록 실패:", xhr.status, xhr.responseText);
+                        alert("찜 등록 실패: " + xhr.responseText);
+                    }
+                });
+            });
+
+
+            // 현재 선택된 버튼을 추적하는 변수
+            var currentButton = null;
+
+            function changeButtonClass(button) {
+                if (currentButton) {
+                    currentButton.classList.remove('btn-dark');
+                    currentButton.classList.add('btn-light');
+                }
+
+                button.classList.remove('btn-light');
+                button.classList.add('btn-dark');
+
+                currentButton = button;
+            }
+
+        });
+
+        function delLike(btn) {
+            var hotelId = $(btn).data("hotel-id");
+            console.log("호텔 ID:", hotelId);
+
+            if (!hotelId) {
+                alert("삭제할 호텔 ID가 없습니다.");
+                return;
+            }
+
+            var paramData = { hotelId: hotelId };
+
+            $.ajax({
+                url: "/like/delete",
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(paramData),
+                success: function () {
+                    alert("스크랩이 취소 되었습니다.");
+                    $(btn).hide();
+                    $(btn).siblings(".likeBtn").show();
+                    location.reload();
+                },
+                error: function (xhr) {
+                    console.error("삭제 실패:", xhr.responseText);
+                    alert("삭제 실패: " + xhr.responseText);
+                }
+            });
+        }
+
+        /*function addLike(btn) {
+            var hotelId = $(btn).data("hotel-id");
+
+            console.log("찜 버튼 클릭됨! 호텔 ID:", hotelId);
+
+            $.ajax({
+                url: "/like/register",
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ hotelId: hotelId }),
+                beforeSend: function () {
+                    console.log("AJAX 요청 전송 중...");
+                },
+                success: function () {
+                    console.log("찜 등록 성공!");
+                    alert("해당 호텔이 스크랩 되었습니다.");
+                    location.reload();
+                },
+                error: function (xhr) {
+                    console.error("찜 등록 실패:", xhr.status, xhr.responseText);
+                    alert("찜 등록 실패: " + xhr.responseText);
+                }
+            });
+        }*/
+
+
+
+
+
+    </script>
+
+
 </head>
 <body>
 <div th:replace="~{fragments/header::header}"></div>
@@ -64,55 +220,69 @@
         <div class="container">
             <!-- 섹션 제목과 More 버튼 배치 -->
             <div class="d-flex justify-content-between align-items-center mb-5 recommended-wrap">
-                <h2 class="text-center flex-grow-1">Recommended room</h2>
-                <a href="/roomList" class="btn btn-outline-primary ms-auto more-btn">More</a>
+                <h2 class="text-center flex-grow-1">Recommended Hotel</h2>
+                <a href="/hotel/list" class="btn btn-outline-primary ms-auto more-btn">More</a>
             </div>
 
-            <!-- 추천 방이 있을 경우 -->
-            <div th:if="${recommendedRooms != null and !#lists.isEmpty(recommendedRooms)}" class="row">
-                <div class="col-md-3" th:each="room : ${recommendedRooms}">
+            <!-- 추천 호텔이 있을 경우 -->
+            <div th:if="${recommendedHotels != null and !#lists.isEmpty(recommendedHotels)}" class="row">
+                <div class="col-md-3" th:each="hotel : ${recommendedHotels}">
                     <div class="card image-hover-container">
                         <div class="image-container">
                             <!-- 이미지 -->
-                            <img th:if="${!#lists.isEmpty(room.roomImageDTOList)}"
-                                 th:src="@{'/upload/' + ${room.roomImageDTOList[0].imagePath}}"
+                            <img th:if="${!#lists.isEmpty(hotel.hotelImgDTOList)}"
+                                 th:src="@{'/upload/' + ${hotel.hotelImgDTOList[0].imagePath}}"
                                  class="card-img-top"
-                                 th:alt="${room.roomName}" />
+                                 th:alt="${hotel.hotelName}" />
                             <!-- 이미지가 없을 경우 기본 이미지 -->
-                            <img th:if="${#lists.isEmpty(room.roomImageDTOList)}"
+                            <img th:if="${#lists.isEmpty(hotel.hotelImgDTOList)}"
                                  src="/img/default_img.jpg"
                                  class="card-img-top"
                                  alt="Default Room Image" />
-                            <!-- Hover 시 나타나는 예약 버튼 -->
+                            <!-- Hover 시 나타나는 자세히보기 버튼 -->
                             <div class="hover-overlay">
-                                <a href="#" class="btn btn-hover" onclick="showComingSoonAlert(event)">자세히 보기</a>
+                                <a th:href="@{/hotel/read(hotelId=${hotel.hotelId})}" class="btn btn-hover" >자세히 보기</a>
                             </div>
                         </div>
-                        <div class="card-body text-left">
-                            <!-- 상태 버튼 -->
-                            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-                                <span th:text="(${room.roomStatus} ? '예약 가능' : '예약 불가')"
-                                      class="badge"
-                                      th:classappend="${room.roomStatus} ? 'bg-success text-white' : 'bg-danger text-white'">
-                                </span>
-                                <!-- 객실 타입 버튼 -->
-                                <span th:text="${room.roomType}"
-                                      class="badge bg-dark text-white">
-                                </span>
+                        <div class="card-body text-left" style="margin-left: -5px">
+                            <!-- 지역버튼 -->
+                            <div style="display: flex; gap: 5px;">
+                                <a th:href="@{'/hotel/list?searchType=location&keyword=' + ${hotel.hotelLocation}}" style="text-decoration: none">
+                                    <div class="badge bg-secondary" th:text="${hotel.hotelLocation}">지역</div>
+                                </a>
                             </div>
-                            <h5 th:text="${room.roomName}" class="card-title">객실 이름</h5>
-                            <p th:text="'예약 기간: ' + ${room.reservationStart} + ' ~ ' + ${room.reservationEnd}" class="card-text">예약 기간</p>
-                            <p th:text="'숙박 기간: ' + ${room.stayStart} + ' ~ ' + ${room.stayEnd}" class="card-text">숙박 기간</p>
-                            <p th:text=" ${room.roomInfo}" class="card-text room-description"></p>
-                            <p th:text="${room.formattedRoomPrice} + ' ' " class="card-text money"> 0 KRW</p>
+
+                            <!-- 상태 버튼 -->
+                            <h4 th:text="${hotel.hotelName}" class="card-title mb-2"></h4>
+                            <p th:text="'체크인-체크아웃: ' + ${hotel.hotelCheckIn} + '시 ~ ' + ${hotel.hotelCheckOut} + '시'" class="card-text"></p>
+                            <input type="hidden" class="hotelId" th:value="${hotel.hotelId}">
+                            <div class="room-actions" style="margin-top: -10px">
+
+                                <p class="room-price mb-0"
+                                   th:text="${hotel.CheapestRoomPrice != null ? hotel.CheapestRoomPrice + ' KRW' + '~' : '가격 미정'}"></p>
+
+                                <button class="btn btn-outline-danger likeBtn"  th:data-hotel-id="${hotel.hotelId}" onclick="addLike()" style="width: 50px; height: 50px">
+                                    <!--<i class="fa-regular fa-heart"></i>-->
+
+                                    <i class="bi bi-heart" style="margin: auto; text-align: center"></i>
+
+                                </button>
+                                <button class="btn btn-outline-danger delBtn"
+                                        th:data-hotel-id="${hotel.hotelId}"
+                                        onclick="delLike(this)"
+                                        style="display: none; width: 50px; height: 50px">
+                                    <i class="bi bi-heart-fill" style="margin: auto; text-align: center"></i>
+                                </button>
+
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- 추천 방이 없을 경우 -->
-            <div th:if="${recommendedRooms == null or #lists.isEmpty(recommendedRooms)}" class="text-center mt-4">
-                <p class="text-muted">추천 방 목록이 없습니다.</p>
+            <div th:if="${recommendedHotels == null or #lists.isEmpty(recommendedHotels)}" class="text-center mt-4">
+                <p class="text-muted">추천 호텔이 없습니다.</p>
             </div>
         </div>
     </section>
@@ -321,10 +491,10 @@
 
 <script>
     /* 자세히 보기 클릭 시 알림창 띄우기(임시로 넣어둠 나중에 지우기)*/
-    function showComingSoonAlert(event) {
+    /*function showComingSoonAlert(event) {
         event.preventDefault(); // 기본 링크 이동 방지
         alert("아직 준비중인 서비스입니다.");
-    }
+    }*/
 </script>
 
 </body>

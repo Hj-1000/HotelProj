@@ -4,6 +4,9 @@ import com.ntt.ntt.DTO.CompanyDTO;
 import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.ImageDTO;
 import com.ntt.ntt.DTO.RoomDTO;
+import com.ntt.ntt.Entity.Hotel;
+import com.ntt.ntt.Entity.Room;
+import com.ntt.ntt.Repository.hotel.HotelRepository;
 import com.ntt.ntt.Service.RoomService;
 import com.ntt.ntt.Service.hotel.HotelService;
 import com.ntt.ntt.Util.PaginationUtil;
@@ -13,6 +16,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,6 +26,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/hotel")
@@ -32,6 +37,7 @@ public class HotelController {
     private final HotelService hotelService;
     private final RoomService roomService;
     private final PaginationUtil paginationUtil;
+    private final HotelRepository hotelRepository;
 
 
     //호텔목록
