@@ -76,7 +76,7 @@ public class ServiceOrderManagerController {
     }
 
     // 주문 삭제
-    @PostMapping("/delete")
+    @GetMapping("/delete")
     public String orderDelete(@RequestParam("serviceOrderId") Integer serviceOrderId, RedirectAttributes redirectAttributes) {
         serviceOrderService.deleteOrder(serviceOrderId);
         redirectAttributes.addFlashAttribute("message", "주문이 삭제되었습니다.");

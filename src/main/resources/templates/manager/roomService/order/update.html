@@ -53,22 +53,11 @@
       <!-- 수정, 삭제 버튼 -->
       <div class="text-end">
         <button type="submit" class="btn btn-primary">수정</button>
-        <button type="button" class="btn btn-danger" onclick="confirmDelete()">삭제</button>
+        <!-- 삭제 버튼 -->
+        <a th:href="@{/manager/order/delete(serviceOrderId=${serviceOrderHistoryDTO.serviceOrderId})}" class="btn btn-danger">삭제</a>
       </div>
-    </form>
-
-    <form id="deleteForm" th:action="@{/manager/order/delete}" method="post">
-      <input type="hidden" name="serviceOrderId" th:value="${serviceOrderHistoryDTO.serviceOrderId}">
     </form>
   </div>
 </div>
-
-<script>
-  function confirmDelete() {
-    if (confirm('정말로 이 주문을 삭제하시겠습니까?')) {
-      document.getElementById('deleteForm').submit();
-    }
-  }
-</script>
 </body>
 </html>

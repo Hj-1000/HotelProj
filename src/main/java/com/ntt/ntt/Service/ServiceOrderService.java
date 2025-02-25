@@ -353,10 +353,12 @@ public class ServiceOrderService {
 
     // 주문 삭제
     public void deleteOrder(Integer serviceOrderId) {
+        log.info("삭제하려고 서비스까지 들어온 serviceOrderId: " + serviceOrderId);
         ServiceOrder serviceOrder = serviceOrderRepository.findById(serviceOrderId)
                 .orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다. ID: " + serviceOrderId));
 
         serviceOrderRepository.delete(serviceOrder);
+        log.info("삭제 처리 후 serviceOrderId: " + serviceOrderId);
     }
 
 }
