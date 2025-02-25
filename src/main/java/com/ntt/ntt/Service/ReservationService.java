@@ -274,7 +274,7 @@ public class ReservationService {
     public Page<ReservationDTO> getUserReservations(Integer memberId, Pageable pageable) {
         LocalDateTime now = LocalDateTime.now();
 
-        Page<Reservation> reservationsPage = reservationRepository.findAllByMember_MemberId(memberId, pageable);
+        Page<Reservation> reservationsPage = reservationRepository.findAllByMember_MemberIdWithPayments(memberId, pageable);
         log.info("조회된 예약 개수: {}", reservationsPage.getTotalElements());
 
         return reservationsPage.map(reservation -> {
