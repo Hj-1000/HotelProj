@@ -84,14 +84,6 @@ public class NotificationService {
 
 
 
-    // ✅ 읽지 않은 댓글 알림 개수 조회
-    public long getUnreadReplyNotificationCount() {
-        return notificationRepository.findAll()
-                .stream()
-                .filter(n -> n.getNotificationMessage().contains("댓글") && !n.isRead()) // 댓글 알림 + 읽지 않은 알림만
-                .count();
-    }
-
 
     // 알림 읽음 처리
     @Transactional

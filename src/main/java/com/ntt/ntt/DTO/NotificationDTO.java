@@ -31,6 +31,8 @@ public class NotificationDTO {
         // Qna 객체가 null이 아니면 qnaId 설정
         if (notification.getQna() != null) {
             dto.setQnaId(notification.getQna().getQnaId());
+        } else {
+            dto.setQnaId(null); // 명시적으로 설정
         }
 
         return dto;
