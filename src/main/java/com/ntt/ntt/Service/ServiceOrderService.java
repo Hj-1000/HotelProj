@@ -4,10 +4,10 @@ import com.ntt.ntt.Constant.ServiceOrderStatus;
 import com.ntt.ntt.DTO.*;
 import com.ntt.ntt.Entity.*;
 import com.ntt.ntt.Repository.*;
-import groovy.util.logging.Log4j2;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -24,12 +24,14 @@ import java.util.List;
 public class ServiceOrderService {
 
     private final ServiceOrderRepository serviceOrderRepository;
+    private final ServiceOrderItemRepository serviceOrderItemRepository;
     private final ServiceMenuRepository serviceMenuRepository;
     private final MemberRepository memberRepository;
     private final ReservationRepository reservationRepository;
     private final ModelMapper modelMapper;
 
 
+    //-----------------------------------------------유저용------------------------------
     //주문 ServiceOrder, ServiceOrderItem
     //위의 내용이 있는 주문 리스트 필요
     //단 주문 목록이 들어있는 경우 누구의 주문인지 알기 위해 email을 받는다.
@@ -71,7 +73,7 @@ public class ServiceOrderService {
         }
     }
 
-    public Integer createOrder(ServiceOrderDTO serviceOrderDTO, String memberEmail , Integer reservationId) {
+    public Integer createOrder(ServiceOrderDTO serviceOrderDTO, String memberEmail, Integer reservationId) {
         //현재 선택한 serviceMenuId 는 serviceOrderDTO로 들어온다. 이 값으로 판매중인 serviceMenu Entity를 가져온다.
         ServiceMenu serviceMenu =
                 serviceMenuRepository.findById(serviceOrderDTO.getServiceMenuId()).orElseThrow(EntityNotFoundException::new);
@@ -203,18 +205,20 @@ public class ServiceOrderService {
         return new PageImpl<ServiceOrderHistoryDTO>(serviceOrderHistoryDTOList, pageable, totalCount);
     }
 
+    //------------------------------------관리자용-----------------------------------
     //관리자의 주문내역관리 페이지
 
-    public Page<ServiceOrderHistoryDTO> managerOrderList( Pageable page,String keyword, String searchType,Integer reservationId) {
+    public Page<ServiceOrderHistoryDTO> managerOrderList(Pageable page, String keyword, String searchType, Integer reservationId) {
         int currentPage = page.getPageNumber() - 1;
         int pageSize = 10;
         Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.DESC, "serviceOrderId"));
         Page<ServiceOrder> serviceOrders = null;
 
+        // 검색 조건에 따라 다른 쿼리 실행
         if (keyword != null && !keyword.isEmpty()) {
             String keywordLike = "%" + keyword + "%";
+
             if ("memberName".equals(searchType)) {
-                //멤버이름으로 검색
                 if (reservationId != null) {
                     serviceOrders = serviceOrderRepository.findByReservation_ReservationIdAndMember_MemberNameLike(reservationId, keywordLike, pageable);
                 } else {
@@ -227,15 +231,12 @@ public class ServiceOrderService {
                     serviceOrders = serviceOrderRepository.findByMember_MemberEmailLike(keywordLike, pageable);
                 }
             } else if ("roomName".equals(searchType)) {
-                // 방 이름으로 검색
                 if (reservationId != null) {
                     serviceOrders = serviceOrderRepository.findByReservation_ReservationIdAndReservation_Room_RoomNameLike(reservationId, keywordLike, pageable);
                 } else {
                     serviceOrders = serviceOrderRepository.findByReservation_Room_RoomNameLike(keywordLike, pageable);
                 }
             } else if ("orderDate".equals(searchType)) {
-                // 주문 날짜로 검색
-                // 날짜는 LocalDateTime이기 때문에, 입력된 keyword를 LocalDateTime으로 변환하여 검색
                 try {
                     LocalDateTime orderDate = LocalDateTime.parse(keyword);
                     if (reservationId != null) {
@@ -244,60 +245,118 @@ public class ServiceOrderService {
                         serviceOrders = serviceOrderRepository.findByRegDateLike(orderDate, pageable);
                     }
                 } catch (Exception e) {
-                    // 날짜 형식이 맞지 않으면 빈 페이지를 반환하거나 에러 메시지를 처리할 수 있습니다.
+                    // 날짜 형식이 잘못된 경우 빈 페이지 반환
                     serviceOrders = Page.empty();
                 }
             } else {
                 serviceOrders = serviceOrderRepository.findByReservation_ReservationId(reservationId, pageable);
             }
+        } else {
+            // keyword가 null인 경우, 단순히 reservationId로 검색
+            if (reservationId != null) {
+                serviceOrders = serviceOrderRepository.findByReservation_ReservationId(reservationId, pageable);
+            } else {
+                serviceOrders = serviceOrderRepository.findAll(pageable);
+            }
         }
-        return serviceOrders.map(entity-> {
-            ServiceOrderHistoryDTO serviceOrderHistoryDTO = modelMapper.map(entity, ServiceOrderHistoryDTO.class);
 
-            return serviceOrderHistoryDTO;
-        });
+        // DTO 변환 및 페이징 처리
+        List<ServiceOrderHistoryDTO> serviceOrderHistoryDTOList = new ArrayList<>();
+
+        for (ServiceOrder serviceOrder : serviceOrders) {
+            ServiceOrderHistoryDTO serviceOrderHistoryDTO = new ServiceOrderHistoryDTO();
+
+            // ServiceOrder -> ServiceOrderHistoryDTO 변환
+            serviceOrderHistoryDTO.setServiceOrderId(serviceOrder.getServiceOrderId());
+            serviceOrderHistoryDTO.setRegDate(serviceOrder.getRegDate());
+            serviceOrderHistoryDTO.setServiceOrderStatus(serviceOrder.getServiceOrderStatus());
+            serviceOrderHistoryDTO.setReservationDTO(modelMapper.map(serviceOrder.getReservation(), ReservationDTO.class));
+            serviceOrderHistoryDTO.setMemberDTO(modelMapper.map(serviceOrder.getMember(), MemberDTO.class));
+
+            // 서비스 주문 아이템 변환
+            List<ServiceOrderItem> serviceOrderItemList = serviceOrder.getServiceOrderItemList();
+            for (ServiceOrderItem serviceOrderItem : serviceOrderItemList) {
+                ServiceOrderItemDTO serviceOrderItemDTO = new ServiceOrderItemDTO();
+                serviceOrderItemDTO.setServiceOrderItemId(serviceOrderItem.getServiceOrderItemId());
+                serviceOrderItemDTO.setServiceMenuName(serviceOrderItem.getServiceMenu().getServiceMenuName());
+                serviceOrderItemDTO.setOrderPrice(serviceOrderItem.getOrderPrice());
+                serviceOrderItemDTO.setCount(serviceOrderItem.getCount());
+
+                // 서비스 메뉴 이미지 처리
+                List<Image> serviceMenuImageList = serviceOrderItem.getServiceMenu().getServiceMenuImageList();
+                for (Image image : serviceMenuImageList) {
+                    serviceOrderItemDTO.setImagePath(image.getImagePath());
+                }
+                serviceOrderHistoryDTO.addServiceOrderItemDTO(serviceOrderItemDTO);
+            }
+
+            serviceOrderHistoryDTOList.add(serviceOrderHistoryDTO);
+        }
+
+        // PageImpl을 사용하여 DTO 목록을 반환
+        return new PageImpl<>(serviceOrderHistoryDTOList, pageable, serviceOrders.getTotalElements());
     }
-            //구매목록
-//        List<ServiceOrder> serviceOrderList = serviceOrderRepository.findServiceOrders(memberEmail, pageable);
-//
-//        //페이징처리를 위한 총 구매목록의 수
-//        Integer totalCount = serviceOrderRepository.totalCount(memberEmail);
-//
-//        //구매목록의 구매아이템들을 만들어주기 위한 List
-//        List<ServiceOrderHistoryDTO> serviceOrderHistoryDTOList = new ArrayList<>();
-//
-//        //EntityToDTO // 주문, 주문아이템들, 주문아이템들의 이미지
-//        for (ServiceOrder serviceOrder : serviceOrderList) {
-//            ServiceOrderHistoryDTO serviceOrderHistoryDTO = new ServiceOrderHistoryDTO();
-//
-//            serviceOrderHistoryDTO.setServiceOrderId(serviceOrder.getServiceOrderId());
-//            serviceOrderHistoryDTO.setRegDate(serviceOrder.getRegDate());
-//            serviceOrderHistoryDTO.setServiceOrderStatus(serviceOrder.getServiceOrderStatus());
-//            serviceOrderHistoryDTO.setReservationDTO(modelMapper.map(serviceOrder.getReservation(), ReservationDTO.class));
-//            serviceOrderHistoryDTO.setMemberDTO(modelMapper.map(serviceOrder.getMember(), MemberDTO.class));
-//
-//            List<ServiceOrderItem> serviceOrderItemList = serviceOrder.getServiceOrderItemList();
-//
-//            for (ServiceOrderItem serviceOrderItem : serviceOrderItemList) {
-//
-//                ServiceOrderItemDTO serviceOrderItemDTO = new ServiceOrderItemDTO();
-//                serviceOrderItemDTO.setServiceOrderItemId(serviceOrder.getServiceOrderId());
-//                serviceOrderItemDTO.setServiceMenuName(serviceOrderItem.getServiceMenu().getServiceMenuName());
-//                serviceOrderItemDTO.setOrderPrice(serviceOrderItem.getOrderPrice());
-//                serviceOrderItemDTO.setCount(serviceOrderItem.getCount());
-//
-//                // 아이템 주문아이템들중 1개
-//                List<Image> serviceMenuImageList = serviceOrderItem.getServiceMenu().getServiceMenuImageList();
-//                //메뉴에 달려있는 이미지
-//                for (Image image : serviceMenuImageList) {
-//                    serviceOrderItemDTO.setImagePath(image.getImagePath());
-//                }
-//                serviceOrderHistoryDTO.addServiceOrderItemDTO(serviceOrderItemDTO);
-//            }
-//            serviceOrderHistoryDTOList.add(serviceOrderHistoryDTO);
-//        }
-//        return new PageImpl<ServiceOrderHistoryDTO>(serviceOrderHistoryDTOList, pageable, totalCount);
+
+    //주문 상세보기
+    public ServiceOrderHistoryDTO getOrderDetail(Integer serviceOrderId) {
+        ServiceOrder serviceOrder = serviceOrderRepository.findById(serviceOrderId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 주문이 없습니다. 주문 ID: " + serviceOrderId));
+
+        ServiceOrderHistoryDTO serviceOrderHistoryDTO = new ServiceOrderHistoryDTO();
+        serviceOrderHistoryDTO.setServiceOrderId(serviceOrder.getServiceOrderId());
+        serviceOrderHistoryDTO.setRegDate(serviceOrder.getRegDate());
+        serviceOrderHistoryDTO.setServiceOrderStatus(serviceOrder.getServiceOrderStatus());
+        serviceOrderHistoryDTO.setReservationDTO(modelMapper.map(serviceOrder.getReservation(), ReservationDTO.class));
+        serviceOrderHistoryDTO.setMemberDTO(modelMapper.map(serviceOrder.getMember(), MemberDTO.class));
+
+        List<ServiceOrderItemDTO> itemDTOList = new ArrayList<>();
+        for (ServiceOrderItem item : serviceOrder.getServiceOrderItemList()) {
+            ServiceOrderItemDTO itemDTO = new ServiceOrderItemDTO();
+            itemDTO.setServiceOrderItemId(item.getServiceOrderItemId());
+            itemDTO.setServiceMenuName(item.getServiceMenu().getServiceMenuName());
+            itemDTO.setCount(item.getCount());
+            itemDTO.setOrderPrice(item.getOrderPrice());
+
+            // 이미지 추가
+            // todo: 이거 이미지처리 목록 뽑았던거랑 비교해서 값 달라지는지 확인할 것
+            List<Image> images = item.getServiceMenu().getServiceMenuImageList();
+            if (!images.isEmpty()) {
+                itemDTO.setImagePath(images.get(0).getImagePath());
+            }
+            itemDTOList.add(itemDTO);
+        }
+        serviceOrderHistoryDTO.setServiceOrderItemDtoList(itemDTOList);
+        return serviceOrderHistoryDTO;
+    }
 
 
+    // 주문 수정
+    public void updateOrder(ServiceOrderUpdateDTO updateDTO) {
+        ServiceOrder serviceOrder = serviceOrderRepository.findById(updateDTO.getServiceOrderId())
+                .orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다. ID: " + updateDTO.getServiceOrderId()));
+
+        // 주문 상태 업데이트
+        serviceOrder.setServiceOrderStatus(updateDTO.getServiceOrderStatus());
+
+        // 주문 아이템 업데이트
+        for (ServiceOrderItemUpdateDTO itemDTO : updateDTO.getOrderItems()) {
+            ServiceOrderItem item = serviceOrderItemRepository.findById(itemDTO.getServiceOrderItemId())
+                    .orElseThrow(() -> new IllegalArgumentException("주문 아이템을 찾을 수 없습니다. ID: " + itemDTO.getServiceOrderItemId()));
+
+            // 수량 업데이트
+            item.setCount(itemDTO.getCount());
+
+            // 가격 재계산
+            item.setOrderPrice(item.getServiceMenu().getServiceMenuPrice());
+        }
+    }
+
+    // 주문 삭제
+    public void deleteOrder(Integer serviceOrderId) {
+        ServiceOrder serviceOrder = serviceOrderRepository.findById(serviceOrderId)
+                .orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다. ID: " + serviceOrderId));
+
+        serviceOrderRepository.delete(serviceOrder);
+    }
 
 }

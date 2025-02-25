@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>주문 상세보기</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+<div id="wrapper" layout:fragment="content">
+    <div class="container mt-4">
+        <h2>주문 상세보기</h2>
+
+        <!-- 주문 정보 -->
+        <div class="card">
+            <div class="card-body">
+                <h5>주문 정보</h5>
+                <p><strong>주문번호:</strong> <span th:text="${serviceOrderHistoryDTO.serviceOrderId}"></span></p>
+                <p><strong>회원명:</strong> <span th:text="${serviceOrderHistoryDTO.memberDTO.memberName}"></span></p>
+                <p><strong>이메일:</strong> <span th:text="${serviceOrderHistoryDTO.memberDTO.memberEmail}"></span></p>
+                <p><strong>방 이름:</strong> <span th:text="${serviceOrderHistoryDTO.reservationDTO.room.roomName}"></span></p>
+                <p><strong>예약 날짜:</strong> <span th:text="${#temporals.format(serviceOrderHistoryDTO.regDate, 'yyyy-MM-dd')}"></span></p>
+                <p><strong>주문 상태:</strong> <span th:text="${serviceOrderHistoryDTO.serviceOrderStatus}"></span></p>
+            </div>
+        </div>
+
+        <!-- 주문 아이템 목록 -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5>주문한 메뉴</h5>
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>메뉴 이미지</th>
+                        <th>메뉴 이름</th>
+                        <th>수량</th>
+                        <th>가격</th>
+                        <th>합계</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="item : ${serviceOrderHistoryDTO.serviceOrderItemDTOList}">
+                        <td>
+                            <img th:src="@{'/upload/' + ${item.imagePath}}" alt="메뉴 이미지" style="width: 60px; height: 60px; object-fit: cover;">
+                        </td>
+                        <td th:text="${item.serviceMenuName}"></td>
+                        <td th:text="${item.count}"></td>
+                        <td th:text="${item.orderPrice} + '원'"></td>
+                        <td th:text="${item.count * item.orderPrice} + '원'"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 뒤로 가기 -->
+        <div class="text-end mt-4">
+            <a th:href="@{/manager/order/list}" class="btn btn-secondary">목록으로</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

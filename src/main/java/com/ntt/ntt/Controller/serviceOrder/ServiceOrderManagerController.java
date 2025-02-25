@@ -1,34 +1,33 @@
 package com.ntt.ntt.Controller.serviceOrder;
 
 import com.ntt.ntt.DTO.ServiceOrderHistoryDTO;
+import com.ntt.ntt.DTO.ServiceOrderItemUpdateDTO;
+import com.ntt.ntt.DTO.ServiceOrderUpdateDTO;
 import com.ntt.ntt.Service.ServiceOrderService;
 import com.ntt.ntt.Util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
-import java.security.Principal;
 import java.util.Map;
-import java.util.Optional;
 
 @Controller
 @Log4j2
 @RequiredArgsConstructor
+@RequestMapping("manager/order") //url roomService아래에
 public class ServiceOrderManagerController {
-    private ServiceOrderService serviceOrderService;
+    private final ServiceOrderService serviceOrderService;
     private final PaginationUtil paginationUtil;
 
-    @GetMapping("/manager/order/list")
+    @GetMapping("/list")
     public String orderListSearch(@RequestParam(required = false) String keyword,
                              @RequestParam(required = false) String searchType,
                              @RequestParam(required = false) Integer reservationId,
@@ -52,28 +51,36 @@ public class ServiceOrderManagerController {
         return "/manager/roomService/order/list";
     }
 
-//    @GetMapping("/manager/order/list")
-//    public String orderHistory(@PathVariable("page") Optional<Integer> page,
-//                               Principal principal, Model model) {
-//        if (principal == null) {
-//            log.info("로그인을 하지않은 접속오류");
-//            return "redirect:/login";
-//        }
-//
-//        // 페이지 번호가 없으면 0을 기본값으로 설정
-//        int currentPage = page.orElse(0);
-//        Pageable pageable = PageRequest.of(currentPage, 4);
-//        log.info(pageable.toString());
-//
-//        String memberEmail = principal.getName();
-//
-//        Page<ServiceOrderHistoryDTO> serviceOrderHistoryDTOPage =
-//                serviceOrderService.getOrderList(memberEmail, pageable);
-//
-//        model.addAttribute("orders", serviceOrderHistoryDTOPage);
-//        // HTML에서 getContent()를 호출할 것임
-//        model.addAttribute("page", currentPage);
-//        model.addAttribute("maxPage", 5);
-//        return "/manager/roomService/order/list";
-//    }
+    @GetMapping("/read")
+    public String orderRead(@RequestParam("serviceOrderId") Integer serviceOrderId, Model model) {
+        // 주문 정보 가져오기
+        ServiceOrderHistoryDTO serviceOrderHistoryDTO = serviceOrderService.getOrderDetail(serviceOrderId);
+        model.addAttribute("serviceOrderHistoryDTO", serviceOrderHistoryDTO);
+        return "/manager/roomService/order/read";
+    }
+
+    // 주문 수정 페이지
+    @GetMapping("/update")
+    public String orderEdit(@RequestParam("serviceOrderId") Integer serviceOrderId, Model model) {
+        ServiceOrderHistoryDTO serviceOrderHistoryDTO = serviceOrderService.getOrderDetail(serviceOrderId);
+        model.addAttribute("serviceOrderHistoryDTO", serviceOrderHistoryDTO);
+        return "/manager/roomService/order/update";
+    }
+
+    // 주문 수정 처리
+    @PostMapping("/update")
+    public String orderUpdate(@ModelAttribute ServiceOrderUpdateDTO updateDTO, RedirectAttributes redirectAttributes) {
+        serviceOrderService.updateOrder(updateDTO);
+        redirectAttributes.addFlashAttribute("message", "주문이 성공적으로 수정되었습니다.");
+        return "redirect:/manager/order/list";
+    }
+
+    // 주문 삭제
+    @PostMapping("/delete")
+    public String orderDelete(@RequestParam("serviceOrderId") Integer serviceOrderId, RedirectAttributes redirectAttributes) {
+        serviceOrderService.deleteOrder(serviceOrderId);
+        redirectAttributes.addFlashAttribute("message", "주문이 삭제되었습니다.");
+        return "redirect:/manager/order/list";
+    }
+
 }
