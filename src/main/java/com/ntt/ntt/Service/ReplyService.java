@@ -9,6 +9,7 @@ import com.ntt.ntt.Repository.ReplyRepository;
 import groovy.util.logging.Log4j2;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,20 +20,16 @@ import java.util.Optional;
 @Service
 @Transactional
 @Log4j2
-
+@AllArgsConstructor
 public class ReplyService {
 
     private final ReplyRepository replyRepository;
     private final QnaRepository qnaRepository;
     private final MemberRepository memberRepository;
+    private final NotificationService notificationService;
 
-    public ReplyService(ReplyRepository replyRepository, QnaRepository qnaRepository, MemberRepository memberRepository) {
-        this.replyRepository = replyRepository;
-        this.qnaRepository = qnaRepository;
-        this.memberRepository = memberRepository;
-    }
 
-    // 댓글 등록
+    // 댓글 등록 (알림 생성 추가)
     public void registerReply(String replyContent, Integer qnaId, Member member) {
         Qna qna = qnaRepository.findById(qnaId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid QnA ID: " + qnaId));
@@ -43,10 +40,14 @@ public class ReplyService {
         reply.setMember(member);
         reply.setQna(qna);
 
-        replyRepository.save(reply);
-
         Reply savedReply = replyRepository.save(reply);
-        System.out.println("✅ 저장된 댓글 ID: " + savedReply.getReplyId() + ", QnA ID: " + savedReply.getQna().getQnaId());
+        System.out.println("✅ 저장된 댓글 ID: " + savedReply.getReplyId());
+
+        // ✅ 댓글이 달린 글의 작성자에게만 알림 생성
+        if (!qna.getMember().equals(member)) { // 본인이 댓글 단 경우 제외
+            String message = member.getMemberName() + " 님이 당신의 Q&A 글에 댓글을 남겼습니다.";
+            notificationService.createNotification(qna.getMember(), message, qna);
+        }
     }
 
     // Qna 객체를 ID로 조회

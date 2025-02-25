@@ -290,6 +290,7 @@ public class QnaController {
         }
         return "redirect:/qna/read/" + qnaId;  // Q&A 상세보기 페이지로 리다이렉트
     }
+
     // 댓글 수정
     @GetMapping("/reply/update/{id}")
     @Operation(summary = "댓글수정폼", description = "댓글을 수정한다.")

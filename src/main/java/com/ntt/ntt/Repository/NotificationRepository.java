@@ -22,11 +22,10 @@ public interface NotificationRepository extends JpaRepository<Notification, Inte
 
 
     // ✅ 동일한 메시지와 동일한 Qna에 대한 알림이 있는지 확인
-    boolean existsByNotificationMessageAndQna(String notificationMessage, Qna qna);
+    boolean existsByNotificationMessageAndQnaAndMember(String notificationMessage, Qna qna, Member member);
 
-    // ✅ 관리자는 모든 알림을 조회 가능
-    @Query("SELECT n FROM Notification n ORDER BY n.timestamp DESC")
-    List<Notification> findAllByOrderByTimestampDesc();
+    // ✅ 특정 사용자(member)의 읽지 않은 댓글 알림 조회
+    List<Notification> findByMemberAndIsReadFalseAndNotificationMessageContaining(Member member, String keyword);
 
 }
 
