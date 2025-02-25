@@ -89,6 +89,8 @@ public class HotelService {
 
         // 2. imageFiles를 ImageService를 통해 저장
         imageService.registerHotelImage(hotel.getHotelId(), imageFiles);
+
+        hotelRepository.flush(); // ✅ 즉시 DB 반영
     }
 
 
@@ -216,6 +218,7 @@ public class HotelService {
 //        return hotelDTOS;
 //    }
 
+    //사용자용 호텔 목록
     @Transactional(readOnly = true)
     public Page<HotelDTO> list(Pageable page, String keyword, String searchType, boolean exactMatch) {
         int currentPage = page.getPageNumber();
@@ -267,6 +270,32 @@ public class HotelService {
 
             return hotelDTO;
         });
+
+        return hotelDTOS;
+    }
+
+
+    // 추천 호텔 목록 가져오기
+    public List<HotelDTO> listRecommendedHotels() {
+        Pageable pageable = PageRequest.of(0, 4, Sort.by(Sort.Direction.DESC, "hotelId"));
+//        Page<Hotel> hotelPage = hotelRepository.findByHotelRating(true, pageable);
+        Page<Hotel> hotelPage = hotelRepository.findAll(pageable);
+
+        List<HotelDTO> hotelDTOS = hotelPage.stream()
+                .map(hotel -> {
+                    HotelDTO hotelDTO = modelMapper.map(hotel, HotelDTO.class);
+
+                    List<ImageDTO> imagesDTOList = imageRepository.findByHotel_HotelId(hotel.getHotelId())
+                            .stream()
+                            .map(image -> {
+                                image.setImagePath(image.getImagePath().replace("c:/data/", ""));
+                                return modelMapper.map(image, ImageDTO.class);
+                            })
+                            .collect(Collectors.toList());
+                    hotelDTO.setHotelImgDTOList(imagesDTOList);
+                    return hotelDTO;
+                })
+                .collect(Collectors.toList());
 
         return hotelDTOS;
     }

@@ -27,6 +27,12 @@
 
     <script th:inline="javascript">
 
+        $(document).ready(function () {
+
+            $(".table-head").hide()
+
+        })
+
         //이미지파일 검사
         function validateImage(event) {
             var files = event.target.files;
@@ -154,29 +160,68 @@
         <div class="card p-4 mb-4">
             <div class="row g-3 align-items-center">
 
-                <!--등록한 사진이 있을 때-->
-                <th:block th:if="${hotelDTO.hotelImgDTOList != 0}">
-                    <div th:each="img : ${hotelDTO.hotelImgDTOList}">
-                        <!-- 이미지 경로(path) -->
-                        <img th:src="@{'/upload/' + ${img.imagePath}}" alt="hotel Image" width="300px"/>
-                    </div>
-                </th:block>
+                <div class="container mt-3">
+                    <h3 th:text="${hotelDTO.hotelName}">호텔(지사)이름</h3>
+                    <p>
+                        <i class="bi bi-geo-alt-fill"></i>
+                        <span th:text="${hotelDTO.hotelAddress}">주소</span>
+                    </p>
+                    <table class="table">
+                        <thead class="table-head">
+                        <tr>
+                            <th style="width: 20%"></th>
+                            <th style="width: 10%"></th>
+                            <th style="width: 30%"></th>
+                            <th style="width: 10%"></th>
+                            <th style="width: 30%"></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr class="table-light">
+                            <td rowspan='4'>
+                                <!--등록한 사진이 있을 때-->
+                                <th:block th:if="${hotelDTO.hotelImgDTOList != 0}">
+                                    <div th:each="img : ${hotelDTO.hotelImgDTOList}">
+                                        <!-- 이미지 경로(path) -->
+                                        <img th:src="@{'/upload/' + ${img.imagePath}}" alt="hotel Image" width="100%"/>
+                                    </div>
+                                </th:block>
 
-                <!--등록한 사진이 없을 때-->
-                <th:block th:unless="${hotelDTO.hotelImgDTOList.size() != 0}">
-                        <div>
-                            <img src="/img/default_img.jpg" alt="noImage" style="width: 300px"/>
-                        </div>
-                </th:block>
+                                <!--등록한 사진이 없을 때-->
+                                <th:block th:unless="${hotelDTO.hotelImgDTOList.size() != 0}">
+                                    <div>
+                                        <img src="/img/default_img.jpg" alt="noImage" style="width: 100%"/>
+                                    </div>
+                                </th:block>
+                            </td>
+                            <td>호텔 본사</td>
+                            <td colspan="3"><span th:text="${hotelDTO.companyName}">본사명</span></td>
+                        </tr>
+                        <tr class="table-light">
+                            <td>지역</td>
+                            <td colspan="3"><span th:text="${hotelDTO.hotelLocation}">지역</span></td>
+                        </tr>
+                        <tr class="table-light">
+                            <td>담당자</td>
+                            <td><span th:text="${hotelDTO.hotelEmail}">이메일</span></td>
+                            <td>전화번호</td>
+                            <td><span th:text="${hotelDTO.hotelPhone}">전화번호</span></td>
+                        </tr>
+                        <tr class="table-light">
+                            <td>체크인-체크아웃</td>
+                            <td colspan="3">
+                                <span th:text="${hotelDTO.hotelCheckIn}">체크인</span>시 -
+                                <span th:text="${hotelDTO.hotelCheckOut}">체크아웃</span>시
+                        </tr>
+                        <tr class="table-light" style="height: 200px;">
+                            <td>상세설명</td>
+                            <td colspan="4">
+                                <span th:text="${hotelDTO.hotelInfo}">상세정보</span>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
 
-                <h3 th:text="${hotelDTO.hotelName}">호텔(지사)이름</h3>
-                <p>호텔본사 : <span th:text="${hotelDTO.companyName}">본사명</span></p>
-                <p>호텔주소 : <span th:text="${hotelDTO.hotelAddress}">주소</span></p>
-                <p>상세정보 : <span th:text="${hotelDTO.hotelInfo}">상세정보</span></p>
-                <p>전화번호 : <span th:text="${hotelDTO.hotelPhone}">전화번호</span></p>
-                <p>이메일 : <span th:text="${hotelDTO.hotelEmail}">이메일</span></p>
-                <p>체크인 : <span th:text="${hotelDTO.hotelCheckIn}">체크인</span>시</p>
-                <p>체크아웃 : <span th:text="${hotelDTO.hotelCheckOut}">체크아웃</span>시</p>
             </div>
 
             <!-- 버튼 -->
