@@ -51,15 +51,15 @@
     <div class="container-fluid mt-4">
         <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
         <a href="#" class="custom-link"><span>호텔관리</span></a> /
-        <a href="/company/list" class="custom-link"><span>호텔본사관리</span></a> /
-        <a th:href="@{/company/update(companyId=${companyDTO.companyId})}" class="custom-link">
+        <a href="/chief/company/list" class="custom-link"><span>호텔본사관리</span></a> /
+        <a th:href="@{/chief/company/update(companyId=${companyDTO.companyId})}" class="custom-link">
             <span>본사수정</span>
         </a>
         <h2 class="mb-3">본사 수정</h2>
         <!-- 폼 -->
         <div class="card p-4 mb-4">
             <div class="row g-3 align-items-center">
-                <form action="/company/update" method="post" enctype="multipart/form-data" th:object="${companyDTO}">
+                <form action="/chief/company/update" method="post" enctype="multipart/form-data" th:object="${companyDTO}">
                     <input type="hidden" class="form-control companyId" id="companyId" name="companyId" th:field="*{companyId}">
 
                     <div class="mb-3 mt-3">
@@ -97,7 +97,7 @@
                     </div>
 
                     <div style="text-align: right">
-                        <a class="btn btn-danger" th:href="@{/company/delete(companyId=${companyDTO.companyId})}">삭제</a>
+                        <a class="btn btn-danger" th:href="@{/chief/company/delete(companyId=${companyDTO.companyId})}">삭제</a>
                         <button type="submit" class="btn btn-primary">등록</button>
                     </div>
                 </form>

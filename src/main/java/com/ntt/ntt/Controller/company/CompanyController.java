@@ -73,7 +73,7 @@ public class CompanyController {
         companyService.register(companyDTO, imageFiles, memberName);
 
         redirectAttributes.addFlashAttribute("message", "본사 등록이 완료되었습니다.");
-        return "redirect:/company/list";
+        return "redirect:/chief/company/list";
     }
 
     //목록
@@ -191,7 +191,7 @@ public class CompanyController {
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("message", "서버 오류가 발생했습니다!");
-            return "redirect:/company/list";
+            return "redirect:/chief/company/list";
         }
     }
 
@@ -215,7 +215,7 @@ public class CompanyController {
         Integer companyId = companyDTO.getCompanyId();
         redirectAttributes.addFlashAttribute("companyId", companyId);
 
-        return "redirect:/company/read?companyId=" + companyId;
+        return "redirect:/chief/company/read?companyId=" + companyId;
     }
 
     // 이미지 삭제 (REST API 형식으로 처리)
@@ -248,7 +248,7 @@ public class CompanyController {
     public String delete(Integer companyId, RedirectAttributes redirectAttributes) {
         companyService.delete(companyId);
         redirectAttributes.addFlashAttribute("message", "해당 본사 삭제가 완료되었습니다.");
-        return "redirect:/company/list";
+        return "redirect:/chief/company/list";
     }
 
 
