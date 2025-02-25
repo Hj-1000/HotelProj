@@ -14,6 +14,7 @@ import com.ntt.ntt.Repository.hotel.HotelRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -347,4 +348,12 @@ public class MemberService implements UserDetailsService {
             throw new RuntimeException("Member를 찾을 수 없습니다.");
         }
     }
+
+    // memberEmail로 회원 조회
+    public Member findMemberByMemberEmail(String memberEmail) {
+        return memberRepository.findByMemberEmail(memberEmail)
+                .orElseThrow(() -> new RuntimeException("회원 정보가 존재하지 않습니다."));
+    }
+
+
 }

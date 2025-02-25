@@ -17,4 +17,15 @@ public interface CompanyRepository extends JpaRepository<Company, Integer> {
     List<Company> findByMember_MemberId(Integer memberId);
 
     void deleteByMember(Member member);
+
+    // 회사명 검색 + memberId 필터링
+    Page<Company> findByCompanyNameLikeAndMember_MemberId(String companyName, Integer memberId, Pageable pageable);
+    // 관리자명 검색 + memberId 필터링
+    Page<Company> findByCompanyManagerLikeAndMember_MemberId(String companyManager, Integer memberId, Pageable pageable);
+    // 회사명 또는 관리자명 검색 + memberId 필터링
+    Page<Company> findByCompanyNameLikeOrCompanyManagerLikeAndMember_MemberId(String companyName, String companyManager, Integer memberId, Pageable pageable);
+    // memberId로만 회사 조회
+    Page<Company> findByMember_MemberId(Integer memberId, Pageable pageable);
+
+
 }

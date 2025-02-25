@@ -62,8 +62,14 @@
                     <li class="nav-item">
                         <a href="#" class="nav-link text-white dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#admin-hotel-menu" aria-expanded="false"><i class="bi bi-buildings"></i> 호텔관리</a>
                         <ul class="collapse list-unstyled ps-3" id="admin-hotel-menu">
-                            <li><a href="/company/list" class="nav-link text-white">호텔본사관리</a></li>
-                            <li><a href="/manager/hotel/list" class="nav-link text-white">호텔지사관리</a></li>
+                            <!--관리자-->
+                            <li><a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/admin/company/list" class="nav-link text-white">호텔본사관리</a></li>
+                            <li><a th:if="${#authorization.expression('hasRole(''ADMIN'')')}"  href="/admin/hotel/list" class="nav-link text-white">호텔지사관리</a></li>
+                            <!--호텔장-->
+                            <li><a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="/chief/company/list" class="nav-link text-white">호텔본사관리</a></li>
+                            <!--수정필요--><li><a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="/chief/hotel/list" class="nav-link text-white">호텔지사관리</a></li>
+                            <!--매니저-->
+                            <li><a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" href="/chief/hotel/list" class="nav-link text-white">호텔지사관리</a></li>
                         </ul>
                     </li>
                     <li class="nav-item">
