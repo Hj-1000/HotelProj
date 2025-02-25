@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name="reservation")
@@ -46,5 +47,7 @@ public class Reservation extends BaseEntity {
     @JoinColumn(name = "roomId")
     private Room room;
 
+    @OneToMany(mappedBy = "reservationId", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Payment> payments;
 
 }

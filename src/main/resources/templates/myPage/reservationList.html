@@ -129,7 +129,7 @@
           <td>
             <button type="button"
                     class="btn btn-primary"
-                    th:disabled="${reservation.reservationStatus != '예약' or reservation.isPaid}"
+                    th:disabled="${reservation.reservationStatus != '예약'}"
                     onclick="requestPay(event)">결제</button>
           </td>
         </tr>
