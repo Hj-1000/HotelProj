@@ -4,14 +4,17 @@ import com.ntt.ntt.DTO.NotificationDTO;
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Entity.Notification;
 import com.ntt.ntt.Entity.Qna;
+import com.ntt.ntt.Repository.MemberRepository;
 import com.ntt.ntt.Repository.NotificationRepository;
 import com.ntt.ntt.Service.MemberService;
 import com.ntt.ntt.Service.NotificationService;
 import com.ntt.ntt.Service.QnaService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,6 +33,7 @@ public class NotificationController {
     private final QnaService qnaService;
     private final NotificationRepository notificationRepository;
     private final MemberService memberService;
+    private final MemberRepository memberRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(NotificationController.class);
 
@@ -47,13 +51,43 @@ public class NotificationController {
         }
     }
 
-    // 🔹 관리자용 알림 목록 조회
     // ✅ 관리자 알림 목록 조회 (GET 요청 허용)
     @GetMapping("/admin")
     public ResponseEntity<List<NotificationDTO>> getNotificationsForAdmin() {
         List<NotificationDTO> notifications = notificationService.getAllNotifications(); // DTO 변환 후 반환
         return ResponseEntity.ok(notifications);
     }
+
+    // ✅ 댓글 알림 목록 가져오기
+    @GetMapping("/replies")
+    public ResponseEntity<?> getReplyNotifications(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+        }
+
+        Member member = memberRepository.findByMemberEmail(userDetails.getUsername())
+                .orElse(null);
+
+        if (member == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("사용자를 찾을 수 없습니다.");
+        }
+
+        List<Notification> notifications = notificationRepository.findByMemberAndIsReadFalseAndNotificationMessageContaining(member, "댓글");
+        return ResponseEntity.ok(notifications);
+    }
+
+
+    // ✅ 읽지 않은 댓글 알림 수 가져오기
+    @GetMapping("/replies/unreadCount")
+    public ResponseEntity<Long> getUnreadReplyNotificationCount(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(0L);
+        }
+
+        long unreadCount = notificationService.getUnreadReplyNotificationCountForMember(userDetails.getUsername());
+        return ResponseEntity.ok(unreadCount);
+    }
+
 
     // 🔹 로그인한 사용자의 알림 목록 조회
     @Operation(summary = "알림 목록 조회", description = "로그인한 사용자의 알림을 가져옵니다.")

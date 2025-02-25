@@ -88,25 +88,21 @@
                     <div sec:authorize="hasRole('ADMIN')">
                         <!-- Q&A와 알림 벨을 같은 라인에 배치 -->
                         <li>
-
                             <div  class="d-flex align-items-center">
                                 <a href="/qna" class="nav-link text-white"><i class="bi bi-question-lg"></i> Q&A</a>
-
                                 <div id="notification-container">
                                     <span id="notification-bell">🔔</span>
                                     <span id="unread-count">0</span>
                                 </div>
-
                                 <!-- 알림 목록 (처음에는 숨겨짐) -->
                                 <ul id="notification-list" style="display: none;">
                                     <!-- 알림을 동적으로 렌더링 -->
                                 </ul>
-
                             </div>
                         </li>
-
                     </div>
                 </div>
+
             </ul>
 
 

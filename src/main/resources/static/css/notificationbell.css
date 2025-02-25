@@ -5,7 +5,7 @@
 
 #notification-list {
     position: absolute;
-    top: 57%; /* 벨 아이콘 아래로 배치 */
+    top: 54%; /* 벨 아이콘 아래로 배치 */
     right: 0;
     background-color: white;
     border: 1px solid #ddd;

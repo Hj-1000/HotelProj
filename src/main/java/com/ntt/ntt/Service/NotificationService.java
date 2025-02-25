@@ -25,12 +25,7 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final MemberRepository memberRepository;
 
-    // 관리자가 볼 수 있는 알림 목록을 가져오는 메소드
-    public List<Notification> getNotificationsForAdmin() {
-        Member admin = memberRepository.findByRole(Role.valueOf("ADMIN"))
-                .orElseThrow(() -> new RuntimeException("관리자 계정을 찾을 수 없습니다."));
-        return notificationRepository.findAllByOrderByTimestampDesc();
-    }
+
 
     // 특정 사용자의 알림 목록 조회
     public List<NotificationDTO> getNotificationsForMember(String memberEmail) {
@@ -42,6 +37,19 @@ public class NotificationService {
                 .collect(Collectors.toList());
     }
 
+    // 댓글 등록 시 생성된 알림만 가져오기
+    public List<NotificationDTO> getReplyNotificationsForMember(String memberEmail) {
+        Member member = memberRepository.findByMemberEmail(memberEmail)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        return notificationRepository.findByMemberOrderByTimestampDesc(member)
+                .stream()
+                .filter(n -> n.getNotificationMessage().contains("댓글")) // ✅ 댓글 관련 알림만 필터링
+                .map(NotificationDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+
 
 
     // 알림 삭제
@@ -52,13 +60,12 @@ public class NotificationService {
 
     // 새로운 알림 생성
     public void createNotification(Member member, String message, Qna qna) {
-        // ✅ 기존에 같은 메시지와 Qna가 있는지 확인 (사용자 기준)
-        boolean exists = notificationRepository.existsByNotificationMessageAndQna(message, qna);
+        boolean exists = notificationRepository.existsByNotificationMessageAndQnaAndMember(message, qna, member);
 
         if (!exists) { // 중복이 없을 경우에만 저장
             Notification notification = new Notification();
             notification.setNotificationMessage(message);
-            notification.setMember(member); // 원래 글 작성자
+            notification.setMember(member); // 알림을 받을 사용자 (Q&A 작성자)
             notification.setRead(false);
             notification.setTimestamp(LocalDateTime.now());
             notification.setQna(qna);
@@ -68,6 +75,22 @@ public class NotificationService {
         }
     }
 
+    // ✅ 특정 사용자의 읽지 않은 댓글 알림 개수 조회
+    public long getUnreadReplyNotificationCountForMember(String memberEmail) {
+        Member member = memberRepository.findByMemberEmail(memberEmail)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        return notificationRepository.findByMemberAndIsReadFalseAndNotificationMessageContaining(member, "댓글").size();
+    }
+
+
+
+    // ✅ 읽지 않은 댓글 알림 개수 조회
+    public long getUnreadReplyNotificationCount() {
+        return notificationRepository.findAll()
+                .stream()
+                .filter(n -> n.getNotificationMessage().contains("댓글") && !n.isRead()) // 댓글 알림 + 읽지 않은 알림만
+                .count();
+    }
 
 
     // 알림 읽음 처리
