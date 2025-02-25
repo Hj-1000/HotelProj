@@ -166,11 +166,25 @@ public class CompanyService {
             companies = companyRepository.findByMember_MemberId(memberId, adjustedPageable);
         }
 
-        // Company -> CompanyDTO 변환 후 호텔 수 설정
+        // Company -> CompanyDTO 변환 후 호텔 수 설정, 이미지
         Page<CompanyDTO> companyDTOS = companies.map(entity -> {
             CompanyDTO companyDTO = modelMapper.map(entity, CompanyDTO.class);
+
+            // 호텔에 대한 이미지 리스트 가져오기
+            List<ImageDTO> imgDTOList = imageRepository.findByCompany_CompanyId(entity.getCompanyId())
+                    .stream()
+                    .map(imagefile -> {
+                        imagefile.setImagePath(imagefile.getImagePath().replace("c:/data/", "")); // 경로 수정
+                        return modelMapper.map(imagefile, ImageDTO.class);
+                    })
+                    .collect(Collectors.toList());
+
+            // 호텔 수를 구하기 위해 HotelRepository를 사용하여 해당 회사에 속한 호텔 수를 카운트
             int hotelCount = hotelRepository.countByCompany_CompanyId(companyDTO.getCompanyId());
             companyDTO.setHotelCount(hotelCount);
+
+            companyDTO.setCompanyImgDTOList(imgDTOList); // 이미지 DTO 리스트 설정
+
             return companyDTO;
         });
 
