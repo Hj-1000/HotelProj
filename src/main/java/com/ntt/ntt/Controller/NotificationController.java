@@ -65,15 +65,20 @@ public class NotificationController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         }
 
-        Member member = memberRepository.findByMemberEmail(userDetails.getUsername())
-                .orElse(null);
+        Member member = memberRepository.findByMemberEmail(userDetails.getUsername()).orElse(null);
 
         if (member == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("사용자를 찾을 수 없습니다.");
         }
 
         List<Notification> notifications = notificationRepository.findByMemberAndIsReadFalseAndNotificationMessageContaining(member, "댓글");
-        return ResponseEntity.ok(notifications);
+
+        // DTO 변환 추가
+        List<NotificationDTO> notificationDTOs = notifications.stream()
+                .map(NotificationDTO::fromEntity)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(notificationDTOs);
     }
 
 

@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const notificationList = document.getElementById('notification-list');
     const unreadCount = document.getElementById('unread-count');
 
+
     if (!bell) {
         return;
     }
@@ -10,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!notificationList) {
         return;
     }
+
 
     let notifications = [];
 
@@ -37,6 +39,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     console.error("🚨 API 응답이 배열이 아닙니다!", notifications);
                     return;
                 }
+
 
                 updateNotificationList();
             })
@@ -130,6 +133,21 @@ document.addEventListener('DOMContentLoaded', function () {
             notificationList.style.display = 'none';
         }
     });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // layout에 있는 알림 벨 아이콘과 목록을 찾음
+        const layoutNotificationBell = document.getElementById('layout-notification-bell');
+        const layoutNotificationList = document.getElementById('layout-notification-list');
+
+        if (layoutNotificationBell) {
+            layoutNotificationBell.style.display = 'none'; // layout에서 알림 벨 숨기기
+        }
+
+        if (layoutNotificationList) {
+            layoutNotificationList.style.display = 'none'; // layout에서 알림 목록 숨기기
+        }
+    });
+
 
     // 📌 페이지 로드 시 알림 목록을 불러오기
     fetchNotifications();
