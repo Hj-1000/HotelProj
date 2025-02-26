@@ -14,6 +14,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -74,31 +76,43 @@ public class ServiceOrderController {
     }
 
     //이건 유저가 볼 유저의 주문내역 페이지 호출함수
-
-    @GetMapping({"/myPage/order/history", "/myPage/order/history/{page}"})
-    public String orderHistory(@PathVariable("page") Optional<Integer> page,
-                               Principal principal, Model model) {
+    @GetMapping("/myPage/order/history")
+    public String orderHistory(@PageableDefault(page = 1, size = 5) Pageable pageable, Principal principal, Model model) {
         if (principal == null) {
             log.info("로그인을 하지않은 접속오류");
             return "redirect:/login";
         }
 
-        // 페이지 번호가 없으면 0을 기본값으로 설정
-        int currentPage = page.orElse(0);
-        Pageable pageable = PageRequest.of(currentPage, 4);
-        log.info(pageable.toString());
-
         String memberEmail = principal.getName();
 
+        // 페이지 번호 보정 (1페이지 -> 0, 2페이지 -> 1)
+        int currentPage = pageable.getPageNumber() - 1;
+        if (currentPage < 0) currentPage = 0; // 0보다 작아지지 않도록 보호
+
+        Pageable correctedPageable = PageRequest.of(currentPage, pageable.getPageSize(), pageable.getSort());
+
         Page<ServiceOrderHistoryDTO> serviceOrderHistoryDTOPage =
-                serviceOrderService.getOrderList(memberEmail, pageable);
+                serviceOrderService.getOrderList(memberEmail, correctedPageable);
+
+        // 페이지 정보 계산 (PaginationUtil 사용)
+        Map<String, Integer> pageInfo = paginationUtil.pagination(serviceOrderHistoryDTOPage);
+
+
+        // 페이지네이션 계산
+        int totalPages = serviceOrderHistoryDTOPage.getTotalPages();
+        // 시작 페이지와 끝 페이지 계산 (현재 페이지를 기준으로 최대 10페이지까지)
+        int startPage = Math.max(1, pageInfo.get("currentPage") - 4);
+        int endPage = Math.min(startPage + 9, serviceOrderHistoryDTOPage.getTotalPages());
+
+        pageInfo.put("startPage", startPage);
+        pageInfo.put("endPage", endPage);
+        pageInfo.put("lastPage", totalPages); // 마지막 페이지 정보 추가
 
         model.addAttribute("orders", serviceOrderHistoryDTOPage);
-        // HTML에서 getContent()를 호출할 것임
-        model.addAttribute("page", currentPage);
-        model.addAttribute("maxPage", 5);
+        model.addAttribute("pageInfo", pageInfo);
         return "myPage/order/history";
     }
+
 
     //주문취소 api
     @PostMapping("/api/order/{serviceOrderId}/cancel")
