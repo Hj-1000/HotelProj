@@ -26,6 +26,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -316,18 +317,27 @@ public class MemberService implements UserDetailsService {
                     .filter(member -> member.getMemberPhone().contains(phone))
                     .collect(Collectors.toList());
         }
-
-        if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            LocalDate start = LocalDate.parse(startDate, formatter);
-            LocalDate end = LocalDate.parse(endDate, formatter);
-
-            members = members.stream()
-                    .filter(member -> {
-                        LocalDate regDate = member.getRegDate().toLocalDate();
-                        return (regDate.isEqual(start) || regDate.isAfter(start)) && (regDate.isEqual(end) || regDate.isBefore(end));
-                    })
-                    .collect(Collectors.toList());
+        if (startDate != null && !startDate.isEmpty()) {
+            try {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                LocalDate start = LocalDate.parse(startDate, formatter);
+                members = members.stream()
+                        .filter(member -> member.getRegDate().toLocalDate().isEqual(start) || member.getRegDate().toLocalDate().isAfter(start))
+                        .collect(Collectors.toList());
+            } catch (DateTimeParseException e) {
+                System.out.println("잘못된 시작 날짜 입력: " + startDate);
+            }
+        }
+        if (endDate != null && !endDate.isEmpty()) {
+            try {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                LocalDate end = LocalDate.parse(endDate, formatter);
+                members = members.stream()
+                        .filter(member -> member.getRegDate().toLocalDate().isEqual(end) || member.getRegDate().toLocalDate().isBefore(end))
+                        .collect(Collectors.toList());
+            } catch (DateTimeParseException e) {
+                System.out.println("잘못된 종료 날짜 입력: " + endDate);
+            }
         }
 
         return members.stream()

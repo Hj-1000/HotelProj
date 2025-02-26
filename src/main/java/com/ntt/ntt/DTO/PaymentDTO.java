@@ -7,6 +7,7 @@ import jakarta.persistence.ManyToOne;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -14,6 +15,8 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PaymentDTO {
+
+    private Integer paymentId;
 
     private Integer roomPrice;
 
@@ -26,5 +29,9 @@ public class PaymentDTO {
     private Integer roomId;
 
     private Integer reservationId;
+
+    private LocalDateTime regDate;
+
+    private LocalDateTime modDate;
 
     }
