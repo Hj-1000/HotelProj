@@ -231,7 +231,7 @@
                 <a class="btn btn-warning" th:href="@{/manager/roomService/category/list(hotelId=${hotelDTO.hotelId})}">룸서비스</a>
                 <a href="/manager/room/register" class="btn btn-success modalBtn">객실 등록</a>
                 <a class="btn btn-primary" th:href="@{/manager/hotel/update(hotelId=${hotelDTO.hotelId})}">수정</a>
-                <a class="btn btn-danger" th:href="@{/manager/hotel/delete(hotelId=${hotelDTO.hotelId})}">삭제</a>
+                <a class="btn btn-danger" th:href="@{/manager/hotel/delete(hotelId=${hotelDTO.hotelId})}"><i class="bi bi-trash"></i></a>
             </div>
 
         </div>
@@ -289,7 +289,7 @@
                                     <a th:href="@{/manager/room/update/{roomId}(roomId=${room.roomId})}" class="btn btn-warning btn-sm">수정</a>
                                     <a th:href="@{/manager/room/delete/{roomId}(roomId=${room.roomId})}"
                                        onclick="return confirm('진짜로 삭제하시겠습니까?')"
-                                       class="btn btn-danger btn-sm">삭제</a>
+                                       class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></a>
                                 </div>
                             </td>
                         </tr>

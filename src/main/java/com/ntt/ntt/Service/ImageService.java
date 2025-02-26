@@ -21,7 +21,7 @@ public class ImageService {
     private final ImageRepository imageRepository;
     private final FileUpload fileUpload;
 
-    @Value("${dataUploadPath}")
+    @Value("c:/data/")
     private String IMG_LOCATION;
 
     // 본사 이미지 등록
