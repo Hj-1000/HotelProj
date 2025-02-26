@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
@@ -42,69 +41,82 @@ public class ReservationService {
     private EntityManager entityManager;
 
     // 1. 방 예약 추가
-    public ReservationDTO registerReservation(Integer roomId, Integer memberId, String checkInDate, String checkOutDate, Integer count) {
-        // 방 정보 확인
+    public ReservationDTO registerReservation(Integer roomId, Integer memberId, LocalDateTime checkInDate, LocalDateTime checkOutDate, Integer count) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 방을 찾을 수 없습니다. roomId: " + roomId));
 
-        // 이미 예약된 방인지 확인
         if (!room.getRoomStatus()) {
-            throw new IllegalStateException("이미 예약된 방입니다. roomId: " + roomId);
+            log.warn("이미 예약된 방입니다. roomId: {}", roomId);
+            throw new IllegalStateException("이미 예약된 방입니다.");
         }
 
         // 회원 정보 확인
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원 정보를 찾을 수 없습니다. memberId: " + memberId));
 
-        // 날짜 검증
-        if (!isValidDateRange(checkInDate, checkOutDate)) {
-            log.error("체크인 날짜는 체크아웃 날짜보다 이전이어야 합니다.");
-            throw new IllegalArgumentException("체크인 날짜는 체크아웃 날짜보다 이전이어야 합니다.");
+        // 중복 예약 방지
+        if (reservationRepository.isRoomAlreadyBooked(roomId, checkInDate, checkOutDate, null)) {
+            throw new IllegalArgumentException("해당 날짜에 이미 예약이 존재합니다.");
         }
 
-        // 인원 수 제한 (최소 1명 ~ 최대 6명)
+        //  숙박 가능 기간 가져오기
+        String stayStartStr = room.getStayStart();
+        String stayEndStr = room.getStayEnd();
+
+        if (stayStartStr == null || stayEndStr == null || stayStartStr.isEmpty() || stayEndStr.isEmpty()) {
+            throw new IllegalStateException("이 객실의 숙박 가능 기간이 설정되지 않았습니다.");
+        }
+
+        LocalDate stayStart = LocalDate.parse(stayStartStr);
+        LocalDate stayEnd = LocalDate.parse(stayEndStr);
+
+        // 체크인/체크아웃 날짜가 숙박 가능 기간을 벗어나면 예외 발생
+        if (checkInDate.toLocalDate().isBefore(stayStart) || checkOutDate.toLocalDate().isAfter(stayEnd)) {
+            throw new IllegalArgumentException("체크인 및 체크아웃 날짜는 숙박 가능 기간(" + stayStart + " ~ " + stayEnd + ") 내에서만 가능합니다.");
+        }
+
+        // 체크아웃 날짜가 체크인 날짜보다 이전이면 예외 처리
+        if (checkOutDate.isBefore(checkInDate)) {
+            log.warn("체크아웃 날짜가 체크인 날짜보다 이전입니다. checkInDate={}, checkOutDate={}", checkInDate, checkOutDate);
+            throw new IllegalArgumentException("체크아웃 날짜는 체크인 날짜보다 이후여야 합니다.");
+        }
+
         if (count < 1 || count > 6) {
+            log.warn("잘못된 예약 인원 수: {}", count);
             throw new IllegalArgumentException("예약 인원 수는 최소 1명, 최대 6명까지 가능합니다.");
         }
 
-        try {
-            // 체크인, 체크아웃 날짜 변환
-            LocalDate checkIn = LocalDate.parse(checkInDate);
-            LocalDate checkOut = LocalDate.parse(checkOutDate);
-
-            // 숙박 일수 계산 (체크아웃 날짜 - 체크인 날짜)
-            long dayCount = ChronoUnit.DAYS.between(checkIn, checkOut);
-            if (dayCount <= 0) {
-                throw new IllegalArgumentException("체크아웃 날짜는 체크인 날짜보다 이후여야 합니다. checkInDate: " + checkInDate + ", checkOutDate: " + checkOutDate);
-            }
-
-            // 총 비용 계산 (객실 가격 * 숙박일)
-            int totalPrice = room.getRoomPrice() * (int) dayCount;
-
-            // 예약 생성
-            Reservation reservation = Reservation.builder()
-                    .checkInDate(checkInDate)
-                    .checkOutDate(checkOutDate)
-                    .dayCount((int) dayCount)
-                    .totalPrice(totalPrice)
-                    .reservationStatus("예약")
-                    .count(count)
-                    .room(room)
-                    .member(member)
-                    .build();
-
-            reservationRepository.save(reservation);
-
-            // 방 상태 변경 (예약 완료 후)
-            room.setRoomStatus(false);
-            roomRepository.save(room);
-
-            return ReservationDTO.fromEntity(reservation);
-        } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("날짜 형식이 올바르지 않습니다. (yyyy-MM-dd 형식이어야 합니다.) checkInDate: " + checkInDate + ", checkOutDate: " + checkOutDate, e);
-        } catch (Exception e) {
-            throw new RuntimeException("예약 처리 중 알 수 없는 오류가 발생했습니다.", e);
+        // 숙박 일수 계산
+        long dayCount = ChronoUnit.DAYS.between(checkInDate.toLocalDate(), checkOutDate.toLocalDate());
+        if (dayCount <= 0) {
+            log.warn("숙박 일수 오류: checkInDate={}, checkOutDate={}", checkInDate, checkOutDate);
+            throw new IllegalArgumentException("체크아웃 날짜는 체크인 날짜보다 이후여야 합니다.");
         }
+
+        // 총 비용 계산
+        int totalPrice = room.getRoomPrice() * (int) dayCount;
+
+        // 예약 생성
+        Reservation reservation = Reservation.builder()
+                .checkInDate(checkInDate)
+                .checkOutDate(checkOutDate)
+                .dayCount((int) dayCount)
+                .totalPrice(totalPrice)
+                .reservationStatus("예약")
+                .count(count)
+                .room(room)
+                .member(member)
+                .build();
+
+        reservationRepository.save(reservation);
+
+        // 방 상태 변경 (예약 완료)
+        room.setRoomStatus(false);
+        roomRepository.save(room);
+
+        log.info("예약 등록 완료 - roomId={}, memberId={}, stayDays={}, totalPrice={}", roomId, memberId, dayCount, totalPrice);
+
+        return ReservationDTO.fromEntity(reservation);
     }
 
     // 2. 모든 예약 목록 가져오기
@@ -123,63 +135,82 @@ public class ReservationService {
         return ReservationDTO.fromEntity(reservation); // DTO 변환 적용
     }
 
+    /* 모든 방 예약객실 보기 메서드*/
+    public List<ReservationDTO> getReservationsByRoomId(Integer roomId) {
+        List<Reservation> reservations = reservationRepository.findAllByRoom_RoomId(roomId);
+        return reservations.stream()
+                .map(ReservationDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
 
     // 4. 방 예약 수정
     public void updateReservation(Integer reservationId, ReservationDTO reservationDTO, Integer memberId) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 예약을 찾을 수 없습니다."));
 
-        // 체크인/체크아웃 날짜 업데이트
-        reservation.setCheckInDate(reservationDTO.getCheckInDate());
-        reservation.setCheckOutDate(reservationDTO.getCheckOutDate());
-
-        // 숙박일 수 다시 계산
-        LocalDate checkInDate = LocalDate.parse(reservationDTO.getCheckInDate());
-        LocalDate checkOutDate = LocalDate.parse(reservationDTO.getCheckOutDate());
-        int dayCount = (int) ChronoUnit.DAYS.between(checkInDate, checkOutDate);
-        reservation.setDayCount(dayCount);
-
-        // 총 비용 계산 (객실 가격 * 숙박일 수)
-        Room room = reservation.getRoom();
-        int totalPrice = room.getRoomPrice() * dayCount;
-        reservation.setTotalPrice(totalPrice);
-
-        // 예약 인원수 업데이트
-        reservation.setCount(reservationDTO.getCount());
-        log.info("수정된 count 값: {}", reservation.getCount());
-
-        // 예약자 정보 업데이트
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다."));
-        reservation.setMember(member);
-
-        // 업데이트 후 저장
-        reservationRepository.save(reservation);
-    }
-
-    // 5. 방 예약 삭제 (예약 취소 - 관리자)
-    public void deleteReservation(Integer reservationId) {
-        Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 예약을 찾을 수 없습니다."));
-
-        // 예약 상태를 "취소 완료"로 변경
-        reservation.setReservationStatus("취소 완료");
-        reservationRepository.save(reservation);
-
         Room room = reservation.getRoom();
 
-        // 해당 방의 다른 예약이 없는지 확인 후 상태 변경
-        boolean hasOtherReservations = reservationRepository.existsByRoom_RoomId(room.getRoomId());
+        // 체크인/체크아웃 날짜 가져오기
+        LocalDateTime checkInDateTime = reservationDTO.getCheckInDate();
+        LocalDateTime checkOutDateTime = reservationDTO.getCheckOutDate();
 
-        if (!hasOtherReservations) {
-            room.setRoomStatus(true); // 다른 예약이 없다면 예약 가능 상태로 변경
-            roomRepository.save(room);
+        if (checkInDateTime == null || checkOutDateTime == null) {
+            throw new IllegalArgumentException("체크인 및 체크아웃 날짜는 필수 입력 사항입니다.");
         }
 
+        //  수정 요청 시 기존 예약과 날짜가 겹치는지 확인 (현재 예약 제외)
+        boolean isDuplicate = reservationRepository.isRoomAlreadyBooked(
+                room.getRoomId(),
+                checkInDateTime,
+                checkOutDateTime,
+                reservationId  // 현재 예약 ID 제외
+        );
+
+        if (isDuplicate) {
+            throw new IllegalArgumentException("이미 해당 날짜에 예약이 존재합니다. 다른 날짜를 선택해주세요.");
+        }
+
+        // 숙박 기간 초과 체크
+        String stayStartStr = room.getStayStart();
+        String stayEndStr = room.getStayEnd();
+
+        if (stayStartStr == null || stayEndStr == null || stayStartStr.isEmpty() || stayEndStr.isEmpty()) {
+            throw new IllegalStateException("이 객실의 숙박 가능 기간이 설정되지 않았습니다.");
+        }
+
+        LocalDate stayStart = LocalDate.parse(stayStartStr);
+        LocalDate stayEnd = LocalDate.parse(stayEndStr);
+
+        if (checkInDateTime.toLocalDate().isBefore(stayStart) || checkOutDateTime.toLocalDate().isAfter(stayEnd)) {
+            throw new IllegalArgumentException("체크인 및 체크아웃 날짜는 숙박 가능 기간(" + stayStart + " ~ " + stayEnd + ") 내에서만 가능합니다.");
+        }
+
+        // 체크아웃 날짜가 체크인 날짜보다 이전이면 예외 발생
+        if (checkOutDateTime.isBefore(checkInDateTime)) {
+            throw new IllegalArgumentException("체크아웃 날짜는 체크인 날짜보다 이후여야 합니다.");
+        }
+
+        // 숙박 일수 계산
+        long dayCount = ChronoUnit.DAYS.between(checkInDateTime.toLocalDate(), checkOutDateTime.toLocalDate());
+        if (dayCount <= 0) {
+            throw new IllegalArgumentException("체크아웃 날짜는 체크인 날짜보다 이후여야 합니다.");
+        }
+
+        // 총 비용 계산 (객실 가격 * 숙박일 수)
+        int totalPrice = room.getRoomPrice() * (int) dayCount;
+
+        // 예약 정보 업데이트
+        reservation.setCheckInDate(checkInDateTime);
+        reservation.setCheckOutDate(checkOutDateTime);
+        reservation.setDayCount((int) dayCount);
+        reservation.setTotalPrice(totalPrice);
+        reservation.setCount(reservationDTO.getCount());
+
+        reservationRepository.save(reservation);
     }
 
-    // 유저가 "취소 완료" 상태의 예약을 직접 삭제하는 메서드
-    public boolean deleteReservationByUser(Integer reservationId, Integer memberId) {
+    // 5. 방 예약 삭제 (유저가 "취소 완료" 상태의 예약을 직접 삭제하는 메서드)
+    public boolean deleteReservation(Integer reservationId, Integer memberId) {
         Optional<Reservation> optionalReservation = reservationRepository.findById(reservationId);
         if (optionalReservation.isEmpty()) {
             return false; //  이미 삭제된 경우 false 반환
@@ -225,20 +256,7 @@ public class ReservationService {
                 updatedReservation.getReservationId(), updatedReservation.getCancelConfirmedAt());
     }
 
-
-    /* 체크인 날짜가 체크아웃 날짜보다 이전인지 검증메서드 */
-    private boolean isValidDateRange(String checkInDate, String checkOutDate) {
-        try {
-            LocalDate checkIn = LocalDate.parse(checkInDate);
-            LocalDate checkOut = LocalDate.parse(checkOutDate);
-            return checkIn.isBefore(checkOut); // 체크인 날짜가 체크아웃 날짜보다 이전이면 true 반환
-        } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("날짜 형식이 올바르지 않습니다. (yyyy-MM-dd 형식이어야 합니다.)");
-        }
-    }
-
     /* 키워드 검색 메서드 */
-
     public Page<ReservationDTO> searchReservations(String category, String keyword, Pageable pageable) {
         Page<Reservation> reservations;
 
@@ -300,7 +318,6 @@ public class ReservationService {
             return dto;
         });
     }
-
 
     // 고객 예약 취소 요청
     public void requestCancelReservation(Integer reservationId, Integer memberId) {

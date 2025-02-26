@@ -20,7 +20,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,7 +28,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
@@ -46,64 +45,54 @@ public class ReservationController {
     private final MemberRepository memberRepository;
     private final RoomRepository roomRepository;
 
+    // 날짜 형식 지정
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/reservation/register")
     public ResponseEntity<?> registerReservationProc(@AuthenticationPrincipal UserDetails userDetails,
                                                      @RequestBody ReservationDTO reservationDTO) {
-        // 1. 로그인 여부 확인
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("success", false, "message", "로그인이 필요합니다."));
-        }
-
-        // 2. 회원 정보 확인
-        Optional<Member> memberOptional = memberRepository.findByMemberEmail(userDetails.getUsername());
-        if (memberOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("success", false, "message", "회원 정보를 찾을 수 없습니다."));
-        }
-        Member member = memberOptional.get();
-
-        // 3. 객실 정보 확인
-        Optional<Room> roomOptional = roomRepository.findById(reservationDTO.getRoomId());
-        if (roomOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("success", false, "message", "해당 객실을 찾을 수 없습니다."));
-        }
-        Room room = roomOptional.get();
-
-        // 4. 체크인 & 체크아웃 날짜 검증
-        LocalDate checkInDate;
-        LocalDate checkOutDate;
         try {
-            checkInDate = LocalDate.parse(reservationDTO.getCheckInDate());
-            checkOutDate = LocalDate.parse(reservationDTO.getCheckOutDate());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("success", false, "message", "날짜 형식이 올바르지 않습니다."));
-        }
+            Integer roomId = reservationDTO.getRoomId();
+            Integer count = reservationDTO.getCount();
+            var checkInDate = reservationDTO.getCheckInDate();
+            var checkOutDate = reservationDTO.getCheckOutDate();
 
-        if (checkOutDate.isBefore(checkInDate) || checkOutDate.isEqual(checkInDate)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("success", false, "message", "체크아웃 날짜는 체크인 날짜 이후여야 합니다."));
-        }
 
-        // 5. 숙박일 수 계산
-        long stayDays = ChronoUnit.DAYS.between(checkInDate, checkOutDate);
+            if (userDetails == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("success", false, "message", "로그인이 필요합니다."));
+            }
 
-        // 6. 총 금액 계산 (객실 가격 × 숙박일 수)
-        int totalPrice = room.getRoomPrice() * (int) stayDays;
+            Optional<Member> memberOptional = memberRepository.findByMemberEmail(userDetails.getUsername());
+            if (memberOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("success", false, "message", "회원 정보를 찾을 수 없습니다."));
+            }
+            Member member = memberOptional.get();
 
-        // 7. 예약 생성 및 저장
-        try {
-            reservationService.registerReservation(
-                    reservationDTO.getRoomId(),
-                    member.getMemberId(),
-                    reservationDTO.getCheckInDate(),
-                    reservationDTO.getCheckOutDate(),
-                    reservationDTO.getCount()
-            );
+            Optional<Room> roomOptional = roomRepository.findById(roomId);
+            if (roomOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("success", false, "message", "해당 객실을 찾을 수 없습니다."));
+            }
+            Room room = roomOptional.get();
+
+            // 체크인 & 체크아웃 날짜 검증
+            if (checkOutDate.isBefore(checkInDate) || checkOutDate.isEqual(checkInDate)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("success", false, "message", "체크아웃 날짜는 체크인 날짜 이후여야 합니다."));
+            }
+
+            // 숙박일 수 계산
+            long stayDays = ChronoUnit.DAYS.between(checkInDate.toLocalDate(), checkOutDate.toLocalDate());
+
+            // 총 금액 계산
+            int totalPrice = room.getRoomPrice() * (int) stayDays;
+
+            // 예약 등록 실행
+            reservationService.registerReservation(roomId, member.getMemberId(), checkInDate, checkOutDate, count);
 
             return ResponseEntity.ok(Map.of(
                     "success", true,
@@ -111,26 +100,29 @@ public class ReservationController {
                     "stayDays", stayDays + "박",
                     "totalPrice", totalPrice + " KRW"
             ));
+
         } catch (Exception e) {
+            log.error("예약 처리 중 오류 발생: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("success", false, "message", "예약 처리 중 오류 발생"));
+                    .body(Map.of("success", false, "message", e.getMessage()));
         }
     }
+
 
     @Operation(summary = "호텔 예약내역 조회", description = "호텔 예약내역 조회 페이지로 이동한다.")
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/myPage/reservationList")
     public String reservationListForm(@AuthenticationPrincipal UserDetails userDetails,
-                                      @RequestParam(value = "page", defaultValue = "0") int page, // 현재 페이지 (0부터 시작)
-                                      @RequestParam(value = "size", defaultValue = "5") int size, // 페이지 크기 (5개)
+                                      @RequestParam(value = "page", defaultValue = "0") int page,
+                                      @RequestParam(value = "size", defaultValue = "5") int size,
                                       Model model) {
         if (userDetails == null) {
-            return "redirect:/login";  // 로그인되어있지 않으면 로그인 페이지로 리다이렉트
+            return "redirect:/login";
         }
 
         Optional<Member> memberOptional = memberRepository.findByMemberEmail(userDetails.getUsername());
         if (memberOptional.isEmpty()) {
-            return "redirect:/login"; // 회원 정보가 없으면 로그인 페이지로 리다이렉트
+            return "redirect:/login";
         }
 
         Member member = memberOptional.get();
@@ -139,31 +131,15 @@ public class ReservationController {
 
         Page<ReservationDTO> reservationsPage = reservationService.getUserReservations(member.getMemberId(), pageable);
 
-        // 현재 페이지가 존재하지 않는 경우 마지막 페이지로 이동하도록 처리
         if (reservationsPage.getTotalPages() > 0 && page >= reservationsPage.getTotalPages()) {
             return "redirect:/myPage/reservationList?page=" + (reservationsPage.getTotalPages() - 1);
         }
 
-        // 데이터가 없을 경우 빈 리스트 반환
-        List<ReservationDTO> reservations = reservationsPage.getContent();  // `getContent()` 사용
+        List<ReservationDTO> reservations = reservationsPage.getContent();
 
-        // 이미지 리스트 확인
-        for (ReservationDTO reservation : reservations) {
-            if (reservation.getRoom() != null) {
-                log.info("예약된 객실 ID: {}", reservation.getRoom().getRoomId());
-                log.info("이미지 리스트 개수: {}", reservation.getRoom().getRoomImageDTOList().size());
-                if (!reservation.getRoom().getRoomImageDTOList().isEmpty()) {
-                    log.info("첫 번째 이미지 경로: {}", reservation.getRoom().getRoomImageDTOList().get(0).getImagePath());
-                } else {
-                    log.warn("객실 ID {} - 이미지 없음", reservation.getRoom().getRoomId());
-                }
-            }
-        }
-
-        // Thymeleaf에서 사용하기 위해 Model에 데이터 추가
         model.addAttribute("reservations", reservations);
-        model.addAttribute("currentPage", reservationsPage.getNumber()); // 현재 페이지 번호
-        model.addAttribute("totalPages", reservationsPage.getTotalPages()); // 전체 페이지 수
+        model.addAttribute("currentPage", reservationsPage.getNumber());
+        model.addAttribute("totalPages", reservationsPage.getTotalPages());
 
         return "myPage/reservationList";
     }
@@ -182,7 +158,6 @@ public class ReservationController {
         Member member = memberOptional.get();
 
         try {
-            // 기존 직접 접근 방식 대신 Service의 메서드 호출로 변경
             reservationService.requestCancelReservation(reservationId, member.getMemberId());
             return ResponseEntity.ok("예약 취소 요청이 접수되었습니다.");
         } catch (IllegalArgumentException e) {
@@ -194,9 +169,6 @@ public class ReservationController {
     @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER')")
     @PostMapping("/admin/reservation/cancel")
     public ResponseEntity<?> approveCancelReservationProc(@RequestParam Integer reservationId) {
-        log.info("[approveCancelReservationProc] 요청 수신 - 관리자 확인 필요");
-        log.info("현재 로그인한 유저: {}", SecurityContextHolder.getContext().getAuthentication().getName());
-
         try {
             reservationService.approveCancelReservation(reservationId);
             return ResponseEntity.ok("예약이 취소 완료되었습니다.");
@@ -221,7 +193,7 @@ public class ReservationController {
         Member member = memberOptional.get();
 
         try {
-            boolean isDeleted = reservationService.deleteReservationByUser(reservationId, member.getMemberId());
+            boolean isDeleted = reservationService.deleteReservation(reservationId, member.getMemberId());
 
             //  이미 삭제된 예약도 성공 처리
             if (!isDeleted) {
