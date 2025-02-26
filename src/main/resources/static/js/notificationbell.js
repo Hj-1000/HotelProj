@@ -40,10 +40,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
 
-                // 🔥 댓글 알림은 제외하도록 필터링 (예시: 메시지에 "댓글"이 포함된 경우)
+                // 🔥 댓글 알림은 제외하도록 필터링
                 notifications = notifications.filter(n => !n.notificationMessage.includes("댓글"));
 
                 updateNotificationList();
+
+                // ✅ 알림 목록이 업데이트된 후 count를 다시 불러옴
+                fetchUnreadNotifications();
             })
             .catch(error => {
                 console.error("🔔 관리자 알림 로드 실패", error);
@@ -104,6 +107,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 📌 새 알림 수 가져오기
     function fetchUnreadNotifications() {
+        updateNotificationList();
         fetch('/notifications/unreadCount')
             .then(response => response.json())
             .then(data => {
@@ -117,7 +121,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     unreadCount.textContent = filteredNotifications.length;
                     unreadCount.style.display = filteredNotifications.length > 0 ? 'inline' : 'none';
 
-                    updateNotificationList();
                 }
             })
             .catch(error => console.error('❌ Error fetching unread notifications:', error));
