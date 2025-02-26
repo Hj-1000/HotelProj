@@ -123,7 +123,7 @@
             <button type="submit" class="btn btn-warning">수정</button>
         </form>
         <form th:action="@{/qna/delete/{id}(id=${qna.qnaId})}" method="post">
-            <button type="submit" class="btn btn-danger">삭제</button>
+            <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i></button>
         </form>
     </div>
 
@@ -155,7 +155,7 @@
 
                     <form th:action="@{/reply/delete/{replyId}(replyId=${reply.replyId})}" method="post"
                           onsubmit="return confirm('정말 삭제하시겠습니까?');">
-                        <button type="submit" class="btn btn-danger">삭제</button>
+                        <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i></button>
                     </form>
 
                 </div>

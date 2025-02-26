@@ -159,7 +159,7 @@
     <div th:if="${not #lists.isEmpty(qnaList)}" class="pagination-container" style="display: flex; justify-content: center; align-items: center;">
         <ul class="pagination">
             <!-- 이전 페이지 버튼 -->
-            <li class="page-item" th:classappend="${pagination['currentPage'] == 1 ? 'disabled' : ''}">
+            <li class="page-item" th:classappend="${pagination['currentPage'] == 1 }? 'disabled' : ''">
                 <a class="page-link" th:href="@{/qna/list(page=${pagination['prevPage']}, keyword=${keyword != null && keyword != '' ? keyword : ''})}">이전</a>
             </li>
 

@@ -128,7 +128,7 @@
                 <div id="imagePreviewContainer">
                     <div th:each="image : ${room.roomImageDTOList}" class="image-preview">
                         <img th:src="@{|/upload/${image.imagePath}|}" alt="이미지 미리보기" class="preview-img" style="width:150px; height:auto;">
-                        <input type="checkbox" th:name="deleteImages" th:value="${image.imageId}"> 삭제
+                        <input type="checkbox" th:name="deleteImages" th:value="${image.imageId}"> <i class="bi bi-trash"></i>
                     </div>
                 </div>
             </div>

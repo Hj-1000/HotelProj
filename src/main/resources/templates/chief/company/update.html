@@ -79,7 +79,7 @@
                         <div>
                             <img th:src="@{'/upload/' + ${img.imagePath}}" alt="old" width="100" id="image-{{iterStat.index}}">
                             <!-- 이미지 삭제 버튼, 이미지 아이디를 전달 -->
-                            <button type="button" class="imgDelBtn" th:onclick="'deleteOldImage(' + ${img.imageId} + ')'" >삭제</button>
+                            <button type="button" class="imgDelBtn" th:onclick="'deleteOldImage(' + ${img.imageId} + ')'" ><i class="bi bi-trash"></i></button>
                         </div>
                     </div>
 
@@ -97,7 +97,7 @@
                     </div>
 
                     <div style="text-align: right">
-                        <a class="btn btn-danger" th:href="@{/chief/company/delete(companyId=${companyDTO.companyId})}">삭제</a>
+                        <a class="btn btn-danger" th:href="@{/chief/company/delete(companyId=${companyDTO.companyId})}"><i class="bi bi-trash"></i></a>
                         <button type="submit" class="btn btn-primary">등록</button>
                     </div>
                 </form>
