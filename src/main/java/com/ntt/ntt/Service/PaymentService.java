@@ -1,5 +1,6 @@
 package com.ntt.ntt.Service;
 
+import com.ntt.ntt.DTO.MemberDTO;
 import com.ntt.ntt.DTO.PaymentDTO;
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Entity.Payment;
@@ -11,11 +12,17 @@ import com.ntt.ntt.Repository.ReservationRepository;
 import com.ntt.ntt.Repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -27,6 +34,7 @@ public class PaymentService {
     private final MemberRepository memberRepository;
     private final RoomRepository roomRepository;
     private final ReservationRepository reservationRepository;
+    private final ModelMapper modelMapper;
 
     // 결제 정보 저장 메소드
     public Payment savePayment(PaymentDTO paymentDTO) {
@@ -44,8 +52,8 @@ public class PaymentService {
         if (existingPayment != null) {
             // 기존 결제 정보가 있으면 새로운 값을 기존 값에 더함
             existingPayment.setRoomPrice(paymentDTO.getRoomPrice());
-            existingPayment.setRoomServicePrice(existingPayment.getRoomServicePrice() + paymentDTO.getRoomServicePrice()); // 기존값 + 새로운값
-            existingPayment.setTotalPrice(paymentDTO.getTotalPrice());
+            existingPayment.setRoomServicePrice(paymentDTO.getRoomServicePrice());
+            existingPayment.setTotalPrice(existingPayment.getTotalPrice() + paymentDTO.getTotalPrice()); // 기존값 + 새로운값
             existingPayment.setModDate(LocalDateTime.now());
 
             // 업데이트 후 저장
@@ -67,6 +75,63 @@ public class PaymentService {
             paymentRepository.save(payment);
             return payment;
         }
+    }
+
+    // 결제 내역 조회 및 검색 기능
+    public List<PaymentDTO> getFilteredPayments(String room, String minPrice, String maxPrice, String startDate, String endDate) {
+        List<Payment> payments = paymentRepository.findAll();
+
+        if (room != null && !room.isEmpty()) {
+            payments = payments.stream()
+                    .filter(payment -> payment.getRoom().getRoomName().equals(room))
+                    .collect(Collectors.toList());
+        }
+        if (minPrice != null && !minPrice.isEmpty()) {
+            try {
+                int min = Integer.parseInt(minPrice);
+                payments = payments.stream()
+                        .filter(payment -> payment.getTotalPrice() >= min)
+                        .collect(Collectors.toList());
+            } catch (NumberFormatException e) {
+                System.out.println("잘못된 최소 금액 입력: " + minPrice);
+            }
+        }
+        if (maxPrice != null && !maxPrice.isEmpty()) {
+            try {
+                int max = Integer.parseInt(maxPrice);
+                payments = payments.stream()
+                        .filter(payment -> payment.getTotalPrice() <= max)
+                        .collect(Collectors.toList());
+            } catch (NumberFormatException e) {
+                System.out.println("잘못된 최대 금액 입력: " + maxPrice);
+            }
+        }
+        if (startDate != null && !startDate.isEmpty()) {
+            try {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                LocalDate start = LocalDate.parse(startDate, formatter);
+                payments = payments.stream()
+                        .filter(payment -> payment.getRegDate().toLocalDate().isEqual(start) || payment.getRegDate().toLocalDate().isAfter(start))
+                        .collect(Collectors.toList());
+            } catch (DateTimeParseException e) {
+                System.out.println("잘못된 시작 날짜 입력: " + startDate);
+            }
+        }
+        if (endDate != null && !endDate.isEmpty()) {
+            try {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                LocalDate end = LocalDate.parse(endDate, formatter);
+                payments = payments.stream()
+                        .filter(payment -> payment.getRegDate().toLocalDate().isEqual(end) || payment.getRegDate().toLocalDate().isBefore(end))
+                        .collect(Collectors.toList());
+            } catch (DateTimeParseException e) {
+                System.out.println("잘못된 종료 날짜 입력: " + endDate);
+            }
+        }
+
+        return payments.stream()
+                .map(payment -> modelMapper.map(payment, PaymentDTO.class))
+                .collect(Collectors.toList());
     }
 }
 

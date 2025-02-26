@@ -512,16 +512,26 @@ public class HotelService {
                 .filter(hotel -> name == null || hotel.getMember().getMemberName().contains(name))
                 .filter(hotel -> phone == null || hotel.getMember().getMemberPhone().contains(phone))
                 .filter(hotel -> {
-                    if (startDate == null || endDate == null || startDate.isEmpty() || endDate.isEmpty()) {
+                    if ((startDate == null || startDate.isEmpty()) && (endDate == null || endDate.isEmpty())) {
                         return true; // 날짜 필터링 안 함
                     }
 
-                    LocalDate start = LocalDate.parse(startDate);
-                    LocalDate end = LocalDate.parse(endDate);
                     LocalDate memberRegDate = hotel.getMember().getRegDate().toLocalDate();
 
-                    return (memberRegDate.isEqual(start) || memberRegDate.isAfter(start)) &&
-                            (memberRegDate.isEqual(end) || memberRegDate.isBefore(end));
+                    if (startDate != null && !startDate.isEmpty()) {
+                        LocalDate start = LocalDate.parse(startDate);
+                        if (memberRegDate.isBefore(start)) {
+                            return false; // 시작 날짜 이후만 허용
+                        }
+                    }
+                    if (endDate != null && !endDate.isEmpty()) {
+                        LocalDate end = LocalDate.parse(endDate);
+                        if (memberRegDate.isAfter(end)) {
+                            return false; // 종료 날짜 이전만 허용
+                        }
+                    }
+
+                    return true; // 조건 만족
                 })
                 .map(hotel -> modelMapper.map(hotel, HotelDTO.class))
                 .collect(Collectors.toList());
