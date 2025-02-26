@@ -57,10 +57,11 @@
 
             <div th:each="order, stat : ${orders.content}" class="card mb-3">
                 <div class="card-header">
-                    NO.<span th:text="${stat.index + 1 + (page * orders.size)}"></span>
+                    NO.<span th:text="${(pageInfo.currentPage - 1) * orders.size + stat.index + 1}"></span>
                     주문번호: <span th:text="${order.serviceOrderId}"></span>
                     방이름: <span class="badge bg-primary ms-2" th:text="${order.reservationDTO.room.roomName}"></span>
                     방 예약 날짜 : <span th:text="${#temporals.format(order.reservationDTO.regDate, 'yyyy-MM-dd')}"></span>
+                    주문 날짜 : <span th:text="${#temporals.format(order.regDate, 'yyyy-MM-dd')}"></span>
                     <span class="badge bg-secondary ms-2" th:text="${order.serviceOrderStatus}"></span>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -79,22 +80,31 @@
                 </div>
             </div>
 
-            <!-- 페이징 처리 -->
-            <nav th:if="${orders.totalPages > 1}" aria-label="Page navigation">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item" th:classappend="${page == 0} ? 'disabled'">
-                        <a class="page-link" th:href="@{/myPage/order/history/(page=${page - 1})}" tabindex="-1">이전</a>
+            <!-- 페이지네이션 -->
+            <div class="d-flex justify-content-center" th:if="${orders.totalPages > 1}">
+                <ul class="pagination">
+                    <li class="page-item" th:classappend="${pageInfo.currentPage == 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/myPage/order/history(page=1)}">시작</a>
                     </li>
-
-                    <li th:each="i : ${#numbers.sequence(0, orders.totalPages - 1)}" class="page-item" th:classappend="${i == page} ? 'active'">
-                        <a class="page-link" th:href="@{/myPage/order/history/(page=${i})}" th:text="${i + 1}"></a>
+                    <li class="page-item" th:unless="${pageInfo.currentPage == 1}">
+                        <a class="page-link" th:href="@{/myPage/order/history(page=${pageInfo.prevPage})}">이전</a>
                     </li>
-
-                    <li class="page-item" th:classappend="${page + 1 == orders.totalPages} ? 'disabled'">
-                        <a class="page-link" th:href="@{/myPage/order/history/(page=${page + 1})}">다음</a>
+                    <th:block th:each="num : ${#numbers.sequence(pageInfo.startPage, pageInfo.endPage, 1)}">
+                        <li class="page-item" th:unless="${num == pageInfo.currentPage}">
+                            <a class="page-link" th:href="@{/myPage/order/history(page=${num})}" th:text="${num}">1</a>
+                        </li>
+                        <li class="page-item active" th:if="${num == pageInfo.currentPage}">
+                            <a class="page-link" th:href="@{/myPage/order/history(page=${num})}" th:text="${num}">[[${num}]]</a>
+                        </li>
+                    </th:block>
+                    <li class="page-item" th:unless="${pageInfo.currentPage >= pageInfo.lastPage}">
+                        <a class="page-link" th:href="@{/myPage/order/history(page=${pageInfo.nextPage})}">다음</a>
+                    </li>
+                    <li class="page-item" th:classappend="${pageInfo.currentPage == pageInfo.lastPage} ? 'disabled'">
+                        <a class="page-link" th:href="@{/myPage/order/history(page=${pageInfo.lastPage})}">끝</a>
                     </li>
                 </ul>
-            </nav>
+            </div>
         </div>
     </div>
 

@@ -160,22 +160,23 @@ public class ServiceOrderService {
     }
 
     // 구매이력 불러오기
-    public Page<ServiceOrderHistoryDTO> getOrderList(String memberEmail, Pageable pageable) {
-        //repository에서 필요한 memberEmail
+    public Page<ServiceOrderHistoryDTO> getOrderList(String memberEmail, Pageable page) {
+        int currentPage = page.getPageNumber() - 1;
+        int pageSize = page.getPageSize(); // 클라이언트에서 전달된 size 사용
+        // 기존 페이지 그대로 사용
+        Pageable pageable = PageRequest.of(page.getPageNumber(), pageSize, Sort.by(Sort.Direction.ASC, "serviceOrderId"));
 
-        //구매목록
+        // 구매 목록 불러오기
         List<ServiceOrder> serviceOrderList = serviceOrderRepository.findServiceOrders(memberEmail, pageable);
 
-        //페이징처리를 위한 총 구매목록의 수
+        // 전체 주문 수 카운트
         Integer totalCount = serviceOrderRepository.totalCount(memberEmail);
 
-        //구매목록의 구매아이템들을 만들어주기 위한 List
         List<ServiceOrderHistoryDTO> serviceOrderHistoryDTOList = new ArrayList<>();
 
-        //EntityToDTO // 주문, 주문아이템들, 주문아이템들의 이미지
+        // Entity -> DTO 변환
         for (ServiceOrder serviceOrder : serviceOrderList) {
             ServiceOrderHistoryDTO serviceOrderHistoryDTO = new ServiceOrderHistoryDTO();
-
             serviceOrderHistoryDTO.setServiceOrderId(serviceOrder.getServiceOrderId());
             serviceOrderHistoryDTO.setRegDate(serviceOrder.getRegDate());
             serviceOrderHistoryDTO.setServiceOrderStatus(serviceOrder.getServiceOrderStatus());
@@ -183,18 +184,15 @@ public class ServiceOrderService {
             serviceOrderHistoryDTO.setMemberDTO(modelMapper.map(serviceOrder.getMember(), MemberDTO.class));
 
             List<ServiceOrderItem> serviceOrderItemList = serviceOrder.getServiceOrderItemList();
-
             for (ServiceOrderItem serviceOrderItem : serviceOrderItemList) {
-
                 ServiceOrderItemDTO serviceOrderItemDTO = new ServiceOrderItemDTO();
                 serviceOrderItemDTO.setServiceOrderItemId(serviceOrder.getServiceOrderId());
                 serviceOrderItemDTO.setServiceMenuName(serviceOrderItem.getServiceMenu().getServiceMenuName());
                 serviceOrderItemDTO.setOrderPrice(serviceOrderItem.getOrderPrice());
                 serviceOrderItemDTO.setCount(serviceOrderItem.getCount());
 
-                // 아이템 주문아이템들중 1개
+                // 메뉴 이미지 경로 세팅
                 List<Image> serviceMenuImageList = serviceOrderItem.getServiceMenu().getServiceMenuImageList();
-                //메뉴에 달려있는 이미지
                 for (Image image : serviceMenuImageList) {
                     serviceOrderItemDTO.setImagePath(image.getImagePath());
                 }
@@ -202,7 +200,9 @@ public class ServiceOrderService {
             }
             serviceOrderHistoryDTOList.add(serviceOrderHistoryDTO);
         }
-        return new PageImpl<ServiceOrderHistoryDTO>(serviceOrderHistoryDTOList, pageable, totalCount);
+
+        // PageImpl 생성
+        return new PageImpl<>(serviceOrderHistoryDTOList, pageable, totalCount);
     }
 
     //------------------------------------관리자용-----------------------------------
