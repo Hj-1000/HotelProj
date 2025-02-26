@@ -40,6 +40,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
 
+                // 🔥 댓글 알림은 제외하도록 필터링 (예시: 메시지에 "댓글"이 포함된 경우)
+                notifications = notifications.filter(n => !n.notificationMessage.includes("댓글"));
 
                 updateNotificationList();
             })
@@ -106,8 +108,16 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => response.json())
             .then(data => {
                 if (!isNaN(data)) {
+                    // 🚨 서버에서 가져온 값 그대로 사용
                     unreadCount.textContent = data;
                     unreadCount.style.display = data > 0 ? 'inline' : 'none';
+
+                    // 🚨 클라이언트에서 한번 더 댓글 알림 필터링
+                    let filteredNotifications = notifications.filter(n => !n.notificationMessage.includes("댓글"));
+                    unreadCount.textContent = filteredNotifications.length;
+                    unreadCount.style.display = filteredNotifications.length > 0 ? 'inline' : 'none';
+
+                    updateNotificationList();
                 }
             })
             .catch(error => console.error('❌ Error fetching unread notifications:', error));

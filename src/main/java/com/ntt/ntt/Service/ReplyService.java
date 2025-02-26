@@ -43,10 +43,18 @@ public class ReplyService {
         Reply savedReply = replyRepository.save(reply);
         System.out.println("✅ 저장된 댓글 ID: " + savedReply.getReplyId());
 
-        // ✅ 댓글이 달린 글의 작성자에게만 알림 생성
-        if (!qna.getMember().equals(member)) { // 본인이 댓글 단 경우 제외
-            String message = member.getMemberName() + " 님이 당신의 Q&A 글에 댓글을 남겼습니다.";
-            notificationService.createNotification(qna.getMember(), message, qna);
+        // ✅ 댓글이 달린 글의 작성자에게만 알림 생성 (관리자 자신에게는 알림 X)
+        if (!qna.getMember().equals(member)) { // 글 작성자와 댓글 작성자가 다를 때만 실행
+            if (!member.getRole().equals("admin")) { // 댓글 작성자가 관리자가 아닐 때
+                String message = member.getMemberName() + " 님이 당신의 Q&A 글에 댓글을 남겼습니다.";
+                notificationService.createNotification(qna.getMember(), message, qna);
+            }
+            // 🔥 관리자(admin)가 댓글을 단 경우, 글 작성자(member)에게만 알림을 보낸다.
+            else if (!qna.getMember().getRole().equals("admin")) {
+                // Q&A 작성자가 관리자가 아닌 경우에만 알림
+                String message = "관리자 님이 당신의 Q&A 글에 댓글을 남겼습니다.";
+                notificationService.createNotification(qna.getMember(), message, qna);
+            }
         }
     }
 
