@@ -33,7 +33,7 @@
                             <input type="text" class="form-control" id="room" name="room" placeholder="객실명" th:value="${param.room}">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">매출액</label>
+                            <label class="form-label">결제 완료 금액</label>
                             <div class="d-flex gap-3">
                                 <div class="form-group" style="flex: 1;">
                                     <input type="number" class="form-control" id="최소" name="minPrice"th:value="${param.minPrice}">
@@ -65,27 +65,73 @@
         </div>
         <div class="card mt-4">
             <div class="card-body">
-                <h5 class="card-title">매출 관리</h5>
+                <h5 class="card-title">일일 매출 그래프 (최근 7일)</h5>
+                <canvas id="chart" th:data-sales-data="${salesDataJson} ?: '[]'" style="width: 100%; height: 400px;"></canvas>
+            </div>
+        </div>
+        <div class="card mt-4">
+            <div class="card-header d-flex justify-content-between">
+                <h5 class="card-title mb-0">일일 매출 현황 (최근 7일)</h5>
+                <button class="btn btn-link" id="toggleCard" aria-expanded="true">
+                    <span id="toggleIcon">-</span> <!-- 기본적으로 내용이 펼쳐짐 -->
+                </button>
+            </div>
+            <div class="card-body" id="cardContent">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>날짜</th>
+                        <th>객실 매출</th>
+                        <th>룸서비스 매출</th>
+                        <th>총 매출</th>
+                        <th>결제 건수</th>
+                    </tr>
+                    </thead>
+                    <tbody id="dailySalesTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">결제내역 상세보기</h5>
                 <table class="table table-bordered text-center" id="memberTable">
                     <thead>
                     <tr>
-                        <th style="background-color: #f8f9fa; width: 10%">주문번호</th>
-                        <th style="background-color: #f8f9fa; width: 15%">객실금액</th>
-                        <th style="background-color: #f8f9fa; width: 15%">룸서비스금액</th>
-                        <th style="background-color: #f8f9fa; width: 20%">총 금액</th>
-                        <th style="background-color: #f8f9fa; width: 10%">객실번호</th>
-                        <th style="background-color: #f8f9fa; width: 30%">최종결제일</th>
+                        <th style="background-color: #f8f9fa; width: 6%">주문번호</th>
+                        <th style="background-color: #f8f9fa; width: 12%">객실 금액</th>
+                        <th style="background-color: #f8f9fa; width: 12%">룸서비스 금액</th>
+                        <th style="background-color: #f8f9fa; width: 12%">총 금액</th>
+                        <th style="background-color: #f8f9fa; width: 12%">결제 완료 금액</th>
+                        <th style="background-color: #f8f9fa; width: 12%">미결제 금액</th>
+                        <th style="background-color: #f8f9fa; width: 12%">객실명</th>
+                        <th style="background-color: #f8f9fa; width: 10%">결제 상태</th>
+                        <th style="background-color: #f8f9fa; width: 12%">최종 결제일</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <th:block th:each="paymentDTO : ${paymentDTOList}">
+                    <th:block th:each="paymentDTO, iterStat : ${paymentDTOList}">
                         <tr style="vertical-align: middle;">
                             <td th:text="${paymentDTO.paymentId}">1</td>
-                            <td th:text="${paymentDTO.roomPrice}">1</td>
-                            <td th:text="${paymentDTO.roomServicePrice}">1</td>
-                            <td th:text="${paymentDTO.totalPrice}">1</td>
-                            <td th:text="${paymentDTO.roomId}">1</td>
-                            <td th:text="${#temporals.format(paymentDTO.regDate, 'yyyy-MM-dd HH:mm')}">2023-01-01</td>
+
+                            <td th:if="${reservationList[iterStat.index].roomPrice != null}" th:text="'₩' + ${#numbers.formatInteger(reservationList[iterStat.index].roomPrice, 1, 'COMMA')}">객실 금액</td>
+                            <td th:if="${reservationList[iterStat.index].totalServiceOrderPrice != null}" th:text="'₩' + ${#numbers.formatInteger(reservationList[iterStat.index].totalServiceOrderPrice, 1, 'COMMA')}">룸서비스 금액</td>
+                            <td th:text="'₩' + ${#numbers.formatInteger(reservationList[iterStat.index].roomPrice + reservationList[iterStat.index].totalServiceOrderPrice, 1, 'COMMA')}">총 금액</td>
+
+                            <td th:text="'₩' + ${#numbers.formatInteger(paymentDTO.totalPrice, 1, 'COMMA')}">결제 완료 금액</td>
+                            <td th:text="'₩' + ${#numbers.formatInteger(reservationList[iterStat.index].roomPrice + reservationList[iterStat.index].totalServiceOrderPrice - paymentDTO.totalPrice, 1, 'COMMA')}">미결제 금액</td>
+
+                            <td th:text="${reservationList[iterStat.index].room.roomName}">객실명</td>
+
+                            <!-- 결제 상태 처리 -->
+                            <td>
+                                <span class="btn btn-primary" style="pointer-events: none; cursor: default;" th:if="${reservationList[iterStat.index].roomPrice + reservationList[iterStat.index].totalServiceOrderPrice - paymentDTO.totalPrice == 0}">결제 완료</span>
+                                <span class="btn btn-danger" style="pointer-events: none; cursor: default;" th:if="${reservationList[iterStat.index].roomPrice + reservationList[iterStat.index].totalServiceOrderPrice - paymentDTO.totalPrice > 0}">결제 필요</span>
+                                <span class="btn btn-warning" style="pointer-events: none; cursor: default;" th:if="${reservationList[iterStat.index].roomPrice + reservationList[iterStat.index].totalServiceOrderPrice - paymentDTO.totalPrice < 0}">환불 필요</span>
+                            </td>
+
+                            <td th:text="${#temporals.format(paymentDTO.modDate, 'yyyy-MM-dd HH:mm')}">최종 결제일</td>
+                        </tr>
                     </th:block>
                     </tbody>
                 </table>
@@ -115,6 +161,251 @@
             </div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var salesData = /*[[${salesDataJson}]]*/ '[]';
+        salesData = salesData ? JSON.parse(salesData) : [];
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const chartElement = document.getElementById("chart");
+
+            if (!salesData.length) {
+                console.log("데이터 없음");
+                return;
+            }
+
+            // 최근 7일의 데이터만 추출
+            const recentDays = 7;
+            const recentSalesData = salesData.slice(-recentDays);  // 마지막 7일의 데이터만 가져오기
+
+            // 일일 매출 및 결제 건수 데이터 집계
+            const dailyData = {};
+
+            recentSalesData.forEach(data => {
+                const date = data.date.substring(0, 10);  // 날짜 (YYYY-MM-DD)
+                if (!dailyData[date]) {
+                    dailyData[date] = {
+                        totalSales: 0,
+                        roomSales: 0,
+                        serviceSales: 0,
+                        paymentCount: 0 // 결제 건수 추가
+                    };
+                }
+                dailyData[date].totalSales += data.totalSales;
+                dailyData[date].roomSales += data.roomSales;
+                dailyData[date].serviceSales += data.serviceSales;
+                dailyData[date].paymentCount += 1;  // 결제 건수 증가
+            });
+
+            // 일일 매출 데이터를 배열로 변환
+            const days = Object.keys(dailyData);  // 날짜 목록 (YYYY-MM-DD)
+            const totalSales1 = days.map(day => dailyData[day].totalSales);  // 총 매출
+            const roomSales1 = days.map(day => dailyData[day].roomSales);   // 객실 금액
+            const serviceSales1 = days.map(day => dailyData[day].serviceSales); // 룸서비스 금액
+            const paymentCounts1 = days.map(day => dailyData[day].paymentCount); // 결제 건수
+
+            // 테이블에 일일 매출 데이터 출력
+            const tableBody = document.getElementById("dailySalesTableBody");
+            days.forEach((day, index) => {
+                const row = document.createElement("tr");
+
+                // 증감폭 계산
+                const prevRoomSales = index > 0 ? roomSales1[index - 1] : null;
+                const prevServiceSales = index > 0 ? serviceSales1[index - 1] : null;
+                const prevTotalSales = index > 0 ? totalSales1[index - 1] : null;
+                const prevPaymentCount = index > 0 ? paymentCounts1[index - 1] : null;
+
+                function calculateChange(current, previous) {
+                    if (previous === null) return ""; // 첫 번째 데이터는 비교할 값이 없으므로 빈 문자열
+                    const change = ((current - previous) / previous) * 100;
+                    return (change >= 0 ? "+" : "") + change.toFixed(1) + "%";
+                }
+
+                row.innerHTML = `
+    <td>${day}</td>
+    <td>
+        <div class="d-flex justify-content-between">
+            <span class="text-start">
+                ₩ ${new Intl.NumberFormat().format(roomSales1[index])}
+            </span>
+            <span class="text-${roomSales1[index] > prevRoomSales ? 'success' : roomSales1[index] < prevRoomSales ? 'danger' : 'muted'} text-end">
+                ${calculateChange(roomSales1[index], prevRoomSales)}
+            </span>
+        </div>
+    </td>
+    <td>
+        <div class="d-flex justify-content-between">
+            <span class="text-start">
+                ₩ ${new Intl.NumberFormat().format(serviceSales1[index])}
+            </span>
+            <span class="text-${serviceSales1[index] > prevServiceSales ? 'success' : serviceSales1[index] < prevServiceSales ? 'danger' : 'muted'} text-end">
+                ${calculateChange(serviceSales1[index], prevServiceSales)}
+            </span>
+        </div>
+    </td>
+    <td>
+        <div class="d-flex justify-content-between">
+            <span class="text-start">
+                ₩ ${new Intl.NumberFormat().format(totalSales1[index])}
+            </span>
+            <span class="text-${totalSales1[index] > prevTotalSales ? 'success' : totalSales1[index] < prevTotalSales ? 'danger' : 'muted'} text-end">
+                ${calculateChange(totalSales1[index], prevTotalSales)}
+            </span>
+        </div>
+    </td>
+    <td>
+        <div class="d-flex justify-content-between">
+            <span class="text-start">
+                ${paymentCounts1[index]}
+            </span>
+            <span class="text-${paymentCounts1[index] > prevPaymentCount ? 'success' : paymentCounts1[index] < prevPaymentCount ? 'danger' : 'muted'} text-end">
+                ${calculateChange(paymentCounts1[index], prevPaymentCount)}
+            </span>
+        </div>
+    </td>
+`;
+                tableBody.appendChild(row);
+                function calculateChange(current, previous) {
+                    if (previous === null || isNaN(current) || isNaN(previous) || !isFinite(current) || !isFinite(previous)) {
+                        return ""; // 값이 NaN 또는 Infinity일 경우 빈 문자열 반환
+                    }
+
+                    const change = ((current - previous) / previous) * 100;
+
+                    // 증감폭이 Infinity일 경우 표시하지 않음
+                    if (!isFinite(change)) {
+                        return ""; // Infinity일 경우 빈 문자열 반환
+                    }
+
+                    return (change >= 0 ? "+" : "") + change.toFixed(1) + "%";
+                }
+            });
+
+
+            // 날짜별 매출 및 결제 건수 데이터 집계
+            const aggregatedData = {};
+
+            recentSalesData.forEach(data => {
+                const date = data.date.substring(0, 10);  // 날짜 (YYYY-MM-DD)
+                if (!aggregatedData[date]) {
+                    aggregatedData[date] = {
+                        totalSales: 0,
+                        roomSales: 0,
+                        serviceSales: 0,
+                        paymentCount: 0 // 결제 건수 추가
+                    };
+                }
+                aggregatedData[date].totalSales += data.totalSales;
+                aggregatedData[date].roomSales += data.roomSales;
+                aggregatedData[date].serviceSales += data.serviceSales;
+                aggregatedData[date].paymentCount += 1;  // 결제 건수 증가
+            });
+
+            // 집계된 데이터를 배열로 변환
+            const labels = Object.keys(aggregatedData);  // 날짜 목록
+            const totalSales = labels.map(date => aggregatedData[date].totalSales);  // 총 매출
+            const roomSales = labels.map(date => aggregatedData[date].roomSales);   // 객실 금액
+            const serviceSales = labels.map(date => aggregatedData[date].serviceSales); // 룸서비스 금액
+            const paymentCounts = labels.map(date => aggregatedData[date].paymentCount); // 결제 건수
+
+            const ctx = chartElement.getContext("2d");
+            new Chart(ctx, {
+                type: "bar",  // 기본적으로 막대 그래프
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: "결제 완료 금액",
+                            data: totalSales,
+                            borderColor: "blue",
+                            backgroundColor: "rgba(0, 0, 255, 0.2)",
+                            fill: true,
+                            barPercentage: 0.5  // 막대의 두께 설정
+                        },
+                        {
+                            label: "객실 금액",
+                            data: roomSales,
+                            borderColor: "green",
+                            backgroundColor: "rgba(0, 255, 0, 0.2)",
+                            fill: true,
+                            barPercentage: 0.5
+                        },
+                        {
+                            label: "룸서비스 금액",
+                            data: serviceSales,
+                            borderColor: "red",
+                            backgroundColor: "rgba(255, 0, 0, 0.2)",
+                            fill: true,
+                            barPercentage: 0.5
+                        },
+                        {
+                            label: "결제 건수",  // 결제 건수는 선형 그래프로
+                            data: paymentCounts,
+                            borderColor: "orange",
+                            backgroundColor: "rgba(255, 165, 0, 0.2)",
+                            fill: false,  // 선형 그래프이므로 fill을 false로 설정
+                            tension: 0,  // 선형 그래프의 곡선을 부드럽게
+                            type: "line",  // 선형 그래프 형식
+                            borderWidth: 2, // 선 굵기
+                            yAxisID: 'y2'  // 별도의 y축 사용 (옵션)
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: "top"
+                        },
+                        tooltip: {
+                            mode: "index",
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: "금액 (₩)"
+                            }
+                        },
+                        y2: {  // 두 번째 y축 추가 (결제 건수 전용)
+                            type: 'linear',
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: '결제 건수'
+                            },
+                            grid: {
+                                drawOnChartArea: false  // 그리드선 숨기기
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: "날짜"
+                            }
+                        }
+                    }
+                }
+            });
+        });
+        /*]]>*/
+    </script>
+    <script>
+        document.getElementById("toggleCard").addEventListener("click", function () {
+            var cardContent = document.getElementById("cardContent");
+            var toggleIcon = document.getElementById("toggleIcon");
+
+            // 토글 (숨기기/보이기)
+            cardContent.style.display = cardContent.style.display === "none" ? "block" : "none";
+
+            // 아이콘 변경
+            toggleIcon.textContent = cardContent.style.display === "none" ? "+" : "-";
+        });
+    </script>
 </div>
 </body>
 </html>
