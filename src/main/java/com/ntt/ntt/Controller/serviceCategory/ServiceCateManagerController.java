@@ -70,22 +70,30 @@ public class ServiceCateManagerController {
     public String listSearch(@RequestParam(required = false) String keyword,
                              @RequestParam(required = false) String searchType,
                              @RequestParam(required = false) Integer hotelId, // hotelId 2024-02-11 추가
-                             @PageableDefault(page = 1) Pageable page, Model model) {
+                             @PageableDefault(page = 1) Pageable page,
+                             Model model) {
 
-        Page<ServiceCateDTO> serviceCateDTOS = serviceCateService.list(page, keyword, searchType, hotelId); // hotelId 전달 2024-02-11 추가
+        // 검색 기능을 포함한 서비스 호출
+        Page<ServiceCateDTO> serviceCateDTOS = serviceCateService.list(page, keyword, searchType, hotelId);
 
-        // 페이지 정보 계산
+        // 페이지 정보 계산 (PaginationUtil 사용)
         Map<String, Integer> pageInfo = paginationUtil.pagination(serviceCateDTOS);
 
-        //hotelDTO hotelName 전달하기
+        // 전체 페이지 수
+        int totalPages = serviceCateDTOS.getTotalPages();
+        // 현재 페이지 수
+        int currentPage = pageInfo.get("currentPage");
+
+        // 시작 페이지와 끝 페이지 계산 (현재 페이지를 기준으로 최대 10페이지까지)
+        int startPage = Math.max(1, currentPage - 4); // 10개씩 끊어서 시작 페이지 계산
+        int endPage = Math.min(startPage + 9, totalPages); // 최대 페이지 수를 넘기지 않도록
+
+        // hotelDTO hotelName 전달하기
         List<HotelDTO> hotelDTOS = serviceCateService.getAllHotel();
 
-
-        // 만약 글이 10개 이하라면, 페이지 2는 표시되지 않도록 수정
-        if (serviceCateDTOS.getTotalPages() <= 1) {
-            pageInfo.put("startPage", 1);
-            pageInfo.put("endPage", 1);
-        }
+        // 페이지 정보 업데이트 (동적으로 계산된 startPage, endPage)
+        pageInfo.put("startPage", startPage);
+        pageInfo.put("endPage", endPage);
 
         // 모델에 데이터 추가
         model.addAttribute("serviceCateDTOS", serviceCateDTOS);

@@ -1,5 +1,6 @@
 package com.ntt.ntt.Controller.serviceOrder;
 
+import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.ServiceOrderHistoryDTO;
 import com.ntt.ntt.DTO.ServiceOrderItemUpdateDTO;
 import com.ntt.ntt.DTO.ServiceOrderUpdateDTO;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -38,10 +40,20 @@ public class ServiceOrderManagerController {
 
         Map<String, Integer> pageInfo = paginationUtil.pagination(serviceOrderHistoryDTOS);
 
-        if (serviceOrderHistoryDTOS.getTotalPages() <= 1) {
-            pageInfo.put("startPage", 1);
-            pageInfo.put("endPage", 1);
-        }
+        // 전체 페이지 수
+        int totalPages = serviceOrderHistoryDTOS.getTotalPages();
+        // 현재 페이지 수
+        int currentPage = pageInfo.get("currentPage");
+
+        // 시작 페이지와 끝 페이지 계산 (현재 페이지를 기준으로 최대 10페이지까지)
+        int startPage = Math.max(1, currentPage - 4); // 10개씩 끊어서 시작 페이지 계산
+        int endPage = Math.min(startPage + 9, totalPages); // 최대 페이지 수를 넘기지 않도록
+
+        // 페이지 정보 업데이트 (동적으로 계산된 startPage, endPage)
+        pageInfo.put("startPage", startPage);
+        pageInfo.put("endPage", endPage);
+
+
         model.addAttribute("serviceOrderHistoryDTOS", serviceOrderHistoryDTOS);
         model.addAttribute("pageInfo", pageInfo);
         model.addAttribute("keyword", keyword);
