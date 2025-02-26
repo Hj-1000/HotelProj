@@ -3,7 +3,9 @@ package com.ntt.ntt.Controller.reservation;
 import com.ntt.ntt.DTO.ReservationDTO;
 import com.ntt.ntt.DTO.RoomDTO;
 import com.ntt.ntt.Entity.Member;
+import com.ntt.ntt.Entity.Reservation;
 import com.ntt.ntt.Repository.MemberRepository;
+import com.ntt.ntt.Repository.ReservationRepository;
 import com.ntt.ntt.Service.ReservationService;
 import com.ntt.ntt.Service.RoomService;
 import com.ntt.ntt.Util.PaginationUtil;
@@ -11,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -23,6 +26,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +42,7 @@ public class ReservationManagerController {
     private final ReservationService reservationService;
     private final RoomService roomService;
     private final MemberRepository memberRepository;
+    private final ReservationRepository reservationRepository;
 
     private final PaginationUtil paginationUtil;
 
@@ -46,8 +51,8 @@ public class ReservationManagerController {
     @PostMapping("/register")
     public String registerReservationProc(@RequestParam("roomId") Integer roomId,
                                           @RequestParam("memberId") Integer memberId,
-                                          @RequestParam("checkInDate") String checkInDate,
-                                          @RequestParam("checkOutDate") String checkOutDate,
+                                          @RequestParam("checkInDate") LocalDateTime checkInDate,
+                                          @RequestParam("checkOutDate") LocalDateTime checkOutDate,
                                           @RequestParam("count") Integer count,
                                           RedirectAttributes redirectAttributes) {
         try {
@@ -68,6 +73,7 @@ public class ReservationManagerController {
             Model model,
             @AuthenticationPrincipal UserDetails userDetails,
             @PageableDefault(size = 10, page = 0) Pageable pageable,
+            @RequestParam(value = "roomId", required = false) Integer roomId,
             @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "keyword", required = false) String keyword) {
 
@@ -78,12 +84,34 @@ public class ReservationManagerController {
 
         // 예약된 방 검색
         Page<ReservationDTO> reservationPage;
+
+        if (roomId != null) {
+            // 특정 객실의 예약만 조회
+            List<ReservationDTO> reservations = reservationService.getReservationsByRoomId(roomId);
+            reservationPage = new PageImpl<>(reservations, pageable, reservations.size());
+        } else if (category != null && keyword != null && !keyword.trim().isEmpty()) {
+            reservationPage = reservationService.searchReservations(category, keyword, pageable);
+        } else {
+            reservationPage = reservationService.getAllReservations(pageable);
+        }
+
         if (category != null && keyword != null && !keyword.trim().isEmpty() &&
                 (category.equals("roomName") || category.equals("memberId") || category.equals("memberName"))) {
             reservationPage = reservationService.searchReservations(category, keyword, pageable);
         } else {
             reservationPage = reservationService.getAllReservations(pageable);
         }
+
+        List<ReservationDTO> reservations = reservationPage.getContent();
+
+        // 예약 목록이 비어있다면, 기본 빈 예약 객체 추가 (Thymeleaf에서 NullPointerException 방지)
+        if (reservations.isEmpty()) {
+            model.addAttribute("reservation", new ReservationDTO()); // 빈 객체 추가
+        } else {
+            model.addAttribute("reservation", reservations.get(0)); // 첫 번째 예약을 기본으로 설정
+        }
+        model.addAttribute("reservations", reservations);
+
 
         // 모든 방 검색 (객실 이름 + 상태 검색 가능)
         Page<RoomDTO> roomPage;
@@ -155,12 +183,15 @@ public class ReservationManagerController {
     // 4. 예약 수정
     @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER')")
     @PostMapping("/update")
-    public String updateReservationProc(@RequestParam(value = "reservationId", required = false) Integer reservationId,
-                                        @RequestParam(value = "roomId", required = true) Integer roomId,
-                                        @RequestParam(value = "reservationEnd", required = false) String reservationEnd,
-                                        @RequestParam(value = "count", required = false) Integer count,
-                                        @ModelAttribute ReservationDTO reservationDTO,
-                                        RedirectAttributes redirectAttributes) {
+    public String updateReservationProc(
+            @RequestParam(value = "reservationId", required = false) Integer reservationId,
+            @RequestParam(value = "roomId", required = true) Integer roomId,
+            @RequestParam(value = "reservationEnd", required = false) String reservationEnd,
+            @RequestParam(value = "checkInDate", required = false) String checkInDate,
+            @RequestParam(value = "checkOutDate", required = false) String checkOutDate,
+            @RequestParam(value = "count", required = false) Integer count,
+            @ModelAttribute ReservationDTO reservationDTO,
+            RedirectAttributes redirectAttributes) {
 
         log.info("[updateReservationProc] 요청됨 - reservationId: {}, roomId: {}, reservationEnd: {}",
                 reservationId, roomId, reservationEnd);
@@ -171,38 +202,72 @@ public class ReservationManagerController {
             return "redirect:/manager/room/reservation/list";
         }
 
-        reservationDTO.setCount(count);
-
         try {
-            // 예약 ID가 없으면 예약 마감 날짜만 수정
+            // 예약 ID가 없으면 예약 마감 날짜만 수정 (기존 동작과 동일)
             if (reservationId == null) {
-                log.info("[updateReservationProc] 기간 만료된 방 - 예약 마감 날짜만 수정");
+                log.info("[updateReservationProc] 예약 마감 날짜만 수정");
 
-                roomService.updateReservationEnd(roomId, reservationEnd);
+                roomService.updateReservationEnd(roomId, reservationEnd);  // String 그대로 전달
                 roomService.updateRoomStatusBasedOnReservationEnd(roomId);
                 redirectAttributes.addFlashAttribute("successMessage", "예약 마감 날짜가 성공적으로 수정되었습니다.");
                 return "redirect:/manager/room/reservation/list";
             }
 
-            // 예약이 존재하는 경우, 예약 정보 수정
+            // 예약이 존재하는 경우, 날짜 변환 후 예약 정보 수정
+            LocalDateTime checkIn = checkInDate != null ? LocalDateTime.parse(checkInDate) : null;
+            LocalDateTime checkOut = checkOutDate != null ? LocalDateTime.parse(checkOutDate) : null;
+
+            reservationDTO.setCheckInDate(checkIn);
+            reservationDTO.setCheckOutDate(checkOut);
+            reservationDTO.setReservationEnd(reservationEnd);
+            reservationDTO.setCount(count);
+
             reservationService.updateReservation(reservationId, reservationDTO, reservationDTO.getMemberId());
             roomService.updateRoomStatusBasedOnReservationEnd(roomId);
+
             redirectAttributes.addFlashAttribute("successMessage", "예약이 성공적으로 수정되었습니다.");
+            return "redirect:/manager/room/reservation/list";
+
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", " 예약 수정 실패: " + e.getMessage());
             return "redirect:/manager/room/reservation/list";
         } catch (Exception e) {
             log.error("[updateReservationProc] 예약 수정 중 오류 발생", e);
-            redirectAttributes.addFlashAttribute("errorMessage", "예약 수정 중 오류가 발생했습니다.");
+            redirectAttributes.addFlashAttribute("errorMessage", " 서버 오류 발생. 다시 시도해주세요.");
             return "redirect:/manager/room/reservation/list";
         }
     }
 
+
     // 5. 예약 삭제
     @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER')")
     @PostMapping("/delete")
-    public String deleteReservationProc(@RequestParam("reservationId") Integer reservationId) {
-        reservationService.deleteReservation(reservationId);
+    public String deleteReservationProc(@RequestParam("reservationId") Integer reservationId, RedirectAttributes redirectAttributes) {
+        try {
+            Reservation reservation = reservationRepository.findById(reservationId)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 예약을 찾을 수 없습니다."));
+
+            // 예약 상태 확인 (이미 취소된 예약은 다시 취소할 수 없음)
+            if (!"예약".equals(reservation.getReservationStatus())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "이미 취소된 예약은 삭제할 수 없습니다.");
+                return "redirect:/manager/room/reservation/list";
+            }
+
+            // '취소 완료'로 상태 변경하고 1분 후 자동 삭제되도록 설정
+            reservation.setReservationStatus("취소 완료");
+            reservation.setCancelConfirmedAt(LocalDateTime.now());
+            reservationRepository.saveAndFlush(reservation);
+
+            redirectAttributes.addFlashAttribute("successMessage", "예약이 강제 취소되었습니다. 1분 후 자동 삭제됩니다.");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "예약 삭제 중 오류 발생");
+        }
+
         return "redirect:/manager/room/reservation/list";
     }
+
 
     // 6. 방 강제 사용 중지
     @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER')")
@@ -220,6 +285,7 @@ public class ReservationManagerController {
         Optional<Member> member = memberRepository.findById(memberId);
         if (member.isPresent()) {
             return ResponseEntity.ok(Map.of(
+                    "memberId", member.get().getMemberId(),
                     "memberName", member.get().getMemberName(),
                     "memberEmail", member.get().getMemberEmail()
             ));

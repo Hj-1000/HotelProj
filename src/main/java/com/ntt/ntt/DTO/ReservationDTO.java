@@ -6,9 +6,9 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.*;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -20,19 +20,33 @@ import java.time.LocalDateTime;
 public class ReservationDTO {
 
     private Integer reservationId;
-    private String checkInDate;
-    private String checkOutDate;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    private LocalDateTime checkInDate;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    private LocalDateTime checkOutDate;
+
     private Integer totalPrice;
+
     private String reservationStatus;
+
     private Integer memberId;
+
     private String memberName;
+
     private String memberEmail;
+
     private Integer roomId;
+
     private RoomDTO room;
+
     private LocalDateTime regDate;
+
     private LocalDateTime modDate;
 
-    private Integer totalServiceOrderPrice; // 서비스 주문 총 가격
+    // 서비스 주문 총 가격
+    private Integer totalServiceOrderPrice;
 
     // 방 예약 여부
     private Boolean reserved;
@@ -57,6 +71,7 @@ public class ReservationDTO {
         return 0; // 기본값을 0으로 설정 (추후 로직을 추가 가능)
     }
 
+    // Entity -> DTO 변환 메서드
     public static ReservationDTO fromEntity(Reservation reservation) {
         if (reservation == null) {
             throw new IllegalArgumentException("Reservation entity가 null입니다.");
@@ -68,6 +83,7 @@ public class ReservationDTO {
         LocalDateTime cancelConfirmedTime = reservation.getCancelConfirmedAt();
         Long remainingTime = 0L; // 기본값을 0으로 설정
 
+        // 취소 완료된 예약일 경우, 1분 후 삭제되도록 남은 시간 계산
         if ("취소 완료".equals(reservation.getReservationStatus()) && cancelConfirmedTime != null) {
             remainingTime = Duration.between(now, cancelConfirmedTime.plusMinutes(1)).toSeconds(); // 1분 후 삭제
 
@@ -90,8 +106,8 @@ public class ReservationDTO {
             paymentTotalPrice = payment.getTotalPrice();
         }
 
-        log.info("[fromEntity] 변환 - reservationId={}, cancelConfirmedAt={}, remainingTime={}, totalServiceOrderPrice={}",
-                reservation.getReservationId(), cancelConfirmedTime, remainingTime, totalServiceOrderPrice);
+        log.info("[fromEntity] 변환 - reservationId={}, cancelConfirmedAt={}, remainingTime={}",
+                reservation.getReservationId(), cancelConfirmedTime, remainingTime);
 
         return new ReservationDTO(
                 reservation.getReservationId(),
@@ -106,8 +122,8 @@ public class ReservationDTO {
                 roomDTO,
                 reservation.getRegDate(),
                 reservation.getModDate(),
-                totalServiceOrderPrice, //
-                roomDTO != null && roomDTO.getReservationEnd() != null && LocalDate.parse(roomDTO.getReservationEnd()).isAfter(LocalDate.now()),
+                totalServiceOrderPrice,
+                roomDTO != null && roomDTO.getReservationEnd() != null,
                 roomDTO != null ? roomDTO.getReservationEnd() : "",
                 reservation.getDayCount(),
                 reservation.getCount(),
@@ -118,4 +134,9 @@ public class ReservationDTO {
                 paymentTotalPrice
         );
     }
+
+    public LocalDateTime getCheckInDate() {
+        return checkInDate != null ? checkInDate : LocalDateTime.of(2000, 1, 1, 0, 0);
+    }
+
 }

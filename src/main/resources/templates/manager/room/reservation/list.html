@@ -7,6 +7,7 @@
 <head>
     <meta charset="UTF-8">
     <title>객실 예약 관리</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css"/>
     <link rel="stylesheet" th:href="@{/css/reservation.css}" type="text/css"/>
 </head>
@@ -46,7 +47,7 @@
             <input type="hidden" name="memberId" id="memberId" th:value="${memberId}">
         </form>
 
-        <!-- 모든 객실 목록 -->
+        <!-- 객실 관리 현황 -->
         <div class="admin-section">
             <h2 class="text-center">객실 관리 현황</h2>
             <div class="table-tabs">
@@ -54,10 +55,14 @@
                 <div id="allTab" class="table-tab" onclick="changeTab('all')">모든 객실</div>
             </div>
 
-            <!-- 예약된 객실만 표시 -->
+            <!-- 예약된 객실 -->
             <div id="reservedTable" class="tab-content  active">
                 <th:block th:if="${reservationPage.totalElements == 0}">
                     <p class="alert alert-warning text-center no-data-message">현재 예약 내역이 없습니다.</p>
+                </th:block>
+
+                <th:block th:if="${roomId != null}">
+                    <p class="alert alert-info text-center">현재 선택된 객실의 예약 목록을 표시 중입니다.</p>
                 </th:block>
 
                 <th:block th:unless="${reservationPage.totalElements ==0}">
@@ -76,6 +81,7 @@
                             <th>숙박일</th>
                             <th>총 비용</th>
                             <th>상태</th>
+                            <th>취소</th>
                             <th>관리</th>
                         </tr>
                         </thead>
@@ -88,8 +94,8 @@
                             <td th:text="${reservation.memberName}"></td>
                             <td th:text="${reservation.count}"></td>
                             <td th:text="${reservation.memberEmail}"></td>
-                            <td th:text="${reservation.checkInDate}"></td>
-                            <td th:text="${reservation.checkOutDate}"></td>
+                            <td th:text="${#temporals.format(reservation.checkInDate, 'yyyy-MM-dd HH:mm')}"></td>
+                            <td th:text="${#temporals.format(reservation.checkOutDate, 'yyyy-MM-dd HH:mm')}"></td>
                             <td th:text="${reservation.dayCount} + '박 ' + (${reservation.dayCount + 1}) + '일'"></td>
                             <td th:text="'₩' + ${#numbers.formatInteger(reservation.totalPrice, 1, 'COMMA')}"></td>
                             <td>
@@ -115,6 +121,28 @@
                                         <button type="submit" class="btn btn-danger">강제 취소</button>
                                     </form>
                                 </th:block>
+                            </td>
+                            <td>
+                                <button class="btn-warning"
+                                        th:attr="data-room-id=${reservation.room.roomId},
+                                                 data-reservation-id=${reservation.reservationId},
+                                                 data-member-id=${reservation.memberId},
+                                                 data-checkin=${reservation.checkInDate},
+                                                 data-checkout=${reservation.checkOutDate},
+                                                 data-reservationEnd=${reservation.room.reservationEnd},
+                                                 data-is-expired='false',
+                                                 data-count=${reservation.count}"
+                                        onclick="openEditModal(
+                                            this.getAttribute('data-room-id'),
+                                            this.getAttribute('data-reservation-id'),
+                                            this.getAttribute('data-member-id'),
+                                            this.getAttribute('data-checkin'),
+                                            this.getAttribute('data-checkout'),
+                                            this.getAttribute('data-reservationEnd'),
+                                            'false',
+                                            this.getAttribute('data-count'))">
+                                    수정
+                                </button>
                             </td>
                         </tr>
                         </tbody>
@@ -151,6 +179,7 @@
                 </div>
             </div>
 
+            <!-- 모든 객실 -->
             <div id="allTable" class="tab-content">
                 <th:block th:if="${roomPage.totalElements == 0}">
                     <p class="alert alert-warning text-center no-data-message">현재 만들어진 객실이 없습니다.</p>
@@ -177,7 +206,9 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr th:each="room, iterStat : ${roomPage.content}" th:with="reservation=${reservationMap[room.roomId]}">
+                        <tr th:each="room, iterStat : ${roomPage.content}"
+                            th:with="reservation=${reservationMap[room.roomId]}"
+                            th:attr="data-room-id=${room.roomId}, data-room-name=${room.roomName}">
                             <td th:text="${roomPage.number * roomPage.size + iterStat.index + 1}"></td>
                             <td th:text="${room.roomName}"></td>
                             <td th:text="${room.roomType}"></td>
@@ -194,9 +225,11 @@
                             <!-- 예약자 이메일 -->
                             <td th:text="${reservation != null ? reservation.memberEmail : ''}"></td>
 
-                            <!-- 체크인 및 체크아웃 날짜 -->
-                            <td th:text="${reservation != null ? reservation.checkInDate : ''}"></td>
-                            <td th:text="${reservation != null ? reservation.checkOutDate : ''}"></td>
+                            <!-- 체크인 날짜 -->
+                            <td th:text="${reservation != null ? #temporals.format(reservation.checkInDate, 'yyyy-MM-dd HH:mm') : ''}"></td>
+
+                            <!-- 체크아웃 날짜 -->
+                            <td th:text="${reservation != null ? #temporals.format(reservation.checkOutDate, 'yyyy-MM-dd HH:mm') : ''}"></td>
 
                             <!-- 숙박일 추가 -->
                             <td th:text="${reservation != null ? reservation.dayCount + '박 ' + (reservation.dayCount + 1) + '일' : ''}"></td>
@@ -218,54 +251,85 @@
 
                             <!-- 수정 버튼 -->
                             <td>
-                                <button th:classappend="${room.isExpired ? 'btn-danger' : (reservation != null ? 'btn-warning' : 'btn-primary')}"
-                                        th:text="${room.isExpired ? '수정' : (reservation != null ? '수정' : '등록')}"
-                                        th:attr="data-room-id=${room.roomId},
-                                 data-reservation-id=${reservation != null ? reservation.reservationId : '-1'},
-                                 data-member-id=${reservation != null ? reservation.memberId : ''},
-                                 data-checkin=${reservation != null ? reservation.checkInDate : ''},
-                                 data-checkout=${reservation != null ? reservation.checkOutDate : ''},
-                                 data-reservationEnd=${room.reservationEnd},
-                                 data-is-expired=${room.isExpired},
-                                 data-count=${reservation != null ? reservation.count : 1}"
-                                        onclick="
-                                if (this.getAttribute('data-is-expired') === 'true') {
-                                    openEditModal(
-                                        this.getAttribute('data-room-id'),
-                                        this.getAttribute('data-reservation-id'),
-                                        this.getAttribute('data-member-id'),
-                                        this.getAttribute('data-checkin'),
-                                        this.getAttribute('data-checkout'),
-                                        this.getAttribute('data-reservationEnd'),
-                                        this.getAttribute('data-is-expired'),
-                                        this.getAttribute('data-count')
-                                    );
-                                } else if (this.getAttribute('data-reservation-id') !== '-1') {
-                                    openEditModal(
-                                        this.getAttribute('data-room-id'),
-                                        this.getAttribute('data-reservation-id'),
-                                        this.getAttribute('data-member-id'),
-                                        this.getAttribute('data-checkin'),
-                                        this.getAttribute('data-checkout'),
-                                        this.getAttribute('data-reservationEnd'),
-                                        'false',
-                                        this.getAttribute('data-count')
-                                    );
-                                } else {
-                                    openRegisterModal(
-                                        this.getAttribute('data-room-id'),
-                                        this.getAttribute('data-reservationEnd')
-                                    );
-                                }
-                        ">
-                                </button>
+                                <!-- 예약된 객실 보기 버튼 -->
+                                <th:block th:if="${reservation != null}">
+                                    <div class="button-container">
+                                        <button class="btn-warning"
+                                                th:text="'조회'"
+                                                th:attr="data-room-id=${room.roomId}"
+                                                onclick="viewRoomReservations(this.getAttribute('data-room-id'))">
+                                        </button>
+
+                                        <!-- 예약된 객실에도 등록 버튼 -->
+                                        <button class="btn-primary"
+                                                th:text="'등록'"
+                                                th:attr="data-room-id=${room.roomId},
+                                                         data-reservationEnd=${room.reservationEnd}"
+                                                onclick="openRegisterModal(
+                                                    this.getAttribute('data-room-id'),
+                                                    this.getAttribute('data-reservationEnd')
+                                                )">
+                                        </button>
+                                    </div>
+                                </th:block>
+
+
+                                <!-- 수정 , 등록 버튼 -->
+                                <th:block th:if="${room.isExpired or reservation == null}">
+                                    <button th:classappend="${room.isExpired ? 'btn-danger' : 'btn-primary'}"
+                                            th:text="${room.isExpired ? '수정' : '등록'}"
+                                            th:attr="data-room-id=${room.roomId},
+                                                     data-reservation-id=${reservation != null ? reservation.reservationId : '-1'},
+                                                     data-member-id=${reservation != null and reservation.memberId != null ? reservation.memberId : '-1'},
+                                                     data-checkin=${reservation != null ? reservation.checkInDate : ''},
+                                                     data-checkout=${reservation != null ? reservation.checkOutDate : ''},
+                                                     data-reservationEnd=${room.reservationEnd},
+                                                     data-is-expired=${room.isExpired},
+                                                     data-count=${reservation != null ? reservation.count : 1}"
+                                            onclick="
+                                                let memberId = this.getAttribute('data-member-id');
+                                                if (!memberId || memberId === 'null' || memberId === '-1') {
+                                                    memberId = '-1';
+                                                }
+
+                                                if (this.getAttribute('data-is-expired') === 'true') {
+                                                    openEditModal(
+                                                        this.getAttribute('data-room-id'),
+                                                        this.getAttribute('data-reservation-id'),
+                                                        memberId,
+                                                        this.getAttribute('data-checkin'),
+                                                        this.getAttribute('data-checkout'),
+                                                        this.getAttribute('data-reservationEnd'),
+                                                        this.getAttribute('data-is-expired'),
+                                                        this.getAttribute('data-count')
+                                                    );
+                                                } else if (this.getAttribute('data-reservation-id') !== '-1') {
+                                                    openEditModal(
+                                                        this.getAttribute('data-room-id'),
+                                                        this.getAttribute('data-reservation-id'),
+                                                        memberId,
+                                                        this.getAttribute('data-checkin'),
+                                                        this.getAttribute('data-checkout'),
+                                                        this.getAttribute('data-reservationEnd'),
+                                                        'false',
+                                                        this.getAttribute('data-count')
+                                                    );
+                                                } else {
+                                                    openRegisterModal(
+                                                        this.getAttribute('data-room-id'),
+                                                        this.getAttribute('data-reservationEnd')
+                                                    );
+                                                }
+                                            ">
+                                    </button>
+                                </th:block>
                             </td>
                         </tr>
                         </tbody>
                     </table>
                 </th:block>
 
-                <!-- 모든 방 검색바 -->
+                <!-- 모든 객실 검색바 -->
                 <div class="search-bar text-center mt-3" th:if="${roomPage.totalElements > 0}">
                     <form id="allRoomSearchForm" th:action="@{/manager/room/reservation/list}" method="get">
                         <select name="category">
@@ -321,21 +385,21 @@
                 <label>예약자 이메일:</label>
                 <input type="email" id="registerMemberEmail" name="memberEmail" readonly disabled><br>
 
-                <label>총 인원 선택:</label>
-                <select id="registerCount" name="count" required>
+                <label style="display: block">총 인원 선택:</label>
+                <select id="registerCount" name="count" style="display: block" required>
                     <option value="1">1명</option>
                     <option value="2">2명</option>
                     <option value="3">3명</option>
                     <option value="4">4명</option>
                     <option value="5">5명</option>
                     <option value="6">6명</option>
-                </select><br><br>
+                </select><br>
 
                 <label>체크인 날짜:</label>
-                <input type="date" id="registerCheckIn" name="checkInDate" required><br>
+                <input type="datetime-local" id="registerCheckIn" name="checkInDate" required><br>
 
                 <label>체크아웃 날짜:</label>
-                <input type="date" id="registerCheckOut" name="checkOutDate" required><br>
+                <input type="datetime-local" id="registerCheckOut" name="checkOutDate" required><br>
 
                 <label>예약마감 날짜:</label>
                 <input type="date" id="registerReservationEnd" name="reservationEnd" readonly disabled><br>
@@ -350,19 +414,24 @@
         <div class="modal-content">
             <span class="close" onclick="closeModal()">&times;</span>
             <h3>객실 정보 수정</h3>
-            <form id="editForm" method="post" action="/manager/room/reservation/update"  th:object="${reservationDTO}" >
+            <form id="editForm" method="post" action="/manager/room/reservation/update" th:object="${reservationDTO}">
+
+                <!-- 기본 정보 -->
                 <input type="hidden" id="editRoomId" name="roomId">
                 <input type="hidden" id="editReservationId" name="reservationId">
+                <input type="hidden" id="editIsExpired" name="isExpired">
 
+                <!-- 예약자 정보 -->
                 <label>예약자 ID:</label>
                 <input type="number" id="editMemberId" name="memberId" min="1" required><br>
 
                 <label>예약자 이름:</label>
-                <input type="text" id="editMemberName" name="memberName"  readonly><br>
+                <input type="text" id="editMemberName" name="memberName" readonly><br>
 
                 <label>예약자 이메일:</label>
                 <input type="email" id="editMemberEmail" name="memberEmail" readonly><br>
 
+                <!-- 총 인원 선택 -->
                 <label id="editCountLabel">총 인원 선택:</label>
                 <select id="editCount" name="count">
                     <option value="1">1명</option>
@@ -373,14 +442,25 @@
                     <option value="6">6명</option>
                 </select><br>
 
-                <label>체크인 날짜:</label>
-                <input type="date" id="editCheckIn" name="checkInDate" required><br>
+                <!-- 체크인 및 체크아웃 날짜 -->
+                <div id="reservationFields">
+                    <label>체크인 날짜:</label>
+                    <input type="datetime-local" id="editCheckIn" name="checkInDate"
+                           th:value="${reservation != null and reservation.checkInDate != null
+                            ? #temporals.format(reservation.checkInDate, 'yyyy-MM-dd''T''HH:mm') : ''}"
+                           required>
 
-                <label>체크아웃 날짜:</label>
-                <input type="date" id="editCheckOut" name="checkOutDate" required><br>
+                    <label>체크아웃 날짜:</label>
+                    <input type="datetime-local" id="editCheckOut" name="checkOutDate"
+                           th:value="${reservation != null and reservation.checkOutDate != null
+                            ? #temporals.format(reservation.checkOutDate, 'yyyy-MM-dd''T''HH:mm') : ''}"
+                           required>
+                </div>
 
+
+                <!-- 예약 마감 날짜 -->
                 <label>예약마감 날짜:</label>
-                <input type="date" id="editReservationEnd"  name="reservationEnd" ><br>
+                <input type="date" id="editReservationEnd" name="reservationEnd">
 
                 <button type="submit" class="btn btn-primary">수정</button>
             </form>
@@ -515,54 +595,14 @@
                         return;
                     }
 
-                    // 예약 가능(초록색) 방 클릭 시 자동으로 오늘, 내일 날짜로 간편 예약 진행
-                    if (confirm("간편 예약하시겠습니까? ")) {
-                        let today = new Date().toISOString().split("T")[0]; // 오늘 날짜 (YYYY-MM-DD)
-                        let tomorrow = new Date();
-                        tomorrow.setDate(tomorrow.getDate() + 1);
-                        let formattedTomorrow = tomorrow.toISOString().split("T")[0]; // 내일 날짜 (YYYY-MM-DD)
-
-                        let form = document.createElement("form");
-                        form.method = "post";
-                        form.action = "/manager/room/reservation/register";
-
-                        let roomInput = document.createElement("input");
-                        roomInput.type = "hidden";
-                        roomInput.name = "roomId";
-                        roomInput.value = roomId;
-                        form.appendChild(roomInput);
-
-                        let memberInput = document.createElement("input");
-                        memberInput.type = "hidden";
-                        memberInput.name = "memberId";
-                        memberInput.value = memberId; // 현재 로그인된 사용자 ID 가져오기
-                        form.appendChild(memberInput);
-
-                        let checkInInput = document.createElement("input");
-                        checkInInput.type = "hidden";
-                        checkInInput.name = "checkInDate";
-                        checkInInput.value = today;
-                        form.appendChild(checkInInput);
-
-                        let checkOutInput = document.createElement("input");
-                        checkOutInput.type = "hidden";
-                        checkOutInput.name = "checkOutDate";
-                        checkOutInput.value = formattedTomorrow;
-                        form.appendChild(checkOutInput);
-
-                        let countInput = document.createElement("input");
-                        countInput.type = "hidden";
-                        countInput.name = "count";
-                        countInput.value = "1"; // 무조건 1명으로 설정
-                        form.appendChild(countInput);
-
-                        document.body.appendChild(form);
-                        form.submit();
+                    //  기존 등록 모달 사용
+                    if (confirm("간편 예약을 하시겠습니까?")) {
+                        openRegisterModal(roomId, memberId);
                     }
                 });
             });
 
-            // 예약 취소 요청 함수
+            //  예약 취소 요청 함수
             function cancelReservation(reservationId) {
                 if (!reservationId) {
                     alert("예약 정보를 찾을 수 없습니다.");
@@ -588,11 +628,17 @@
         document.addEventListener("DOMContentLoaded", function () {
             document.querySelectorAll(".btn-warning").forEach(button => {
                 button.addEventListener("click", function () {
+                    console.log(" 수정 버튼 클" +
+                        "릭 감지됨!");
+
                     let roomId = this.getAttribute("data-room-id");
                     let reservationId = this.getAttribute("data-reservation-id");
                     let checkIn = this.getAttribute("data-checkin");
                     let checkOut = this.getAttribute("data-checkout");
                     let reservationEnd = this.getAttribute("data-reservationEnd");
+
+                    console.log(" 수정 버튼 정보:", { roomId, reservationId, checkIn, checkOut, reservationEnd });
+
 
                     openEditModal(roomId, reservationId, checkIn, checkOut, reservationEnd);
                 });
@@ -603,7 +649,12 @@
 
         document.addEventListener("DOMContentLoaded", function () {
             let savedTab = localStorage.getItem("selectedTab") || "reserved";
-            changeTab(savedTab, false); // 자동 초기화 방지
+
+            if (typeof changeTab === "function") {
+                changeTab(savedTab, false); // 자동 초기화 방지
+            } else {
+                console.error(" changeTab 함수가 정의되지 않았습니다.");
+            }
         });
 
         function changeTab(tab, shouldReset = true) {
@@ -649,43 +700,59 @@
                 .catch(error => console.error("탭 변경 중 오류 발생:", error));
         }
 
-        /* 체크인 날짜 변경 시 체크아웃 최소 날짜 설정 */
 
         document.addEventListener("DOMContentLoaded", function () {
-            let editCheckIn = document.getElementById("editCheckIn");
-            let editCheckOut = document.getElementById("editCheckOut");
-            let registerCheckIn = document.getElementById("registerCheckIn");
-            let registerCheckOut = document.getElementById("registerCheckOut");
+            let checkInInputs = document.querySelectorAll("#editCheckIn, #registerCheckIn");
+            let checkOutInputs = document.querySelectorAll("#editCheckOut, #registerCheckOut");
 
-            function updateCheckOutMinDate(checkInInput, checkOutInput) {
+            function validateCheckOutDate(checkInInput, checkOutInput) {
+                let checkInDate = new Date(checkInInput.value);
+                let checkOutDate = new Date(checkOutInput.value);
+
+                if (isNaN(checkInDate) || isNaN(checkOutDate)) {
+                    return; // 유효한 날짜가 아니면 검증하지 않음
+                }
+
+                if (checkOutDate <= checkInDate) {
+                    alert(" 체크아웃 날짜는 체크인 날짜보다 늦어야 합니다.");
+                    checkOutInput.value = ""; // 잘못된 날짜 선택 시 초기화
+                }
+            }
+
+            checkInInputs.forEach(checkInInput => {
                 checkInInput.addEventListener("change", function () {
-                    let checkInDate = new Date(this.value);
-                    if (!isNaN(checkInDate.getTime())) {
-                        let nextDay = new Date(checkInDate);
-                        nextDay.setDate(nextDay.getDate() + 1); // 체크인 다음날부터 선택 가능
+                    let checkOutInput = this.closest("form").querySelector("[name='checkOutDate']");
+                    if (checkOutInput) {
+                        let selectedCheckIn = new Date(this.value);
+                        let nextDay = new Date(selectedCheckIn);
+                        nextDay.setDate(nextDay.getDate() + 1);
+                        let formattedNextDay = nextDay.toISOString().slice(0, 16);
 
-                        let formattedDate = nextDay.toISOString().split("T")[0]; // YYYY-MM-DD 형식 변환
-                        checkOutInput.min = formattedDate;
+                        checkOutInput.min = formattedNextDay;
 
-                        // 기존 체크아웃 날짜가 체크인 날짜보다 이전이라면 초기화
-                        if (checkOutInput.value && new Date(checkOutInput.value) < checkInDate) {
-                            checkOutInput.value = formattedDate;
+                        // 기존 체크아웃 날짜가 유효 범위를 벗어나면 초기화
+                        if (checkOutInput.value && new Date(checkOutInput.value) < selectedCheckIn) {
+                            checkOutInput.value = "";
                         }
                     }
                 });
-            }
+            });
 
-            // 체크아웃 날짜 변경 시 체크인 날짜보다 이전 선택 불가
-            function preventInvalidCheckOut(checkInInput, checkOutInput) {
+            checkOutInputs.forEach(checkOutInput => {
                 checkOutInput.addEventListener("change", function () {
-                    let checkInDate = new Date(checkInInput.value);
-                    let checkOutDate = new Date(this.value);
-                    if (checkInDate && checkOutDate < checkInDate) {
-                        alert("체크아웃 날짜는 체크인 날짜 이후로 설정해야 합니다.");
-                        this.value = ""; // 잘못된 입력 초기화
+                    let checkInInput = this.closest("form").querySelector("[name='checkInDate']");
+                    if (checkInInput) {
+                        validateCheckOutDate(checkInInput, this);
                     }
                 });
-            }
+            });
+        });
+
+        /* 체크인 날짜 변경 시 체크아웃 최소 날짜 설정 */
+
+        document.addEventListener("DOMContentLoaded", function () {
+            let checkInInputs = document.querySelectorAll("#editCheckIn, #registerCheckIn");
+            let checkOutInputs = document.querySelectorAll("#editCheckOut, #registerCheckOut");
 
             function updateDateLimits(roomId, checkInInput, checkOutInput) {
                 let roomElement = document.querySelector(`[data-room-id='${roomId}']`);
@@ -698,54 +765,109 @@
                 let stayEnd = roomElement.getAttribute("data-stay-end");
 
                 if (!stayStart || !stayEnd) {
-                    console.error("숙박 기간 정보가 없습니다. stayStart:", stayStart, "stayEnd:", stayEnd);
+                    console.error("숙박 가능 기간 정보가 없습니다.");
                     return;
                 }
 
                 console.log(`객실 ${roomId}의 숙박 가능 기간: ${stayStart} ~ ${stayEnd}`);
 
-                // 체크인 & 체크아웃 날짜 범위 설정
-                checkInInput.min = stayStart;
-                checkInInput.max = stayEnd;
-                checkOutInput.min = stayStart;
-                checkOutInput.max = stayEnd;
+                // 날짜를 `YYYY-MM-DD`에서 `YYYY-MM-DDTHH:MM`으로 변환
+                let formattedStayStart = `${stayStart}T00:00`;
+                let formattedStayEnd = `${stayEnd}T23:59`;
 
-                // 체크인 날짜 선택 시 체크아웃 최소값 갱신
+                checkInInput.min = formattedStayStart;
+                checkInInput.max = formattedStayEnd;
+                checkOutInput.min = formattedStayStart;
+                checkOutInput.max = formattedStayEnd;
+
+                // 체크인 날짜 변경 시 체크아웃 최소값 갱신
                 checkInInput.addEventListener("change", function () {
-                    checkOutInput.min = checkInInput.value;
-                    checkOutInput.value = ""; // 기존 선택값 초기화
+                    let selectedCheckIn = new Date(this.value);
+                    let nextDay = new Date(selectedCheckIn);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    let formattedNextDay = nextDay.toISOString().slice(0, 16);
+
+                    checkOutInput.min = formattedNextDay;
+
+                    // 기존 체크아웃 날짜가 체크인 이전이면 초기화
+                    if (checkOutInput.value && new Date(checkOutInput.value) < selectedCheckIn) {
+                        checkOutInput.value = "";
+                    }
                 });
 
-                // 체크아웃 날짜가 숙박 범위를 벗어나지 않도록 처리
-                checkOutInput.addEventListener("change", function () {
-                    if (checkOutInput.value > stayEnd) {
-                        alert("체크아웃 날짜는 숙박 가능 기간을 초과할 수 없습니다.");
-                        checkOutInput.value = stayEnd;
+                // 체크아웃 날짜 선택 시 잘못된 값 초기화 + 선택 차단
+                checkOutInput.addEventListener("change", function (event) {
+                    let selectedCheckOut = new Date(this.value);
+                    let minCheckOutDate = new Date(checkOutInput.min);
+
+                    if (selectedCheckOut < minCheckOutDate) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        alert("체크아웃 날짜는 체크인 다음 날 이후로만 선택할 수 있습니다.");
+                        this.value = "";
+                    }
+                });
+
+                // 잘못된 체크아웃 선택 방지 (캘린더 UI 차단)
+                checkOutInput.addEventListener("click", function (event) {
+                    if (!checkInInput.value) {
+                        event.preventDefault();
+                        alert("먼저 체크인 날짜를 선택해주세요!");
                     }
                 });
             }
 
-            document.getElementById("registerRoomId").addEventListener("change", function () {
-                let selectedRoomId = this.value;
-                updateDateLimits(selectedRoomId, registerCheckIn, registerCheckOut);
+            // 수정 모달 - 객실 ID 변경 시 제한 적용
+            document.getElementById("editRoomId")?.addEventListener("change", function () {
+                updateDateLimits(this.value, document.getElementById("editCheckIn"), document.getElementById("editCheckOut"));
             });
 
-            // 수정 모달 적용
-            if (editCheckIn && editCheckOut) {
-                updateCheckOutMinDate(editCheckIn, editCheckOut);
-                preventInvalidCheckOut(editCheckIn, editCheckOut);
-            }
+            // 등록 모달 - 객실 ID 변경 시 제한 적용
+            document.getElementById("registerRoomId")?.addEventListener("change", function () {
+                updateDateLimits(this.value, document.getElementById("registerCheckIn"), document.getElementById("registerCheckOut"));
+            });
 
-            // 등록 모달 적용
-            if (registerCheckIn && registerCheckOut) {
-                updateCheckOutMinDate(registerCheckIn, registerCheckOut);
-                preventInvalidCheckOut(registerCheckIn, registerCheckOut);
-            }
+            // 모달이 열릴 때 초기 값 설정
+            checkInInputs.forEach(input => {
+                if (input.value) input.value = input.value.replace(" ", "T");
+            });
 
+            checkOutInputs.forEach(input => {
+                if (input.value) input.value = input.value.replace(" ", "T");
+            });
         });
 
-        /* 수정 버튼 구분*/
+        /* 보기 버튼 */
+        function viewRoomReservations(roomId) {
+            // '예약된 객실' 탭으로 변경
+            changeTab('reserved');
 
+            // 해당 roomId에 해당하는 객실 이름 가져오기
+            let roomElement = document.querySelector(`[data-room-id='${roomId}']`);
+            if (!roomElement) {
+                console.error("객실 정보를 찾을 수 없습니다.");
+                return;
+            }
+
+            let roomName = roomElement.innerText.trim(); // 객실 이름 가져오기
+
+            // 검색어 설정
+            let searchForm = document.getElementById("searchForm");
+            if (searchForm) {
+                let categorySelect = searchForm.querySelector("select[name='category']");
+                let keywordInput = searchForm.querySelector("input[name='keyword']");
+
+                categorySelect.value = "roomName"; // 검색 기준: 객실 이름
+                keywordInput.value = roomName; //  객실 이름을 검색어로 사용
+
+                // 폼 자동 제출 (검색 실행)
+                searchForm.submit();
+            } else {
+                console.error("검색 폼을 찾을 수 없습니다.");
+            }
+        }
+
+        /* 수정 버튼 구분*/
         document.addEventListener("DOMContentLoaded", function () {
             // 수정 버튼을 모두 선택합니다.
             const editButtons = document.querySelectorAll(".btn-warning");
@@ -771,7 +893,7 @@
             // 모달 요소 확인
             let modal = document.getElementById("editModal");
             if (!modal) {
-                console.error("[오류] `editModal`을 찾을 수 없습니다.");
+                console.error("[오류] editModal을 찾을 수 없습니다.");
             }
 
             // 모달 닫기 버튼 이벤트 추가
@@ -787,7 +909,7 @@
                     fetchMemberDetails(this.value);
                 });
             } else {
-                console.error("[오류] `editMemberId` 요소가 없습니다.");
+                console.error("[오류] editMemberId 요소가 없습니다.");
             }
         });
 
@@ -799,7 +921,7 @@
             let modal = document.getElementById("editModal");
 
             if (!modal) {
-                console.error("[오류] `editModal`이 존재하지 않습니다.");
+                console.error("[오류] editModal이 존재하지 않습니다.");
                 return;
             }
 
@@ -815,35 +937,39 @@
             let editCountLabel = document.getElementById("editCountLabel");
             let editButton = document.querySelector(".btn-primary");
 
+            function formatDateTimeForInput(dateTime) {
+                if (!dateTime) return "";
+                return dateTime.replace(" ", "T");
+            }
+
+            if (!reservationId || reservationId === "-1" || reservationId === "null") {
+                console.warn("예약 정보가 없는 방입니다. memberId를 null로 설정합니다.");
+                memberId = null;
+            }
+
             // 입력값 초기화
             editRoomId.value = roomId;
             editReservationId.value = reservationId || "";
             editMemberId.value = memberId || "";
-            editCheckIn.value = checkIn || "";
-            editCheckOut.value = checkOut || "";
+            editCheckIn.value = formatDateTimeForInput(checkIn);
+            editCheckOut.value = formatDateTimeForInput(checkOut);
             editReservationEnd.value = reservationEnd || "";
             editCount.value = count || 1;
 
-            // 예약자 정보를 서버에서 불러와 자동 입력
-            if (memberId) {
-                fetch(`/manager/room/reservation/member/details?memberId=${memberId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        editMemberName.value = data.memberName || "이름 없음";
-                        editMemberEmail.value = data.memberEmail || "이메일 없음";
-                    })
-                    .catch(error => {
-                        console.error("예약자 정보를 불러오는 중 오류 발생:", error);
-                    });
+            if (memberId && !isNaN(memberId)) {
+                fetchMemberDetails(memberId, "edit");
+            } else {
+                // **예약자가 없을 경우 빈 값으로 초기화**
+                editMemberName.value = "";
+                editMemberEmail.value = "";
             }
 
+
             // reservationEnd가 undefined라면 roomId를 이용해 가져오기
-            if (!reservationEnd || reservationEnd === 'null' || reservationEnd === 'undefined' || reservationEnd === '') {
+            if (!reservationEnd) {
                 let roomElement = document.querySelector(`[data-room-id='${roomId}']`);
                 if (roomElement) {
                     reservationEnd = roomElement.getAttribute("data-reservationEnd") || '';
-                } else {
-                    reservationEnd = ''; // 방 정보가 없을 경우 기본값 처리
                 }
             }
 
@@ -851,7 +977,7 @@
             editReservationEnd.value = reservationEnd;
 
             if (!roomId || roomId === 'null' || roomId === 'undefined') {
-                console.error(" `roomId`가 존재하지 않습니다.");
+                console.error(" roomId가 존재하지 않습니다.");
                 alert("객실 정보를 찾을 수 없습니다.");
                 return;
             }
@@ -872,7 +998,7 @@
                 return;
             }
 
-            console.log(` 객실 ${roomId}의 숙박 가능 기간: ${stayStart} ~ ${stayEnd}`);
+            console.log(`객실 ${roomId}의 숙박 가능 기간: ${stayStart} ~ ${stayEnd}`);
 
             // 체크인 & 체크아웃 날짜 범위 설정
             editCheckIn.min = stayStart;
@@ -897,11 +1023,9 @@
 
             // 객실 유형에 따른 최대 인원 설정
             let maxPeople = getMaxPeopleByRoomType(roomType);
+            editCount.innerHTML = "";
 
             console.log(`객실 타입: ${roomType}, 최대 인원: ${maxPeople}`);
-
-            // 기존 옵션 제거 후 새로운 옵션 추가
-            editCount.innerHTML = "";
 
             for (let i = 1; i <= maxPeople; i++) {
                 let option = document.createElement("option");
@@ -915,43 +1039,47 @@
             }
 
             // 만료 여부 확인 후 UI 조정
-            let isRoomExpired = (isExpired === 'true' || isExpired === true || new Date(reservationEnd) < new Date());
+            let isRoomExpired = (isExpired === 'true' || isExpired === true || new Date(reservationEnd + 'T23:59:59') < new Date());
 
             if (isRoomExpired) {
                 console.log("예약 기간 만료된 방: 예약 마감 날짜만 수정 가능");
 
                 // 예약자 정보 비활성화
                 editReservationId.value = "";
-                editMemberId.value = "";
+                editMemberId.value = memberId || "";
                 editMemberName.value = "";
                 editMemberEmail.value = "";
                 editCheckIn.value = "";
                 editCheckOut.value = "";
 
-                editMemberId.disabled = true;
-                editMemberName.disabled = true;
-                editMemberEmail.disabled = true;
-                editCheckIn.disabled = true;
-                editCheckOut.disabled = true;
+                editReservationId.setAttribute("disabled", "true");
+                editMemberId.setAttribute("disabled", "true");
+                editMemberName.setAttribute("disabled", "true");
+                editMemberEmail.setAttribute("disabled", "true");
+                editCheckIn.setAttribute("disabled", "true");
+                editCheckOut.setAttribute("disabled", "true");
+                editCount.setAttribute("disabled", "true");
+
+                editReservationEnd.removeAttribute("disabled");
+
                 editCount.style.display = "none";
                 editReservationEnd.disabled = false;
 
                 editButton.style.backgroundColor = "red";
 
                 // 총 인원 선택 라벨 & 선택창 숨기기
-                editCount.style.display = "none";
                 editCountLabel.style.display = "none";
 
                 // 필수 입력 제거
                 editCount.removeAttribute("required");
 
-                // hidden input 추가 (disabled 상태에서는 값이 제출되지 않기 때문)
-                if (!document.getElementById("editCountHidden")) {
-                    let hiddenInput = document.createElement("input");
+                let hiddenInput = document.getElementById("editCountHidden");
+                if (!hiddenInput) {
+                    hiddenInput = document.createElement("input");
                     hiddenInput.type = "hidden";
                     hiddenInput.id = "editCountHidden";
                     hiddenInput.name = "count";
-                    hiddenInput.value = "1"; // 기본값 설정
+                    hiddenInput.value = count || ""; // 기본값 설정
                     editCount.parentNode.appendChild(hiddenInput);
                 }
 
@@ -960,39 +1088,32 @@
 
                 editReservationId.value = reservationId || "";
                 editMemberId.value = memberId || "";
-                editCheckIn.value = checkIn || "";
-                editCheckOut.value = checkOut || "";
+                editCheckIn.value = formatDateTimeForInput(checkIn);
+                editCheckOut.value = formatDateTimeForInput(checkOut);
                 editReservationEnd.value = reservationEnd || "";
                 editCount.value = count || 1;
 
-                editMemberName.disabled = true;
-                editMemberEmail.disabled = true;
-                editCheckIn.disabled = false;
-                editCheckOut.disabled = false;
-                editMemberId.disabled = false;
-                editCount.disabled = false;
-                editReservationEnd.disabled = true;
+                editMemberName.setAttribute("disabled", "true");
+                editMemberEmail.setAttribute("disabled", "true");
+
+                editCheckIn.removeAttribute("readonly");
+                editCheckOut.removeAttribute("readonly");
+                editMemberId.removeAttribute("readonly");
+                editCount.removeAttribute("readonly");
+
+                editReservationEnd.disabled = true; // 예약 가능 방은 예약 마감 수정 불가
 
                 editButton.style.backgroundColor = "#000000";
 
                 // 총 인원 선택 라벨 & 선택창 보이기
                 editCount.style.display = "block";
                 editCountLabel.style.display = "block";
-
-                editCount.style.display = "block";
                 editCount.setAttribute("required", "true");
 
                 let hiddenInput = document.getElementById("editCountHidden");
                 if (hiddenInput) {
                     hiddenInput.remove();
                 }
-            }
-
-            // `count` 필드가 예약 만료된 방에서는 필수 입력되지 않도록 변경
-            if (isRoomExpired) {
-                editCount.removeAttribute("required");
-            } else {
-                editCount.setAttribute("required", "true");
             }
 
             modal.style.display = "block";
@@ -1009,89 +1130,71 @@
             }
         }
 
-        /* 수정 모달 alert */
-
-        document.addEventListener("DOMContentLoaded", function () {
-            const editForm = document.getElementById("editForm");
-
-            if (editForm) {
-                editForm.addEventListener("submit", function (event) {
-                    event.preventDefault(); // 기본 폼 제출 동작 방지
-
-                    let roomId = document.getElementById("editRoomId").value;
-                    let reservationId = document.getElementById("editReservationId").value;
-                    let memberId = document.getElementById("editMemberId").value.trim();
-                    let checkIn = document.getElementById("editCheckIn").value.trim();
-                    let checkOut = document.getElementById("editCheckOut").value.trim();
-                    let reservationEnd = document.getElementById("editReservationEnd").value.trim();
-
-                    // 해당 방의 만료 여부 확인
-                    let isExpired = document.querySelector(`[data-room-id='${roomId}']`).getAttribute("data-is-expired") === 'true';
-
-                    if (isExpired) {
-                        if (!reservationEnd) {
-                            alert("예약 마감 날짜를 입력해주세요.");
-                            return;
-                        }
-                    } else {
-                        if (!memberId || !checkIn || !checkOut) {
-                            alert("예약자 ID, 체크인 날짜, 체크아웃 날짜를 입력해주세요.");
-                            return;
-                        }
-                    }
-
-                    let formData = new FormData(editForm);
-
-                    // `count` 값이 정상적으로 포함되어 있는지 확인
-                    if (!formData.has("count") || !formData.get("count")) {
-                        alert("총 인원을 선택해주세요.");
-                        return;
-                    }
-
-                    fetch(editForm.action, {
-                        method: editForm.method,
-                        body: formData
-                    })
-                        .then(response => {
-                            if (response.ok) {
-                                alert("수정이 완료되었습니다.");
-                                location.reload();
-                            } else {
-                                alert("수정 실패! 다시 시도해주세요.");
-                            }
-                        })
-                        .catch(error => {
-                            console.error("수정 요청 중 오류 발생:", error);
-                            alert("수정 중 오류가 발생했습니다.");
-                        });
-                });
-            }
-        });
-
         // 예약자 ID 변경 시 자동으로 이름 & 이메일 업데이트
 
-        document.getElementById("registerMemberId").addEventListener("change", function () {
-            fetchMemberDetails(this.value);
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("editMemberId").addEventListener("change", function () {
+                fetchMemberDetails(this.value, "edit");
+            });
+
+            document.getElementById("registerMemberId").addEventListener("change", function () {
+                fetchMemberDetails(this.value, "register");
+            });
         });
 
-        function fetchMemberDetails(memberId) {
-            if (!memberId) return;
+        function fetchMemberDetails(memberId, modalType) {
+            if (!memberId || isNaN(memberId) || memberId === "null" || memberId === "-1") {
+                console.warn("유효하지 않은 memberId 값:", memberId);
+                return;
+            }
 
             fetch(`/manager/room/reservation/member/details?memberId=${memberId}`)
-                .then(response => response.json())
+                .then(response => {
+                    if (response.status === 404) {
+                        throw new Error("해당 ID를 가진 회원이 존재하지 않습니다.");
+                    }
+                    return response.json();
+                })
                 .then(data => {
-                    // 등록 모달인지 수정 모달인지 확인 후 값 설정
-                    if (document.getElementById("registerMemberId") && document.getElementById("registerMemberId").value == memberId) {
+                    if (!data || !data.memberId) {
+                        throw new Error("해당 ID를 가진 회원이 존재하지 않습니다.");
+                    }
+
+                    if (modalType === "edit") {
+                        document.getElementById("editMemberName").value = data.memberName || "";
+                        document.getElementById("editMemberEmail").value = data.memberEmail || "";
+                    } else if (modalType === "register") {
                         document.getElementById("registerMemberName").value = data.memberName || "";
                         document.getElementById("registerMemberEmail").value = data.memberEmail || "";
                     }
-
-                    if (document.getElementById("editMemberId") && document.getElementById("editMemberId").value == memberId) {
-                        document.getElementById("editMemberName").value = data.memberName || "";
-                        document.getElementById("editMemberEmail").value = data.memberEmail || "";
-                    }
                 })
-                .catch(error => console.error("회원 정보 불러오기 오류:", error));
+                .catch(error => {
+                    console.error("회원 정보 불러오기 오류:", error);
+
+                    // alert 중복 실행 방지
+                    if (!document.getElementById("alertDisplayed")) {
+                        let alertFlag = document.createElement("input");
+                        alertFlag.type = "hidden";
+                        alertFlag.id = "alertDisplayed";
+                        document.body.appendChild(alertFlag);
+                        alert(error.message);
+                    }
+
+                    if (modalType === "edit") {
+                        document.getElementById("editMemberId").value = "";
+                        document.getElementById("editMemberName").value = "";
+                        document.getElementById("editMemberEmail").value = "";
+                    } else if (modalType === "register") {
+                        document.getElementById("registerMemberId").value = "";
+                        document.getElementById("registerMemberName").value = "";
+                        document.getElementById("registerMemberEmail").value = "";
+                    }
+
+                    setTimeout(() => {
+                        let alertFlag = document.getElementById("alertDisplayed");
+                        if (alertFlag) alertFlag.remove();
+                    }, 1000); // 1초 후 alertFlag 삭제 (중복 방지)
+                });
         }
 
         document.getElementById("editReservationId").addEventListener("change", function () {
@@ -1113,47 +1216,58 @@
 
         /* 예약 등록 모달 열기 */
 
-        function openRegisterModal(roomId, reservationEnd) {
+        function openRegisterModal(roomId, memberId = null) {
             let modal = document.getElementById("registerModal");
             if (!modal) {
-                console.error("[오류] `registerModal`이 존재하지 않습니다.");
+                console.error("[오류] registerModal이 존재하지 않습니다.");
                 return;
             }
 
             let registerRoomId = document.getElementById("registerRoomId");
             let registerReservationEnd = document.getElementById("registerReservationEnd");
-            let registerCount = document.getElementById("registerCount"); // 인원 선택 박스
+            let registerCheckIn = document.getElementById("registerCheckIn");
+            let registerCheckOut = document.getElementById("registerCheckOut");
+            let registerCount = document.getElementById("registerCount");
+            let registerMemberId = document.getElementById("registerMemberId");
+            let registerMemberName = document.getElementById("registerMemberName");
+            let registerMemberEmail = document.getElementById("registerMemberEmail");
 
             if (!roomId || roomId === 'null' || roomId === 'undefined') {
-                console.error("[오류] `roomId`가 존재하지 않습니다.");
+                console.error("[오류] roomId가 존재하지 않습니다.");
                 alert("객실 정보를 찾을 수 없습니다.");
                 return;
             }
 
-            registerRoomId.value = roomId;
-            registerReservationEnd.value = reservationEnd || '';
-
+            // 객실 정보 가져오기
             let roomElement = document.querySelector(`[data-room-id='${roomId}']`);
             if (!roomElement) {
-                console.error(" 해당 객실 정보를 찾을 수 없습니다.");
+                console.error("해당 객실 정보를 찾을 수 없습니다.");
                 return;
             }
 
+            let reservationEnd = roomElement.getAttribute("data-reservationEnd") || "날짜 정보 없음";
+
+            // 객실 정보 반영
+            registerRoomId.value = roomId;
+            registerReservationEnd.value = reservationEnd;
+            registerReservationEnd.setAttribute("disabled", "true"); // 예약 마감 날짜 수정 불가
+
+            // 체크인/체크아웃 초기화
+            registerCheckIn.value = "";
+            registerCheckOut.value = "";
+
             let stayStart = roomElement.getAttribute("data-stay-start");
             let stayEnd = roomElement.getAttribute("data-stay-end");
-            let roomType = roomElement.getAttribute("data-room-type"); // 객실 타입 가져오기
+            let roomType = roomElement.getAttribute("data-room-type");
 
             if (!stayStart || !stayEnd) {
-                console.error(" 숙박 가능 기간 정보가 없습니다.");
+                console.error("숙박 가능 기간 정보가 없습니다.");
                 return;
             }
 
             console.log(`객실 ${roomId}의 숙박 가능 기간: ${stayStart} ~ ${stayEnd}`);
 
-            // 체크인 & 체크아웃 날짜 범위 설정
-            let registerCheckIn = document.getElementById("registerCheckIn");
-            let registerCheckOut = document.getElementById("registerCheckOut");
-
+            // 체크인/체크아웃 날짜 범위 설정
             registerCheckIn.min = stayStart;
             registerCheckIn.max = stayEnd;
             registerCheckOut.min = stayStart;
@@ -1163,11 +1277,9 @@
                 let selectedCheckIn = new Date(this.value);
                 let nextDay = new Date(selectedCheckIn);
                 nextDay.setDate(nextDay.getDate() + 1);
-
-                let formattedNextDay = nextDay.toISOString().split("T")[0];
+                let formattedNextDay = nextDay.toISOString().slice(0, 16);
                 registerCheckOut.min = formattedNextDay;
 
-                // 기존 체크아웃 날짜가 유효 범위를 벗어나면 초기화
                 if (registerCheckOut.value && new Date(registerCheckOut.value) < selectedCheckIn) {
                     registerCheckOut.value = "";
                 }
@@ -1175,16 +1287,48 @@
 
             // 객실 타입별 최대 인원 설정
             let maxPeople = getMaxPeopleByRoomType(roomType);
-
-            // 기존 옵션 제거
             registerCount.innerHTML = "";
 
-            // 새로운 옵션 추가
             for (let i = 1; i <= maxPeople; i++) {
                 let option = document.createElement("option");
                 option.value = i;
                 option.text = `${i}명`;
                 registerCount.appendChild(option);
+            }
+
+            //  회원 정보 자동 입력 (로그인된 사용자)
+            if (memberId) {
+                registerMemberId.value = memberId;
+                fetch(`/manager/room/reservation/member/details?memberId=${memberId}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error("해당 ID를 가진 회원이 존재하지 않습니다.");
+                        return response.json();
+                    })
+                    .then(data => {
+                        registerMemberName.value = data.memberName || "";
+                        registerMemberEmail.value = data.memberEmail || "";
+
+                        //  fetch 완료 후 disabled 속성 유지
+                        registerMemberName.setAttribute("disabled", "true");
+                        registerMemberEmail.setAttribute("disabled", "true");
+                    })
+                    .catch(error => {
+                        console.error("회원 정보 불러오기 오류:", error);
+                        registerMemberName.value = "";
+                        registerMemberEmail.value = "";
+
+                        // 회원 정보가 없을 경우에도 disabled 유지
+                        registerMemberName.setAttribute("disabled", "true");
+                        registerMemberEmail.setAttribute("disabled", "true");
+                    });
+            } else {
+                registerMemberId.value = "";
+                registerMemberName.value = "";
+                registerMemberEmail.value = "";
+
+                // 회원 ID가 없을 경우 disabled 유지
+                registerMemberName.setAttribute("disabled", "true");
+                registerMemberEmail.setAttribute("disabled", "true");
             }
 
             modal.style.display = "block";
@@ -1199,7 +1343,7 @@
                 case "Suite": return 4;
                 case "Deluxe": return 5;
                 case "Family": return 6;
-                default: return 1;  // 기본값 (예외처리)
+                default: return 1;
             }
         }
 
@@ -1232,7 +1376,7 @@
             });
         });
 
-        /* cancel 상하 반복 */
+        /* 취소요청 상하 반복 */
         document.addEventListener("DOMContentLoaded", function() {
             const cancelRequests = document.querySelectorAll(".status-cancel");
 
@@ -1242,7 +1386,6 @@
                 }, 1000);
             });
         });
-
     </script>
 </div>
 </body>

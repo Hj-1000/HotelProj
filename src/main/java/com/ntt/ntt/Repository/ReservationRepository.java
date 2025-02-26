@@ -36,6 +36,16 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
     // 특정 방의 예약을 삭제 (예약 취소 기능)
     void deleteByRoom_RoomId(Integer roomId);
 
+    // 특정 방이 예약되었는지 확인 (새로운 예약과 겹치는 경우)
+    @Query("SELECT COUNT(r) > 0 FROM Reservation r " +
+            "WHERE r.room.roomId = :roomId " +
+            "AND (:checkOutDate > r.checkInDate AND :checkInDate < r.checkOutDate) " +
+            "AND (:excludeReservationId IS NULL OR r.reservationId <> :excludeReservationId)")
+    boolean isRoomAlreadyBooked(@Param("roomId") Integer roomId,
+                                @Param("checkInDate") LocalDateTime checkInDate,
+                                @Param("checkOutDate") LocalDateTime checkOutDate,
+                                @Param("excludeReservationId") Integer excludeReservationId);
+
     // 페이징 처리
     Page<Reservation> findAll(Pageable pageable);
 

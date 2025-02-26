@@ -38,11 +38,11 @@
                         </div>
                         <div class="mb-3">
                             <label for="checkInDate" class="form-label">체크인 날짜</label>
-                            <input type="date" class="form-control" id="checkInDate" name="checkInDate" required>
+                            <input type="datetime-local" class="form-control" id="checkInDate" name="checkInDate" required>
                         </div>
                         <div class="mb-3">
                             <label for="checkOutDate" class="form-label">체크아웃 날짜</label>
-                            <input type="date" class="form-control" id="checkOutDate" name="checkOutDate" required>
+                            <input type="datetime-local" class="form-control" id="checkOutDate" name="checkOutDate" required>
                         </div>
                         <div class="mb-3">
                             <label for="dayCount" class="form-label">숙박일</label>
@@ -155,6 +155,32 @@
             alert("아직 준비중인 서비스입니다.");
         }
 
+        document.addEventListener("DOMContentLoaded", function () {
+            function getFormattedDateTime(offsetDays = 0) {
+                let now = new Date();
+                now.setDate(now.getDate() + offsetDays);
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); // 시간대 보정
+                return now.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:mm" 형식
+            }
+
+            let checkInInput = document.getElementById("checkInDate");
+            let checkOutInput = document.getElementById("checkOutDate");
+
+            if (checkInInput) {
+                checkInInput.value = getFormattedDateTime();
+            }
+            if (checkOutInput) {
+                checkOutInput.value = getFormattedDateTime(1); // 하루 뒤 기본값
+            }
+
+            checkInInput.addEventListener("change", function () {
+                let checkInDate = new Date(checkInInput.value);
+                let minCheckOutDate = new Date(checkInDate);
+                minCheckOutDate.setDate(minCheckOutDate.getDate() + 1);
+                checkOutInput.min = minCheckOutDate.toISOString().slice(0, 16);
+            });
+        });
+
         let reservationModal;
 
         document.addEventListener("DOMContentLoaded", function () {
@@ -194,6 +220,8 @@
                             console.error("Error: Room ID not found.");
                             return;
                         }
+
+                        console.log("예약 버튼 클릭됨 - Room ID:", roomId);
 
                         const roomPriceElement = roomCard.querySelector(".room-price");
                         if (!roomPriceElement) {
@@ -340,27 +368,19 @@
 
         document.addEventListener("DOMContentLoaded", function () {
             document.getElementById("confirmReservation").addEventListener("click", function () {
-                let roomId = document.getElementById("roomId").value;
+                let roomId = parseInt(document.getElementById("roomId").value, 10);
                 let checkInDate = document.getElementById("checkInDate").value;
                 let checkOutDate = document.getElementById("checkOutDate").value;
-                let count = document.getElementById("reservationCount").value;
+                let count = parseInt(document.getElementById("reservationCount").value, 10);
 
-                //  디버깅 추가
-                console.log("예약하기 버튼 클릭됨");
-                console.log("Room ID:", roomId);
-                console.log("체크인 날짜:", checkInDate);
-                console.log("체크아웃 날짜:", checkOutDate);
-
-                if (!roomId || !checkInDate || !checkOutDate) {
-                    alert(" 예약 정보를 모두 입력해주세요.");
+                if (!roomId || !checkInDate || !checkOutDate || !count) {
+                    alert("예약 정보를 모두 입력해주세요.");
                     return;
                 }
 
-                fetch("/reservation/register", {  // 새로운 엔드포인트
+                fetch("/reservation/register", {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         roomId: roomId,
                         checkInDate: checkInDate,
