@@ -93,15 +93,15 @@ public class ServiceCartController {
     }
     //장바구니 페이지를 만들 때 필요한 컨트롤러인데
     //이번에는 유저의 주문 페이지에 장바구니를 동적으로 만들었기에 필요하지 않을 듯 보임
-    @GetMapping("/myPage/cart")
-    public String orderHistory(Principal principal ,Model model) {
-        List<ServiceCartDetailDTO> serviceCartDetailDTOList =
-                serviceCartService.listServiceCart(principal.getName());
-
-        //사용자에게 보여줄 장바구니 목록중에 CartDetailDTO(꼭 필요한 정보만 가공한 DTO)로 담은 lIST
-        model.addAttribute("serviceCartDetailDTOList", serviceCartDetailDTOList);
-        return "myPage/cart/history";
-    }
+//    @GetMapping("/myPage/cart")
+//    public String orderHistory(Principal principal ,Model model) {
+//        List<ServiceCartDetailDTO> serviceCartDetailDTOList =
+//                serviceCartService.listServiceCart(principal.getName());
+//
+//        //사용자에게 보여줄 장바구니 목록중에 CartDetailDTO(꼭 필요한 정보만 가공한 DTO)로 담은 lIST
+//        model.addAttribute("serviceCartDetailDTOList", serviceCartDetailDTOList);
+//        return "myPage/cart/history";
+//    }
     // 장바구니에 담긴 수량을 변경하는 기능
     @PutMapping("/api/updateCartItem")
     public ResponseEntity<?> updateCartItem(@RequestBody @Valid ServiceCartItemDTO serviceCartItemDTO,

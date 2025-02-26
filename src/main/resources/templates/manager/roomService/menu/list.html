@@ -222,7 +222,7 @@
                                     <a th:href="@{/manager/roomService/menu/read(serviceMenuId=${data.serviceMenuId})}">
                                         <img th:src="@{'/upload/' + ${data.serviceMenuImageDTOList[0].imagePath}}" class="card-img-top" alt="Service Menu Image">
                                     </a>
-                                    <div class="card-body">
+                                    <div class="card-body" style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
                                         <!-- 카테고리명 가운데 정렬 및 폰트 크기 증가 -->
                                         <p class="card-text text-center" style="font-size: 1.25rem;">
                                             <span th:text="${data.serviceCateName}"></span>
@@ -242,7 +242,7 @@
                                         <p class="card-text">
                                             <strong>가격: </strong><span th:text="${data.serviceMenuPrice}"></span>
                                         </p>
-                                        <a th:href="@{/manager/roomService/menu/delete(serviceMenuId=${data.serviceMenuId})}" class="btn btn-danger"><i class="bi bi-trash"></i></a>
+                                        <a th:href="@{/manager/roomService/menu/delete(serviceMenuId=${data.serviceMenuId})}" class="btn btn-danger" style="width: 50px;"><i class="bi bi-trash"></i></a>
                                     </div>
                                 </div>
                             </div>

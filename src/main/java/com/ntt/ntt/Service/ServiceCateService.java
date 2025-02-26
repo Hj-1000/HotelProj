@@ -143,6 +143,7 @@ public class ServiceCateService{
 
 
     //존재하는 카테고리 목록 가져오기
+    //메뉴컨트롤러에서 사용하기 위함
     /*--------------------------------
     함수명 : List<ServiceCateDTO> getAllServiceCate()
     인수 : 조회할 메뉴 id 번호

@@ -131,11 +131,18 @@ public class ServiceMenuManagerController {
         // 페이지 정보 계산
         Map<String, Integer> pageInfo = paginationUtil.pagination(serviceMenuDTOS);
 
-        // 페이지가 하나뿐일 경우, startPage와 endPage를 1로 설정
-        if (serviceMenuDTOS.getTotalPages() <= 1) {
-            pageInfo.put("startPage", 1);
-            pageInfo.put("endPage", 1);
-        }
+        // 전체 페이지 수
+        int totalPages = serviceMenuDTOS.getTotalPages();
+        // 현재 페이지 수
+        int currentPage = pageInfo.get("currentPage");
+
+        // 시작 페이지와 끝 페이지 계산 (현재 페이지를 기준으로 최대 10페이지까지)
+        int startPage = Math.max(1, currentPage - 4); // 10개씩 끊어서 시작 페이지 계산
+        int endPage = Math.min(startPage + 9, totalPages); // 최대 페이지 수를 넘기지 않도록
+
+        // 페이지 정보 업데이트 (동적으로 계산된 startPage, endPage)
+        pageInfo.put("startPage", startPage);
+        pageInfo.put("endPage", endPage);
 
         // 모든 카테고리와 상태값 추가
         if (serviceCateId != null) {
