@@ -3,12 +3,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const notificationreplyList = document.getElementById('notification-reply-list'); // 📜 알림 목록
     const unreadreplyCount = document.getElementById('notification-reply-count'); // 🔢 읽지 않은 댓글 알림 개수
 
-    if (!replybell || !notificationreplyList || !unreadreplyCount) {
-        console.error("❌ 필수 요소가 존재하지 않습니다.");
+    // 🚨 layout에서는 실행되지 않도록 차단
+    if (!replybell) {
+        console.warn("❌ [notificationreplybell.js] layout에서 실행되지 않도록 차단됨.");
         return;
     }
 
-    let notifications = [];
+
+    let notifications  = [];
 
     // 📌 페이지 로드 시 즉시 댓글 알림 개수 가져오기
     fetchUnreadReplyNotifications();
@@ -41,7 +43,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // 📌 알림 목록을 업데이트하는 함수
-// 알림 목록을 업데이트하는 함수
     function updateNotificationList() {
         notificationreplyList.innerHTML = '';
 
@@ -75,7 +76,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     }
-
 
     // 📌 알림 클릭 시 삭제하고 해당 Q&A로 이동
     function deleteNotification(notification, qnaId) {
@@ -118,11 +118,6 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .catch(error => console.error('❌ 댓글 알림 수 가져오기 실패:', error));
     }
-
-// 📌 페이지 로드 시 댓글 알림 가져오기
-    document.addEventListener('DOMContentLoaded', function () {
-        fetchUnreadReplyNotifications();
-    });
 
     // 📌 읽지 않은 댓글 알림 수 업데이트
     function updateUnreadCount() {
