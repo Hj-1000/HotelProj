@@ -98,7 +98,7 @@ public class NoticeController {
         noticeService.register(noticeDTO, multipartFile);
 
         // 성공 메시지를 추가
-        redirectAttributes.addFlashAttribute("message", "공지사항이 성공적으로 등록되었습니다.");
+        redirectAttributes.addFlashAttribute("message", "공지사항이 등록되었습니다.");
 
         return "redirect:/notice/list";
     }

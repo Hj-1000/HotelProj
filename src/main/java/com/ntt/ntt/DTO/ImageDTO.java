@@ -32,7 +32,7 @@ public class ImageDTO {
 
     private Notice noticeId;
 
-    private Banner baannerId;
+    private Banner bannerId;
 
     public static ImageDTO fromEntity(Image image) {
         return new ImageDTO(

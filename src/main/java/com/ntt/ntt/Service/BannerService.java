@@ -32,15 +32,6 @@ import java.util.stream.Collectors;
 
 public class BannerService {
 
-//    @Autowired
-//    private BannerRepository bannerRepository;
-//    @Autowired
-//    private ImageRepository imageRepository;
-//    @Autowired
-//    private ModelMapper modelMapper;
-//    @Autowired
-//    private ImageService imageService;
-
     private final BannerRepository bannerRepository;
     private final ImageRepository imageRepository;
     private final ImageService imageService;
@@ -89,23 +80,12 @@ public class BannerService {
 
     }
 
+    @Transactional
     public void delete(Integer bannerId) {
-        Optional<Banner> bannerOpt = bannerRepository.findById(bannerId);
-        if (bannerOpt.isPresent()) {
-            Banner banner = bannerOpt.get();
-
-            List<Image> imagesToDelete = banner.getBannerImageList();
-            for (Image image : imagesToDelete) {
-
-                imageService.deleteImage(image.getImageId());
-            }
-            bannerRepository.delete(banner);
-        } else {
-            throw new RuntimeException("배너가 없습니다");
-        }
+        bannerRepository.deleteById(bannerId);
     }
 
-    public List<BannerDTO> getFilteredBanner(String bannerTitle, String regDate, String modDate) {
+    public List<BannerDTO> getAllBanners(String bannerTitle, String regDate, String modDate) {
 
         List<Banner> banners = bannerRepository.findAll();
 
