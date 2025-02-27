@@ -78,12 +78,12 @@ public class PaymentService {
     }
 
     // 결제 내역 조회 및 검색 기능
-    public List<PaymentDTO> getFilteredPayments(String room, String minPrice, String maxPrice, String startDate, String endDate) {
+    public List<PaymentDTO> getFilteredPayments(String roomName, String minPrice, String maxPrice, String startDate, String endDate) {
         List<Payment> payments = paymentRepository.findAll();
 
-        if (room != null && !room.isEmpty()) {
+        if (roomName != null && !roomName.isEmpty()) {
             payments = payments.stream()
-                    .filter(payment -> payment.getRoom().getRoomName().equals(room))
+                    .filter(payment -> payment.getRoom().getRoomName().contains(roomName))
                     .collect(Collectors.toList());
         }
         if (minPrice != null && !minPrice.isEmpty()) {
@@ -111,7 +111,7 @@ public class PaymentService {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                 LocalDate start = LocalDate.parse(startDate, formatter);
                 payments = payments.stream()
-                        .filter(payment -> payment.getRegDate().toLocalDate().isEqual(start) || payment.getRegDate().toLocalDate().isAfter(start))
+                        .filter(payment -> payment.getModDate().toLocalDate().isEqual(start) || payment.getModDate().toLocalDate().isAfter(start))
                         .collect(Collectors.toList());
             } catch (DateTimeParseException e) {
                 System.out.println("잘못된 시작 날짜 입력: " + startDate);
@@ -122,7 +122,7 @@ public class PaymentService {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                 LocalDate end = LocalDate.parse(endDate, formatter);
                 payments = payments.stream()
-                        .filter(payment -> payment.getRegDate().toLocalDate().isEqual(end) || payment.getRegDate().toLocalDate().isBefore(end))
+                        .filter(payment -> payment.getModDate().toLocalDate().isEqual(end) || payment.getModDate().toLocalDate().isBefore(end))
                         .collect(Collectors.toList());
             } catch (DateTimeParseException e) {
                 System.out.println("잘못된 종료 날짜 입력: " + endDate);
@@ -131,6 +131,27 @@ public class PaymentService {
 
         return payments.stream()
                 .map(payment -> modelMapper.map(payment, PaymentDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    // 전체 결제 내역을 가져오는 메서드
+    public List<PaymentDTO> getAllPayments() {
+        // 전체 결제 내역을 DB에서 가져오는 로직
+        List<Payment> allPayments = paymentRepository.findAll();
+
+        // Payment 객체를 PaymentDTO로 변환하여 반환
+        return allPayments.stream()
+                .map(payment -> new PaymentDTO(
+                        payment.getPaymentId(),           // paymentId
+                        payment.getRoomPrice(),           // roomPrice
+                        payment.getRoomServicePrice(),    // roomServicePrice
+                        payment.getTotalPrice(),          // totalPrice
+                        payment.getMember().getMemberId(),// memberId (Member에서 가져옴)
+                        payment.getRoom().getRoomId(),    // roomId (Room에서 가져옴)
+                        payment.getReservation().getReservationId(), // reservationId (Reservation에서 가져옴)
+                        payment.getRegDate(),             // regDate
+                        payment.getModDate()              // modDate
+                ))
                 .collect(Collectors.toList());
     }
 }

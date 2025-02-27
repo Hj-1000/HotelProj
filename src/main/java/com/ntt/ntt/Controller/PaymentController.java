@@ -48,7 +48,7 @@ public class PaymentController {
     @Operation(summary = "매출관리", description = "매출관리 페이지로 이동한다.")
     @GetMapping("/manager/sales")
     public String getSales(@AuthenticationPrincipal UserDetails userDetails,
-                           @RequestParam(required = false) String room,
+                           @RequestParam(required = false) String roomName,
                            @RequestParam(required = false) String minPrice,
                            @RequestParam(required = false) String maxPrice,
                            @RequestParam(required = false) String startDate,
@@ -57,10 +57,13 @@ public class PaymentController {
                            @RequestParam(defaultValue = "10") int size,
                            Model model, Pageable pageable) {
         try {
-            if ("전체".equals(room)) room = null;
+            if ("전체".equals(roomName)) roomName = null;
 
             // 필터링된 결제내역 리스트 가져오기
-            List<PaymentDTO> filteredPayments = paymentService.getFilteredPayments(room, minPrice, maxPrice, startDate, endDate);
+            List<PaymentDTO> filteredPayments = paymentService.getFilteredPayments(roomName, minPrice, maxPrice, startDate, endDate);
+
+            // 전체 결제내역 리스트 가져오기 (필터링 적용 안됨)
+            List<PaymentDTO> allPayments = paymentService.getAllPayments();
 
             // 페이징 처리
             int startIdx = page * size;
@@ -84,10 +87,11 @@ public class PaymentController {
             model.addAttribute("pageNumber", page);
             model.addAttribute("totalPages", (int) Math.ceil((double) filteredPayments.size() / size));
             model.addAttribute("size", size);
+            model.addAttribute("allPayments", allPayments);  // 전체 결제 내역도 전달
 
             // JSON으로 변환할 데이터 리스트 생성
             List<Map<String, Object>> salesData = new ArrayList<>();
-            for (PaymentDTO payment : filteredPayments) {
+            for (PaymentDTO payment : allPayments) {
                 Map<String, Object> data = new HashMap<>();
                 data.put("date", payment.getModDate().toString()); // 날짜
                 data.put("totalSales", payment.getTotalPrice());   // 결제 완료 금액
