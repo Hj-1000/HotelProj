@@ -50,6 +50,7 @@
                         <th style="width: 20%">회원이메일</th>
                         <th style="width: 18%">방이름</th>
                         <th style="width: 15%">예약날짜</th>
+                        <th style="width: 10%">주문상태</th>
                         <th style="width: 17%">관리</th>
                     </tr>
                     </thead>
@@ -60,6 +61,7 @@
                         <td th:text="${data.memberDTO.memberEmail}"></td>
                         <td th:text="${data.reservationDTO.room.roomName}"></td>
                         <td th:text="${#temporals.format(data.regDate, 'yyyy-MM-dd')}"></td>
+                        <td th:text="${data.serviceOrderStatus}"></td>
                         <td>
                             <!-- 보기 버튼 -->
                             <button type="button" class="btn btn-info btn-sm"

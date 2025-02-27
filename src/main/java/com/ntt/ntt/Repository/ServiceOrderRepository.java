@@ -36,7 +36,9 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Inte
     Page<ServiceOrder> findByReservation_ReservationId(Integer reservationId, Pageable pageable);
 
     //특정 회원의 구매 이력으로 모두 불러오기
-    @Query("select so from ServiceOrder so where so.member.memberEmail = :memberEmail order by so.regDate asc")
+    //serviceOrderId를 오름차순으로 정렬하되 status가 CANCELED라면 후순위로 밀기
+    @Query("select so from ServiceOrder so where so.member.memberEmail = :memberEmail order by " +
+            "case when so.serviceOrderStatus = 'CANCELED' then 1 else 0 end, so.regDate asc")
     public List<ServiceOrder> findServiceOrders(@Param("memberEmail") String memberEmail, Pageable pageable);
 
     //특정 회원의 주문갯수 검색 메서드

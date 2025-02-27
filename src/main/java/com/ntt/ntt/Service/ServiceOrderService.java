@@ -15,7 +15,9 @@ import org.thymeleaf.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -61,16 +63,18 @@ public class ServiceOrderService {
                         .orElseThrow(EntityNotFoundException::new);
         //주문상태인 orderStatus를 주문 취소 상태로 변경
         serviceOrder.setServiceOrderStatus(ServiceOrderStatus.CANCELED);
+
         //주문의 자식인 주문아이템들의 주문 수량을 가지고 serviceMenu의 주문수량에 더한다.
 
         for (ServiceOrderItem serviceOrderItem : serviceOrder.getServiceOrderItemList()) {
             serviceOrderItem.getServiceMenu().setServiceMenuQuantity(
                     serviceOrderItem.getServiceMenu().getServiceMenuQuantity() + serviceOrderItem.getCount()
             );
+            serviceOrderItem.setOrderPrice(0);
         }
-        if (serviceOrder != null) {
-            serviceOrderRepository.deleteById(serviceOrderId);
-        }
+//        if (serviceOrder != null) {
+//            serviceOrderRepository.deleteById(serviceOrderId);
+//        }
     }
 
     public Integer createOrder(ServiceOrderDTO serviceOrderDTO, String memberEmail, Integer reservationId) {
@@ -102,8 +106,7 @@ public class ServiceOrderService {
             serviceOrder.setMember(member); //구매한 사람의 id로 찾아온 entity객체
             serviceOrder.setReservation(reservation); //예약을 통해 방의 정보를 가져옴
             serviceOrder.setServiceOrderItemList(serviceOrderItem); //주문목록 이건 새로 만든 setOrderItemList이다.
-
-            serviceOrder.setServiceOrderStatus(ServiceOrderStatus.COMPLETED); //주문상태
+            serviceOrder.setServiceOrderStatus(ServiceOrderStatus.PENDING); //주문상태는 처음 주문이 들어갔을 때는 아직 결제 전 이므로 주문대기로 생성됨
             serviceOrder.setRegDate(LocalDateTime.now()); //주문시간
             //이렇게 만들어진 order 주문 객체를 저장하기전에
             //serviceOrderItem에서 private ServiceOrder serviceOrder; 를 set 해줌으로써
@@ -150,7 +153,7 @@ public class ServiceOrderService {
         }
         serviceOrder.setMember(member);
         serviceOrder.setReservation(reservation);
-        serviceOrder.setServiceOrderStatus(ServiceOrderStatus.COMPLETED);
+        serviceOrder.setServiceOrderStatus(ServiceOrderStatus.PENDING);
         serviceOrder.setRegDate(LocalDateTime.now());
         serviceOrder.setServiceOrderItemList(serviceOrderItemList);
 
@@ -200,6 +203,11 @@ public class ServiceOrderService {
             }
             serviceOrderHistoryDTOList.add(serviceOrderHistoryDTO);
         }
+
+        // 'CANCELED' 상태인 주문들을 마지막으로 밀기
+        List<ServiceOrderHistoryDTO> sortedList = serviceOrderHistoryDTOList.stream()
+                .sorted(Comparator.comparing(serviceOrder -> serviceOrder.getServiceOrderStatus() == ServiceOrderStatus.CANCELED ? 1 : 0))
+                .collect(Collectors.toList());
 
         // PageImpl 생성
         return new PageImpl<>(serviceOrderHistoryDTOList, pageable, totalCount);
@@ -330,7 +338,7 @@ public class ServiceOrderService {
     }
 
 
-    // 주문 수정
+    // 주문 정보를 수정
     public void updateOrder(ServiceOrderUpdateDTO updateDTO) {
         ServiceOrder serviceOrder = serviceOrderRepository.findById(updateDTO.getServiceOrderId())
                 .orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다. ID: " + updateDTO.getServiceOrderId()));
@@ -350,7 +358,6 @@ public class ServiceOrderService {
             item.setOrderPrice(item.getServiceMenu().getServiceMenuPrice());
         }
     }
-
     // 주문 삭제
     public void deleteOrder(Integer serviceOrderId) {
         log.info("삭제하려고 서비스까지 들어온 serviceOrderId: " + serviceOrderId);
