@@ -9,6 +9,7 @@ import com.ntt.ntt.Service.ReplyService;
 import groovy.util.logging.Log4j2;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -23,6 +24,7 @@ import java.util.List;
 
 @Controller
 @Log4j2
+@AllArgsConstructor
 @RequestMapping("/reply")
 @Tag(name = "replyController", description = "Q&A페이지에 댓글")
 public class ReplyController {
@@ -30,16 +32,11 @@ public class ReplyController {
     private final ReplyService replyService;
     private final MemberService memberService;
 
-    public ReplyController(ReplyService replyService, MemberService memberService) {
-        this.replyService = replyService;
-        this.memberService = memberService;
-    }
-
     // 댓글 등록
     @Operation(summary = "댓글등록", description = "ROLE=운영자시 댓글을 등록할수있다.")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/qna/reply/register/{qnaId}")
-    public String registerReply(@PathVariable Integer qnaId, String replyContent, Authentication authentication, RedirectAttributes redirectAttributes) {
+    public String registerReplyProc(@PathVariable Integer qnaId, String replyContent, Authentication authentication, RedirectAttributes redirectAttributes) {
         Member member = (Member) authentication.getPrincipal();
         if (member == null) {
             return "errorPage";  // 회원이 없을 경우 처리
@@ -58,7 +55,7 @@ public class ReplyController {
     // 댓글 목록 불러오기
     @Operation(summary = "댓글목록", description = "댓글등록시 상세보기창에서 댓글을 볼수있다.")
     @GetMapping("/list/{qnaId}")
-    public String listReplies(@PathVariable Integer qnaId, Model model) {
+    public String listRepliesForm(@PathVariable Integer qnaId, Model model) {
         List<Reply> replies = replyService.readRepliesByQna(qnaId);
         model.addAttribute("replies", replies);
 
@@ -89,7 +86,6 @@ public class ReplyController {
         return "/reply/update"; // 댓글 수정 폼
     }
 
-
     // 댓글 수정 처리
     @Operation(summary = "댓글수정창", description = "수정시 데이터 등록 후 상세보기 페이지로 이동한다.")
     @PostMapping("/update/{id}")
@@ -106,7 +102,7 @@ public class ReplyController {
     // 댓글 삭제 처리
     @Operation(summary = "댓글삭제", description = "등록된 댓글데이터 삭제후 상세보기창 이동한다.")
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("delete/{replyId}")
+    @PostMapping("/delete/{replyId}")
     public String deleteReplyProc(@PathVariable("replyId") Integer replyId, RedirectAttributes redirectAttributes)  {
         Reply reply = replyService.findById(replyId);
         if (reply == null) {
@@ -121,9 +117,6 @@ public class ReplyController {
 
         return "redirect:/qna/read/" + qnaId;
     }
-
-
-
 
     private Member dtoToEntity(MemberDTO memberDTO) {
         if (memberDTO == null) {

@@ -3,22 +3,19 @@ package com.ntt.ntt.Controller;
 import com.ntt.ntt.DTO.NotificationDTO;
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Entity.Notification;
-import com.ntt.ntt.Entity.Qna;
 import com.ntt.ntt.Repository.MemberRepository;
 import com.ntt.ntt.Repository.NotificationRepository;
-import com.ntt.ntt.Service.MemberService;
 import com.ntt.ntt.Service.NotificationService;
-import com.ntt.ntt.Service.QnaService;
+import groovy.util.logging.Log4j2;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,20 +24,19 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/notifications")
 @RequiredArgsConstructor
+@Log4j2
+@Tag(name = "notificationController", description = "Q&A , 댓글 알림페이지")
 public class NotificationController {
 
     private final NotificationService notificationService;
-    private final QnaService qnaService;
     private final NotificationRepository notificationRepository;
-    private final MemberService memberService;
     private final MemberRepository memberRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(NotificationController.class);
 
-
-
+    @Operation(summary = "읽지 않은 알림 수 조회", description = "읽지 않은 알림의 개수를 반환합니다.")
     @GetMapping("/unreadCount")
-    public ResponseEntity<Integer> getUnreadCount() {
+    public ResponseEntity<Integer> getUnreadCountForm() {
         try {
             int unreadCount = notificationRepository.countByIsReadFalse();
             logger.debug("Unread notifications count: {}", unreadCount);
@@ -51,16 +47,16 @@ public class NotificationController {
         }
     }
 
-    // ✅ 관리자 알림 목록 조회 (GET 요청 허용)
+    @Operation(summary = "관리자 알림 목록 조회", description = "관리자가 모든 알림을 조회합니다.")
     @GetMapping("/admin")
-    public ResponseEntity<List<NotificationDTO>> getNotificationsForAdmin() {
-        List<NotificationDTO> notifications = notificationService.getAllNotifications(); // DTO 변환 후 반환
+    public ResponseEntity<List<NotificationDTO>> getNotificationsForAdminForm() {
+        List<NotificationDTO> notifications = notificationService.getAllNotifications();
         return ResponseEntity.ok(notifications);
     }
 
-    // ✅ 댓글 알림 목록 가져오기
+    @Operation(summary = "댓글 알림 목록 조회", description = "사용자에게 해당하는 댓글 알림을 조회합니다.")
     @GetMapping("/replies")
-    public ResponseEntity<?> getReplyNotifications(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<?> getReplyNotificationsForm(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         }
@@ -73,7 +69,6 @@ public class NotificationController {
 
         List<Notification> notifications = notificationRepository.findByMemberAndIsReadFalseAndNotificationMessageContaining(member, "댓글");
 
-        // DTO 변환 추가
         List<NotificationDTO> notificationDTOs = notifications.stream()
                 .map(NotificationDTO::fromEntity)
                 .collect(Collectors.toList());
@@ -81,10 +76,9 @@ public class NotificationController {
         return ResponseEntity.ok(notificationDTOs);
     }
 
-
-    // ✅ 읽지 않은 댓글 알림 수 가져오기
+    @Operation(summary = "읽지 않은 댓글 알림 수 조회", description = "읽지 않은 댓글 알림의 개수를 반환합니다.")
     @GetMapping("/replies/unreadCount")
-    public ResponseEntity<Long> getUnreadReplyNotificationCount(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Long> getUnreadReplyNotificationCountForm(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(0L);
         }
@@ -93,17 +87,14 @@ public class NotificationController {
         return ResponseEntity.ok(unreadCount);
     }
 
-
-    // 🔹 로그인한 사용자의 알림 목록 조회
-    @Operation(summary = "알림 목록 조회", description = "로그인한 사용자의 알림을 가져옵니다.")
+    @Operation(summary = "사용자 알림 목록 조회", description = "로그인한 사용자의 알림 목록을 조회합니다.")
     @GetMapping
-    public ResponseEntity<List<NotificationDTO>> getUserNotifications(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<List<NotificationDTO>> getUserNotificationsForm(@AuthenticationPrincipal UserDetails userDetails) {
         List<NotificationDTO> notifications = notificationService.getNotificationsForMember(userDetails.getUsername());
         System.out.println("📢 사용자 알림 개수: " + notifications.size()); // 디버깅 로그 추가
         return ResponseEntity.ok(notifications);
     }
 
-    // 🔹 알림 읽음 처리
     @Operation(summary = "알림 읽음 처리", description = "특정 알림을 읽음 상태로 변경합니다.")
     @PatchMapping("/{id}/read")
     public ResponseEntity<?> markAsRead(@PathVariable Integer id) {
@@ -111,8 +102,6 @@ public class NotificationController {
         return ResponseEntity.ok().build();
     }
 
-
-    // 🔹 알림 삭제
     @Operation(summary = "알림 삭제", description = "특정 알림을 삭제합니다.")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteNotification(@PathVariable Integer id) {
@@ -124,6 +113,4 @@ public class NotificationController {
             return ResponseEntity.status(500).build();
         }
     }
-
-
 }
