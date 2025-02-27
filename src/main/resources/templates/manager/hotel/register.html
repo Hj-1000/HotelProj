@@ -33,10 +33,10 @@
         <a th:href="@{/company/read(companyId=${companyDTO.companyId})}" class="custom-link">
             <span>본사상세보기</span>
         </a> /
-        <a th:href="@{/manager/hotel/list(companyId=${companyDTO.companyId})}" class="custom-link">
+        <a href="/chief/hotel/list" class="custom-link">
             <span>호텔지사관리</span>
         </a> /
-        <a href="/manager/hotel/register" class="custom-link">
+        <a href="/chief/hotel/register" class="custom-link">
             <span>지사등록</span>
         </a>
         <h2 class="mb-3">지사 등록</h2>
@@ -44,7 +44,7 @@
         <!-- 폼 -->
         <div class="card p-4 mb-4">
             <div class="row g-3 align-items-center">
-                <form action="/manager/hotel/register" method="post" enctype="multipart/form-data">
+                <form action="/chief/hotel/register" method="post" enctype="multipart/form-data">
                     <div class="mb-3 mt-3">
                         <label for="companyId" class="form-label">본사명:</label>
                         <select id="companyId" name="companyId" class="form-select">
@@ -79,8 +79,12 @@
                         <input type="text" class="form-control" id="hotelPhone" name="hotelPhone" required>
                     </div>
                     <!--<div class="mb-3 mt-3">
-                        <label for="hotelEmail" class="form-label">호텔이메일:</label>
-                        <input type="email" class="form-control" id="hotelEmail" name="hotelEmail">
+                        <label for="hotelEmail" class="form-label">담당자:</label>
+                        <select id="hotelEmail" name="hotelEmail" class="form-select">
+                            <th:block th:each="memberDTOS : ${memberDTOS}">
+                                <option th:value="${memberDTOS.memberEmail}" th:text="${memberDTOS.memberName}">뒤에바</option>
+                            </th:block>
+                        </select>
                     </div>-->
                     <div class="mb-3 mt-3">
                         <label for="hotelCheckIn" class="form-label">호텔 체크인:</label>

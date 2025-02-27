@@ -1,9 +1,7 @@
 package com.ntt.ntt.Service.hotel;
 
-import com.ntt.ntt.DTO.CompanyDTO;
-import com.ntt.ntt.DTO.HotelDTO;
-import com.ntt.ntt.DTO.ImageDTO;
-import com.ntt.ntt.DTO.RoomDTO;
+import com.ntt.ntt.Constant.Role;
+import com.ntt.ntt.DTO.*;
 import com.ntt.ntt.Entity.*;
 import com.ntt.ntt.Repository.ImageRepository;
 import com.ntt.ntt.Repository.MemberRepository;
@@ -17,6 +15,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -53,23 +53,46 @@ public class HotelService {
 
     //호텔 본사 불러오는
     public List<CompanyDTO> getAllCompany() {
-        List<Company> companies = companyRepository.findAll();
+        // 현재 로그인한 회원의 memberEmail을 가져오기
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String memberEmail = authentication.getName(); // 현재 로그인한 회원의 이메일
 
+        // 해당 이메일로 회원 정보 가져오기
+        Optional<Member> member = memberRepository.findByMemberEmail(memberEmail);
+        if (member == null) {
+            throw new RuntimeException("회원 정보를 찾을 수 없습니다.");
+        }
+
+        // 해당 회원의 memberId를 가져오기
+        Integer memberId = member.get().getMemberId();
+
+        // 해당 memberId와 일치하는 company만 조회
+        List<Company> companies = companyRepository.findByMember_MemberId(memberId);
+
+        // Company -> CompanyDTO 변환
         List<CompanyDTO> companyDTOS = companies.stream()
-                .map(a -> new CompanyDTO(a.getCompanyId(), a.getCompanyName())).collect(Collectors.toList());
+                .map(a -> new CompanyDTO(a.getCompanyId(), a.getCompanyName()))
+                .collect(Collectors.toList());
 
         return companyDTOS;
     }
 
 
+
+    //회원목록 불러오는
+    public List<MemberDTO> getAllManagers() {
+        List<Member> members = memberRepository.findByRole(Role.MANAGER);
+
+        List<MemberDTO> memberDTOS = members.stream()
+                .map(a -> new MemberDTO(a.getMemberId(), a.getMemberEmail(), a.getMemberName()))
+                .collect(Collectors.toList());
+
+        return memberDTOS;
+    }
+
+
     //등록
     public void register(HotelDTO hotelDTO, List<MultipartFile> imageFiles, String memberEmail) {
-
-        /* Company company = companyRepository.findById(companyId)
-                .orElseThrow(() -> new IllegalStateException("본사가 존재하지 않습니다.")); */
-        // 로그인한 회원 정보 조회
-        Member member = memberRepository.findByMemberEmail(memberEmail)
-                .orElseThrow(() -> new RuntimeException("Member not found"));
 
         // modelMapper가 null이 아닌지 확인
         if (modelMapper == null) {
@@ -77,12 +100,6 @@ public class HotelService {
         }
 
         Hotel hotel = modelMapper.map(hotelDTO, Hotel.class);
-
-        // 이메일 로그인된 회원의 이메일로 설정
-        hotel.setHotelEmail(member.getMemberEmail());
-
-        // 🔹 회원 정보 설정 -> memberId 추가를 위해
-        hotel.setMember(member);
 
         // 1. Hotel 먼저 저장
         hotelRepository.save(hotel);
@@ -92,6 +109,36 @@ public class HotelService {
 
         hotelRepository.flush(); // ✅ 즉시 DB 반영
     }
+
+//    public void register(HotelDTO hotelDTO, List<MultipartFile> imageFiles, String memberEmail) {
+//
+//        /* Company company = companyRepository.findById(companyId)
+//                .orElseThrow(() -> new IllegalStateException("본사가 존재하지 않습니다.")); */
+//        // 로그인한 회원 정보 조회
+//        Member member = memberRepository.findByMemberEmail(memberEmail)
+//                .orElseThrow(() -> new RuntimeException("Member not found"));
+//
+//        // modelMapper가 null이 아닌지 확인
+//        if (modelMapper == null) {
+//            throw new IllegalStateException("ModelMapper가 초기화되지 않았습니다.");
+//        }
+//
+//        Hotel hotel = modelMapper.map(hotelDTO, Hotel.class);
+//
+//        // 이메일 로그인된 회원의 이메일로 설정
+//        hotel.setHotelEmail(member.getMemberEmail());
+//
+//        // 🔹 회원 정보 설정 -> memberId 추가를 위해
+//        hotel.setMember(member);
+//
+//        // 1. Hotel 먼저 저장
+//        hotelRepository.save(hotel);
+//
+//        // 2. imageFiles를 ImageService를 통해 저장
+//        imageService.registerHotelImage(hotel.getHotelId(), imageFiles);
+//
+//        hotelRepository.flush(); // ✅ 즉시 DB 반영
+//    }
 
 
     //관리자용 호텔목록
@@ -154,8 +201,96 @@ public class HotelService {
     }
 
 
-    //호텔장용목록
-    public Page<HotelDTO> listByCompany(Pageable page, String keyword, Integer keyword1, String searchType, Integer companyId) {
+    //호텔장용 목록
+    //로그인한 chief의 담당 companyId가 겹치는 hotel 목록
+    public Page<HotelDTO> listByChief(Pageable pageable, String keyword, Integer keyword1, String searchType, Integer memberId) {
+        // 1. 현재 로그인한 회원의 memberId로 companyId를 찾는다.
+        List<Company> companies = companyRepository.findByMember_MemberId(memberId); // 리스트로 반환되므로 수정
+        Integer companyId = null;
+
+        if (companies != null && !companies.isEmpty()) {
+            companyId = companies.get(0).getCompanyId(); // 첫 번째 회사에서 companyId 가져오기
+        }
+
+        if (companyId == null) {
+            // 만약 회원이 등록된 회사가 없으면 빈 결과 반환
+            return Page.empty(pageable);
+        }
+
+        // 2. 검색 조건에 따라 호텔 조회
+        Page<Hotel> hotels;
+        if (keyword != null && !keyword.isEmpty()) {
+            String keywordLike = "%" + keyword + "%";  // LIKE 조건을 위한 검색어 처리
+
+            if ("name".equals(searchType)) {
+                // 호텔명 검색
+                hotels = hotelRepository.findByCompany_CompanyIdAndHotelNameLike(companyId, keywordLike, pageable);
+            } else if ("location".equals(searchType)) {
+                // 지역 검색
+                hotels = hotelRepository.findByCompany_CompanyIdAndHotelLocationLike(companyId, keywordLike, pageable);
+            } else if ("address".equals(searchType)) {
+                // 주소 검색
+                hotels = hotelRepository.findByCompany_CompanyIdAndHotelAddressLike(companyId, keywordLike, pageable);
+            } else if ("rating".equals(searchType)) {
+                // 별점 검색
+                hotels = hotelRepository.findByCompany_CompanyIdAndHotelRating(companyId, keyword1, pageable);
+            } else {
+                // 검색어가 없으면 companyId에 해당하는 모든 호텔 조회
+                hotels = hotelRepository.findByCompany_CompanyId(companyId, pageable);
+            }
+        } else {
+            // 검색어가 없으면 companyId에 해당하는 모든 호텔 조회
+            hotels = hotelRepository.findByCompany_CompanyId(companyId, pageable);
+        }
+
+        // 3. Hotel -> HotelDTO 변환
+        return hotels.map(entity -> {
+            HotelDTO hotelDTO = modelMapper.map(entity, HotelDTO.class);
+
+            // 호텔에 대한 이미지 리스트 가져오기
+            List<ImageDTO> imgDTOList = imageRepository.findByHotel_HotelId(entity.getHotelId())
+                    .stream()
+                    .map(imagefile -> {
+                        imagefile.setImagePath(imagefile.getImagePath().replace("c:/data/", "")); // 경로 수정
+                        return modelMapper.map(imagefile, ImageDTO.class);
+                    })
+                    .collect(Collectors.toList());
+
+            hotelDTO.setHotelImgDTOList(imgDTOList); // 이미지 DTO 리스트 설정
+            return hotelDTO;
+        });
+    }
+
+
+    //호텔 매니저용
+    public Page<HotelDTO> listByManager(Integer memberId, Pageable pageable) {
+        // 1. memberId에 해당하는 호텔 조회
+        // memberId와 연관된 호텔을 조회
+        Page<Hotel> hotels = hotelRepository.findByMember_MemberId(memberId, pageable);
+
+        // 2. Hotel -> HotelDTO 변환
+        return hotels.map(entity -> {
+            HotelDTO hotelDTO = modelMapper.map(entity, HotelDTO.class);
+
+            // 호텔에 대한 이미지 리스트 가져오기
+            List<ImageDTO> imgDTOList = imageRepository.findByHotel_HotelId(entity.getHotelId())
+                    .stream()
+                    .map(imagefile -> {
+                        imagefile.setImagePath(imagefile.getImagePath().replace("c:/data/", "")); // 경로 수정
+                        return modelMapper.map(imagefile, ImageDTO.class);
+                    })
+                    .collect(Collectors.toList());
+
+            hotelDTO.setHotelImgDTOList(imgDTOList); // 이미지 DTO 리스트 설정
+            return hotelDTO;
+        });
+    }
+
+
+
+
+    //본사별로
+    /*public Page<HotelDTO> listByCompany(Pageable page, String keyword, Integer keyword1, String searchType, Integer companyId) {
         // 1. 페이지 정보 재가공
         int currentPage = page.getPageNumber(); // 기존 페이지 번호 그대로 사용
         int pageSize = page.getPageSize(); // 페이지 사이즈 그대로 사용
@@ -211,7 +346,9 @@ public class HotelService {
         });
 
         return hotelDTOS;
-    }
+    }*/
+
+
 
     //일반회원용 호텔 목록
     @Transactional(readOnly = true)
@@ -541,11 +678,25 @@ public class HotelService {
         Optional<Hotel> hotelOpt = hotelRepository.findById(hotelDTO.getHotelId());
         if (hotelOpt.isPresent()) {
             Hotel hotel = hotelOpt.get();
-            hotel.setMember(hotelDTO.getMemberId());  // 호텔에 memberId 설정
-            hotelRepository.save(hotel);  // 호텔 정보 저장
+
+            // memberId를 설정
+            hotel.setMember(hotelDTO.getMemberId()); // 기존 memberId로 hotel의 member 설정
+
+            // member 객체에서 memberEmail을 가져와 hotelEmail에 설정
+            Member member = hotelDTO.getMemberId(); // 여기서 memberId가 Member 객체로 설정되어 있다고 가정
+            if (member != null) {
+                hotel.setHotelEmail(member.getMemberEmail());  // hotelEmail을 memberEmail로 설정
+            } else {
+                throw new RuntimeException("회원 정보를 찾을 수 없습니다.");
+            }
+
+            // 호텔 정보 저장
+            hotelRepository.save(hotel);
         } else {
             throw new RuntimeException("지사를 찾을 수 없습니다.");
         }
     }
+
+
 
 }

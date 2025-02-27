@@ -27,5 +27,4 @@ public interface CompanyRepository extends JpaRepository<Company, Integer> {
     // memberId로만 회사 조회
     Page<Company> findByMember_MemberId(Integer memberId, Pageable pageable);
 
-
 }

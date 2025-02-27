@@ -71,15 +71,15 @@
     <div class="container-fluid mt-4">
         <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
         <a href="#" class="custom-link"><span>호텔관리</span></a> /
-        <a th:href="@{/manager/hotel/list(companyId=${companyId})}" class="custom-link">
+        <a href="/chief/hotel/list" class="custom-link">
             <span>호텔지사관리</span>
         </a>
         <h2 class="mb-3">호텔 지사 관리</h2>
 
         <!-- 검색 영역 -->
         <div class="card p-4 mb-4">
-            <form action="/manager/hotel/list" method="get">
-                <input type="hidden" name="companyId" th:value="${companyId}">
+            <form action="/chief/hotel/list" method="get">
+                <!--<input type="hidden" name="companyId" th:value="${companyId}">-->
                 <div class="row g-3 align-items-center">
                     <h5 class="card-title">지사 찾기</h5>
                     <div class="col-md-6">
@@ -96,7 +96,8 @@
                 </div>
                 <!-- 조회 버튼 -->
                 <div class="text-center mt-4">
-                    <button type="submit" class="btn btn-dark w-25" th:formaction="@{ /manager/hotel/list(companyId=${companyId}, searchType=${searchType}, keyword=${keyword}) }">조회</button>
+                    <!--<button type="submit" class="btn btn-dark w-25" th:formaction="@{ /manager/hotel/list(companyId=${companyId}, searchType=${searchType}, keyword=${keyword}) }">조회</button>-->
+                    <button type="submit" class="btn btn-dark w-25">조회</button>
                 </div>
             </form>
         </div>
@@ -140,7 +141,9 @@
                             </td>
                             <td th:text="${data.companyName}" class="align-middle text-center">본사명</td>
                             <td class="align-middle text-center">
-                                <a th:href="@{/manager/hotel/read(hotelId=${data.hotelId})}" style="text-decoration: none; color: black" th:text="${data.hotelName}" >지사명</a>
+                                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/hotel/read(hotelId=${data.hotelId})}" style="text-decoration: none; color: black" th:text="${data.hotelName}" >지사명</a>
+                                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/hotel/read(hotelId=${data.hotelId})}" style="text-decoration: none; color: black" th:text="${data.hotelName}" >지사명</a>
+                                <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" th:href="@{/manager/hotel/read(hotelId=${data.hotelId})}" style="text-decoration: none; color: black" th:text="${data.hotelName}" >지사명</a>
                             </td>
                             <td th:text="${data.hotelAddress}" class="align-middle text-center">주소</td>
                             <td th:text="${data.hotelPhone}" class="align-middle text-center">전화번호</td>
@@ -149,9 +152,11 @@
                                 <span th:text="${data.hotelCheckIn}">체크인</span>:00-<span th:text="${data.hotelCheckOut}">체크아웃</span>:00</td>
                             <!--<td class="align-middle text-center">별점</td>--> <!-- 별점은 나중에 -->
                             <td class="align-middle text-center">
-                                <a th:href="@{/manager/hotel/read(hotelId=${data.hotelId})}" class="btn btn-info btn-sm">보기</a>
-                                <a th:href="@{/manager/hotel/update(hotelId=${data.hotelId})}"  class="btn btn-warning btn-sm">수정</a>
-                                <a th:href="@{/manager/hotel/delete(hotelId=${data.hotelId})}" style="text-decoration: none; color: black" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')"><i class="bi bi-trash"></i></a>
+                                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/hotel/read(hotelId=${data.hotelId})}" class="btn btn-info btn-sm">보기</a>
+                                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/hotel/read(hotelId=${data.hotelId})}" class="btn btn-info btn-sm">보기</a>
+                                <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" th:href="@{/manager/hotel/read(hotelId=${data.hotelId})}" class="btn btn-info btn-sm">보기</a>
+                                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/hotel/update(hotelId=${data.hotelId})}"  class="btn btn-warning btn-sm">수정</a>
+                                <a th:href="@{/chief/hotel/delete(hotelId=${data.hotelId})}" style="text-decoration: none; color: black" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')"><i class="bi bi-trash"></i></a>
                             </td>
                         </tr>
                     </th:block>
@@ -171,34 +176,35 @@
 
                 <!-- 추가 버튼 -->
                 <div class="text-end mt-3">
-                    <a class="btn btn-success" th:href="@{/company/read(companyId=${companyId})}">본사상세</a> <!--only chief-->
-                    <button class="btn btn-dark" onclick="location.href='/manager/hotel/register'">등록</button>
-                    <button type="button" class="btn btn-primary modalBtn">간편 등록</button>
+                    <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="btn btn-success" href="/admin/company/list">본사관리</a> <!--only admin-->
+                    <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="btn btn-success" href="/chief/company/list">본사관리</a> <!--only chief-->
+                    <button th:if="${#authorization.expression('hasRole(''CHIEF'')')}"  class="btn btn-dark" onclick="location.href='/chief/hotel/register'">등록</button> <!--only chief-->
+                    <button th:if="${#authorization.expression('hasRole(''CHIEF'')')}"  type="button" class="btn btn-primary modalBtn">간편 등록</button> <!--only chief-->
                 </div>
 
 
                 <!-- 페이지네이션 -->
-                <div class="d-flex justify-content-center">
+                <div class="d-flex justify-content-center" th:unless="${#authorization.expression('hasRole(''manager'')')}">
                     <ul class="pagination">
                         <li class="page-item" th:unless="${pageInfo.startPage == 1}">
-                            <a class="page-link" th:href="@{/manager/hotel/list(page=1)}">시작</a>
+                            <a class="page-link" th:href="@{/chief/hotel/list(page=1)}">시작</a>
                         </li>
                         <li class="page-item" th:unless="${pageInfo.currentPage == 1}">
-                            <a class="page-link" th:href="@{/manager/hotel/list(page=${pageInfo.prevPage})}">이전</a>
+                            <a class="page-link" th:href="@{/chief/hotel/list(page=${pageInfo.prevPage})}">이전</a>
                         </li>
                         <th:block th:each="num : ${#numbers.sequence(pageInfo.startPage, pageInfo.endPage, 1)}">
                             <li class="page-item" th:unless="${num == pageInfo.currentPage}">
-                                <a class="page-link" th:href="@{/manager/hotel/list(page=${num})}" th:text="${num}">1</a>
+                                <a class="page-link" th:href="@{/chief/hotel/list(page=${num})}" th:text="${num}">1</a>
                             </li>
                             <li class="page-item active" th:if="${num == pageInfo.currentPage}">
-                                <a class="page-link" th:href="@{/manager/hotel/list(page=${num})}" th:text="${num}">[[${num}]]</a>
+                                <a class="page-link" th:href="@{/chief/hotel/list(page=${num})}" th:text="${num}">[[${num}]]</a>
                             </li>
                         </th:block>
                         <li class="page-item" th:unless="${pageInfo.currentPage >= pageInfo.lastPage}">
-                            <a class="page-link" th:href="@{/manager/hotel/list(page=${pageInfo.nextPage})}">다음</a>
+                            <a class="page-link" th:href="@{/chief/hotel/list(page=${pageInfo.nextPage})}">다음</a>
                         </li>
                         <li class="page-item" th:unless="${pageInfo.endPage == pageInfo.lastPage}">
-                            <a class="page-link" th:href="@{/manager/hotel/list(page=${pageInfo.lastPage})}">끝</a>
+                            <a class="page-link" th:href="@{/chief/hotel/list(page=${pageInfo.lastPage})}">끝</a>
                         </li>
                     </ul>
                 </div>
@@ -221,7 +227,7 @@
 
                 <div class="modal-body">
 
-                    <form action="/manager/hotel/register" method="post" enctype="multipart/form-data">
+                    <form action="/chief/hotel/register" method="post" enctype="multipart/form-data">
                         <div class="mb-3 mt-3">
                             <label for="companyId" class="form-label">본사명:</label>
                             <select id="companyId" name="companyId" class="form-select">
@@ -252,10 +258,14 @@
                             <label for="hotelPhone" class="form-label">호텔전화:</label>
                             <input type="text" class="form-control" id="hotelPhone" name="hotelPhone" required>
                         </div>
-                        <!--<div class="mb-3 mt-3">
-                            <label for="hotelEmail" class="form-label">호텔이메일:</label>
-                            <input type="email" class="form-control" id="hotelEmail" name="hotelEmail">
-                        </div>-->
+                        <div class="mb-3 mt-3">
+                            <label for="hotelEmail" class="form-label">담당자:</label>
+                            <select id="hotelEmail" name="hotelEmail" class="form-select">
+                                <th:block th:each="memberDTOS : ${memberDTOS}">
+                                    <option th:value="${memberDTOS.memberEmail}" th:text="${memberDTOS.memberName}">뒤에바</option>
+                                </th:block>
+                            </select>
+                        </div>
                         <div class="mb-3 mt-3">
                             <label for="hotelCheckIn" class="form-label">호텔 체크인:</label>
                             <select id="hotelCheckIn" name="hotelCheckIn" class="form-select">

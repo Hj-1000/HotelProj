@@ -213,7 +213,7 @@ function setHotelLocationBasedOnAddress(address) {
     // 제주도
     else if (address.includes('제주특별자치도 한림읍') || address.includes('제주특별자치도 애월읍')) {
         location = '제주/한림/애월';
-    } else if (address.includes('제주특별자치도 중문동') || address.includes('제주특별자치도 대정읍') || address.includes('제주특별자치도 서귀포시 대포복개로') || address.includes('제주특별자치도 서귀포시 대포로')) {
+    } else if (address.includes('제주특별자치도 중문') || address.includes('제주특별자치도 대정읍') || address.includes('제주특별자치도 서귀포시 대포복개로') || address.includes('제주특별자치도 서귀포시 대포로')) {
         location = '서귀포/중문/대정';
     } else if (address.includes('제주특별자치도 성산읍') || address.includes('제주특별자치도 서귀포시 표선면') || address.includes('제주특별자치도 송악산')) {
         location = '성산/표선/송악산';

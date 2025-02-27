@@ -92,7 +92,7 @@ function deleteOldImage(imageId) {
     console.log(imageId)
 
     $.ajax({
-        url: '/manager/hotel/image/delete/' + imageId,  // 기본 URL 포함
+        url: '/chief/hotel/image/delete/' + imageId,  // 기본 URL 포함
         method: 'DELETE',
         success: function(response) {
             if (response.success === "true") {

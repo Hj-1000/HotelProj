@@ -63,4 +63,10 @@ public class MemberDTO {
         this.modDate = member.getModDate();
     }
 
+    public MemberDTO(Integer memberId, String memberEmail, String memberName) {
+        this.memberId = memberId;
+        this.memberEmail = memberEmail;
+        this.memberName = memberName;
+    }
+
 }

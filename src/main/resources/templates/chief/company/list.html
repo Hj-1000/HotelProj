@@ -112,7 +112,7 @@
         </div>
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">본사 목록</h5>
+                <!--<h5 class="card-title">본사 목록</h5>-->
                 <table class="table table-bordered text-center">
                     <thead>
                     <tr>
@@ -139,18 +139,21 @@
                                 </span>
                             </td>
                             <td class="align-middle text-center">
-                                <a th:href="@{/chief/company/read(companyId=${data.companyId})}" style="text-decoration: none; color: black" th:text="${data.companyName}">NTT호텔</a>
+                                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/company/read(companyId=${data.companyId})}" style="text-decoration: none; color: black" th:text="${data.companyName}">NTT호텔</a>
+                                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/company/read(companyId=${data.companyId})}" style="text-decoration: none; color: black" th:text="${data.companyName}">NTT호텔</a>
                             </td>
                             <td th:text="${data.companyManager}" class="align-middle text-center">우리</td>
                             <!--나중에 지사수, 매장수 업데이트할거임~!-->
                             <td th:text="${data.hotelCount}" class="align-middle text-center">2</td>
                             <!--<td class="align-middle text-center">2</td>-->
                             <td class="align-middle text-center">
-                                <a th:href="@{/chief/company/read(companyId=${data.companyId})}" class="btn btn-info btn-sm">보기</a>
-                                <a th:href="@{/chief/company/update(companyId=${data.companyId})}"  class="btn btn-warning btn-sm">수정</a>
+                                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/company/read(companyId=${data.companyId})}" class="btn btn-info btn-sm">보기</a>
+                                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/company/read(companyId=${data.companyId})}" class="btn btn-info btn-sm">보기</a>
+                                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/company/update(companyId=${data.companyId})}"  class="btn btn-warning btn-sm">수정</a>
 
                                 <!--삭제 버튼 누르면 해당 본사 삭제됨-->
-                                <a th:href="@{/chief/company/delete(companyId=${data.companyId})}" style="text-decoration: none; color: black" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')"><i class="bi bi-trash"></i></a>
+                                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/company/delete(companyId=${data.companyId})}" style="text-decoration: none; color: black" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')"><i class="bi bi-trash"></i></a>
+                                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/company/delete(companyId=${data.companyId})}" style="text-decoration: none; color: black" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')"><i class="bi bi-trash"></i></a>
                             </td>
                         </tr>
                     </th:block>
@@ -166,33 +169,33 @@
 
                 <!-- 추가 버튼 -->
                 <div class="text-end mt-3">
-                    <button class="btn btn-success" onclick="location.href='/chief/company/register' ">등록</button>
-                    <button type="button" class="btn btn-dark modalBtn">간편 등록</button>
+                    <button th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="btn btn-success" onclick="location.href='/admin/company/register' ">등록</button>
+                    <button th:if="${#authorization.expression('hasRole(''ADMIN'')')}" type="button" class="btn btn-dark modalBtn">간편 등록</button>
                 </div>
 
 
                 <!-- 페이지네이션 -->
-                <div class="d-flex justify-content-center">
+                <div th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="d-flex justify-content-center">
                     <ul class="pagination">
                         <li class="page-item" th:unless="${pageInfo.startPage == 1}">
-                            <a class="page-link" th:href="@{/chief/company/list(page=1)}">시작</a>
+                            <a class="page-link" th:href="@{/admin/company/list(page=1)}">시작</a>
                         </li>
                         <li class="page-item" th:unless="${pageInfo.currentPage == 1}">
-                            <a class="page-link" th:href="@{/chief/company/list(page=${pageInfo.prevPage})}">이전</a>
+                            <a class="page-link" th:href="@{/admin/company/list(page=${pageInfo.prevPage})}">이전</a>
                         </li>
                         <th:block th:each="num : ${#numbers.sequence(pageInfo.startPage, pageInfo.endPage, 1)}">
                             <li class="page-item" th:unless="${num == pageInfo.currentPage}">
-                                <a class="page-link" th:href="@{/chief/company/list(page=${num})}" th:text="${num}">1</a>
+                                <a class="page-link" th:href="@{/admin/company/list(page=${num})}" th:text="${num}">1</a>
                             </li>
                             <li class="page-item active" th:if="${num == pageInfo.currentPage}">
-                                <a class="page-link" th:href="@{/chief/company/list(page=${num})}" th:text="${num}">[[${num}]]</a>
+                                <a class="page-link" th:href="@{/admin/company/list(page=${num})}" th:text="${num}">[[${num}]]</a>
                             </li>
                         </th:block>
                         <li class="page-item" th:unless="${pageInfo.currentPage >= pageInfo.lastPage}">
-                            <a class="page-link" th:href="@{/chief/company/list(page=${pageInfo.nextPage})}">다음</a>
+                            <a class="page-link" th:href="@{/admin/company/list(page=${pageInfo.nextPage})}">다음</a>
                         </li>
                         <li class="page-item" th:unless="${pageInfo.endPage == pageInfo.lastPage}">
-                            <a class="page-link" th:href="@{/chief/company/list(page=${pageInfo.lastPage})}">끝</a>
+                            <a class="page-link" th:href="@{/admin/company/list(page=${pageInfo.lastPage})}">끝</a>
                         </li>
                     </ul>
                 </div>
@@ -213,7 +216,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
-              <form action="/chief/company/register" method="post" enctype="multipart/form-data">
+              <form action="/admin/company/register" method="post" enctype="multipart/form-data">
 
                     <!-- Modal body -->
                     <div class="modal-body">
@@ -221,12 +224,15 @@
                             <label for="companyName" class="form-label">본사명:</label>
                             <input type="text" class="form-control" id="companyName" name="companyName" required>
                         </div>
-<!--                        <div class="mb-3 mt-3">-->
-<!--                            &lt;!&ndash;나중에 자동으로 서비스에서 등록되도록 바꿀 것&ndash;&gt;-->
-<!--                            <label for="companyManager" class="form-label">본사 관리자명:</label>-->
-<!--                            <input type="text" class="form-control" id="companyManager" name="companyManager">-->
-<!--                        </div>-->
-                        <!-- 새 이미지 업로드 및 미리보기 -->
+                        <label for="companyManager" class="form-label">담당자:</label>
+                        <select id="companyManager" name="companyManager" class="form-select" onchange="updateMemberId()">
+                            <th:block th:each="memberDTO : ${memberDTOS}">
+                                <option th:value="${memberDTO.memberName}" th:text="${memberDTO.memberName}" th:data-id="${memberDTO.memberId}">김호텔장</option>
+                            </th:block>
+                        </select>
+
+                        <!-- 선택된 담당자의 memberId를 저장할 숨겨진 input -->
+                        <input type="hidden" id="memberId" name="memberId">
                         <div>
                             <label for="newImageFiles">본사이미지:</label>
                             <input type="file" id="newImageFiles" name="imageFiles" multiple accept="image/*" onchange="validateImage(event)" required>
