@@ -164,7 +164,9 @@
                         </li>
                     </ul>
                 </div>
-
+                <div th:if="${#lists.isEmpty(memberDTOList)}" class="alert alert-warning text-center mt-4  ">
+                    조회 결과가 없습니다.
+                </div>
                 <!-- 회원정보 수정 성공시 메시지 -->
                 <div id="successMessage" th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
                     <span th:text="${successMessage}"></span>

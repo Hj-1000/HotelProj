@@ -27,10 +27,10 @@
         <div class="card p-4">
             <form th:action="@{/manager/sales}" method="get">
                 <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="room" class="form-label">객실명</label>
-                            <input type="text" class="form-control" id="room" name="room" placeholder="객실명" th:value="${param.room}">
+                            <label for="roomName" class="form-label">객실명</label>
+                            <input type="text" class="form-control" id="roomName" name="roomName" placeholder="객실명" th:value="${param.roomName}">
                         </div>
                         <div class="mb-3">
                             <label class="form-label">결제 완료 금액</label>
@@ -44,7 +44,7 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">결제일</label>
+                            <label class="form-label">최종 결제일</label>
                             <div class="d-flex gap-3">
                                 <div class="form-group" style="flex: 1;">
                                     <input type="date" class="form-control" id="시작일" name="startDate"th:value="${param.startDate}">
@@ -54,48 +54,18 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
                 <div class="text-center mt-3">
-                    <button type="submit" class="btn btn-dark">
+                    <button type="submit" class="btn btn-dark" id="applyDateRange">
                         <i class="bi bi-search"></i> 조회</button>
                 </div>
             </form>
         </div>
         <div class="card mt-4">
             <div class="card-body">
-                <h5 class="card-title">일일 매출 그래프 (최근 7일)</h5>
-                <canvas id="chart" th:data-sales-data="${salesDataJson} ?: '[]'" style="width: 100%; height: 400px;"></canvas>
-            </div>
-        </div>
-        <div class="card mt-4">
-            <div class="card-header d-flex justify-content-between">
-                <h5 class="card-title mb-0">일일 매출 현황 (최근 7일)</h5>
-                <button class="btn btn-link" id="toggleCard" aria-expanded="true">
-                    <span id="toggleIcon">-</span> <!-- 기본적으로 내용이 펼쳐짐 -->
-                </button>
-            </div>
-            <div class="card-body" id="cardContent">
-                <table class="table table-bordered">
-                    <thead>
-                    <tr>
-                        <th>날짜</th>
-                        <th>객실 매출</th>
-                        <th>룸서비스 매출</th>
-                        <th>총 매출</th>
-                        <th>결제 건수</th>
-                    </tr>
-                    </thead>
-                    <tbody id="dailySalesTableBody">
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="card mt-4">
-            <div class="card-body">
                 <h5 class="card-title">결제내역 상세보기</h5>
-                <table class="table table-bordered text-center" id="memberTable">
+                <table class="table table-bordered text-center" id="paymentTable">
                     <thead>
                     <tr>
                         <th style="background-color: #f8f9fa; width: 6%">주문번호</th>
@@ -158,252 +128,358 @@
                         </li>
                     </ul>
                 </div>
+                <div th:if="${#lists.isEmpty(paymentDTOList)}" class="alert alert-warning text-center mt-4  ">
+                    조회 결과가 없습니다.
+                </div>
+            </div>
+        </div>
+        <div class="card mt-4">
+            <div class="card-body toggleContent">
+                <h5 class="card-title" id="salesGraph">일일 매출 그래프 (최근 7일)</h5>
+                <canvas id="chart" th:data-sales-data="${salesDataJson} ?: '[]'" style="width: 100%; max-height: 0px;"></canvas>
+            </div>
+        </div>
+        <div class="btn-group mt-4 form-group" style="flex: 1;">
+            <button id="show7Days" class="btn btn-primary">최근 7일 (일별)</button>
+            <button id="show6Months" class="btn btn-secondary">최근 6개월 (월별)</button>
+            <button id="custom" class="btn btn-secondary">사용자 지정일</button>
+        </div>
+        <div id="customDatePicker" class="mt-2" style="display: none;">
+            <input type="date" id="startDate" class="form-control d-inline-block" style="width: auto;">
+            ~
+            <input type="date" id="endDate" class="form-control d-inline-block" style="width: auto;">
+            <button id="applyCustomDate" class="btn btn-success">적용</button>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-body justify-content-between">
+                <h5 class="card-title" id="salesTitle">일일 매출 현황 (최근 7일)</h5>
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>날짜</th>
+                        <th>객실 매출</th>
+                        <th>룸서비스 매출</th>
+                        <th>총 매출</th>
+                        <th>결제 건수</th>
+                    </tr>
+                    </thead>
+                    <tbody id="salesTableBody"></tbody>
+                </table>
             </div>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script th:inline="javascript">
-        /*<![CDATA[*/
-        var salesData = /*[[${salesDataJson}]]*/ '[]';
-        salesData = salesData ? JSON.parse(salesData) : [];
-
         document.addEventListener("DOMContentLoaded", function () {
-            const chartElement = document.getElementById("chart");
+            var salesData = /*[[${salesDataJson}]]*/ '[]';
+            salesData = salesData ? JSON.parse(salesData) : [];
 
-            if (!salesData.length) {
-                console.log("데이터 없음");
-                return;
-            }
+            // 버튼 선택
+            const buttons = document.querySelectorAll(".btn-group button");
 
-            // 최근 7일의 데이터만 추출
-            const recentDays = 7;
-            const recentSalesData = salesData.slice(-recentDays);  // 마지막 7일의 데이터만 가져오기
+            // 버튼 클릭 시 활성화 상태 변경
+            buttons.forEach(button => {
+                button.addEventListener("click", function () {
+                    // 모든 버튼을 secondary로 변경
+                    buttons.forEach(btn => btn.classList.remove("btn-primary", "btn-secondary"));
+                    buttons.forEach(btn => btn.classList.add("btn-secondary"));
 
-            // 일일 매출 및 결제 건수 데이터 집계
-            const dailyData = {};
-
-            recentSalesData.forEach(data => {
-                const date = data.date.substring(0, 10);  // 날짜 (YYYY-MM-DD)
-                if (!dailyData[date]) {
-                    dailyData[date] = {
-                        totalSales: 0,
-                        roomSales: 0,
-                        serviceSales: 0,
-                        paymentCount: 0 // 결제 건수 추가
-                    };
-                }
-                dailyData[date].totalSales += data.totalSales;
-                dailyData[date].roomSales += data.roomSales;
-                dailyData[date].serviceSales += data.serviceSales;
-                dailyData[date].paymentCount += 1;  // 결제 건수 증가
+                    // 클릭한 버튼만 primary로 변경
+                    this.classList.remove("btn-secondary");
+                    this.classList.add("btn-primary");
+                });
             });
 
-            // 일일 매출 데이터를 배열로 변환
-            const days = Object.keys(dailyData);  // 날짜 목록 (YYYY-MM-DD)
-            const totalSales1 = days.map(day => dailyData[day].totalSales);  // 총 매출
-            const roomSales1 = days.map(day => dailyData[day].roomSales);   // 객실 금액
-            const serviceSales1 = days.map(day => dailyData[day].serviceSales); // 룸서비스 금액
-            const paymentCounts1 = days.map(day => dailyData[day].paymentCount); // 결제 건수
+            const chartElement = document.getElementById("chart");
+            const tableBody = document.getElementById("salesTableBody");
+            const show7DaysBtn = document.getElementById("show7Days");
+            const show6MonthsBtn = document.getElementById("show6Months");
+            const customBtn = document.getElementById("custom");
+            const customDatePicker = document.getElementById("customDatePicker");
+            const applyCustomDateBtn = document.getElementById("applyCustomDate");
+            const startDateInput = document.getElementById("startDate");
+            const endDateInput = document.getElementById("endDate");
+            let myChart;
 
-            // 테이블에 일일 매출 데이터 출력
-            const tableBody = document.getElementById("dailySalesTableBody");
-            days.forEach((day, index) => {
-                const row = document.createElement("tr");
+            function hideCustomDatePicker() {
+                customDatePicker.style.display = "none";
+            }
 
-                // 증감폭 계산
-                const prevRoomSales = index > 0 ? roomSales1[index - 1] : null;
-                const prevServiceSales = index > 0 ? serviceSales1[index - 1] : null;
-                const prevTotalSales = index > 0 ? totalSales1[index - 1] : null;
-                const prevPaymentCount = index > 0 ? paymentCounts1[index - 1] : null;
+            buttons.forEach(button => {
+                button.addEventListener("click", function () {
+                    buttons.forEach(btn => btn.classList.remove("btn-primary", "btn-secondary"));
+                    buttons.forEach(btn => btn.classList.add("btn-secondary"));
+                    this.classList.remove("btn-secondary");
+                    this.classList.add("btn-primary");
 
-                function calculateChange(current, previous) {
-                    if (previous === null) return ""; // 첫 번째 데이터는 비교할 값이 없으므로 빈 문자열
-                    const change = ((current - previous) / previous) * 100;
-                    return (change >= 0 ? "+" : "") + change.toFixed(1) + "%";
+                    if (this.id === "custom") {
+                        customDatePicker.style.display = "block";
+                    } else {
+                        hideCustomDatePicker();
+                    }
+                });
+            });
+
+            // 사용자 지정 날짜 적용 버튼 클릭 시 차트 업데이트
+            applyCustomDateBtn.addEventListener("click", function () {
+                const startDate = new Date(startDateInput.value);
+                const endDate = new Date(endDateInput.value);
+
+                if (!startDate || !endDate || startDate > endDate) {
+                    alert("올바른 날짜를 선택하세요.");
+                    return;
                 }
 
-                row.innerHTML = `
-    <td>${day}</td>
+                updateChartAndTable("custom", startDate, endDate);
+            });
+
+            function updateChartAndTable(mode, startDate = null, endDate = null) {
+                if (!salesData.length) {
+                    console.log("데이터 없음");
+                    return;
+                }
+
+                let aggregatedData = {};
+                let labels = [];
+
+                if (mode === "7days") {
+                    salesGraph.textContent = "일일 매출 그래프 (최근 7일)";
+                    salesTitle.textContent = "일일 매출 현황 (최근 7일)";
+                    const now = new Date();
+                    now.setHours(23, 59, 59, 999); // 오늘의 끝시간 설정
+                    const sevenDaysAgo = new Date();
+                    sevenDaysAgo.setDate(now.getDate() - 6); // 7일 전 (오늘 포함)
+
+                    // 최근 7일 동안의 날짜를 미리 0으로 초기화
+                    let tempDate = new Date(sevenDaysAgo);
+                    while (tempDate <= now) {
+                        const dateKey = tempDate.toISOString().substring(0, 10); // YYYY-MM-DD 형식
+                        aggregatedData[dateKey] = { totalSales: 0, roomSales: 0, serviceSales: 0, paymentCount: 0 };
+                        tempDate.setDate(tempDate.getDate() + 1); // 다음 날짜로 이동
+                    }
+
+                    // 실제 데이터가 있는 날짜는 값 추가
+                    salesData.forEach(data => {
+                        const date = new Date(data.date);
+                        date.setHours(23, 59, 59, 999); // 날짜 기준 맞추기
+                        if (date.getTime() >= sevenDaysAgo.getTime() && date.getTime() <= now.getTime()) {
+                            const dateKey = date.toISOString().substring(0, 10); // YYYY-MM-DD 형식
+                            aggregatedData[dateKey].totalSales += data.totalSales;
+                            aggregatedData[dateKey].roomSales += data.roomSales;
+                            aggregatedData[dateKey].serviceSales += data.serviceSales;
+                            aggregatedData[dateKey].paymentCount += 1;
+                        }
+                    });
+
+                    labels = Object.keys(aggregatedData).sort(); // 날짜 정렬
+                } else if (mode === "6months") {
+                    salesGraph.textContent = "월별 매출 그래프 (최근 6개월)";
+                    salesTitle.textContent = "월별 매출 현황 (최근 6개월)";
+                    const now = new Date();
+                    const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1); // 6개월 전 1일
+                    const endOfCurrentMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0); // 이번 달 마지막 날
+
+                    // 최근 6개월 동안의 모든 월을 0으로 초기화
+                    let tempDate = new Date(sixMonthsAgo);
+                    while (tempDate <= endOfCurrentMonth) {
+                        const monthKey = `${tempDate.getFullYear()}-${String(tempDate.getMonth() + 1).padStart(2, "0")}`;
+                        aggregatedData[monthKey] = { totalSales: 0, roomSales: 0, serviceSales: 0, paymentCount: 0 };
+                        tempDate.setMonth(tempDate.getMonth() + 1); // 다음 달로 이동
+                    }
+
+                    // 실제 데이터가 있는 월만 값 추가
+                    salesData.forEach(data => {
+                        const date = new Date(data.date);
+                        if (date.getTime() >= sixMonthsAgo.getTime() && date.getTime() <= endOfCurrentMonth.getTime()) {
+                            const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+                            aggregatedData[monthKey].totalSales += data.totalSales;
+                            aggregatedData[monthKey].roomSales += data.roomSales;
+                            aggregatedData[monthKey].serviceSales += data.serviceSales;
+                            aggregatedData[monthKey].paymentCount += 1;
+                        }
+                    });
+
+                    labels = Object.keys(aggregatedData).sort(); // 월별 정렬
+                } else if (mode === "custom" && startDate && endDate) {
+                    // 사용자가 선택한 날짜 범위
+                    let tempDate = new Date(startDate);
+                    while (tempDate <= endDate) {
+                        const dateKey = tempDate.toISOString().substring(0, 10); // YYYY-MM-DD 형식
+                        aggregatedData[dateKey] = { totalSales: 0, roomSales: 0, serviceSales: 0, paymentCount: 0 };
+                        tempDate.setDate(tempDate.getDate() + 1); // 다음 날짜로 이동
+                    }
+
+                    // 실제 데이터가 있는 날짜는 값 추가
+                    salesData.forEach(data => {
+                        const date = new Date(data.date);
+                        if (date.getTime() >= startDate.getTime() && date.getTime() <= endDate.getTime()) {
+                            const dateKey = date.toISOString().substring(0, 10); // YYYY-MM-DD 형식
+                            aggregatedData[dateKey].totalSales += data.totalSales;
+                            aggregatedData[dateKey].roomSales += data.roomSales;
+                            aggregatedData[dateKey].serviceSales += data.serviceSales;
+                            aggregatedData[dateKey].paymentCount += 1;
+                        }
+                    });
+
+                    labels = Object.keys(aggregatedData).sort(); // 날짜 정렬
+                }
+
+                const totalSales = labels.map(date => aggregatedData[date].totalSales);
+                const roomSales = labels.map(date => aggregatedData[date].roomSales);
+                const serviceSales = labels.map(date => aggregatedData[date].serviceSales);
+                const paymentCounts = labels.map(date => aggregatedData[date].paymentCount);
+
+                // 데이터가 모두 0일 경우 차트 높이를 0으로 설정
+                const hasData = totalSales.some(sale => sale > 0) || roomSales.some(sale => sale > 0) || serviceSales.some(sale => sale > 0) || paymentCounts.some(count => count > 0);
+
+                if (hasData) {
+                    chartElement.style.height = "400px";
+                    chartElement.style.maxHeight = "400px";
+                } else {
+                    chartElement.style.height = "0px";
+                    chartElement.style.maxHeight = "0px";
+                }
+
+                // 차트 업데이트
+                if (myChart) {
+                    myChart.destroy();
+                }
+                const ctx = chartElement.getContext("2d");
+                myChart = new Chart(ctx, {
+                    type: "bar",
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: "총 매출",
+                                data: totalSales,
+                                backgroundColor: "rgba(0, 0, 255, 0.2)",
+                                borderColor: "blue",
+                                barPercentage: 0.5
+                            },
+                            {
+                                label: "객실 매출",
+                                data: roomSales,
+                                backgroundColor: "rgba(0, 255, 0, 0.2)",
+                                borderColor: "green",
+                                barPercentage: 0.5
+                            },
+                            {
+                                label: "룸서비스 매출",
+                                data: serviceSales,
+                                backgroundColor: "rgba(255, 0, 0, 0.2)",
+                                borderColor: "red",
+                                barPercentage: 0.5
+                            },
+                            {
+                                label: "결제 건수",
+                                data: paymentCounts,
+                                borderColor: "orange",
+                                backgroundColor: "rgba(255, 165, 0, 0.2)",
+                                fill: false,
+                                type: "line",
+                                yAxisID: 'y2'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: { title: { display: true, text: "금액 (₩)" }, beginAtZero: true },
+                            y2: { position: 'right', title: { display: true, text: "결제 건수" }, grid: { drawOnChartArea: false } },
+                            x: { title: { display: true, text: mode === "7days" ? "날짜" : "월" } }
+                        }
+                    }
+                });
+
+                // 테이블 업데이트
+                tableBody.innerHTML = "";
+                labels.forEach((date, index) => {
+                    const row = document.createElement("tr");
+
+                    function calculateChange(current, previous) {
+                        if (previous === null || isNaN(current) || isNaN(previous) || !isFinite(current) || !isFinite(previous)) {
+                            return "<span style='color: grey;'>0%</span>"; // NaN일 경우 "0%"로 처리
+                        }
+
+                        // 값이 0에서 0으로 바뀔 때도 0%로 처리
+                        if (current === 0 && previous === 0) {
+                            return "<span style='color: grey;'>0%</span>";
+                        }
+
+                        const change = ((current - previous) / previous) * 100;
+
+                        // 증감폭이 Infinity일 경우 "Infinity"로 표시 (주황색)
+                        if (!isFinite(change)) {
+                            return "<span style='color: green;'>Infinity</span>"; // Infinity일 경우 주황색
+                        }
+
+                        const changeText = (change >= 0 ? "+" : "") + change.toFixed(1) + "%";
+
+                        // 증감폭에 따라 색상 적용
+                        return `<span style="color: ${change >= 0 ? 'green' : 'red'};">${changeText}</span>`;
+                    }
+
+                    const prevRoomSales = index > 0 ? roomSales[index - 1] : null;
+                    const prevServiceSales = index > 0 ? serviceSales[index - 1] : null;
+                    const prevTotalSales = index > 0 ? totalSales[index - 1] : null;
+                    const prevPaymentCount = index > 0 ? paymentCounts[index - 1] : null;
+
+                    row.innerHTML = `
+    <td>${date}</td>
     <td>
         <div class="d-flex justify-content-between">
             <span class="text-start">
-                ₩ ${new Intl.NumberFormat().format(roomSales1[index])}
+                ₩ ${new Intl.NumberFormat().format(roomSales[index])}
             </span>
-            <span class="text-${roomSales1[index] > prevRoomSales ? 'success' : roomSales1[index] < prevRoomSales ? 'danger' : 'muted'} text-end">
-                ${calculateChange(roomSales1[index], prevRoomSales)}
+            <span class="text-${roomSales[index] > prevRoomSales ? 'success' : roomSales[index] < prevRoomSales ? 'danger' : 'muted'} text-end">
+                ${calculateChange(roomSales[index], prevRoomSales)}
             </span>
         </div>
     </td>
     <td>
         <div class="d-flex justify-content-between">
             <span class="text-start">
-                ₩ ${new Intl.NumberFormat().format(serviceSales1[index])}
+                ₩ ${new Intl.NumberFormat().format(serviceSales[index])}
             </span>
-            <span class="text-${serviceSales1[index] > prevServiceSales ? 'success' : serviceSales1[index] < prevServiceSales ? 'danger' : 'muted'} text-end">
-                ${calculateChange(serviceSales1[index], prevServiceSales)}
-            </span>
-        </div>
-    </td>
-    <td>
-        <div class="d-flex justify-content-between">
-            <span class="text-start">
-                ₩ ${new Intl.NumberFormat().format(totalSales1[index])}
-            </span>
-            <span class="text-${totalSales1[index] > prevTotalSales ? 'success' : totalSales1[index] < prevTotalSales ? 'danger' : 'muted'} text-end">
-                ${calculateChange(totalSales1[index], prevTotalSales)}
+            <span class="text-${serviceSales[index] > prevServiceSales ? 'success' : serviceSales[index] < prevServiceSales ? 'danger' : 'muted'} text-end">
+                ${calculateChange(serviceSales[index], prevServiceSales)}
             </span>
         </div>
     </td>
     <td>
         <div class="d-flex justify-content-between">
             <span class="text-start">
-                ${paymentCounts1[index]}
+                ₩ ${new Intl.NumberFormat().format(totalSales[index])}
             </span>
-            <span class="text-${paymentCounts1[index] > prevPaymentCount ? 'success' : paymentCounts1[index] < prevPaymentCount ? 'danger' : 'muted'} text-end">
-                ${calculateChange(paymentCounts1[index], prevPaymentCount)}
+            <span class="text-${totalSales[index] > prevTotalSales ? 'success' : totalSales[index] < prevTotalSales ? 'danger' : 'muted'} text-end">
+                ${calculateChange(totalSales[index], prevTotalSales)}
+            </span>
+        </div>
+    </td>
+    <td>
+        <div class="d-flex justify-content-between">
+            <span class="text-start">
+                ${paymentCounts[index]}
+            </span>
+            <span class="text-${paymentCounts[index] > prevPaymentCount ? 'success' : paymentCounts[index] < prevPaymentCount ? 'danger' : 'muted'} text-end">
+                ${calculateChange(paymentCounts[index], prevPaymentCount)}
             </span>
         </div>
     </td>
 `;
-                tableBody.appendChild(row);
-                function calculateChange(current, previous) {
-                    if (previous === null || isNaN(current) || isNaN(previous) || !isFinite(current) || !isFinite(previous)) {
-                        return ""; // 값이 NaN 또는 Infinity일 경우 빈 문자열 반환
-                    }
 
-                    const change = ((current - previous) / previous) * 100;
+                    tableBody.appendChild(row);
+                });
+            }
 
-                    // 증감폭이 Infinity일 경우 표시하지 않음
-                    if (!isFinite(change)) {
-                        return ""; // Infinity일 경우 빈 문자열 반환
-                    }
+            // 초기 데이터 (최근 7일)
+            updateChartAndTable("7days");
 
-                    return (change >= 0 ? "+" : "") + change.toFixed(1) + "%";
-                }
-            });
-
-
-            // 날짜별 매출 및 결제 건수 데이터 집계
-            const aggregatedData = {};
-
-            recentSalesData.forEach(data => {
-                const date = data.date.substring(0, 10);  // 날짜 (YYYY-MM-DD)
-                if (!aggregatedData[date]) {
-                    aggregatedData[date] = {
-                        totalSales: 0,
-                        roomSales: 0,
-                        serviceSales: 0,
-                        paymentCount: 0 // 결제 건수 추가
-                    };
-                }
-                aggregatedData[date].totalSales += data.totalSales;
-                aggregatedData[date].roomSales += data.roomSales;
-                aggregatedData[date].serviceSales += data.serviceSales;
-                aggregatedData[date].paymentCount += 1;  // 결제 건수 증가
-            });
-
-            // 집계된 데이터를 배열로 변환
-            const labels = Object.keys(aggregatedData);  // 날짜 목록
-            const totalSales = labels.map(date => aggregatedData[date].totalSales);  // 총 매출
-            const roomSales = labels.map(date => aggregatedData[date].roomSales);   // 객실 금액
-            const serviceSales = labels.map(date => aggregatedData[date].serviceSales); // 룸서비스 금액
-            const paymentCounts = labels.map(date => aggregatedData[date].paymentCount); // 결제 건수
-
-            const ctx = chartElement.getContext("2d");
-            new Chart(ctx, {
-                type: "bar",  // 기본적으로 막대 그래프
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: "결제 완료 금액",
-                            data: totalSales,
-                            borderColor: "blue",
-                            backgroundColor: "rgba(0, 0, 255, 0.2)",
-                            fill: true,
-                            barPercentage: 0.5  // 막대의 두께 설정
-                        },
-                        {
-                            label: "객실 금액",
-                            data: roomSales,
-                            borderColor: "green",
-                            backgroundColor: "rgba(0, 255, 0, 0.2)",
-                            fill: true,
-                            barPercentage: 0.5
-                        },
-                        {
-                            label: "룸서비스 금액",
-                            data: serviceSales,
-                            borderColor: "red",
-                            backgroundColor: "rgba(255, 0, 0, 0.2)",
-                            fill: true,
-                            barPercentage: 0.5
-                        },
-                        {
-                            label: "결제 건수",  // 결제 건수는 선형 그래프로
-                            data: paymentCounts,
-                            borderColor: "orange",
-                            backgroundColor: "rgba(255, 165, 0, 0.2)",
-                            fill: false,  // 선형 그래프이므로 fill을 false로 설정
-                            tension: 0,  // 선형 그래프의 곡선을 부드럽게
-                            type: "line",  // 선형 그래프 형식
-                            borderWidth: 2, // 선 굵기
-                            yAxisID: 'y2'  // 별도의 y축 사용 (옵션)
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: "top"
-                        },
-                        tooltip: {
-                            mode: "index",
-                            intersect: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: "금액 (₩)"
-                            }
-                        },
-                        y2: {  // 두 번째 y축 추가 (결제 건수 전용)
-                            type: 'linear',
-                            position: 'right',
-                            title: {
-                                display: true,
-                                text: '결제 건수'
-                            },
-                            grid: {
-                                drawOnChartArea: false  // 그리드선 숨기기
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: "날짜"
-                            }
-                        }
-                    }
-                }
-            });
-        });
-        /*]]>*/
-    </script>
-    <script>
-        document.getElementById("toggleCard").addEventListener("click", function () {
-            var cardContent = document.getElementById("cardContent");
-            var toggleIcon = document.getElementById("toggleIcon");
-
-            // 토글 (숨기기/보이기)
-            cardContent.style.display = cardContent.style.display === "none" ? "block" : "none";
-
-            // 아이콘 변경
-            toggleIcon.textContent = cardContent.style.display === "none" ? "+" : "-";
+            // 버튼 클릭 이벤트 추가
+            show7DaysBtn.addEventListener("click", () => updateChartAndTable("7days"));
+            show6MonthsBtn.addEventListener("click", () => updateChartAndTable("6months"));
         });
     </script>
 </div>
