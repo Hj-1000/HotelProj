@@ -1,9 +1,7 @@
 package com.ntt.ntt.Service.company;
 
-import com.ntt.ntt.DTO.CompanyDTO;
-import com.ntt.ntt.DTO.HotelDTO;
-import com.ntt.ntt.DTO.ImageDTO;
-import com.ntt.ntt.DTO.RoomDTO;
+import com.ntt.ntt.Constant.Role;
+import com.ntt.ntt.DTO.*;
 import com.ntt.ntt.Entity.*;
 import com.ntt.ntt.Repository.ImageRepository;
 import com.ntt.ntt.Repository.MemberRepository;
@@ -52,33 +50,69 @@ public class CompanyService {
     @Autowired
     private FileUpload fileUpload;
 
+    //회원목록 불러오는
+    public List<MemberDTO> getAllChiefs() {
+        // 1. 모든 CHIEF 역할을 가진 회원 목록 조회
+        List<Member> members = memberRepository.findByRole(Role.CHIEF);
+
+        // 2. 이미 company 테이블에 등록된 memberId 목록 가져오기
+        List<Integer> companyMemberIds = companyRepository.findAll().stream()
+                .map(company -> company.getMember().getMemberId()) // company에 해당하는 memberId 추출
+                .collect(Collectors.toList());
+
+        // 3. company에 등록되지 않은 회원만 필터링
+        List<MemberDTO> memberDTOS = members.stream()
+                .filter(member -> !companyMemberIds.contains(member.getMemberId())) // company에 없는 memberId만 필터링
+                .map(a -> new MemberDTO(a.getMemberId(), a.getMemberEmail(), a.getMemberName()))
+                .collect(Collectors.toList());
+
+        return memberDTOS;
+    }
+
+
     //등록
-    public void register(CompanyDTO companyDTO, List<MultipartFile> imageFiles, String memberEmail) {
-
-        // 로그인한 회원 정보 조회
-        Member member = memberRepository.findByMemberEmail(memberEmail)
-                .orElseThrow(() -> new RuntimeException("Member not found"));
-
-
-        // modelMapper가 null이 아닌지 확인
-        if (modelMapper == null) {
-            throw new IllegalStateException("ModelMapper가 초기화되지 않았습니다.");
-        }
-
+    @Transactional
+    public void register(CompanyDTO companyDTO, List<MultipartFile> imageFiles) {
+        // DTO → Entity 변환
         Company company = modelMapper.map(companyDTO, Company.class);
 
-        //관리자명 로그인된 회원 이름으로
-        company.setCompanyManager(member.getMemberName());
-
-        // 🔹 회원 정보 설정 -> memberId 추가를 위해
-        company.setMember(member);
+        // 🔹 선택한 담당자의 memberId와 memberName 저장
+//        company.setCompanyManager(companyManager); // 담당자 이름 저장
 
         // 1. Company 먼저 저장
         companyRepository.save(company);
-        // 2. imageFiles를 ImageService를 통해 저장
+
+        // 2. 이미지 파일 저장
         imageService.registerCompanyImage(company.getCompanyId(), imageFiles);
         companyRepository.flush(); // 🔹 즉시 DB 반영하여 트랜잭션 지연 문제 방지
     }
+
+//    public void register(CompanyDTO companyDTO, List<MultipartFile> imageFiles, String memberEmail) {
+//
+//        // 로그인한 회원 정보 조회
+//        Member member = memberRepository.findByMemberEmail(memberEmail)
+//                .orElseThrow(() -> new RuntimeException("Member not found"));
+//
+//
+//        // modelMapper가 null이 아닌지 확인
+//        if (modelMapper == null) {
+//            throw new IllegalStateException("ModelMapper가 초기화되지 않았습니다.");
+//        }
+//
+//        Company company = modelMapper.map(companyDTO, Company.class);
+//
+//        //관리자명 로그인된 회원 이름으로
+//        /*company.setCompanyManager(member.getMemberName());*/
+//
+//        // 🔹 회원 정보 설정 -> memberId 추가를 위해
+//        /*company.setMember(member);*/
+//
+//        // 1. Company 먼저 저장
+//        companyRepository.save(company);
+//        // 2. imageFiles를 ImageService를 통해 저장
+//        imageService.registerCompanyImage(company.getCompanyId(), imageFiles);
+//        companyRepository.flush(); // 🔹 즉시 DB 반영하여 트랜잭션 지연 문제 방지
+//    }
 
 
 

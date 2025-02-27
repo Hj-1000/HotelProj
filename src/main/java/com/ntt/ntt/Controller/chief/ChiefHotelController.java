@@ -1,10 +1,12 @@
-package com.ntt.ntt.Controller.hotel;
+package com.ntt.ntt.Controller.chief;
 
 import com.ntt.ntt.DTO.CompanyDTO;
 import com.ntt.ntt.DTO.HotelDTO;
+import com.ntt.ntt.DTO.MemberDTO;
 import com.ntt.ntt.DTO.RoomDTO;
+import com.ntt.ntt.Entity.Member;
+import com.ntt.ntt.Repository.MemberRepository;
 import com.ntt.ntt.Service.ImageService;
-import com.ntt.ntt.Service.RoomService;
 import com.ntt.ntt.Service.hotel.HotelService;
 import com.ntt.ntt.Util.PaginationUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -28,13 +31,14 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/manager/hotel")
+@RequestMapping("/chief/hotel")
 @RequiredArgsConstructor
 @Log4j2
-public class HotelManagerController {
+public class ChiefHotelController {
 
     private final HotelService hotelService;
-    private final RoomService roomService;
+
+    private final MemberRepository memberRepository;
 
     private final PaginationUtil paginationUtil;
     private final ImageService imageService;
@@ -48,6 +52,10 @@ public class HotelManagerController {
         List<CompanyDTO> companyDTOS = hotelService.getAllCompany();
         model.addAttribute("companyDTOS", companyDTOS);
         model.addAttribute("companyDTO", new CompanyDTO());
+
+        List<MemberDTO> memberDTOS = hotelService.getAllManagers();
+        model.addAttribute("memberDTOS", memberDTOS);
+        model.addAttribute("memberDTO", new MemberDTO());
         return "/manager/hotel/register";
     }
     //등록처리
@@ -72,95 +80,61 @@ public class HotelManagerController {
         redirectAttributes.addFlashAttribute("message", "지사 등록이 완료되었습니다.");
         redirectAttributes.addFlashAttribute("companyId", companyId); // companyId 전달
 
-        return "redirect:/manager/hotel/list?companyId=" + companyId;  // companyId를 쿼리 파라미터로 전달
+//        return "redirect:/manager/hotel/list?companyId=" + companyId;  // companyId를 쿼리 파라미터로 전달
+        return "redirect:/chief/hotel/list";  // 목록으로 이동
     }
 
 
-
-
-    //목록
-    @Operation(summary = "호텔장 호텔 목록", description = "본사에 소속 된 목록 페이지로 이동한다.")
+    //호텔장 호텔 목록
     @GetMapping("/list")
-    public String list(@RequestParam(required = false) Integer companyId,
-                       @RequestParam(required = false) String keyword,
+    public String list(@RequestParam(required = false) String keyword,
                        @RequestParam(required = false) String searchType,
-                       @RequestParam(required = false) Integer keyword1,  // 별점 검색용
-                       @RequestParam(defaultValue = "1") int page, // 기본값을 1로 설정 (1-based)
-                       @PageableDefault(size = 10) Pageable pageable, // 한 페이지에 10개씩
+                       @RequestParam(required = false) Integer keyword1,
+                       @RequestParam(defaultValue = "1") int page,
+                       @PageableDefault(size = 10) Pageable pageable,
                        Model model, HttpServletRequest request,
-                       RedirectAttributes redirectAttributes
-                       ) {
-
+                       RedirectAttributes redirectAttributes) {
         try {
-            // 페이지 번호를 0-based로 변환 (page는 1-based로 들어오므로 1을 빼줌)
-            Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize());
+            // 현재 로그인한 사용자 ID 가져오기
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            Member member = memberRepository.findByMemberEmail(email)
+                    .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다."));
+            Integer memberId = member.getMemberId();
 
-            // companyId가 존재하는 경우 해당 회사의 지사들만 조회
-            Page<HotelDTO> hotelDTOS;
+            Pageable adjustedPageable = PageRequest.of(page - 1, 10);  // 페이지 크기 명시적으로 지정
+            Page<HotelDTO> hotelDTOS = hotelService.listByChief(adjustedPageable, keyword, keyword1, searchType, memberId);
 
-            if (companyId != null) {
-
-                // 요청 URL 로그 출력
-                System.out.println("호텔리스트!! Requested URL: " + request.getRequestURL());
-                // companyId 값 출력 (디버깅용)
-                System.out.println("호텔리스트!! companyId: " + companyId);
-
-                hotelDTOS = hotelService.listByCompany(adjustedPageable, keyword, keyword1, searchType, companyId);
-            } else {
-                hotelDTOS = hotelService.listByCompany(adjustedPageable, keyword, keyword1, searchType, companyId); // 기본적으로 모든 지사 조회
-            }
-
-            // 페이지 정보 계산
             Map<String, Integer> pageInfo = paginationUtil.pagination(hotelDTOS);
 
-            // 전체 페이지 수
             int totalPages = hotelDTOS.getTotalPages();
             int currentPage = pageInfo.get("currentPage");
-
-            // 시작 페이지와 끝 페이지 계산 (현재 페이지를 기준으로 최대 10페이지까지)
-            int startPage = Math.max(1, currentPage - 4); // 최대 10개씩 출력
-            int endPage = Math.min(startPage + 9, totalPages); // 전체 페이지 수를 넘지 않도록
-
-            // prevPage, nextPage, lastPage 계산
+            int startPage = Math.max(1, currentPage - 4);
+            int endPage = Math.min(startPage + 9, totalPages);
             int prevPage = Math.max(1, currentPage - 1);
             int nextPage = Math.min(totalPages, currentPage + 1);
             int lastPage = totalPages;
 
-            // 페이지 정보 업데이트
             pageInfo.put("startPage", startPage);
             pageInfo.put("endPage", endPage);
             pageInfo.put("prevPage", prevPage);
             pageInfo.put("nextPage", nextPage);
             pageInfo.put("lastPage", lastPage);
 
-
-            // 모델에 데이터 추가
             model.addAttribute("hotelDTOS", hotelDTOS);
             model.addAttribute("pageInfo", pageInfo);
-
-            // 검색어와 검색 타입을 폼에 전달할 수 있도록 추가
             model.addAttribute("keyword", keyword);
             model.addAttribute("searchType", searchType);
 
-            // companyId를 쿼리 파라미터로 다시 전달
-            model.addAttribute("companyId", companyId);
+            List<MemberDTO> memberDTOS = hotelService.getAllManagers();
+            model.addAttribute("memberDTOS", memberDTOS);
+            model.addAttribute("memberDTO", new MemberDTO());
 
-            // 회사 목록 추가
-            List<CompanyDTO> companyDTOS = hotelService.getAllCompany();
-            model.addAttribute("companyDTOS", companyDTOS);
-            model.addAttribute("companyDTO", new CompanyDTO());
-
-            return "/manager/hotel/list"; // 뷰 경로
-        } catch (NullPointerException e) {
-            // Flash Attribute로 메시지를 전달
-            redirectAttributes.addFlashAttribute("message", "해당 본사가 없습니다!");
-            return "redirect:/company/list"; // 목록 페이지로 리다이렉트
+            return "/manager/hotel/list";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("message", "서버 오류가 있습니다!");
-            return "redirect:/company/list"; // 목록 페이지로 리다이렉트
+            return "redirect:/chief/company/list";
         }
     }
-
 
     //읽기
     @Operation(summary = "관리자용 호텔 상세", description = "hotelId에 맞는 호텔 상세 페이지로 이동한다.")
@@ -173,7 +147,7 @@ public class HotelManagerController {
             HotelDTO hotelDTO = hotelService.read(hotelId);
             if (hotelDTO == null) {
                 redirectAttributes.addFlashAttribute("message", "해당 호텔이 존재하지 않습니다!");
-                return "redirect:/manager/hotel/list";
+                return "redirect:/chief/hotel/list";
             }
 
             // Pageable 객체 생성
@@ -204,10 +178,9 @@ public class HotelManagerController {
             return "/manager/hotel/read";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("message", "서버 오류가 발생했습니다!");
-            return "redirect:/manager/hotel/list";
+            return "redirect:/chief/hotel/list";
         }
     }
-
 
 
     //수정폼
@@ -231,7 +204,7 @@ public class HotelManagerController {
         Integer hotelId = hotelDTO.getHotelId();
         redirectAttributes.addFlashAttribute("hotelId", hotelId);
 
-        return "redirect:/manager/hotel/read?hotelId=" + hotelId;
+        return "redirect:/chief/hotel/read?hotelId=" + hotelId;
     }
 
     // 이미지 삭제 (REST API 형식으로 처리)
@@ -271,7 +244,7 @@ public class HotelManagerController {
 
         if (hotelDTO == null) {
             redirectAttributes.addFlashAttribute("error", "해당 호텔을 찾을 수 없습니다.");
-            return "redirect:/manager/hotel/list";
+            return "redirect:/chief/hotel/list";
         }
 
         // 삭제 수행
@@ -282,7 +255,7 @@ public class HotelManagerController {
 
         redirectAttributes.addFlashAttribute("message", "해당 지사 삭제가 완료되었습니다.");
 
-        return "redirect:/manager/hotel/list?companyId=" + companyId;  // companyId를 쿼리 파라미터로 전달
+        return "redirect:/chief/hotel/list";  // companyId를 쿼리 파라미터로 전달
     }
 
 

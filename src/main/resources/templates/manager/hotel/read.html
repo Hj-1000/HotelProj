@@ -151,7 +151,9 @@
     <div class="container-fluid mt-4">
         <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
         <a href="#" class="custom-link"><span>호텔관리</span></a> /
-        <a href="/manager/hotel/list" class="custom-link"><span>호텔지사관리</span></a> /
+        <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/admin/hotel/list" class="custom-link"><span>호텔지사관리</span></a>
+        <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="/chief/hotel/list" class="custom-link"><span>호텔지사관리</span></a>
+        <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" href="/manager/hotel/list" class="custom-link"><span>호텔지사관리</span></a> /
         <a th:href="@{/manager/hotel/read(hotelId=${hotelDTO.hotelId})}" class="custom-link">
             <span>지사상세보기</span>
         </a>
@@ -203,7 +205,7 @@
                         </tr>
                         <tr class="table-light">
                             <td>담당자</td>
-                            <td><span th:text="${hotelDTO.hotelEmail}">이메일</span></td>
+                            <td><span th:text="${hotelDTO.hotelEmail}">매니저 이메일</span></td>
                             <td>전화번호</td>
                             <td><span th:text="${hotelDTO.hotelPhone}">전화번호</span></td>
                         </tr>
@@ -226,12 +228,15 @@
 
             <!-- 버튼 -->
             <div class="text-end mt-3">
-                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="btn btn-primary" style="background-color: black" href="/admin/hotel/list">전체 지사</a> <!--관리자용-->
-                <a class="btn btn-primary" style="background-color: black" th:href="@{/manager/hotel/list(companyId=${hotelDTO.companyId})}">지사 관리</a>
-                <a class="btn btn-warning" th:href="@{/manager/roomService/category/list(hotelId=${hotelDTO.hotelId})}">룸서비스</a>
-                <a href="/manager/room/register" class="btn btn-success modalBtn">객실 등록</a>
-                <a class="btn btn-primary" th:href="@{/manager/hotel/update(hotelId=${hotelDTO.hotelId})}">수정</a>
-                <a class="btn btn-danger" th:href="@{/manager/hotel/delete(hotelId=${hotelDTO.hotelId})}"><i class="bi bi-trash"></i></a>
+                <!--관리자-->
+                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="btn btn-primary" style="background-color: black" href="/admin/hotel/list">지사 관리</a>
+                <!--호텔장-->
+                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="btn btn-primary" style="background-color: black" href="/chief/hotel/list">지사 관리</a>
+                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="btn btn-primary" th:href="@{/chief/hotel/update(hotelId=${hotelDTO.hotelId})}">수정</a>
+                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="btn btn-danger" th:href="@{/chief/hotel/delete(hotelId=${hotelDTO.hotelId})}"><i class="bi bi-trash"></i></a>
+                <!--매니저-->
+                <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" class="btn btn-warning" th:href="@{/manager/roomService/category/list(hotelId=${hotelDTO.hotelId})}">룸서비스</a>
+                <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" href="/manager/room/register" class="btn btn-success modalBtn">객실 등록</a>
             </div>
 
         </div>

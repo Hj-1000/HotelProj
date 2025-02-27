@@ -65,10 +65,16 @@
     <div class="container-fluid mt-4">
         <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
         <a href="#" class="custom-link"><span>호텔관리</span></a> /
-        <a href="/chief/company/list" class="custom-link"><span>호텔본사관리</span></a> /
-        <a th:href="@{/chief/company/read(companyId=${companyDTO.companyId})}" class="custom-link">
+        <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/admin/company/list" class="custom-link"><span>호텔본사관리</span></a>
+        <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="#" class="custom-link"><span>호텔본사관리</span></a> /
+
+        <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/company/read(companyId=${companyDTO.companyId})}" class="custom-link">
             <span>본사상세보기</span>
         </a>
+        <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/company/read(companyId=${companyDTO.companyId})}" class="custom-link">
+            <span>본사상세보기</span>
+        </a>
+
         <h2 class="mb-3">본사 상세보기</h2>
 
         <div class="card p-4 mb-4">
@@ -94,12 +100,12 @@
             </div>
             <!-- 버튼 -->
             <div class="text-end mt-3">
-                <a class="btn btn-primary" th:href="@{/chief/company/update(companyId=${companyDTO.companyId})}">수정</a>
+                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="btn btn-primary" th:href="@{/chief/company/update(companyId=${companyDTO.companyId})}">수정</a>
                 <!--<button type="button" class="btn btn-success modalBtn">지사 등록</button>-->
-                <a href="/manager/hotel/register" class="btn btn-success">지사 등록</a>
-                <a class="btn btn-dark" th:href="@{/manager/hotel/list(companyId=${companyDTO.companyId})}">지사 관리</a>
-                <button th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="btn btn-light" onclick="location.href='/admin/company/list' ">전체 본사 관리</button> <!--admin만 보이도록-->
-                <button class="btn btn-light" onclick="location.href='/chief/company/list' ">본사 관리</button>
+                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="/chief/hotel/register" class="btn btn-success">지사 등록</a>
+                <!--<a class="btn btn-dark" th:href="@{/manager/hotel/list(companyId=${companyDTO.companyId})}">지사 관리</a>-->
+                <a class="btn btn-dark" href="/chief/hotel/list">지사 관리</a>
+                <button th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="btn btn-light" onclick="location.href='/admin/company/list' ">본사 관리</button> <!--admin만 보이도록-->
             </div>
 
         </div>
@@ -112,7 +118,7 @@
 
         <!-- 검색 영역 -->
         <!--<div class="card p-4 mb-4">
-            <form action="/manager/hotel/list" method="get" id="searchForm">
+            <form action="/chief/hotel/list" method="get" id="searchForm">
                 <div class="row g-3 align-items-center">
                     <h5 class="card-title">지사 찾기</h5>
                     <div class="col-md-6">
@@ -179,8 +185,8 @@
                             <td class="align-middle text-center">별점</td> <!-- 별점은 나중에 -->
                             <td class="align-middle text-center">
                                 <a th:href="@{/manager/hotel/read(hotelId=${data.hotelId})}" class="btn btn-info btn-sm">보기</a>
-                                <a th:href="@{/manager/hotel/update(hotelId=${data.hotelId})}"  class="btn btn-warning btn-sm">수정</a>
-                                <a th:href="@{/manager/hotel/delete(hotelId=${data.hotelId})}" style="text-decoration: none" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')"><i class="bi bi-trash"></i></a>
+                                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/hotel/update(hotelId=${data.hotelId})}"  class="btn btn-warning btn-sm">수정</a>
+                                <a th:href="@{/chief/hotel/delete(hotelId=${data.hotelId})}" style="text-decoration: none" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')"><i class="bi bi-trash"></i></a>
                             </td>
                         </tr>
                     </th:block>
@@ -213,7 +219,7 @@
 
                 <div class="modal-body">
 
-                    <form action="/manager/hotel/register" method="post" enctype="multipart/form-data">
+                    <form action="/chief/hotel/register" method="post" enctype="multipart/form-data">
 
                         <input type="hidden" class="form-control" id="companyId" name="companyId" th:value="${companyDTO.companyId}">
 

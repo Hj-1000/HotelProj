@@ -1,9 +1,11 @@
-package com.ntt.ntt.Controller.company;
+package com.ntt.ntt.Controller.chief;
 
 import com.ntt.ntt.DTO.CompanyDTO;
 import com.ntt.ntt.DTO.HotelDTO;
-import com.ntt.ntt.DTO.HotelDTO;
+import com.ntt.ntt.DTO.MemberDTO;
 import com.ntt.ntt.Entity.Member;
+import com.ntt.ntt.Repository.MemberRepository;
+import com.ntt.ntt.Repository.company.CompanyRepository;
 import com.ntt.ntt.Service.ImageService;
 import com.ntt.ntt.Service.MemberService;
 import com.ntt.ntt.Service.company.CompanyService;
@@ -11,7 +13,6 @@ import com.ntt.ntt.Service.hotel.HotelService;
 import com.ntt.ntt.Util.PaginationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -19,9 +20,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,7 +31,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,42 +39,14 @@ import java.util.Map;
 @RequestMapping("/chief/company")
 @AllArgsConstructor
 @Log4j2
-public class CompanyController {
+public class ChiefCompanyController {
 
     private final CompanyService companyService;
+    private final HotelService hotelService;
     private final PaginationUtil paginationUtil;
     private final ImageService imageService;
     private final MemberService memberService;
 
-    //등록폼
-    @Operation(summary = "관리자용 본사 등록 폼", description = "본사 등록 폼 페이지로 이동한다.")
-    @GetMapping("/register")
-    public String registerForm() {
-        return "/chief/company/register";
-    }
-    //등록처리
-    @Operation(summary = "관리자용 본사 등록 처리", description = "본사를 등록 처리 한다.")
-    @PostMapping("/register")
-    public String registerProc(@Valid @ModelAttribute CompanyDTO companyDTO,
-                               List<MultipartFile> imageFiles,
-                               RedirectAttributes redirectAttributes,
-                               Authentication authentication,
-                               BindingResult result) {
-        log.info("본사 등록 진입");
-
-        if (result.hasErrors()) {
-            return "/chief/company/register";  // 입력 오류 시 다시 폼으로
-        }
-
-        // Authentication 객체에서 UserDetails를 가져와 이름을 추출
-        String memberName = ((UserDetails) authentication.getPrincipal()).getUsername();
-
-        // memberName을 companyService.register()에 전달
-        companyService.register(companyDTO, imageFiles, memberName);
-
-        redirectAttributes.addFlashAttribute("message", "본사 등록이 완료되었습니다.");
-        return "redirect:/chief/company/list";
-    }
 
     //목록
     @Operation(summary = "호텔장 용 본사 목록", description = "본사 목록 페이지로 이동한다.")
@@ -124,6 +96,7 @@ public class CompanyController {
         return "/chief/company/list";
     }
 
+
     // 로그인한 사용자의 memberId를 가져오는 메서드
     private Integer getLoggedInMemberId(Authentication authentication) {
         // authentication이 null이 아니고, 인증된 사용자가 있는지 확인
@@ -164,7 +137,7 @@ public class CompanyController {
             CompanyDTO companyDTO = companyService.read(companyId);
             if (companyDTO == null) {
                 redirectAttributes.addFlashAttribute("message", "해당 본사가 존재하지 않습니다!");
-                return "redirect:/company/list";
+                return "redirect:/chief/company/list";
             }
 
             // Pageable 객체 생성
@@ -182,6 +155,10 @@ public class CompanyController {
                 }
             }
 
+            List<MemberDTO> memberDTOS = hotelService.getAllManagers();
+            model.addAttribute("memberDTOS", memberDTOS);
+            model.addAttribute("memberDTO", new MemberDTO());
+
             model.addAttribute("companyDTO", companyDTO);
             model.addAttribute("hotelDTOS", hotelDTOS.getContent());  // 현재 페이지의 객실 목록
             model.addAttribute("totalPages", hotelDTOS.getTotalPages());  // 총 페이지 수
@@ -194,7 +171,6 @@ public class CompanyController {
             return "redirect:/chief/company/list";
         }
     }
-
 
     //수정폼
     @Operation(summary = "관리자용 본사 수정 처리", description = "본사를 수정 처리 한다.")
@@ -240,15 +216,6 @@ public class CompanyController {
             response.put("message", "Error deleting image");
         }
         return response;
-    }
-
-    //삭제
-    @Operation(summary = "관리자용 본사 삭제 처리", description = "본사를 삭제 처리 한다.")
-    @GetMapping("/delete")
-    public String delete(Integer companyId, RedirectAttributes redirectAttributes) {
-        companyService.delete(companyId);
-        redirectAttributes.addFlashAttribute("message", "해당 본사 삭제가 완료되었습니다.");
-        return "redirect:/chief/company/list";
     }
 
 
