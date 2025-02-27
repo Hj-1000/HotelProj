@@ -175,7 +175,8 @@ public class ImageService {
                     image.setBanner(new Banner(bannerId)); // 수정: bannerId 사용
                     image.setImageName(filename);
                     image.setImageOriginalName(imageFiles.get(i).getOriginalFilename());
-                    image.setImagePath(IMG_LOCATION + filename);
+//                    image.setImagePath(IMG_LOCATION + filename);
+                    image.setImagePath(filename);
                     imageRepository.save(image); // DB 저장
                 }
             }
