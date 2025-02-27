@@ -9,22 +9,52 @@
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css"/>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
     <link rel="stylesheet" th:href="@{/css/user.css}">
-    <link rel="stylesheet" th:href="@{/css/roomList.css}">
+
 </head>
 <style>
+    /* 마이페이지 화면 스타일 */
+    .mypage-container {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: calc(100vh - 279px); /* 100vh = 화면 전체 높이를 차지하도록 (-209px 는 헤더와 푸터의 높이) */
+    }
+
+    .mypage-card {
+        width: 100%;
+        max-width: 800px; /* 카드 너비 */
+        padding: 10px 215px 10px 215px;
+        border: none;
+    }
+
+    /* 기본 탭의 글씨 색을 회색으로 설정 */
+    .nav-item .nav-link1 {
+        width: 270px; /* 원하는 너비로 수정 */
+        text-align: center; /* 텍스트 중앙 정렬 */
+        padding: 10px 20px; /* 패딩을 추가하여 버튼이 더 커지도록 설정 */
+    }
+
+    /* active 상태일 때 배경을 회색으로 변경 */
+    .nav-link1.active {
+        background-color: #6c757d !important; /* 회색 배경 */
+        color: white !important; /* 흰색 글씨 */
+    }
+
+    /* 호버 시 배경과 글씨 색을 변경 */
+    .nav-link1:hover {
+        background-color: #5a6268 !important; /* 호버 시 어두운 회색 배경 */
+        color: white !important; /* 호버 시 흰색 글씨 */
+    }
+
     /* 전체 화면을 flex로 설정 */
     html, body {
         height: 100%;
         margin: 0;
-    }
-
-    .container {
-        flex: 1; /* flex-grow로 주문 내역 부분이 남은 공간을 채우도록 설정 */
-        overflow-y: auto; /* 주문 내역이 길어지면 스크롤이 생기도록 설정 */
     }
 
     .wrapper {
@@ -41,11 +71,26 @@
     footer {
         margin-top: auto; /* 푸터를 항상 화면 하단에 고정 */
     }
+    .canceled-order {
+        background-color: #f8d7da;  /* 연한 회색 배경 */
+        text-decoration: line-through; /* 취소선 */
+    }
 </style>
 
 <body>
 <div class="wrapper">
     <div th:replace="~{fragments/header::header}"></div>
+    <ul class="nav nav-tabs d-flex justify-content-center">
+        <li class="nav-item">
+            <a class="nav-link nav-link1" href="/myPage/update">회원정보 수정</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link nav-link1" href="/myPage/reservationList">호텔 예약내역</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link nav-link1 active" href="/myPage/order/history">룸서비스 주문내역</a>
+        </li>
+    </ul>
 
     <div class="container mt-5">
         <h2 class="mb-4">주문 내역</h2>
@@ -55,7 +100,7 @@
                 주문 내역이 없습니다.
             </div>
 
-            <div th:each="order, stat : ${orders.content}" class="card mb-3">
+            <div th:each="order, stat : ${orders.content}" th:classappend="${order.serviceOrderStatus.name() == 'CANCELED'} ? 'canceled-order' : ''" class="card mb-3">
                 <div class="card-header">
                     NO.<span th:text="${(pageInfo.currentPage - 1) * orders.size + stat.index + 1}"></span>
                     주문번호: <span th:text="${order.serviceOrderId}"></span>
@@ -69,16 +114,20 @@
                         <img th:src="@{/upload/} + ${item.imagePath}" alt="메뉴 이미지" class="me-3" style="width: 60px; height: 60px; object-fit: cover;">
                         <div>
                             <span th:text="${item.serviceMenuName}"></span>
+                            <span th:if="${order.serviceOrderStatus.name() != 'CANCELED'}">
                             - <span th:text="${item.count} + '개'"></span>
                             - <span th:text="${item.orderPrice} + '원'"></span>
+                            </span>
                         </div>
                     </li>
                 </ul>
                 <div class="card-footer d-flex justify-content-between">
                     <span>총 가격: <strong th:text="${#aggregates.sum(order.serviceOrderItemDTOList.![count * orderPrice])} + '원'"></strong></span>
-                    <button th:if="${order.serviceOrderStatus != 'CANCELED'}" class="btn btn-danger btn-sm" th:onclick="|cancelOrder(${order.serviceOrderId})|">주문 취소</button>
+                    <button th:if="${order.serviceOrderStatus.name() != 'CANCELED'}" class="btn btn-danger btn-sm" th:onclick="|cancelOrder(${order.serviceOrderId})|">주문 취소</button>
                 </div>
             </div>
+
+
 
             <!-- 페이지네이션 -->
             <div class="d-flex justify-content-center" th:if="${orders.totalPages > 1}">
@@ -112,6 +161,7 @@
 </div>
 
 <script>
+
     function cancelOrder(orderId) {
         if (!confirm('정말 주문을 취소하시겠습니까?')) {
             return;

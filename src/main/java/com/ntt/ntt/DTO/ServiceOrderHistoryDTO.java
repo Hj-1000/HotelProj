@@ -30,9 +30,6 @@ public class ServiceOrderHistoryDTO {
     private List<ServiceOrderItemDTO> serviceOrderItemDTOList = new ArrayList<>();
     //구매이력에 담길 구매 아이템들
 
-
-
-
     public void addServiceOrderItemDTO(ServiceOrderItemDTO serviceOrderItemDTO) {
         serviceOrderItemDTOList.add(serviceOrderItemDTO);
     }
