@@ -1,13 +1,11 @@
 package com.ntt.ntt.Controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ntt.ntt.Constant.Role;
-import com.ntt.ntt.DTO.MemberDTO;
-import com.ntt.ntt.DTO.PaymentDTO;
-import com.ntt.ntt.DTO.ReservationDTO;
+import com.ntt.ntt.DTO.*;
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Repository.MemberRepository;
-import com.ntt.ntt.Service.MemberService;
+import com.ntt.ntt.Repository.RoomRepository;
+import com.ntt.ntt.Repository.hotel.HotelRepository;
 import com.ntt.ntt.Service.PaymentService;
 import com.ntt.ntt.Service.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,6 +20,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.*;
 
 @Controller
@@ -29,9 +28,10 @@ import java.util.*;
 public class PaymentController {
 
     private final PaymentService paymentService;
-    private final MemberService memberService;
     private final ReservationService reservationService;
     private final MemberRepository memberRepository;
+    private final HotelRepository hotelRepository;
+    private final RoomRepository roomRepository;
 
     // 결제 정보를 저장
     @PostMapping("/payment")
@@ -48,6 +48,7 @@ public class PaymentController {
     @Operation(summary = "매출관리", description = "매출관리 페이지로 이동한다.")
     @GetMapping("/manager/sales")
     public String getSales(@AuthenticationPrincipal UserDetails userDetails,
+                           @RequestParam(required = false) String hotelName,
                            @RequestParam(required = false) String roomName,
                            @RequestParam(required = false) String minPrice,
                            @RequestParam(required = false) String maxPrice,
@@ -55,15 +56,22 @@ public class PaymentController {
                            @RequestParam(required = false) String endDate,
                            @RequestParam(defaultValue = "0") int page,
                            @RequestParam(defaultValue = "10") int size,
-                           Model model, Pageable pageable) {
+                           Model model, Pageable pageable, Principal principal) {
         try {
-            if ("전체".equals(roomName)) roomName = null;
+
+            // 로그인한 사용자의 이메일 가져오기
+            String userEmail = principal.getName();
+            Member member = memberRepository.findByMemberEmail(userEmail)
+                    .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다."));
+
+            // 로그인한 사용자가 관리하는 호텔 ID 목록 가져오기
+            List<Integer> hotelIds = hotelRepository.findHotelIdsByMemberId(member.getMemberId());
+
+            // 해당 호텔들에 속한 roomId 목록 가져오기
+            List<Integer> roomIds = roomRepository.findRoomIdsByHotelIds(hotelIds);
 
             // 필터링된 결제내역 리스트 가져오기
-            List<PaymentDTO> filteredPayments = paymentService.getFilteredPayments(roomName, minPrice, maxPrice, startDate, endDate);
-
-            // 전체 결제내역 리스트 가져오기 (필터링 적용 안됨)
-            List<PaymentDTO> allPayments = paymentService.getAllPayments();
+            List<PaymentDTO> filteredPayments = paymentService.getFilteredPaymentsByRoomIds(roomIds, hotelName, roomName, minPrice, maxPrice, startDate, endDate);
 
             // 페이징 처리
             int startIdx = page * size;
@@ -75,8 +83,6 @@ public class PaymentController {
                 return "redirect:/login";
             }
 
-            Member member = memberOptional.get();
-
             // 예약 정보 가져오기
             Page<ReservationDTO> reservationsPage = reservationService.getUserReservations(member.getMemberId(), pageable);
             List<ReservationDTO> reservations = reservationsPage.getContent();
@@ -87,11 +93,11 @@ public class PaymentController {
             model.addAttribute("pageNumber", page);
             model.addAttribute("totalPages", (int) Math.ceil((double) filteredPayments.size() / size));
             model.addAttribute("size", size);
-            model.addAttribute("allPayments", allPayments);  // 전체 결제 내역도 전달
+            model.addAttribute("filteredPayments", filteredPayments);  // 전체 결제 내역도 전달
 
             // JSON으로 변환할 데이터 리스트 생성
             List<Map<String, Object>> salesData = new ArrayList<>();
-            for (PaymentDTO payment : allPayments) {
+            for (PaymentDTO payment : filteredPayments) {
                 Map<String, Object> data = new HashMap<>();
                 data.put("date", payment.getModDate().toString()); // 날짜
                 data.put("totalSales", payment.getTotalPrice());   // 결제 완료 금액

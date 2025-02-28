@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Integer> {
     //기본 삽입,수정,삭제는 추가로 작업할 내용이 없다.
@@ -50,5 +52,8 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
 
     /* 특정 호텔 ID에 속한 방들을 페이징 처리후 조회*/
     Page<Room> findByHotelId_HotelId (Integer hotelId, Pageable pageable);
+
+    @Query("SELECT r.roomId FROM Room r WHERE r.hotelId.hotelId IN :hotelIds")
+    List<Integer> findRoomIdsByHotelIds(@Param("hotelIds") List<Integer> hotelIds);
 
 }

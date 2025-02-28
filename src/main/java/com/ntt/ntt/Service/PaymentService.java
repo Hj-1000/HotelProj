@@ -1,6 +1,5 @@
 package com.ntt.ntt.Service;
 
-import com.ntt.ntt.DTO.MemberDTO;
 import com.ntt.ntt.DTO.PaymentDTO;
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Entity.Payment;
@@ -16,7 +15,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -78,9 +76,14 @@ public class PaymentService {
     }
 
     // 결제 내역 조회 및 검색 기능
-    public List<PaymentDTO> getFilteredPayments(String roomName, String minPrice, String maxPrice, String startDate, String endDate) {
+    public List<PaymentDTO> getFilteredPaymentsByRoomIds(List<Integer> roomIds, String hotelName, String roomName, String minPrice, String maxPrice, String startDate, String endDate) {
         List<Payment> payments = paymentRepository.findAll();
 
+        if (hotelName != null && !hotelName.isEmpty()) {
+            payments = payments.stream()
+                    .filter(payment -> payment.getRoom().getHotelId().getHotelName().contains(hotelName))
+                    .collect(Collectors.toList());
+        }
         if (roomName != null && !roomName.isEmpty()) {
             payments = payments.stream()
                     .filter(payment -> payment.getRoom().getRoomName().contains(roomName))
