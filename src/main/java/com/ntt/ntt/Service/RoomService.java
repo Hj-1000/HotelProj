@@ -149,18 +149,129 @@ public class RoomService {
         return hotelDTOS;
     }
 
+    /* 배너 이미지 수정 메서드 */
+    public void updateRoomBannerImage(Integer roomId, MultipartFile bannerImageFile) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 방을 찾을 수 없습니다: " + roomId));
+
+        // 기존 배너 이미지 삭제 (새로운 배너가 존재할 때만 삭제)
+        if (bannerImageFile != null && !bannerImageFile.isEmpty()) {
+            imageRepository.findByRoom_RoomId(roomId).stream()
+                    .filter(image -> "Y".equals(image.getImageMain()))
+                    .forEach(image -> {
+                        fileUpload.FileDelete(IMG_LOCATION, image.getImagePath());
+                        imageRepository.delete(image);
+                    });
+
+            // 새로운 배너 이미지 저장
+            String savedPath = imageService.registerRoombannerImage(bannerImageFile, roomId);
+            Image bannerImage = Image.builder()
+                    .imagePath(savedPath)
+                    .imageMain("Y") // 대표 이미지 설정
+                    .room(room)
+                    .build();
+            imageRepository.save(bannerImage);
+        }
+    }
+
+    /* 이미지 타이틀과 설명 수정 메서드 */
+    @Transactional
+    public void updateRoomImageDetails(List<Integer> existingImageIds, List<String> existingImageTitles, List<String> existingImageDescriptions) {
+        for (int i = 0; i < existingImageIds.size(); i++) {
+            Integer imageId = existingImageIds.get(i);
+            Optional<Image> optionalImage = imageRepository.findById(imageId);
+
+            if (optionalImage.isPresent()) {
+                Image image = optionalImage.get();
+
+                String title = (existingImageTitles.size() > i) ? existingImageTitles.get(i) : "";
+                String description = (existingImageDescriptions.size() > i) ? existingImageDescriptions.get(i) : "";
+
+                if (title.trim().isEmpty() || description.trim().isEmpty()) {
+                    log.warn("이미지 ID {}의 제목 또는 설명이 비어 있어 업데이트하지 않음", imageId);
+                    continue; // 제목이나 설명이 비어 있으면 업데이트 생략
+                }
+
+                log.info("기존 이미지 수정 - ID: {}, 기존 제목: {}, 새로운 제목: {}, 기존 설명: {}, 새로운 설명: {}",
+                        imageId, image.getImageTitle(), title, image.getImageDescription(), description);
+
+                image.setImageTitle(title);
+                image.setImageDescription(description);
+                imageRepository.save(image);
+                log.info("이미지 정보 업데이트됨 - ID: {}, 제목: {}, 설명: {}", imageId, title, description);
+            } else {
+                log.warn("이미지를 찾을 수 없습니다. ID: {}", imageId);
+            }
+        }
+    }
+
+
     // 1. 등록 register
-    public Integer registerRoom(RoomDTO roomDTO, List<MultipartFile> multipartFile) {
+    public Integer registerRoom(RoomDTO roomDTO,
+                                List<MultipartFile> multipartFile,
+                                MultipartFile bannerImageFile,
+                                List<String> imageTitles,
+                                List<String> imageDescriptions) {
+
+        // 이미지 제목과 설명이 null일 경우 빈 리스트로 초기화하여 데이터 저장 시 예외 방지
+        if (imageTitles == null || imageTitles.isEmpty()) {
+            imageTitles = new ArrayList<>();
+        }
+
+        if (imageDescriptions == null || imageDescriptions.isEmpty()) {
+            imageDescriptions = new ArrayList<>();
+        }
 
         // DTO -> Entity 변환
         Room room = modelMapper.map(roomDTO, Room.class);
         // 저장
         Room saveRoom = roomRepository.save(room);
 
-        //저장된 RoomId를 사용하여 이미지 저장
+        // 객실 이미지 저장
         if (multipartFile != null && !multipartFile.isEmpty()) {
-            imageService.registerRoomImage(room.getRoomId(), multipartFile);
+            List<String> filteredTitles = new ArrayList<>();
+            List<String> filteredDescriptions = new ArrayList<>();
+            List<MultipartFile> filteredFiles = new ArrayList<>();
+
+            for (int i = 0; i < multipartFile.size(); i++) {
+                MultipartFile file = multipartFile.get(i);
+                String title = (imageTitles != null && i < imageTitles.size()) ? imageTitles.get(i) : "";
+                String description = (imageDescriptions != null && i < imageDescriptions.size()) ? imageDescriptions.get(i) : "";
+
+                // 이미지 파일이 없고, 제목/설명만 있으면 제외
+                if (file == null || file.isEmpty()) {
+                    log.warn("이미지 파일 없이 제목({}) 또는 설명({})만 존재하여 제외됨", title, description);
+                    continue;
+                }
+
+                filteredFiles.add(file);
+                filteredTitles.add(title);
+                filteredDescriptions.add(description);
+            }
+
+            // 필터링된 이미지만 저장
+            if (!filteredFiles.isEmpty()) {
+                imageService.registerRoomImage(saveRoom.getRoomId(), filteredFiles, filteredTitles, filteredDescriptions);
+            }
         }
+
+        // 배너 이미지 저장
+        if (bannerImageFile != null && !bannerImageFile.isEmpty()) {
+            String savedPath = imageService.registerRoombannerImage(bannerImageFile, saveRoom.getRoomId());
+
+            // ** 기존 배너 이미지가 없을 때만 저장 **
+            boolean isBannerExists = imageRepository.findByRoom_RoomIdAndImageMain(saveRoom.getRoomId(), "Y") != null;
+            if (!isBannerExists) {
+                Image bannerImage = Image.builder()
+                        .imagePath(savedPath)
+                        .imageMain("Y") // 대표 이미지 설정
+                        .room(saveRoom)
+                        .build();
+                imageRepository.save(bannerImage);
+            }
+        }
+
+        log.info("[registerRoom] 실행됨 - Room ID: {}", saveRoom.getRoomId());
 
         return saveRoom.getRoomId();
     }
@@ -168,27 +279,41 @@ public class RoomService {
     // 2. 조회 read
     @Transactional(readOnly = true)
     public RoomDTO readRoom(Integer roomId) {
-        // 데이터 조회
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("등록된 아이디에 방을 찾을 수 없습니다: " + roomId));
 
-        // Room -> RoomDTO 변환
         RoomDTO roomDTO = modelMapper.map(room, RoomDTO.class);
 
-        // 이미지 조회 및 설정
-        List<ImageDTO> imageDTOList = imageRepository.findByRoom_RoomId(roomId)
-                .stream()
-                .map(image -> {
-                    // 이미지 경로 상대 경로 변환
-                    image.setImagePath(image.getImagePath().replace("c:/data/", ""));
-                    return modelMapper.map(image, ImageDTO.class);
-                })
-                .collect(Collectors.toList());
+        List<ImageDTO> imageDTOList = new ArrayList<>();
+        String bannerImagePath = "";  // 배너 이미지 기본값
 
-        roomDTO.setRoomImageDTOList(imageDTOList);
+        // 이미지 조회 및 배너 이미지와 상세 이미지를 분리 저장
+        for (Image image : imageRepository.findByRoom_RoomId(roomId)) {
+            if ("Y".equals(image.getImageMain())) {
+                bannerImagePath = image.getImagePath(); // 배너 이미지 저장
+            } else {
+                ImageDTO imageDTO = modelMapper.map(image, ImageDTO.class);
+
+                // 기존 이미지 제목과 설명을 DTO에 반영하도록 추가
+                imageDTO.setImageTitle(image.getImageTitle());
+                imageDTO.setImageDescription(image.getImageDescription());
+
+                log.info("기존 이미지 정보 - ID: {}, 제목: {}, 설명: {}",
+                        imageDTO.getImageId(), imageDTO.getImageTitle(), imageDTO.getImageDescription());
+
+                imageDTOList.add(imageDTO); // 상세 이미지 리스트에 추가
+            }
+        }
+
+        //  상세 이미지 리스트가 비어있는지 확인
+        log.warn(" 상세 이미지 개수 (DB 조회 결과): {}", imageDTOList.size());
+
+        roomDTO.setRoomImageDTOList(imageDTOList); //  상세 이미지 설정
+        roomDTO.setBannerImage(bannerImagePath); // 배너 이미지 설정
 
         return roomDTO;
     }
+
 
     // 3. 목록 list
     public List<RoomDTO> listRoom() {
@@ -209,7 +334,23 @@ public class RoomService {
     }
 
     // 4. 수정 update
-    public void updateRoom(Integer roomId, RoomDTO roomDTO, List<MultipartFile> imageFile, List<Integer> deleteImages) {
+    public void updateRoom(Integer roomId, RoomDTO roomDTO, List<MultipartFile> imageFile,
+                           List<String> imageTitles, List<String> imageDescriptions,
+                           List<Integer> deleteImages,
+                           List<Integer> existingImageIds, List<String> existingImageTitles, List<String> existingImageDescriptions) {
+
+        log.info("받은 이미지 제목 리스트: {}", existingImageTitles);
+        log.info("받은 이미지 설명 리스트: {}", existingImageDescriptions);
+
+        // 기존 이미지 제목 및 설명이 null이면 빈 리스트로 초기화
+        if (existingImageTitles == null || existingImageTitles.isEmpty()) {
+            existingImageTitles = new ArrayList<>();
+        }
+
+        if (existingImageDescriptions == null || existingImageDescriptions.isEmpty()) {
+            existingImageDescriptions = new ArrayList<>();
+        }
+
         //Room 존재 확인
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("등록된 아이디에 방을 찾을수 없습니다 : " + roomId));
@@ -245,20 +386,55 @@ public class RoomService {
 
         log.info("Room ID: {} 수정됨. 새로운 예약 종료일: {}", roomId, room.getReservationEnd());
 
+        // 기존 이미지 제목 및 설명 업데이트 추가
+        if (existingImageIds != null && !existingImageIds.isEmpty()) {
+            log.info("이미지 업데이트 요청 - ID 목록: {}", existingImageIds);
+            log.info("이미지 제목 목록: {}", existingImageTitles);
+            log.info("이미지 설명 목록: {}", existingImageDescriptions);
+
+            for (int i = 0; i < existingImageIds.size(); i++) {
+                Integer imageId = existingImageIds.get(i);
+                Optional<Image> optionalImage = imageRepository.findById(imageId);
+
+                if (optionalImage.isPresent()) {
+                    Image image = optionalImage.get();
+
+                    // 제목과 설명이 비어있다면 기본값으로 설정
+                    String title = (existingImageTitles.size() > i && existingImageTitles.get(i) != null && !existingImageTitles.get(i).trim().isEmpty())
+                            ? existingImageTitles.get(i)
+                            : "제목 없음";
+
+                    String description = (existingImageDescriptions.size() > i && existingImageDescriptions.get(i) != null && !existingImageDescriptions.get(i).trim().isEmpty())
+                            ? existingImageDescriptions.get(i)
+                            : "설명 없음";
+
+                    // 기존 이미지의 제목과 설명 업데이트
+                    image.setImageTitle(title);
+                    image.setImageDescription(description);
+
+                    log.info("이미지 정보 업데이트됨 - ID: {}, 제목: {}, 설명: {}", imageId, image.getImageTitle(), image.getImageDescription());
+
+                    // DB 저장
+                    imageRepository.save(image);
+                } else {
+                    log.warn("이미지를 찾을 수 없습니다. ID: {}", imageId);
+                }
+            }
+        }
+
         // 기존 이미지를 삭제
         if (deleteImages != null && !deleteImages.isEmpty()) {
             for (Integer imageId : deleteImages) {
-                // 이미지 존재 여부 확인
                 Optional<Image> optionalImage = imageRepository.findById(imageId);
 
                 if (optionalImage.isPresent()) {
                     Image image = optionalImage.get();
                     String imagePath = image.getImagePath();
-                    String imageFileName = imagePath.substring(imagePath.lastIndexOf("/") + 1); // 파일명 추출
+                    String imageFileName = imagePath.substring(imagePath.lastIndexOf("/") + 1);
 
                     log.info("Deleting selected image: {}", imagePath);
 
-                    // 물리적 파일 삭제 (경로와 파일명을 분리하여 전달)
+                    // 물리적 파일 삭제
                     fileUpload.FileDelete(IMG_LOCATION, imageFileName);
                     log.info("Image file deletion attempted: {}", imageFileName);
 
@@ -271,11 +447,40 @@ public class RoomService {
             }
         }
 
-
+        // 새로운 이미지 저장 (제목 & 설명 포함)
         if (imageFile != null && !imageFile.isEmpty()) {
             log.info("Room ID: {} 새로운 이미지 저장 시작", roomId);
-            imageService.registerRoomImage(roomId, imageFile);
+
+            List<String> filteredTitles = new ArrayList<>();
+            List<String> filteredDescriptions = new ArrayList<>();
+            List<MultipartFile> filteredFiles = new ArrayList<>();
+
+            for (int i = 0; i < imageFile.size(); i++) {
+                MultipartFile file = imageFile.get(i);
+
+                // 새로운 이미지의 제목 및 설명 가져오기
+                String title = (imageTitles != null && imageTitles.size() > i) ? imageTitles.get(i) : "제목 없음";
+                String description = (imageDescriptions != null && imageDescriptions.size() > i) ? imageDescriptions.get(i) : "설명 없음";
+
+                // 이미지 파일이 없고, 제목/설명만 존재하면 제외
+                if (file == null || file.isEmpty()) {
+                    log.warn("이미지 파일 없이 제목({}) 또는 설명({})만 존재하여 제외됨", title, description);
+                    continue;
+                }
+
+                filteredFiles.add(file);
+                filteredTitles.add(title);
+                filteredDescriptions.add(description);
+            }
+
+            // 필터링된 이미지만 저장
+            if (!filteredFiles.isEmpty()) {
+                imageService.registerRoomImage(roomId, filteredFiles, filteredTitles, filteredDescriptions);
+            } else {
+                log.warn("새로운 이미지가 없으므로 추가 저장하지 않음.");
+            }
         }
+
 
         // Room 저장
         roomRepository.save(room);
@@ -310,7 +515,7 @@ public class RoomService {
 
     @Transactional(readOnly = true)
     public Page<RoomDTO> searchRooms(String keyword, String category, Pageable pageable) {
-        log.info("🔎 검색 요청 - 카테고리: {}, 키워드: {}", category, keyword);
+        log.info(" 검색 요청 - 카테고리: {}, 키워드: {}", category, keyword);
 
         Page<Room> rooms;
 

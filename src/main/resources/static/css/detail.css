@@ -1,0 +1,200 @@
+/* 객실 상세보기 페이지 CSS */
+
+/* 전체 컨테이너 */
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.25rem 0;
+}
+
+/* 배너 이미지 */
+.room-banner {
+    width: 100vw;
+    height: 600px;
+    position: relative;
+    overflow: hidden;
+}
+
+.room-banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+.banner-overlay {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+}
+
+.banner-title {
+    font-size: 28px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.reservation-info-wrapper {
+    position: sticky;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f8f9fa;
+    padding: 2rem 0;
+    top: 0;
+    border-radius: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease-in-out, padding 0.3s ease-in-out;
+}
+
+.reservation-info-wrapper.scrolled {
+    background-color: rgba(248, 249, 250, 0.9);
+    padding: 1rem 0;
+}
+
+.reservation-info {
+    width: 100%;
+    max-width: 1400px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* 예약 정보 버튼 스타일 */
+.reservation-info-wrapper .reservation-info button {
+    padding: 1rem 2.5rem;
+    font-size: 1rem;
+    border-radius: 0;
+    margin-left: .75rem;
+}
+
+.reservation-info-wrapper .reservation-info div:last-child {
+    display: flex;
+    gap: .25rem;
+}
+
+
+.reservation-info-wrapper .reservation-info .period {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.reservation-info-wrapper .reservation-info button {
+    padding: 1rem 3rem;
+    font-size: 1rem;
+    border-radius: 0;
+}
+
+/* 주요 혜택 */
+.room-item-wrapper {
+    margin-top: 20px;
+}
+
+.room-item-wrapper .room-item .room-item-box {
+    display: flex;
+    gap: 3rem;
+}
+
+.room-details {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.room-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.room-image {
+    object-fit: cover;
+}
+
+.room-details-title {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.room-details-description {
+    font-size: 1rem;
+    color: #666;
+    line-height: 2;
+    white-space: pre-line;
+}
+
+.room-divider {
+    margin: 2rem 0;
+    border: none;
+    border-top: 2px solid #000000;
+}
+
+/* 유의사항 */
+.notice {
+    background-color: #f8f9fa;
+    padding: 20px;
+}
+
+.notice h2 {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.notice ul {
+    padding-left: 20px;
+}
+
+.notice li {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+/* 예약 문의 */
+.contact-info {
+    background-color: #fff3cd;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 20px;
+    border: 1px solid #ffeeba;
+}
+
+.contact-info h2 {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.contact-info p {
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .room-item {
+        flex-direction: column;
+    }
+
+    .room-image {
+        max-height: 200px;
+    }
+
+    .room-title {
+        font-size: 20px;
+    }
+
+    .room-description {
+        font-size: 14px;
+    }
+}

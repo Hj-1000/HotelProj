@@ -1,4 +1,4 @@
-package com.ntt.ntt.Controller.room;
+package com.ntt.ntt.Controller.Room;
 
 
 import com.ntt.ntt.DTO.HotelDTO;
@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -73,8 +74,9 @@ public class RoomController {
         // 한 번에 로드할 방 개수
         int pageSize = 3;
 
+        // 음수 방지
         if (page < 0) {
-            page = 0; // 음수 방지
+            page = 0;
         }
 
         Page<RoomDTO> paginatedRooms = roomService.getPaginatedRooms(PageRequest.of(page, pageSize));
@@ -87,6 +89,21 @@ public class RoomController {
         response.put("rooms", paginatedRooms.getContent());
         response.put("isLastPage", paginatedRooms.isLast());
         return response;
+    }
+
+    // 특정 객실 상세보기 페이지
+    @GetMapping("/room/{roomId}")
+    public String getRoomDetail(@PathVariable Integer roomId, Model model) {
+        log.info("객실 상세보기 요청 - Room ID: {}", roomId);
+
+        RoomDTO room = roomService.readRoom(roomId);
+        if (room == null) {
+            log.warn("객실을 찾을 수 없습니다. Room ID: {}", roomId);
+            return "redirect:/roomList"; // 방이 없으면 리스트 페이지로 이동
+        }
+
+        model.addAttribute("room", room);
+        return "detail"; // detail.html 반환
     }
 
 }

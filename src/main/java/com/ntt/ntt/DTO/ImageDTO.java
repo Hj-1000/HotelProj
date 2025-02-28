@@ -34,6 +34,10 @@ public class ImageDTO {
 
     private Banner bannerId;
 
+    private String imageTitle;
+
+    private String imageDescription;
+
     public static ImageDTO fromEntity(Image image) {
         return new ImageDTO(
                 image.getImageId(),
@@ -47,7 +51,9 @@ public class ImageDTO {
                 image.getServiceCate(),
                 image.getServiceMenu(),
                 image.getNotice(),
-                image.getBanner()
+                image.getBanner(),
+                image.getImageTitle(),
+                image.getImageDescription()
         );
     }
 

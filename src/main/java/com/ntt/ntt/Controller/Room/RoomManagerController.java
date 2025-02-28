@@ -2,6 +2,7 @@ package com.ntt.ntt.Controller.Room;
 
 
 import com.ntt.ntt.DTO.HotelDTO;
+import com.ntt.ntt.DTO.ImageDTO;
 import com.ntt.ntt.DTO.RoomDTO;
 import com.ntt.ntt.Repository.ImageRepository;
 import com.ntt.ntt.Repository.ReservationRepository;
@@ -62,17 +63,24 @@ public class RoomManagerController {
     @PostMapping("/register")
     public String registerRoomProc(@ModelAttribute RoomDTO roomDTO,
                                    @RequestParam("imageFile") List<MultipartFile> imageFile,
+                                   @RequestParam("bannerImageFile") MultipartFile bannerImageFile,
+                                   @RequestParam("imageTitles") List<String> imageTitles,
+                                   @RequestParam("imageDescriptions") List<String> imageDescriptions,
                                    RedirectAttributes redirectAttributes) {
 
         log.info("객실 등록 요청: {}", roomDTO);
 
-        // 이미지가 없으면 등록 불가
         if (imageFile == null || imageFile.isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessage", "객실 이미지는 필수입니다.");
             return "redirect:/manager/room/register";
         }
 
-        roomService.registerRoom(roomDTO, imageFile);
+        if (bannerImageFile == null || bannerImageFile.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "배너(대표) 이미지는 필수입니다.");
+            return "redirect:/manager/room/register";
+        }
+
+        roomService.registerRoom(roomDTO, imageFile, bannerImageFile, imageTitles, imageDescriptions);
 
         redirectAttributes.addFlashAttribute("successMessage", "객실이 성공적으로 등록되었습니다.");
         return "redirect:/manager/room/list";
@@ -194,7 +202,17 @@ public class RoomManagerController {
     public String updateRoomForm(@PathVariable Integer roomId, Model model) {
         RoomDTO room = roomService.readRoom(roomId);
 
-        // 방의 예약 여부를 `reserved` 필드로 설정
+        // 이미지 정보 디버깅 출력
+        if (room.getRoomImageDTOList() != null) {
+            for (ImageDTO imageDTO : room.getRoomImageDTOList()) {
+                log.info("이미지 정보 - ID: {}, 제목: {}, 설명: {}",
+                        imageDTO.getImageId(), imageDTO.getImageTitle(), imageDTO.getImageDescription());
+            }
+        } else {
+            log.warn("roomImageDTOList가 비어 있음");
+        }
+
+        // 방의 예약 여부를 reserved 필드로 설정
         room.setReserved(reservationRepository.existsByRoom_RoomId(roomId));
 
         model.addAttribute("room", room);
@@ -207,10 +225,24 @@ public class RoomManagerController {
     public String updateRoomProc(@PathVariable Integer roomId,
                                  @ModelAttribute RoomDTO roomDTO,
                                  @RequestParam(value = "imageFile", required = false) List<MultipartFile> imageFile,
-                                 @RequestParam(value = "deleteImages", required = false) List<String> deleteImagesStr, // ✅ 문자열 리스트로 받음
+                                 @RequestParam(value = "bannerImageFile", required = false) MultipartFile bannerImageFile,
+                                 @RequestParam(value = "newImageTitles", required = false) List<String> newImageTitles,  // ✅ 추가
+                                 @RequestParam(value = "newImageDescriptions", required = false) List<String> newImageDescriptions, // ✅ 추가
+                                 @RequestParam(value = "existingImageIds", required = false) List<Integer> existingImageIds,
+                                 @RequestParam(value = "existingImageTitles", required = false) List<String> existingImageTitles,
+                                 @RequestParam(value = "existingImageDescriptions", required = false) List<String> existingImageDescriptions,
+                                 @RequestParam(value = "deleteBannerImage", required = false, defaultValue = "false") boolean deleteBannerImage,
+                                 @RequestParam(value = "deleteImages", required = false) List<String> deleteImagesStr,
                                  RedirectAttributes redirectAttributes) {
 
-        log.info("Updating Room with ID: {}", roomId);
+
+        // List가 null이면 빈 리스트로 초기화
+        if (newImageTitles == null) newImageTitles = new ArrayList<>();
+        if (newImageDescriptions == null) newImageDescriptions = new ArrayList<>();
+        if (existingImageIds == null) existingImageIds = new ArrayList<>();
+        if (existingImageTitles == null) existingImageTitles = new ArrayList<>();
+        if (existingImageDescriptions == null) existingImageDescriptions = new ArrayList<>();
+        if (deleteImagesStr == null) deleteImagesStr = new ArrayList<>();
 
         LocalDate today = LocalDate.now();
         LocalDate newReservationEnd = roomDTO.getReservationEnd() != null ? LocalDate.parse(roomDTO.getReservationEnd()) : null;
@@ -221,15 +253,44 @@ public class RoomManagerController {
             roomDTO.setRoomStatus(true); // 예약 가능
         }
 
+        // 기존 이미지 제목과 설명이 비어있는 경우 예외 처리
+        for (int i = 0; i < existingImageIds.size(); i++) {
+            String title = (existingImageTitles.size() > i) ? existingImageTitles.get(i) : "";
+            String description = (existingImageDescriptions.size() > i) ? existingImageDescriptions.get(i) : "";
+
+            if (title.trim().isEmpty() || description.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "기존 이미지의 제목과 설명을 모두 입력해야 합니다.");
+                return "redirect:/manager/room/update/" + roomId;
+            }
+        }
+
+        // 기존 이미지 제목 & 설명 업데이트
+        if (existingImageIds != null && !existingImageIds.isEmpty()) {
+            for (int i = 0; i < existingImageIds.size(); i++) {
+                // 제목과 설명이 비어있는 경우 기본값 설정
+                String title = (i < existingImageTitles.size() && !existingImageTitles.get(i).trim().isEmpty()) ? existingImageTitles.get(i) : "제목 없음";
+                String description = (i < existingImageDescriptions.size() && !existingImageDescriptions.get(i).trim().isEmpty()) ? existingImageDescriptions.get(i) : "설명 없음";
+
+                existingImageTitles.set(i, title);
+                existingImageDescriptions.set(i, description);
+            }
+            roomService.updateRoomImageDetails(existingImageIds, existingImageTitles, existingImageDescriptions);
+        }
+
+        // 기존 배너 이미지 삭제
+        if (deleteBannerImage || (bannerImageFile != null && !bannerImageFile.isEmpty())) {
+            roomService.updateRoomBannerImage(roomId, bannerImageFile);
+        }
+
         // 문자열 리스트 → 정수 리스트 변환
         List<Integer> deleteImages = new ArrayList<>();
         if (deleteImagesStr != null && !deleteImagesStr.isEmpty()) {
             try {
                 deleteImages = deleteImagesStr.stream()
-                        .flatMap(str -> Arrays.stream(str.split(","))) // 쉼표(,)로 구분된 경우 분리
-                        .map(String::trim) // 공백 제거
-                        .map(Integer::parseInt) // 정수 변환
-                        .distinct() // 중복 제거
+                        .flatMap(str -> Arrays.stream(str.split(",")))
+                        .map(String::trim)
+                        .map(Integer::parseInt)
+                        .distinct()
                         .collect(Collectors.toList());
             } catch (NumberFormatException e) {
                 log.warn("삭제할 이미지 ID 변환 오류: {}", deleteImagesStr, e);
@@ -258,6 +319,7 @@ public class RoomManagerController {
         log.info("남아있는 이미지 개수: {}", remainingImages);
         boolean hasNewImages = (imageFile != null && !imageFile.isEmpty());
 
+        // 모든 이미지 삭제 시 예외 처리
         if (remainingImages == 0 && !hasNewImages) {
             redirectAttributes.addFlashAttribute("errorMessage", "객실 이미지는 최소 1개 이상 등록해야 합니다.");
             return "redirect:/manager/room/update/" + roomId;
@@ -265,9 +327,34 @@ public class RoomManagerController {
 
         if (hasNewImages) {
             log.info("새로운 이미지 저장 시작");
-            roomService.updateRoom(roomId, roomDTO, imageFile, deleteImages);
+
+            List<ImageDTO> imageDTOList = new ArrayList<>();
+            for (int i = 0; i < imageFile.size(); i++) {
+                ImageDTO imageDTO = new ImageDTO();
+
+                // 새로운 이미지 제목과 설명 적용
+                String title = (i < newImageTitles.size() && !newImageTitles.get(i).trim().isEmpty()) ? newImageTitles.get(i) : "제목 없음";
+                String description = (i < newImageDescriptions.size() && !newImageDescriptions.get(i).trim().isEmpty()) ? newImageDescriptions.get(i) : "설명 없음";
+
+                imageDTO.setImageTitle(title);
+                imageDTO.setImageDescription(description);
+                imageDTOList.add(imageDTO);
+            }
+
+            roomDTO.setRoomImageDTOList(imageDTOList);
+            roomService.updateRoom(roomId, roomDTO, imageFile, newImageTitles, newImageDescriptions, deleteImages, existingImageIds, existingImageTitles, existingImageDescriptions);
         } else {
             log.info("이미지를 변경하지 않고 방 정보만 업데이트");
+
+            roomDTO.setRoomImageDTOList(new ArrayList<>());
+            for (int i = 0; i < existingImageIds.size(); i++) {
+                ImageDTO imageDTO = new ImageDTO();
+                imageDTO.setImageId(existingImageIds.get(i));
+                imageDTO.setImageTitle(i < existingImageTitles.size() ? existingImageTitles.get(i) : "");
+                imageDTO.setImageDescription(i < existingImageDescriptions.size() ? existingImageDescriptions.get(i) : "");
+                roomDTO.getRoomImageDTOList().add(imageDTO);
+            }
+
             roomService.updateRoomWithoutImages(roomId, roomDTO);
         }
 

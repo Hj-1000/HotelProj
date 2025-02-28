@@ -253,7 +253,7 @@
                         checkOutInput.min = stayStart;
                         checkOutInput.max = stayEnd;
 
-                        checkInInput.removeEventListener("change", updateCheckOutMinDate); // 기존 이벤트 제거 후 다시 추가
+                        checkInInput.removeEventListener("change", updateCheckOutMinDate);
                         checkInInput.addEventListener("change", updateCheckOutMinDate);
 
                         const roomType = roomCard.querySelector(".badge.bg-dark").innerText.trim();
@@ -306,20 +306,51 @@
             return recommendedTextMap[roomType] || "";
         }
 
-        // 체크인 날짜 변경 시 체크아웃 최소 날짜 설정 함수 추가
+        // 체크인 날짜 변경 시 체크아웃 최소 날짜 설정
         function updateCheckOutMinDate() {
             const checkInInput = document.getElementById("checkInDate");
             const checkOutInput = document.getElementById("checkOutDate");
 
             let checkInDate = new Date(checkInInput.value);
             if (!isNaN(checkInDate.getTime())) {
-                let nextDay = new Date(checkInDate);
-                nextDay.setDate(nextDay.getDate() + 1);
-                checkOutInput.min = nextDay.toISOString().split("T")[0];
+                let minCheckOutDate = new Date(checkInDate);
+                minCheckOutDate.setDate(minCheckOutDate.getDate() + 1); // 최소 1박 이후 가능
+                let minCheckOutStr = minCheckOutDate.toISOString().slice(0, 16); // YYYY-MM-DDTHH:mm 형식
+
+                checkOutInput.min = minCheckOutStr;
+
+                // 체크아웃 날짜가 체크인 날짜보다 이전이면 자동 변경
+                let selectedCheckOutDate = new Date(checkOutInput.value);
+                if (selectedCheckOutDate < minCheckOutDate) {
+                    checkOutInput.value = minCheckOutStr;
+                }
             }
 
-            calculateStayAndPrice(); // 추가: 숙박일 및 총 비용 계산
+            calculateStayAndPrice(); // 숙박일 및 총 비용 계산
         }
+
+        // 체크아웃 날짜 선택 시 체크인 이후인지 검증
+        function validateCheckOutDate() {
+            const checkInInput = document.getElementById("checkInDate");
+            const checkOutInput = document.getElementById("checkOutDate");
+
+            let checkInDate = new Date(checkInInput.value);
+            let checkOutDate = new Date(checkOutInput.value);
+
+            if (!isNaN(checkInDate.getTime()) && !isNaN(checkOutDate.getTime()) && checkOutDate <= checkInDate) {
+                let minCheckOutDate = new Date(checkInDate);
+                minCheckOutDate.setDate(minCheckOutDate.getDate() + 1);
+                checkOutInput.value = minCheckOutDate.toISOString().slice(0, 16);
+            }
+
+            calculateStayAndPrice(); // 숙박일 및 총 비용 계산
+        }
+
+        document.getElementById("checkInDate").addEventListener("change", updateCheckOutMinDate);
+        document.getElementById("checkOutDate").addEventListener("change", validateCheckOutDate);
+
+        // 페이지 로드 시 체크아웃 최소값 설정
+        updateCheckOutMinDate();
 
         /* 체크인 & 체크아웃 날짜 변경 시 자동으로 숙박일과 총 금액 계산*/
 
