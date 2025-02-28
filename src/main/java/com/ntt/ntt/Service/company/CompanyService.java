@@ -77,7 +77,7 @@ public class CompanyService {
         Company company = modelMapper.map(companyDTO, Company.class);
 
         // 🔹 선택한 담당자의 memberId와 memberName 저장
-//        company.setCompanyManager(companyManager); // 담당자 이름 저장
+        // company.setCompanyManager(companyManager); // 담당자 이름 저장
 
         // 1. Company 먼저 저장
         companyRepository.save(company);
