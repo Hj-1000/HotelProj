@@ -29,8 +29,8 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="roomName" class="form-label">객실명</label>
-                            <input type="text" class="form-control" id="roomName" name="roomName" placeholder="객실명" th:value="${param.roomName}">
+                            <label for="hotelName" class="form-label">지사명</label>
+                            <input type="text" class="form-control" id="hotelName" name="hotelName" placeholder="호텔명" th:value="${param.hotelName}">
                         </div>
                         <div class="mb-3">
                             <label class="form-label">결제 완료 금액</label>
@@ -43,11 +43,17 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="roomName" class="form-label">객실명</label>
+                            <input type="text" class="form-control" id="roomName" name="roomName" placeholder="객실명" th:value="${param.roomName}">
+                        </div>
                         <div class="mb-3">
                             <label class="form-label">최종 결제일</label>
                             <div class="d-flex gap-3">
                                 <div class="form-group" style="flex: 1;">
-                                    <input type="date" class="form-control" id="시작일" name="startDate"th:value="${param.startDate}">
+                                    <input type="date" class="form-control" id="시작일" name="startDate" th:value="${param.startDate}">
                                 </div> ~
                                 <div class="form-group" style="flex: 1;">
                                     <input type="date" class="form-control" id="종료일" name="endDate" th:value="${param.endDate}">
@@ -69,14 +75,15 @@
                     <thead>
                     <tr>
                         <th style="background-color: #f8f9fa; width: 6%">주문번호</th>
-                        <th style="background-color: #f8f9fa; width: 12%">객실 금액</th>
-                        <th style="background-color: #f8f9fa; width: 12%">룸서비스 금액</th>
-                        <th style="background-color: #f8f9fa; width: 12%">총 금액</th>
-                        <th style="background-color: #f8f9fa; width: 12%">결제 완료 금액</th>
-                        <th style="background-color: #f8f9fa; width: 12%">미결제 금액</th>
+                        <th style="background-color: #f8f9fa; width: 10%">객실 금액</th>
+                        <th style="background-color: #f8f9fa; width: 10%">룸서비스 금액</th>
+                        <th style="background-color: #f8f9fa; width: 10%">총 금액</th>
+                        <th style="background-color: #f8f9fa; width: 10%">결제 완료금액</th>
+                        <th style="background-color: #f8f9fa; width: 10%">미결제 금액</th>
+                        <th style="background-color: #f8f9fa; width: 12%">지사명</th>
                         <th style="background-color: #f8f9fa; width: 12%">객실명</th>
                         <th style="background-color: #f8f9fa; width: 10%">결제 상태</th>
-                        <th style="background-color: #f8f9fa; width: 12%">최종 결제일</th>
+                        <th style="background-color: #f8f9fa; width: 10%">최종 결제일</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -91,6 +98,7 @@
                             <td th:text="'₩' + ${#numbers.formatInteger(paymentDTO.totalPrice, 1, 'COMMA')}">결제 완료 금액</td>
                             <td th:text="'₩' + ${#numbers.formatInteger(reservationList[iterStat.index].roomPrice + reservationList[iterStat.index].totalServiceOrderPrice - paymentDTO.totalPrice, 1, 'COMMA')}">미결제 금액</td>
 
+                            <td th:text="${reservationList[iterStat.index].room.hotelId.hotelName}">호텔명</td>
                             <td th:text="${reservationList[iterStat.index].room.roomName}">객실명</td>
 
                             <!-- 결제 상태 처리 -->
@@ -156,12 +164,12 @@
                 <h5 class="card-title" id="salesTitle">일일 매출 현황 (최근 7일)</h5>
                 <table class="table table-bordered">
                     <thead>
-                    <tr>
-                        <th>날짜</th>
-                        <th>객실 매출</th>
-                        <th>룸서비스 매출</th>
-                        <th>총 매출</th>
-                        <th>결제 건수</th>
+                    <tr class="text-center">
+                        <th style="background-color: #f8f9fa; width: 10%">날짜</th>
+                        <th style="background-color: #f8f9fa; width: 25%">객실 매출</th>
+                        <th style="background-color: #f8f9fa; width: 25%">룸서비스 매출</th>
+                        <th style="background-color: #f8f9fa; width: 25%">총 매출</th>
+                        <th style="background-color: #f8f9fa; width: 15%">결제 건수</th>
                     </tr>
                     </thead>
                     <tbody id="salesTableBody"></tbody>
@@ -231,6 +239,8 @@
                     return;
                 }
 
+                endDate.setHours(23, 59, 59, 999);
+
                 updateChartAndTable("custom", startDate, endDate);
             });
 
@@ -279,7 +289,7 @@
                     const now = new Date();
                     const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1); // 6개월 전 1일
                     const endOfCurrentMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0); // 이번 달 마지막 날
-
+                    endOfCurrentMonth.setHours(23, 59, 59, 999);
                     // 최근 6개월 동안의 모든 월을 0으로 초기화
                     let tempDate = new Date(sixMonthsAgo);
                     while (tempDate <= endOfCurrentMonth) {
@@ -302,6 +312,8 @@
 
                     labels = Object.keys(aggregatedData).sort(); // 월별 정렬
                 } else if (mode === "custom" && startDate && endDate) {
+                    salesGraph.textContent = "사용자 지정일 매출 그래프";
+                    salesTitle.textContent = "사용자 지정일 매출 현황";
                     // 사용자가 선택한 날짜 범위
                     let tempDate = new Date(startDate);
                     while (tempDate <= endDate) {
@@ -427,7 +439,7 @@
                     const prevPaymentCount = index > 0 ? paymentCounts[index - 1] : null;
 
                     row.innerHTML = `
-    <td>${date}</td>
+    <td class="text-center">${date}</td>
     <td>
         <div class="d-flex justify-content-between">
             <span class="text-start">
