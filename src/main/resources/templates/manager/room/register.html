@@ -128,6 +128,15 @@
                 </div>
             </div>
 
+            <!-- 배너 이미지 업로드 -->
+            <div class="mb-3">
+                <label for="bannerImageFile" class="form-label">배너 이미지 업로드</label>
+                <input type="file" class="form-control" id="bannerImageFile" name="bannerImageFile" accept="image/*" required>
+                <div class="invalid-feedback">
+                    배너 이미지를 업로드해야 합니다.
+                </div>
+            </div>
+
             <!-- 객실 이미지 업로드 -->
             <div class="mb-3">
                 <label for="imageFile" class="form-label">객실 이미지 업로드</label>
@@ -138,11 +147,48 @@
                 <small class="form-text text-muted">여러 이미지를 선택하려면 Ctrl(또는 Cmd) 키를 누른 상태로 이미지를 선택하세요.</small>
             </div>
 
+            <!--  이미지 제목 및 설명 입력 -->
+            <div id="imageDetailsContainer"></div>
+
             <!-- Submit Button -->
             <button type="submit" class="btn btn-primary">등록</button>
         </form>
     </div>
     <script>
+
+        /* 타이틀 , 설명 길이제한 */
+        document.addEventListener("DOMContentLoaded", function () {
+            let descriptionInputs = document.querySelectorAll("[name='existingImageDescriptions'], [name='newImageDescriptions']");
+
+            descriptionInputs.forEach(function (input) {
+                input.addEventListener("input", function () {
+                    if (this.value.length > 500) {
+                        alert("이미지 설명은 최대 500자까지 입력할 수 있습니다.");
+                        this.value = this.value.substring(0, 500); // 초과한 문자 제거
+                    }
+                });
+            });
+        });
+
+        /* 이미지 제목 , 텍스트 추가 */
+        document.getElementById("imageFile").addEventListener("change", function (event) {
+            const container = document.getElementById("imageDetailsContainer");
+            container.innerHTML = ""; // 기존 내용을 초기화
+
+            for (let i = 0; i < event.target.files.length; i++) {
+                const div = document.createElement("div");
+                div.classList.add("mb-3");
+
+                div.innerHTML = `
+                <label class="form-label">타이틀 ${i + 1}</label>
+                <input type="text" class="form-control" name="imageTitles" placeholder="타이틀을 입력하세요" maxlength="50">
+                <label class="form-label mt-2">설명 ${i + 1}</label>
+                <textarea class="form-control" name="imageDescriptions" rows="2" placeholder="이미지 설명을 입력하세요" maxlength="500"></textarea>
+            `;
+
+                container.appendChild(div);
+            }
+        });
 
         document.addEventListener("DOMContentLoaded", function () {
             const form = document.querySelector(".needs-validation");
@@ -163,12 +209,24 @@
 
         /* 예약기간 , 숙박기간 이후부터 시작 메서드*/
         document.addEventListener("DOMContentLoaded", function () {
-            function setMinDate(startInput, endInput) {
+            function setTodayMinDate(input) {  //  오늘 이전 날짜 선택 방지 추가됨
+                let today = new Date();
+                today.setMinutes(today.getMinutes() - today.getTimezoneOffset()); // UTC 보정
+                input.min = today.toISOString().split("T")[0];
+
+                // 기존 값이 오늘 이전이라면 자동 수정
+                let selectedDate = new Date(input.value);
+                if (selectedDate < today) {
+                    input.value = input.min;
+                }
+            }
+
+            function setMinEndDate(startInput, endInput) {  //  시작 날짜 이후로만 종료 날짜 설정
                 startInput.addEventListener("change", function () {
                     let startDate = new Date(this.value);
                     if (!isNaN(startDate.getTime())) {
                         let nextDay = new Date(startDate);
-                        nextDay.setDate(nextDay.getDate() + 1); // 시작일 다음 날 설정
+                        nextDay.setDate(nextDay.getDate() + 1);
                         endInput.min = nextDay.toISOString().split("T")[0];
 
                         // 기존 종료일이 새로운 최소값보다 작으면 초기화
@@ -179,13 +237,13 @@
                 });
             }
 
-            function preventInvalidEndDate(startInput, endInput) {
+            function validateEndDate(startInput, endInput) {  //  종료 날짜가 시작 날짜 이전인지 확인
                 endInput.addEventListener("change", function () {
                     let startDate = new Date(startInput.value);
                     let endDate = new Date(this.value);
-                    if (startDate && endDate < startDate) {
+                    if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime()) && endDate < startDate) {
                         alert("종료 날짜는 시작 날짜 이후여야 합니다.");
-                        this.value = "";
+                        this.value = ""; // 잘못된 입력 초기화
                     }
                 });
             }
@@ -194,16 +252,20 @@
             const reservationStart = document.getElementById("reservationStart");
             const reservationEnd = document.getElementById("reservationEnd");
             if (reservationStart && reservationEnd) {
-                setMinDate(reservationStart, reservationEnd);
-                preventInvalidEndDate(reservationStart, reservationEnd);
+                setTodayMinDate(reservationStart);  //  오늘 이전 날짜 선택 방지
+                setTodayMinDate(reservationEnd);
+                setMinEndDate(reservationStart, reservationEnd);
+                validateEndDate(reservationStart, reservationEnd);
             }
 
             // 숙박 기간
             const stayStart = document.getElementById("stayStart");
             const stayEnd = document.getElementById("stayEnd");
             if (stayStart && stayEnd) {
-                setMinDate(stayStart, stayEnd);
-                preventInvalidEndDate(stayStart, stayEnd);
+                setTodayMinDate(stayStart);  //  오늘 이전 날짜 선택 방지
+                setTodayMinDate(stayEnd);
+                setMinEndDate(stayStart, stayEnd);
+                validateEndDate(stayStart, stayEnd);
             }
         });
 

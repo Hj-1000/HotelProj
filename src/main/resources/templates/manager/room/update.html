@@ -38,6 +38,71 @@
         input[type="date"] {
             flex: 1;
         }
+
+        .preview-img {
+            width: 200px;
+            height: auto;
+            display: block;
+            margin-bottom: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            padding: 5px;
+        }
+
+        /* 상세보기 이미지 컨테이너 가로 정렬 */
+
+        .image-preview-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            margin-bottom: 10px;
+        }
+
+        .image-preview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 200px;
+        }
+
+        .image-preview img {
+            width: 100%;
+            height: auto;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            padding: 5px;
+        }
+
+        .delete-checkbox {
+            margin-top: 10px;
+        }
+
+        .image-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .image-title-input {
+            width: 100%;
+            font-size: 1.1rem;
+            padding: 10px;
+        }
+
+        .image-description-input {
+            width: 100%;
+            font-size: 1.1rem;
+            padding: 10px;
+            height: 100px;
+        }
+
     </style>
 </head>
 <body>
@@ -45,7 +110,8 @@
     <div class="container py-4">
         <h1 class="text-center mb-5">객실 수정</h1>
         <!-- Room Update Form -->
-        <form th:action="@{/manager/room/update/{roomId}(roomId=${room.roomId})}"
+        <form id="updateForm"
+              th:action="@{/manager/room/update/{roomId}(roomId=${room.roomId})}"
               th:object="${room}" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
             <!-- 객실 이름 -->
             <div class="mb-3">
@@ -122,23 +188,74 @@
                     <label class="form-check-label" for="statusUnavailable">예약 불가</label>
                 </div>
             </div>
-            <!-- 이미지 업로드 -->
+
+            <!-- 배너 이미지 영역 -->
             <div class="mb-3">
-                <label class="form-label">현재 등록된 이미지</label>
+                <label class="form-label">현재 배너 이미지</label>
+                <div>
+                    <!-- 배너 이미지가 존재하는 경우 -->
+                    <img th:if="${room.bannerImage != null and not #strings.isEmpty(room.bannerImage)}"
+                         th:src="@{|/upload/${room.bannerImage}|}"
+                         alt="배너 이미지 미리보기" class="preview-img">
+
+                    <!-- 배너 이미지가 없는 경우 -->
+                    <span th:if="${room.bannerImage == null or #strings.isEmpty(room.bannerImage)}">등록된 배너 이미지 없음</span>
+
+                    <input type="checkbox" id="deleteBannerImage" name="deleteBannerImage" value="true">
+                    <label for="deleteBannerImage">이미지 삭제</label>
+                </div>
+            </div>
+
+            <!-- 새 배너 이미지 업로드 -->
+            <div class="mb-3">
+                <label for="bannerImageFile" class="form-label">새 배너 이미지 업로드</label>
+                <input type="file" class="form-control" id="bannerImageFile" name="bannerImageFile" accept="image/*">
+            </div>
+
+            <!-- 현재 등록된 객실 상세 이미지 -->
+            <div class="mb-3">
+                <label class="form-label">현재 등록된 상세보기 이미지</label>
                 <div id="imagePreviewContainer">
-                    <div th:each="image : ${room.roomImageDTOList}" class="image-preview">
-                        <img th:src="@{|/upload/${image.imagePath}|}" alt="이미지 미리보기" class="preview-img" style="width:150px; height:auto;">
-                        <input type="checkbox" th:name="deleteImages" th:value="${image.imageId}"> <i class="bi bi-trash"></i>
+                    <div th:each="image, iterStat : ${room.roomImageDTOList}" class="image-preview-container">
+                        <div class="image-preview">
+                            <!-- 상세 이미지 표시 -->
+                            <img th:if="${image.imagePath != room.bannerImage}"
+                                 th:src="@{|/upload/${image.imagePath}|}"
+                                 alt="이미지 미리보기" class="preview-img">
+
+                            <!-- 이미지 삭제 체크박스 -->
+                            <div class="delete-checkbox">
+                                <input type="checkbox" th:name="deleteImages" th:value="${image.imageId}">
+                                <label>이미지 삭제</label>
+                            </div>
+                        </div>
+
+                        <!-- 기존 이미지 -->
+                        <div class="image-details">
+                            <input type="hidden" name="existingImageIds" th:value="${image.imageId}">
+                            <input type="text" class="form-control image-title-input"
+                                   th:name="existingImageTitles"
+                                   th:value="${image.imageTitle}" placeholder="이미지 제목을 입력하세요">
+
+                            <textarea class="form-control image-description-input"
+                                      th:name="existingImageDescriptions"
+                                      placeholder="이미지 설명을 입력하세요"
+                                      th:text="${image.imageDescription}"></textarea>
+
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- 새 이미지 업로드 -->
             <div class="mb-3">
-                <label for="imageFile" class="form-label">객실 이미지 업로드</label>
+                <label for="imageFile" class="form-label">새로운 객실 이미지 업로드</label>
                 <input type="file" class="form-control" id="imageFile" name="imageFile" multiple>
                 <small class="form-text text-muted">여러 이미지를 선택하려면 Ctrl(또는 Cmd) 키를 누른 상태로 이미지를 선택하세요.</small>
             </div>
+
+            <!-- 추가될 이미지 제목 및 설명 입력 필드 -->
+            <div id="imageDetailsContainer"></div>
 
             <button type="submit" class="btn btn-primary">수정</button>
         </form>
@@ -147,12 +264,49 @@
 
     <script>
 
+        /* 타이틀 , 설명 길이제한 */
+        document.addEventListener("DOMContentLoaded", function () {
+            let descriptionInputs = document.querySelectorAll("[name='existingImageDescriptions'], [name='newImageDescriptions']");
+
+            descriptionInputs.forEach(function (input) {
+                input.addEventListener("input", function () {
+                    if (this.value.length > 500) {
+                        alert("이미지 설명은 최대 500자까지 입력할 수 있습니다.");
+                        this.value = this.value.substring(0, 500); // 초과한 문자 제거
+                    }
+                });
+            });
+        });
+
+        /* 새 이미지 추가 시 제목 및 설명 입력 필드 자동 생성 */
+        document.getElementById("imageFile").addEventListener("change", function (event) {
+            const container = document.getElementById("imageDetailsContainer");
+            container.innerHTML = ""; // 기존 내용을 초기화
+
+            for (let i = 0; i < event.target.files.length; i++) {
+                const div = document.createElement("div");
+                div.classList.add("mb-3");
+
+                div.innerHTML = `
+                <label class="form-label">새 타이틀 ${i + 1}</label>
+                <input type="text" class="form-control" name="newImageTitles" placeholder="타이틀을 입력하세요" maxlength="50">
+                <label class="form-label mt-2">새 설명 ${i + 1}</label>
+                <textarea class="form-control" name="newImageDescriptions" rows="2" placeholder="설명을 입력하세요" maxlength="500"></textarea>
+            `;
+
+                container.appendChild(div);
+            }
+        });
+
         /* 이미지 예외처리 */
 
         document.addEventListener("DOMContentLoaded", function () {
             const form = document.querySelector("form");
             const imageCheckboxes = document.querySelectorAll("input[name='deleteImages']");
             const deleteImagesInput = document.createElement("input");
+            const deleteBannerCheckbox = document.getElementById("deleteBannerImage");
+            const bannerImageInput = document.getElementById("bannerImageFile");
+            const imageFileInput = document.getElementById("imageFile");
 
             deleteImagesInput.setAttribute("type", "hidden");
             deleteImagesInput.setAttribute("name", "deleteImages");
@@ -161,6 +315,7 @@
             form.addEventListener("submit", function (event) {
                 let checkedImages = [];
 
+                // 삭제할 객실 이미지 목록 수집
                 imageCheckboxes.forEach(checkbox => {
                     if (checkbox.checked) {
                         checkedImages.push(checkbox.value);
@@ -168,12 +323,24 @@
                 });
 
                 deleteImagesInput.value = checkedImages.length > 0 ? checkedImages.join(",") : ""; // 빈 값이면 유지
-
                 console.log("최종 삭제 이미지 목록:", deleteImagesInput.value); // 확인용 로그
 
-                if (checkedImages.length === imageCheckboxes.length && !document.getElementById("imageFile").files.length) {
-                    alert("최소 한 개 이상의 이미지를 등록해야 합니다.");
-                    event.preventDefault();
+                //  객실 이미지 예외처리
+                if (checkedImages.length === imageCheckboxes.length) {
+                    if (!imageFileInput || !imageFileInput.files.length) {
+                        alert("최소 한 개 이상의 객실 이미지를 등록해야 합니다.");
+                        event.preventDefault();
+                        return;
+                    }
+                }
+
+                // 배너 이미지 예외처리
+                if (deleteBannerCheckbox && deleteBannerCheckbox.checked) {
+                    if (!bannerImageInput || !bannerImageInput.files.length) {
+                        alert("배너 이미지를 삭제하면 새로운 배너 이미지를 업로드해야 합니다.");
+                        event.preventDefault();
+                        return;
+                    }
                 }
             });
         });
@@ -181,12 +348,24 @@
 
         /* 예약기간 , 숙박기간 이후부터 시작 메서드*/
         document.addEventListener("DOMContentLoaded", function () {
-            function setMinDate(startInput, endInput) {
+            function setTodayMinDate(input) {  // 오늘 이전 날짜 선택 방지 추가됨
+                let today = new Date();
+                today.setMinutes(today.getMinutes() - today.getTimezoneOffset()); // UTC 보정
+                input.min = today.toISOString().split("T")[0];
+
+                // 기존 값이 오늘 이전이라면 자동 수정
+                let selectedDate = new Date(input.value);
+                if (selectedDate < today) {
+                    input.value = input.min;
+                }
+            }
+
+            function setMinEndDate(startInput, endInput) {  // 시작 날짜 이후로만 종료 날짜 설정
                 startInput.addEventListener("change", function () {
                     let startDate = new Date(this.value);
                     if (!isNaN(startDate.getTime())) {
                         let nextDay = new Date(startDate);
-                        nextDay.setDate(nextDay.getDate() + 1); // 시작일 다음 날 설정
+                        nextDay.setDate(nextDay.getDate() + 1);
                         endInput.min = nextDay.toISOString().split("T")[0];
 
                         // 기존 종료일이 새로운 최소값보다 작으면 초기화
@@ -197,13 +376,13 @@
                 });
             }
 
-            function preventInvalidEndDate(startInput, endInput) {
+            function validateEndDate(startInput, endInput) {  // 종료 날짜가 시작 날짜 이전인지 확인
                 endInput.addEventListener("change", function () {
                     let startDate = new Date(startInput.value);
                     let endDate = new Date(this.value);
-                    if (startDate && endDate < startDate) {
+                    if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime()) && endDate < startDate) {
                         alert("종료 날짜는 시작 날짜 이후여야 합니다.");
-                        this.value = "";
+                        this.value = ""; // 잘못된 입력 초기화
                     }
                 });
             }
@@ -212,16 +391,20 @@
             const reservationStart = document.getElementById("reservationStart");
             const reservationEnd = document.getElementById("reservationEnd");
             if (reservationStart && reservationEnd) {
-                setMinDate(reservationStart, reservationEnd);
-                preventInvalidEndDate(reservationStart, reservationEnd);
+                setTodayMinDate(reservationStart);  // 오늘 이전 날짜 선택 방지
+                setTodayMinDate(reservationEnd);
+                setMinEndDate(reservationStart, reservationEnd);
+                validateEndDate(reservationStart, reservationEnd);
             }
 
             // 숙박 기간
             const stayStart = document.getElementById("stayStart");
             const stayEnd = document.getElementById("stayEnd");
             if (stayStart && stayEnd) {
-                setMinDate(stayStart, stayEnd);
-                preventInvalidEndDate(stayStart, stayEnd);
+                setTodayMinDate(stayStart);  // 오늘 이전 날짜 선택 방지
+                setTodayMinDate(stayEnd);
+                setMinEndDate(stayStart, stayEnd);
+                validateEndDate(stayStart, stayEnd);
             }
         });
 

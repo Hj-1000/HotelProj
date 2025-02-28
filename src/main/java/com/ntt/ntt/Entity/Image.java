@@ -23,6 +23,10 @@ public class Image extends BaseEntity {
     private String imagePath;
     // 대표이미지 여부
     private String imageMain;
+    @Column(length = 50, nullable = true)
+    private String imageTitle;
+    @Column(length = 500, nullable = true)
+    private String imageDescription;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "companyId")
