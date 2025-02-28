@@ -1,5 +1,7 @@
 package com.ntt.ntt.Repository;
 
+import com.ntt.ntt.Constant.ServiceOrderStatus;
+import com.ntt.ntt.Entity.Reservation;
 import com.ntt.ntt.Entity.Room;
 import com.ntt.ntt.Entity.ServiceOrder;
 import org.springframework.data.domain.Page;
@@ -36,9 +38,11 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Inte
     Page<ServiceOrder> findByReservation_ReservationId(Integer reservationId, Pageable pageable);
 
     //특정 회원의 구매 이력으로 모두 불러오기
-    //serviceOrderId를 오름차순으로 정렬하되 status가 CANCELED라면 후순위로 밀기
+    //serviceOrderId를 오름차순으로 정렬하되 STATUS를 CANCELED, COMPLETED, PENDING 순으로 밀기
     @Query("select so from ServiceOrder so where so.member.memberEmail = :memberEmail order by " +
-            "case when so.serviceOrderStatus = 'CANCELED' then 1 else 0 end, so.regDate asc")
+            "case when so.serviceOrderStatus = 'PENDING' then 1 " +
+            "when so.serviceOrderStatus = 'COMPLETED' then 2 " +
+            "else 3 end, so.regDate asc")
     public List<ServiceOrder> findServiceOrders(@Param("memberEmail") String memberEmail, Pageable pageable);
 
     //특정 회원의 주문갯수 검색 메서드
@@ -52,4 +56,8 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Inte
             "JOIN so.serviceOrderItemList soi " +
             "WHERE so.reservation.reservationId = :reservationId")
     Integer getTotalOrderPriceByReservation(@Param("reservationId") Integer reservationId);
+
+
+    //예약에 걸려있는 주문 상품 중에 serviceOrderStatus를 특정해서 골라옴
+    List<ServiceOrder> findByReservationAndServiceOrderStatus(Reservation reservation, ServiceOrderStatus status);
 }

@@ -28,10 +28,11 @@ public class PaymentDTO {
 
     private Integer roomId;
 
+
     private Integer reservationId;
 
     private LocalDateTime regDate;
 
     private LocalDateTime modDate;
 
-    }
+}
