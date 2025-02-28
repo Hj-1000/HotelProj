@@ -38,6 +38,55 @@
         input[type="date"] {
             flex: 1;
         }
+
+        .image-preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .preview-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 150px;
+        }
+
+        .image-preview {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .image-filename {
+            font-size: 12px;
+            text-align: center;
+            margin-top: 5px;
+            color: #666;
+        }
+
+        .image-title-input {
+            width: 100%;
+            font-size: 1rem;
+            padding: 8px;
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            background-color: #eef6ff;
+        }
+
+        .image-description-input {
+            width: 100%;
+            font-size: 1rem;
+            padding: 10px;
+            border: 2px solid #28a745;
+            border-radius: 5px;
+            background-color: #eaf8eb;
+            height: 100px;
+        }
+
     </style>
 </head>
 <body>
@@ -132,19 +181,17 @@
             <div class="mb-3">
                 <label for="bannerImageFile" class="form-label">배너 이미지 업로드</label>
                 <input type="file" class="form-control" id="bannerImageFile" name="bannerImageFile" accept="image/*" required>
-                <div class="invalid-feedback">
-                    배너 이미지를 업로드해야 합니다.
-                </div>
+                <div class="invalid-feedback">배너 이미지를 업로드해야 합니다.</div>
+                <div id="bannerImagePreview" class="image-preview-container"></div> <!-- 미리보기 -->
             </div>
 
             <!-- 객실 이미지 업로드 -->
             <div class="mb-3">
                 <label for="imageFile" class="form-label">객실 이미지 업로드</label>
                 <input type="file" class="form-control" id="imageFile" name="imageFile" multiple required>
-                <div class="invalid-feedback">
-                    객실 이미지를 최소 1개 이상 업로드해야 합니다.
-                </div>
+                <div class="invalid-feedback">객실 이미지를 최소 1개 이상 업로드해야 합니다.</div>
                 <small class="form-text text-muted">여러 이미지를 선택하려면 Ctrl(또는 Cmd) 키를 누른 상태로 이미지를 선택하세요.</small>
+                <div id="roomImagesPreview" class="image-preview-container"></div> <!-- 미리보기 -->
             </div>
 
             <!--  이미지 제목 및 설명 입력 -->
@@ -181,13 +228,54 @@
 
                 div.innerHTML = `
                 <label class="form-label">타이틀 ${i + 1}</label>
-                <input type="text" class="form-control" name="imageTitles" placeholder="타이틀을 입력하세요" maxlength="50">
+                <input type="text" class="form-control image-title-input" name="imageTitles" placeholder="타이틀을 입력하세요" maxlength="50">
                 <label class="form-label mt-2">설명 ${i + 1}</label>
-                <textarea class="form-control" name="imageDescriptions" rows="2" placeholder="이미지 설명을 입력하세요" maxlength="500"></textarea>
+                <textarea class="form-control image-description-input" name="imageDescriptions " rows="2" placeholder="설명을 입력하세요" maxlength="500"></textarea>
             `;
 
                 container.appendChild(div);
             }
+        });
+
+        /* 이미지 미리보기 */
+
+        document.addEventListener("DOMContentLoaded", function () {
+            function previewImages(input, previewContainerId) {
+                const previewContainer = document.getElementById(previewContainerId);
+                previewContainer.innerHTML = ""; // 기존 미리보기 초기화
+
+                if (input.files && input.files.length > 0) {
+                    Array.from(input.files).forEach((file, index) => {
+                        const reader = new FileReader();
+
+                        reader.onload = function (e) {
+                            const previewItem = document.createElement("div");
+                            previewItem.classList.add("preview-item");
+
+                            previewItem.innerHTML = `
+                            <div class="image-preview-wrapper">
+                                <img src="${e.target.result}" class="image-preview" alt="이미지 미리보기">
+                                <p class="image-filename">${file.name}</p>
+                            </div>
+                        `;
+
+                            previewContainer.appendChild(previewItem);
+                        };
+
+                        reader.readAsDataURL(file);
+                    });
+                }
+            }
+
+            // 배너 이미지 미리보기 이벤트
+            document.getElementById("bannerImageFile").addEventListener("change", function () {
+                previewImages(this, "bannerImagePreview");
+            });
+
+            // 객실 이미지 미리보기 이벤트
+            document.getElementById("imageFile").addEventListener("change", function () {
+                previewImages(this, "roomImagesPreview");
+            });
         });
 
         document.addEventListener("DOMContentLoaded", function () {

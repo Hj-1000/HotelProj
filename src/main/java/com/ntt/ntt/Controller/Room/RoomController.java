@@ -96,14 +96,15 @@ public class RoomController {
     public String getRoomDetail(@PathVariable Integer roomId, Model model) {
         log.info("객실 상세보기 요청 - Room ID: {}", roomId);
 
-        RoomDTO room = roomService.readRoom(roomId);
-        if (room == null) {
+        try {
+            RoomDTO room = roomService.readRoom(roomId);
+            model.addAttribute("room", room);
+            return "detail"; // detail.html 반환
+        } catch (IllegalArgumentException e) { // 예외 발생 시 404 페이지 반환
             log.warn("객실을 찾을 수 없습니다. Room ID: {}", roomId);
-            return "redirect:/roomList"; // 방이 없으면 리스트 페이지로 이동
+            model.addAttribute("errorMessage", "요청하신 객실을 찾을 수 없습니다.");
+            return "error/404"; // 404 페이지로 이동
         }
-
-        model.addAttribute("room", room);
-        return "detail"; // detail.html 반환
     }
 
 }

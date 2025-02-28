@@ -150,6 +150,14 @@ public class ReservationService {
 
         Room room = reservation.getRoom();
 
+        // 기존 Member ID와 새로운 Member ID가 다를 경우 변경 적용
+        if (!reservation.getMember().getMemberId().equals(memberId)) {
+            Member newMember = memberRepository.findById(memberId)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 회원 정보를 찾을 수 없습니다. memberId: " + memberId));
+            reservation.setMember(newMember);
+        }
+
+
         // 체크인/체크아웃 날짜 가져오기
         LocalDateTime checkInDateTime = reservationDTO.getCheckInDate();
         LocalDateTime checkOutDateTime = reservationDTO.getCheckOutDate();

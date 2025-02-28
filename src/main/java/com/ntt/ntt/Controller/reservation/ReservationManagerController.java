@@ -190,6 +190,7 @@ public class ReservationManagerController {
             @RequestParam(value = "checkInDate", required = false) String checkInDate,
             @RequestParam(value = "checkOutDate", required = false) String checkOutDate,
             @RequestParam(value = "count", required = false) Integer count,
+            @RequestParam(value = "memberId", required = true) Integer memberId,
             @ModelAttribute ReservationDTO reservationDTO,
             RedirectAttributes redirectAttributes) {
 
@@ -222,7 +223,7 @@ public class ReservationManagerController {
             reservationDTO.setReservationEnd(reservationEnd);
             reservationDTO.setCount(count);
 
-            reservationService.updateReservation(reservationId, reservationDTO, reservationDTO.getMemberId());
+            reservationService.updateReservation(reservationId, reservationDTO, memberId);
             roomService.updateRoomStatusBasedOnReservationEnd(roomId);
 
             redirectAttributes.addFlashAttribute("successMessage", "예약이 성공적으로 수정되었습니다.");

@@ -184,17 +184,25 @@ public class RoomManagerController {
 
     // 특정 룸 조회
     @GetMapping("/{roomId}")
-    public String getRoomDetailsForm(@PathVariable Integer roomId, Model model) {
+    public String readRoomForm(@PathVariable Integer roomId, Model model) {
         log.info("Fetching details for roomId: {}", roomId);
 
-        RoomDTO room = roomService.readRoom(roomId);
-        log.info("Fetched RoomDTO: {}", room);
+        try {
+            RoomDTO room = roomService.readRoom(roomId);
+            if (room == null) {
+                throw new IllegalArgumentException("등록된 아이디에 방을 찾을 수 없습니다: " + roomId);
+            }
 
-        String formattedPrice = String.format("%,d KRW", room.getRoomPrice());
-        model.addAttribute("room", room);
-        model.addAttribute("formattedPrice", formattedPrice);
+            String formattedPrice = String.format("%,d KRW", room.getRoomPrice());
+            model.addAttribute("room", room);
+            model.addAttribute("formattedPrice", formattedPrice);
 
-        return "manager/room/read";
+            return "manager/room/read";
+        } catch (IllegalArgumentException e) {
+            log.warn("객실을 찾을 수 없습니다. Room ID: {}", roomId);
+            model.addAttribute("errorMessage", "요청하신 객실을 찾을 수 없습니다.");
+            return "error/404"; // 404 페이지로 이동
+        }
     }
 
     // 3. Room 수정 페이지로 이동

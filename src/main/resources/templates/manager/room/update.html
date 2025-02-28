@@ -39,6 +39,11 @@
             flex: 1;
         }
 
+        .banner-image-box {
+            max-width: 200px;
+            text-align: center;
+        }
+
         .preview-img {
             width: 200px;
             height: auto;
@@ -54,12 +59,12 @@
         .image-preview-container {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
             border: 1px solid #ddd;
             padding: 15px;
             border-radius: 5px;
             background-color: #f9f9f9;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
 
         .image-preview {
@@ -67,7 +72,7 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
-            width: 200px;
+            width: 180px;
         }
 
         .image-preview img {
@@ -86,20 +91,37 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             width: 100%;
+        }
+
+        .image-title-label {
+            font-weight: bold;
+            color: #444;
         }
 
         .image-title-input {
             width: 100%;
-            font-size: 1.1rem;
-            padding: 10px;
+            font-size: 1rem;
+            padding: 8px;
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            background-color: #eef6ff;
+        }
+
+        .image-description-label {
+            font-weight: bold;
+            color: #444;
+            margin-top: 10px;
         }
 
         .image-description-input {
             width: 100%;
-            font-size: 1.1rem;
+            font-size: 1rem;
             padding: 10px;
+            border: 2px solid #28a745;
+            border-radius: 5px;
+            background-color: #eaf8eb;
             height: 100px;
         }
 
@@ -192,7 +214,7 @@
             <!-- 배너 이미지 영역 -->
             <div class="mb-3">
                 <label class="form-label">현재 배너 이미지</label>
-                <div>
+                <div class="banner-image-box">
                     <!-- 배너 이미지가 존재하는 경우 -->
                     <img th:if="${room.bannerImage != null and not #strings.isEmpty(room.bannerImage)}"
                          th:src="@{|/upload/${room.bannerImage}|}"
@@ -202,7 +224,7 @@
                     <span th:if="${room.bannerImage == null or #strings.isEmpty(room.bannerImage)}">등록된 배너 이미지 없음</span>
 
                     <input type="checkbox" id="deleteBannerImage" name="deleteBannerImage" value="true">
-                    <label for="deleteBannerImage">이미지 삭제</label>
+                    <label for="deleteBannerImage">삭제</label>
                 </div>
             </div>
 
@@ -226,22 +248,26 @@
                             <!-- 이미지 삭제 체크박스 -->
                             <div class="delete-checkbox">
                                 <input type="checkbox" th:name="deleteImages" th:value="${image.imageId}">
-                                <label>이미지 삭제</label>
+                                <label>삭제</label>
                             </div>
                         </div>
 
-                        <!-- 기존 이미지 -->
+                        <!-- 기존 이미지 정보 입력 -->
                         <div class="image-details">
                             <input type="hidden" name="existingImageIds" th:value="${image.imageId}">
+
+                            <!-- 🏷️ 타이틀 라벨 -->
+                            <label class="image-title-label">타이틀</label>
                             <input type="text" class="form-control image-title-input"
                                    th:name="existingImageTitles"
-                                   th:value="${image.imageTitle}" placeholder="이미지 제목을 입력하세요">
+                                   th:value="${image.imageTitle}" placeholder="타이틀을 입력하세요">
 
+                            <!-- 🏷️ 설명 라벨 -->
+                            <label class="image-description-label">설명</label>
                             <textarea class="form-control image-description-input"
                                       th:name="existingImageDescriptions"
-                                      placeholder="이미지 설명을 입력하세요"
+                                      placeholder="설명을 입력하세요"
                                       th:text="${image.imageDescription}"></textarea>
-
                         </div>
                     </div>
                 </div>
@@ -293,7 +319,6 @@
                 <label class="form-label mt-2">새 설명 ${i + 1}</label>
                 <textarea class="form-control" name="newImageDescriptions" rows="2" placeholder="설명을 입력하세요" maxlength="500"></textarea>
             `;
-
                 container.appendChild(div);
             }
         });
