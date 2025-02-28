@@ -49,13 +49,10 @@ public class ChiefHotelController {
     @GetMapping("/register")
     public String registerForm(Model model) {
         //검증처리가 필요하면 빈 companyDTO를 생성해서 전달한다.
-        List<CompanyDTO> companyDTOS = hotelService.getAllCompany();
+        List<CompanyDTO> companyDTOS = hotelService.getMyCompany();
         model.addAttribute("companyDTOS", companyDTOS);
         model.addAttribute("companyDTO", new CompanyDTO());
 
-        List<MemberDTO> memberDTOS = hotelService.getAllManagers();
-        model.addAttribute("memberDTOS", memberDTOS);
-        model.addAttribute("memberDTO", new MemberDTO());
         return "/manager/hotel/register";
     }
     //등록처리
@@ -125,9 +122,9 @@ public class ChiefHotelController {
             model.addAttribute("keyword", keyword);
             model.addAttribute("searchType", searchType);
 
-            List<MemberDTO> memberDTOS = hotelService.getAllManagers();
-            model.addAttribute("memberDTOS", memberDTOS);
-            model.addAttribute("memberDTO", new MemberDTO());
+            List<CompanyDTO> companyDTOS = hotelService.getMyCompany();
+            model.addAttribute("companyDTOS", companyDTOS);
+            model.addAttribute("companyDTO", new CompanyDTO());
 
             return "/manager/hotel/list";
         } catch (Exception e) {
@@ -188,7 +185,7 @@ public class ChiefHotelController {
     @GetMapping("/update")
     public String updateForm(Integer hotelId, Model model) {
         HotelDTO hotelDTO = hotelService.read(hotelId);
-        List<CompanyDTO> companyDTOS = hotelService.getAllCompany();
+        List<CompanyDTO> companyDTOS = hotelService.getMyCompany();
         model.addAttribute("companyDTOS", companyDTOS);
         model.addAttribute("companyDTO", new CompanyDTO());
         model.addAttribute("hotelDTO", hotelDTO);

@@ -11,6 +11,7 @@ import com.ntt.ntt.Service.company.CompanyService;
 import com.ntt.ntt.Service.hotel.HotelService;
 import com.ntt.ntt.Util.PaginationUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -30,6 +31,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -197,10 +200,6 @@ public class AdminCompanyHotelController {
                 }
             }
 
-            List<MemberDTO> memberDTOS = hotelService.getAllManagers();
-            model.addAttribute("memberDTOS", memberDTOS);
-            model.addAttribute("memberDTO", new MemberDTO());
-
             model.addAttribute("companyDTO", companyDTO);
             model.addAttribute("hotelDTOS", hotelDTOS.getContent());  // 현재 페이지의 객실 목록
             model.addAttribute("totalPages", hotelDTOS.getTotalPages());  // 총 페이지 수
@@ -214,14 +213,77 @@ public class AdminCompanyHotelController {
         }
     }
 
+    //수정폼
+    @Operation(summary = "관리자용 본사 수정 처리", description = "본사를 수정 처리 한다.")
+    @GetMapping("/company/update")
+    public String updateHTML(Integer companyId, Model model) {
+        CompanyDTO companyDTO = companyService.read(companyId);
+        model.addAttribute("companyDTO", companyDTO);
+        return "/chief/company/update";
+    }
+    //수정처리
+    @Operation(summary = "관리자용 본사 수정 처리", description = "본사를 수정 처리 한다.")
+    @PostMapping("/company/update")
+    public String updateProc(CompanyDTO companyDTO, List<MultipartFile> newImageFiles, RedirectAttributes redirectAttributes) {
 
-    //삭제
+        companyService.update(companyDTO, newImageFiles);
+        redirectAttributes.addFlashAttribute("message", "본사 수정이 완료되었습니다.");
+
+        Integer companyId = companyDTO.getCompanyId();
+        redirectAttributes.addFlashAttribute("companyId", companyId);
+
+        return "redirect:/admin/company/read?companyId=" + companyId;
+    }
+
+
+    //본사 삭제
     @Operation(summary = "관리자용 본사 삭제 처리", description = "본사를 삭제 처리 한다.")
     @GetMapping("/company/delete")
     public String delete(Integer companyId, RedirectAttributes redirectAttributes) {
         companyService.delete(companyId);
         redirectAttributes.addFlashAttribute("message", "해당 본사 삭제가 완료되었습니다.");
         return "redirect:/admin/company/list";
+    }
+
+
+
+    // ------------------ hotel ---------------------
+    //등록폼
+    @Operation(summary = "관리자용 호텔 등록 폼", description = "호텔 등록 페이지로 이동한다.")
+    @GetMapping("/hotel/register")
+    public String registerForm(Model model) {
+        //검증처리가 필요하면 빈 companyDTO를 생성해서 전달한다.
+        List<CompanyDTO> companyDTOS = hotelService.getAllCompany();
+        model.addAttribute("companyDTOS", companyDTOS);
+        model.addAttribute("companyDTO", new CompanyDTO());
+
+        return "/manager/hotel/register";
+    }
+
+    //등록처리
+    @Operation(summary = "관리자용 호텔 등록 처리", description = "호텔을 등록 처리한다.")
+    @PostMapping("/hotel/register")
+    public String registerProc(@ModelAttribute HotelDTO hotelDTO,
+                               List<MultipartFile> imageFiles,
+                               RedirectAttributes redirectAttributes,
+                               Principal principal) {
+        log.info("본사 등록 진입");
+
+        // 현재 로그인한 사용자의 이메일 가져오기
+        String userEmail = principal.getName();
+
+        // 호텔 등록 서비스 호출 (memberEmail 전달)
+        hotelService.register(hotelDTO, imageFiles, userEmail);
+
+        // 등록된 지사의 companyId 가져오기
+        Integer companyId = hotelDTO.getCompanyId();  // hotelDTO에 companyId가 포함되어 있다고 가정
+
+        // 성공 메시지와 함께 companyId도 전달
+        redirectAttributes.addFlashAttribute("message", "지사 등록이 완료되었습니다.");
+        redirectAttributes.addFlashAttribute("companyId", companyId); // companyId 전달
+
+//        return "redirect:/manager/hotel/list?companyId=" + companyId;  // companyId를 쿼리 파라미터로 전달
+        return "redirect:/admin/hotel/list";  // 목록으로 이동
     }
 
 
@@ -283,11 +345,6 @@ public class AdminCompanyHotelController {
             model.addAttribute("keyword", keyword);
             model.addAttribute("searchType", searchType);
 
-            // 회사 목록 추가
-            List<CompanyDTO> companyDTOS = hotelService.getAllCompany();
-            model.addAttribute("companyDTOS", companyDTOS);
-            model.addAttribute("companyDTO", new CompanyDTO());
-
             return "/manager/hotel/list"; // 뷰 경로
         } catch (AuthenticationCredentialsNotFoundException e) {
             redirectAttributes.addFlashAttribute("message", "로그인이 필요합니다.");
@@ -343,6 +400,31 @@ public class AdminCompanyHotelController {
             return "redirect:/admin/hotel/list";
         }
     }
+
+    //수정폼
+    @Operation(summary = "관리자용 호텔 수정폼", description = "hotelId에 맞는 호텔 수정폼 페이지로 이동한다.")
+    @GetMapping("/hotel/update")
+    public String updateForm(Integer hotelId, Model model) {
+        HotelDTO hotelDTO = hotelService.read(hotelId);
+        List<CompanyDTO> companyDTOS = hotelService.getMyCompany();
+        model.addAttribute("companyDTOS", companyDTOS);
+        model.addAttribute("companyDTO", new CompanyDTO());
+        model.addAttribute("hotelDTO", hotelDTO);
+        return "/manager/hotel/update";
+    }
+    //수정처리
+    @Operation(summary = "관리자용 호텔 수정 처리", description = "hotelId에 맞는 호텔 수정 처리한다.")
+    @PostMapping("/hotel/update")
+    public String updateProc(HotelDTO hotelDTO, List<MultipartFile> newImageFiles, RedirectAttributes redirectAttributes) {
+        hotelService.update(hotelDTO, newImageFiles);
+        redirectAttributes.addFlashAttribute("message", "지사 수정이 완료되었습니다.");
+
+        Integer hotelId = hotelDTO.getHotelId();
+        redirectAttributes.addFlashAttribute("hotelId", hotelId);
+
+        return "redirect:/admin/hotel/read?hotelId=" + hotelId;
+    }
+
 
 
 

@@ -51,8 +51,22 @@ public class HotelService {
     private final HotelRepository hotelRepository;
 
 
-    //호텔 본사 불러오는
+    //호텔 본사 전부(관리자용)
     public List<CompanyDTO> getAllCompany() {
+
+        // company 조회
+        List<Company> companies = companyRepository.findAll();
+
+        // Company -> CompanyDTO 변환
+        List<CompanyDTO> companyDTOS = companies.stream()
+                .map(a -> new CompanyDTO(a.getCompanyId(), a.getCompanyName()))
+                .collect(Collectors.toList());
+
+        return companyDTOS;
+    }
+
+    //자신것만 호텔 본사(호텔장)
+    public List<CompanyDTO> getMyCompany() {
         // 현재 로그인한 회원의 memberEmail을 가져오기
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String memberEmail = authentication.getName(); // 현재 로그인한 회원의 이메일
@@ -80,15 +94,23 @@ public class HotelService {
 
 
     //회원목록 불러오는
-    public List<MemberDTO> getAllManagers() {
+    /*public List<MemberDTO> getAllManagers() {
+        // 1. 모든 CHIEF 역할을 가진 회원 목록 조회
         List<Member> members = memberRepository.findByRole(Role.MANAGER);
 
+        // 2. 이미 company 테이블에 등록된 memberId 목록 가져오기
+        List<Integer> hotelMembersIds = hotelRepository.findAll().stream()
+                .map(hotel -> hotel.getMember().getMemberId()) // hotel에 해당하는 memberId 추출
+                .collect(Collectors.toList());
+
+        // 3. hotel에 등록되지 않은 회원만 필터링
         List<MemberDTO> memberDTOS = members.stream()
+                .filter(member -> !hotelMembersIds.contains(member.getMemberId())) // company에 없는 memberId만 필터링
                 .map(a -> new MemberDTO(a.getMemberId(), a.getMemberEmail(), a.getMemberName()))
                 .collect(Collectors.toList());
 
         return memberDTOS;
-    }
+    }*/
 
 
     //등록
@@ -160,7 +182,10 @@ public class HotelService {
             String keywordLike = "%" + keyword + "%";  // LIKE 조건을 위한 검색어 처리
 
             // 검색 타입에 따라 조건을 추가
-            if ("name".equals(searchType)) {
+            if ("company".equals(searchType)) {
+                // 본사명 검색
+                hotels = hotelRepository.findByCompany_CompanyNameLike(keywordLike, pageable);
+            } else if ("name".equals(searchType)) {
                 // 호텔명 검색
                 hotels = hotelRepository.findByHotelNameLike(keywordLike, pageable);
             } else if ("location".equals(searchType)) {

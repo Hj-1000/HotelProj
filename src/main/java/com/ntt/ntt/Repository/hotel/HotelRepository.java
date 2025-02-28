@@ -14,6 +14,11 @@ import java.util.List;
 @Repository
 public interface HotelRepository extends JpaRepository<Hotel, Integer> {
 
+    // 회사명에 해당하는 호텔 조회 (이름 포함)
+    @Query("SELECT h FROM Hotel h JOIN h.company c WHERE c.companyName LIKE %:companyName%")
+    Page<Hotel> findByCompany_CompanyNameLike(@Param("companyName") String companyName, Pageable pageable);
+
+
     // 특정회사 X
     Page<Hotel> findByHotelNameLike (String keyword, Pageable pageable); //호텔이름검색
     Page<Hotel> findByHotelAddressLike (String keyword, Pageable pageable); //호텔주소검색
