@@ -284,6 +284,13 @@ public class RoomService {
 
         RoomDTO roomDTO = modelMapper.map(room, RoomDTO.class);
 
+        // 가격 포맷팅
+        if (room.getRoomPrice() != null) {
+            roomDTO.setFormattedRoomPrice(String.format("%,d KRW", room.getRoomPrice()));
+        } else {
+            roomDTO.setFormattedRoomPrice("가격 미정");
+        }
+
         List<ImageDTO> imageDTOList = new ArrayList<>();
         String bannerImagePath = "";  // 배너 이미지 기본값
 

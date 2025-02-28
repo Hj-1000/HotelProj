@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en"
       xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>객실 상세보기</title>
@@ -14,6 +15,52 @@
 <body>
 <div th:replace="~{fragments/header::header}"></div>
 <div layout:fragment="content">
+
+    <!-- 예약 모달 -->
+    <div class="modal fade" id="reservationModal" tabindex="-1" aria-labelledby="reservationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="reservationModalLabel">호텔 예약하기</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="reservationForm">
+                        <input type="hidden" id="roomId" name="roomId">
+                        <div class="mb-3">
+                            <label for="reservationCount" class="form-label">
+                                예약 인원 <span id="recommendedCountText"></span>
+                            </label>
+                            <select class="form-control" id="reservationCount" name="count" required>
+                                <option value="1">1명</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="checkInDate" class="form-label">체크인 날짜</label>
+                            <input type="datetime-local" class="form-control" id="checkInDate" name="checkInDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="checkOutDate" class="form-label">체크아웃 날짜</label>
+                            <input type="datetime-local" class="form-control" id="checkOutDate" name="checkOutDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="dayCount" class="form-label">숙박일</label>
+                            <input type="text" class="form-control" id="dayCount" name="dayCount" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="totalPrice" class="form-label">총 금액</label>
+                            <input type="text" class="form-control" id="totalPrice" name="totalPrice" readonly>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="button" id="confirmReservation" class="btn btn-primary">예약하기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 객실 배너 이미지 -->
     <section class="room-banner">
         <div class="banner-container">
@@ -24,14 +71,25 @@
     </section>
     <!-- 예약 정보 및 버튼 -->
     <section class="reservation-info-wrapper">
-        <div class="reservation-info d-flex justify-content-between align-items-center">
+        <div class="room-card reservation-info d-flex justify-content-between align-items-center"
+             th:data-room-id="${room.roomId}"
+             th:data-stay-start="${room.stayStart}"
+             th:data-stay-end="${room.stayEnd}">
             <div>
                 <p class="period"><strong>예약 기간:</strong> <span th:text="${room.reservationStart}"></span> ~ <span th:text="${room.reservationEnd}"></span></p>
                 <p class="period"><strong>숙박 기간:</strong> <span th:text="${room.stayStart}"></span> ~ <span th:text="${room.stayEnd}"></span></p>
             </div>
             <div>
-                <button class="btn btn-outline-dark"><i class="fas fa-share"></i> 공유하기</button>
-                <button class="btn btn-dark"><i class="fas fa-bed"></i> 예약하기</button>
+                <div th:data-room-id="${room.roomId}">
+                    <button class="btn btn-outline-dark"><i class="fas fa-share"></i> 공유하기</button>
+                    <button class="btn btn-dark btn-book" data-room-id="${room.roomId}" data-bs-toggle="modal" data-bs-target="#reservationModal">
+                        <i class="fas fa-bed"></i> 예약하기
+                    </button>
+                </div>
+                <span id="roomType" th:data-room-type="${room.roomType}" style="display: none;"></span>
+
+
+                <input type="hidden" id="roomPrice" th:value="${room.formattedRoomPrice}">
             </div>
         </div>
     </section>
@@ -65,21 +123,40 @@
         </section>
 
         <!-- 유의사항 -->
-        <section class="notice">
-            <h2 class="mb-3">유의사항</h2>
-            <ul class="list-group">
-                <li class="list-group-item">본 상품은 세금 및 봉사료가 포함되어 있습니다.</li>
-                <li class="list-group-item">체크인 3PM / 체크아웃 12PM 입니다.</li>
-                <li class="list-group-item">취소 정책은 투숙일 1일 전까지 무료 변경 및 취소 가능합니다.</li>
-                <li class="list-group-item">호텔 사정에 따라 조기 마감 될 수 있습니다.</li>
-                <li class="list-group-item">투숙 기간 24시간 주차 무료입니다.</li>
-                <li class="list-group-item">메리어트 본보이 멤버십 적립 가능합니다.</li>
-                <li class="list-group-item">콜렉션&리워드 가입 시 1박에 한하여 사전 가능 합니다.</li>
-                <li class="list-group-item">호텔 수요에 따라 금액 변동이 있을 수 있습니다.</li>
+        <section class="notice mb-5 p-4 border rounded">
+            <h3 class="mb-3 fw-bold">유의사항</h3>
+            <ul class="list-unstyled">
+                <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> 상기 요금에는 세금 및 봉사료가 포함되어 있습니다.</li>
+                <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> 요금은 상시 변경되며, 예약 시점의 요금과 상이할 수 있습니다.</li>
+                <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> 체크인 날짜 기준 1일 전까지 무료 취소 가능하며, 이후 변경 및 No-Show 시 1박 요금이 부과됩니다.</li>
+                <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> 주차장 이용 시 입차 기준 15,000원(24시간)의 주차료가 발생합니다.</li>
+                <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> 호텔 수요에 따라 금액 변동이 있을 수 있습니다.</li>
+                <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> 메리어트 본보이 멤버십 적립 가능합니다.</li>
+                <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> 클럽조선 1만원 할인권과 VIP 등급 할인 적용 가능합니다.</li>
+                <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> 호텔 사정에 따라 조기 마감될 수 있습니다.</li>
             </ul>
         </section>
+
+        <!-- 로그인된 상태 -->
+        <div sec:authorize="isAuthenticated()">
+            <script th:inline="javascript">
+                var isLoggedIn = true;
+                console.log("isLoggedIn:", isLoggedIn);
+            </script>
+        </div>
+
+        <!-- 로그인되지 않은 상태 -->
+        <div sec:authorize="!isAuthenticated()">
+            <script th:inline="javascript">
+                var isLoggedIn = false;
+                console.log("isLoggedIn:", isLoggedIn);
+            </script>
+        </div>
     </div>
+
     <script>
+
+        /* 스크롤 함수 */
         document.addEventListener("DOMContentLoaded", function () {
             const reservationInfo = document.querySelector(".reservation-info-wrapper");
 
@@ -90,6 +167,378 @@
                     reservationInfo.classList.remove("scrolled");
                 }
             });
+        });
+
+        /* 체크인 체크아웃 기본값 설정 */
+        document.addEventListener("DOMContentLoaded", function () {
+            function getFormattedDateTime(offsetDays = 0) {
+                let now = new Date();
+                now.setDate(now.getDate() + offsetDays);
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); // 시간대 보정
+                return now.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:mm" 형식
+            }
+
+            let checkInInput = document.getElementById("checkInDate");
+            let checkOutInput = document.getElementById("checkOutDate");
+
+            if (checkInInput) {
+                checkInInput.value = getFormattedDateTime();
+            }
+            if (checkOutInput) {
+                checkOutInput.value = getFormattedDateTime(1); // 하루 뒤 기본값
+            }
+
+            checkInInput.addEventListener("change", function () {
+                let checkInDate = new Date(checkInInput.value);
+                let minCheckOutDate = new Date(checkInDate);
+                minCheckOutDate.setDate(minCheckOutDate.getDate() + 1);
+                checkOutInput.min = minCheckOutDate.toISOString().slice(0, 16);
+            });
+        });
+
+        let reservationModal;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            reservationModal = new bootstrap.Modal(document.getElementById('reservationModal')); // 모달 초기화
+            updateRoomReservationStatus(); // 방 예약 상태 업데이트
+
+            // 체크인 & 체크아웃 날짜 변경 시 숙박일과 총 비용 계산
+            const checkInInput = document.getElementById("checkInDate");
+            const checkOutInput = document.getElementById("checkOutDate");
+
+            checkInInput.addEventListener("change", updateCheckOutMinDate);
+            checkOutInput.addEventListener("change", calculateStayAndPrice);
+        });
+
+        /* URL에서 roomID 가져오기 */
+        function getRoomIdFromURL() {
+            const pathSegments = window.location.pathname.split("/");
+            return pathSegments[pathSegments.length - 1];
+        }
+
+        /* 버튼 클릭시  로그인 , 비로그인 예외처리 및 버튼 함수*/
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll('.btn-book').forEach(button => {
+                button.addEventListener("click", function (e) {
+                    if (!isLoggedIn) {
+                        alert("로그인이 필요합니다.");
+                        window.location.href = "/login";
+                        return;
+                    }
+
+                    let roomCard = button.closest(".room-card");
+                    if (!roomCard) {
+                        console.error("Error: `roomCard` element not found.");
+                        return;
+                    }
+
+                    //  URL에서 roomId 가져오기
+                    let roomId = getRoomIdFromURL();
+                    let stayStart = roomCard.dataset.stayStart;
+                    let stayEnd = roomCard.dataset.stayEnd;
+                    let roomPriceElement = document.getElementById("roomPrice");
+                    let roomPrice = roomPriceElement ? roomPriceElement.value : null;
+
+                    // roomId가 유효한지 확인 후 진행
+                    if (!roomId || isNaN(roomId)) {
+                        console.error("Error: Room ID is invalid. Value:", roomId);
+                        alert("객실 정보를 불러올 수 없습니다.");
+                        return;
+                    }
+
+                    if (!stayStart || !stayEnd) {
+                        console.error("Error: Stay start or end date is missing.");
+                        alert("숙박 가능 날짜 정보를 불러올 수 없습니다.");
+                        return;
+                    }
+
+                    console.log(" Room ID:", roomId);
+                    console.log(" Check-in available from:", stayStart);
+                    console.log(" Check-out available until:", stayEnd);
+
+                    if (roomPrice) {
+                        document.getElementById("totalPrice").value = roomPrice + " KRW";
+                    } else {
+                        document.getElementById("totalPrice").value = "가격 미정";
+                    }
+
+                    const checkInInput = document.getElementById("checkInDate");
+                    const checkOutInput = document.getElementById("checkOutDate");
+                    const reservationCount = document.getElementById("reservationCount");
+                    const recommendedText = document.getElementById("recommendedCountText");
+
+                    checkInInput.min = stayStart;
+                    checkInInput.max = stayEnd;
+                    checkOutInput.min = stayStart;
+                    checkOutInput.max = stayEnd;
+
+                    checkInInput.removeEventListener("change", updateCheckOutMinDate);
+                    checkInInput.addEventListener("change", updateCheckOutMinDate);
+
+                    let maxPeople = getMaxPeopleByRoomType(roomType);
+                    let recommendedTextValue = getRecommendedTextByRoomType(roomType);
+
+                    reservationCount.innerHTML = ""; // 기존 옵션 제거
+
+                    for (let i = 1; i <= maxPeople; i++) {
+                        let option = document.createElement("option");
+                        option.value = i;
+                        option.text = `${i}명`;
+                        reservationCount.appendChild(option);
+                    }
+
+                    recommendedText.innerText = recommendedTextValue;
+
+                    //  모달에 roomId 설정
+                    document.getElementById("roomId").value = roomId;
+                    reservationModal.show();
+                });
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // roomType 요소 가져오기
+            const roomTypeElement = document.getElementById("roomType");
+
+            if (roomTypeElement) {
+                // data-room-type 속성에서 값 가져오기
+                const roomType = roomTypeElement.dataset.roomType;
+
+                console.log("roomType ->", roomType); // 콘솔에서 확인
+
+                if (roomType) {
+                    // 객실 타입에 따른 추천 인원 정보 가져오기
+                    const recommendedText = getRecommendedTextByRoomType(roomType);
+
+                    // recommendedCountText 요소가 존재하는지 확인 후 업데이트
+                    const recommendedTextElement = document.getElementById("recommendedCountText");
+                    if (recommendedTextElement) {
+                        recommendedTextElement.innerHTML = `<span style="color: orange; font-weight: bold;">${recommendedText}</span>`;
+                    } else {
+                        console.error("Element with ID 'recommendedCountText' not found.");
+                    }
+                } else {
+                    console.warn("roomType 값이 비어 있음!");
+                }
+            } else {
+                console.error("Element with ID 'roomType' not found.");
+            }
+        });
+
+
+
+        function getMaxPeopleByRoomType(roomType) {
+            const roomCapacity = {
+                "Single": 1,
+                "Double": 2,
+                "Suite": 4,
+                "Deluxe": 5,
+                "Family": 6
+            };
+            return roomCapacity[roomType] || 1;
+        }
+
+        function getRecommendedTextByRoomType(roomType) {
+            const recommendedTextMap = {
+                "Single": "(추천 인원 : 1명)",
+                "Double": "(추천 인원 : 1~2명)",
+                "Suite": "(추천 인원 : 2~4명)",
+                "Deluxe": "(추천 인원 : 4~5명)",
+                "Family": "(추천 인원 : 4~6명)"
+            };
+            return recommendedTextMap[roomType] || "";
+        }
+
+        // 체크인 날짜 변경 시 체크아웃 최소 날짜 설정
+        function updateCheckOutMinDate() {
+            const checkInInput = document.getElementById("checkInDate");
+            const checkOutInput = document.getElementById("checkOutDate");
+
+            let checkInDate = new Date(checkInInput.value);
+            if (!isNaN(checkInDate.getTime())) {
+                let minCheckOutDate = new Date(checkInDate);
+                minCheckOutDate.setDate(minCheckOutDate.getDate() + 1); // 최소 1박 이후 가능
+                let minCheckOutStr = minCheckOutDate.toISOString().slice(0, 16); // YYYY-MM-DDTHH:mm 형식
+
+                checkOutInput.min = minCheckOutStr;
+
+                // 체크아웃 날짜가 체크인 날짜보다 이전이면 자동 변경
+                let selectedCheckOutDate = new Date(checkOutInput.value);
+                if (selectedCheckOutDate < minCheckOutDate) {
+                    checkOutInput.value = minCheckOutStr;
+                }
+            }
+
+            calculateStayAndPrice(); // 숙박일 및 총 비용 계산
+        }
+
+        // 체크아웃 날짜 선택 시 체크인 이후인지 검증
+        function validateCheckOutDate() {
+            const checkInInput = document.getElementById("checkInDate");
+            const checkOutInput = document.getElementById("checkOutDate");
+
+            let checkInDate = new Date(checkInInput.value);
+            let checkOutDate = new Date(checkOutInput.value);
+
+            if (!isNaN(checkInDate.getTime()) && !isNaN(checkOutDate.getTime()) && checkOutDate <= checkInDate) {
+                let minCheckOutDate = new Date(checkInDate);
+                minCheckOutDate.setDate(minCheckOutDate.getDate() + 1);
+                checkOutInput.value = minCheckOutDate.toISOString().slice(0, 16);
+            }
+
+            calculateStayAndPrice(); // 숙박일 및 총 비용 계산
+        }
+
+        document.getElementById("checkInDate").addEventListener("change", updateCheckOutMinDate);
+        document.getElementById("checkOutDate").addEventListener("change", validateCheckOutDate);
+
+        // 페이지 로드 시 체크아웃 최소값 설정
+        updateCheckOutMinDate();
+
+        /* 체크인 & 체크아웃 날짜 변경 시 자동으로 숙박일과 총 금액 계산*/
+
+        function calculateStayAndPrice() {
+            const checkInInput = document.getElementById("checkInDate");
+            const checkOutInput = document.getElementById("checkOutDate");
+            const totalPriceInput = document.getElementById("totalPrice");
+            const dayCountInput = document.getElementById("dayCount");
+
+            const checkInDate = new Date(checkInInput.value);
+            const checkOutDate = new Date(checkOutInput.value);
+
+            if (!isNaN(checkInDate.getTime()) && !isNaN(checkOutDate.getTime()) && checkOutDate > checkInDate) {
+                const stayDays = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+                dayCountInput.value = `${stayDays}박 ${stayDays + 1}일`;
+
+                // 객실 가격 가져오기
+                let roomPriceElement = document.getElementById("roomPrice");
+                let roomPrice = roomPriceElement && roomPriceElement.value ? parseInt(roomPriceElement.value.replace(/[^\d]/g, ""), 10) : null;
+
+                if (!isNaN(roomPrice) && roomPrice !== null) {
+                    const totalPrice = roomPrice * stayDays;
+                    totalPriceInput.value = totalPrice.toLocaleString() + " KRW";
+                } else {
+                    totalPriceInput.value = "가격 미정";
+                }
+            } else {
+                dayCountInput.value = "";
+                totalPriceInput.value = "";
+            }
+        }
+
+        /* roomID 검증 */
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("confirmReservation").addEventListener("click", function () {
+                let roomId = parseInt(document.getElementById("roomId").value, 10);
+                let checkInDate = document.getElementById("checkInDate").value;
+                let checkOutDate = document.getElementById("checkOutDate").value;
+                let count = parseInt(document.getElementById("reservationCount").value, 10);
+
+                console.log("DEBUG: roomId =", roomId);
+                console.log("DEBUG: checkInDate =", checkInDate);
+                console.log("DEBUG: checkOutDate =", checkOutDate);
+                console.log("DEBUG: count =", count);
+
+                if (!roomId || !checkInDate || !checkOutDate || !count) {
+                    alert("예약 정보를 모두 입력해주세요.");
+                    return;
+                }
+
+                fetch("/reservation/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        roomId: roomId,
+                        checkInDate: checkInDate,
+                        checkOutDate: checkOutDate,
+                        count: count
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("예약이 완료되었습니다!");
+                            location.reload();
+                        } else {
+                            alert("예약 실패: " + data.message);
+                        }
+                    })
+                    .catch(error => console.error("예약 요청 중 오류 발생:", error));
+            });
+        });
+
+        // 예약 상태 업데이트 함수
+        function updateRoomReservationStatus(parentElement = document) {
+            const today = new Date();
+
+            parentElement.querySelectorAll('.room-card').forEach(roomCard => {
+                const stayEnd = roomCard.dataset.stayEnd;
+
+                // stayEnd 값이 유효한지 확인
+                if (!stayEnd) {
+                    console.warn(`Invalid stayEnd for roomCard:`, roomCard);
+                    return;
+                }
+
+                const reservationEndDate = new Date(stayEnd);
+
+                // 예약기간이 지난 경우에만 표시
+                if (reservationEndDate < today) {
+                    const overlay = roomCard.querySelector('.sold-out-overlay');
+                    if (overlay) {
+                        overlay.style.display = 'flex';
+                    }
+
+                    // 예약 불가 버튼 처리
+                    const button = roomCard.querySelector('.btn-book');
+                    button.textContent = '예약 불가';
+                    button.disabled = true;
+                    button.classList.remove('btn-dark');
+                    button.classList.add('btn-danger', 'text-bold');
+                }
+            });
+        }
+
+        // 모달 닫힐 때 강제 초기화
+        document.getElementById('reservationModal').addEventListener('hidden.bs.modal', function () {
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+                backdrop.remove();
+            }
+            document.body.classList.remove('modal-open');
+            document.body.style.removeProperty('overflow');
+            document.body.style.removeProperty('padding-right');
+        });
+
+        /* aria-hidden 제거 코드 */
+        document.addEventListener("DOMContentLoaded", function () {
+            var reservationModal = document.getElementById("reservationModal");
+
+            // 모달 열릴 때 `aria-hidden` 제거
+            reservationModal.addEventListener("shown.bs.modal", function () {
+                console.log("Modal opened - removing aria-hidden");
+                reservationModal.removeAttribute("aria-hidden");
+
+                // 모달 내부 포커스를 강제 설정 (접근성 문제 해결)
+                setTimeout(() => {
+                    let focusableElement = reservationModal.querySelector("input, button, select, textarea");
+                    if (focusableElement) {
+                        focusableElement.focus();
+                    }
+                }, 100);
+            });
+
+            // 모달 닫힐 때 `aria-hidden` 추가
+            reservationModal.addEventListener("hidden.bs.modal", function () {
+                console.log("Modal closed - setting aria-hidden=true");
+                reservationModal.setAttribute("aria-hidden", "true");
+            });
+
+            // Bootstrap 모달 초기화 (이전 객체 중복 방지)
+            let modalInstance = bootstrap.Modal.getInstance(reservationModal);
+            if (!modalInstance) {
+                new bootstrap.Modal(reservationModal);
+            }
         });
     </script>
 </div>
