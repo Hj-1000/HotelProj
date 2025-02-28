@@ -54,7 +54,6 @@ public interface HotelRepository extends JpaRepository<Hotel, Integer> {
 
     void deleteByMember(Member member);
 
-    List<Hotel> findByHotelEmail(String email);
 
     @Query("SELECT h FROM Hotel h WHERE h.member.memberId = :memberId")
     Page<Hotel> findByMember_MemberId(@Param("memberId") Integer memberId, Pageable pageable);
