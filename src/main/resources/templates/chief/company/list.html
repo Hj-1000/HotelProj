@@ -79,11 +79,31 @@
     <div class="container-fluid mt-4">
         <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
         <a href="#" class="custom-link"><span>호텔관리</span></a> /
+        <a href="/admin/company/list" class="custom-link"><span>호텔본사관리</span></a>
         <a href="/chief/company/list" class="custom-link"><span>호텔본사관리</span></a>
         <h2 class="mb-3">호텔 본사 관리</h2>
         <!-- 검색 영역 -->
         <div class="card p-4 mb-4">
-            <form action="/chief/company/list" method="get">
+            <form th:if="${#authorization.expression('hasRole(''ADMIN'')')}" action="/admin/company/list" method="get">
+                <div class="row g-3 align-items-center">
+                    <h5 class="card-title">본사 찾기</h5>
+                    <div class="col-md-6">
+                        <select name="searchType" class="form-select">
+                            <option value="name" th:selected="${searchType == 'name'}">회사명</option>
+                            <option value="manager" th:selected="${searchType == 'manager'}">관리자명</option>
+                            <option value="both" th:selected="${searchType == 'both'}">회사명 + 관리자명</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <input type="text" name="keyword" class="form-control" placeholder="검색어를 입력하세요">
+                    </div>
+                </div>
+                <!-- 조회 버튼 -->
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary w-25" style="background-color: black">조회</button>
+                </div>
+            </form>
+            <form th:if="${#authorization.expression('hasRole(''CHIEF'')')}" action="/chief/company/list" method="get">
                 <div class="row g-3 align-items-center">
                     <h5 class="card-title">본사 찾기</h5>
                     <div class="col-md-6">
@@ -147,12 +167,13 @@
                             <td th:text="${data.hotelCount}" class="align-middle text-center">2</td>
                             <!--<td class="align-middle text-center">2</td>-->
                             <td class="align-middle text-center">
+                                <!--admin-->
                                 <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/company/read(companyId=${data.companyId})}" class="btn btn-info btn-sm">보기</a>
+                                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/company/update(companyId=${data.companyId})}"  class="btn btn-warning btn-sm">수정</a>
+                                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/company/delete(companyId=${data.companyId})}" style="text-decoration: none; color: black" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')"><i class="bi bi-trash"></i></a>
+                                <!--chief-->
                                 <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/company/read(companyId=${data.companyId})}" class="btn btn-info btn-sm">보기</a>
                                 <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/company/update(companyId=${data.companyId})}"  class="btn btn-warning btn-sm">수정</a>
-
-                                <!--삭제 버튼 누르면 해당 본사 삭제됨-->
-                                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/company/delete(companyId=${data.companyId})}" style="text-decoration: none; color: black" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')"><i class="bi bi-trash"></i></a>
                                 <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/company/delete(companyId=${data.companyId})}" style="text-decoration: none; color: black" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')"><i class="bi bi-trash"></i></a>
                             </td>
                         </tr>

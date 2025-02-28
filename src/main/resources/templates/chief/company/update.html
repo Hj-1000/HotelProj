@@ -20,6 +20,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <script th:src="@{/js/company.js}"></script>
+    <script th:src="@{/js/companyUpdate.js}"></script>
 
 
     <script th:inline="javascript">
@@ -42,6 +43,85 @@
 
         })
 
+        document.addEventListener('DOMContentLoaded', function() {
+            let isManagerChanged = false;
+            let companyManagerInput = document.getElementById("companyManager");
+            let memberIdInput = document.getElementById("memberId");
+
+            // 페이지 로드 시 초기값 저장
+            let initialManagerValue = companyManagerInput.value;
+            let initialMemberId = memberIdInput.value;
+
+            function toggleManagerSelect() {
+                let selectBox = document.getElementById("companyManagerSel");
+                let changeButton = document.getElementById("changeManagerBtn");
+                let saveManagerBtn = document.querySelector(".saveManagerBtn");
+
+                if (!isManagerChanged) {
+                    // 셀렉트 박스를 보이게 하고, 입력 필드는 숨깁니다.
+                    selectBox.style.display = "block";
+                    companyManagerInput.style.display = "none";
+                    changeButton.classList.remove("btn-light");
+                    changeButton.classList.add("btn-danger");
+                    changeButton.textContent = "취소"; // 버튼 텍스트를 "취소"로 변경
+                    saveManagerBtn.style.display = "inline-block";
+                    isManagerChanged = true;
+                } else {
+                    // 셀렉트 박스를 숨기고, 입력 필드를 다시 보이게 하며 초기값으로 복원합니다.
+                    selectBox.style.display = "none";
+                    companyManagerInput.style.display = "block";
+                    changeButton.classList.remove("btn-danger");
+                    changeButton.classList.add("btn-light");
+                    changeButton.textContent = "변경"; // 버튼 텍스트를 "변경"으로 복원
+                    saveManagerBtn.style.display = "none";
+
+                    // 초기값 복원 (memberId도 함께)
+                    companyManagerInput.value = initialManagerValue;
+                    memberIdInput.value = initialMemberId;
+                    isManagerChanged = false;
+                }
+            }
+            window.toggleManagerSelect = toggleManagerSelect;
+
+            function saveManager() {
+                let selectBox = document.getElementById("companyManagerSel");
+                let selectedOption = selectBox.options[selectBox.selectedIndex];
+                let selectedMemberName = selectedOption.value;
+                let selectedMemberId = selectedOption.getAttribute("data-id");
+
+                // 선택한 값을 입력 필드와 hidden input에 반영
+                companyManagerInput.value = selectedMemberName;
+                memberIdInput.value = selectedMemberId;
+
+                // 셀렉트 박스를 숨기고, 입력 필드를 다시 보이게 합니다.
+                selectBox.style.display = "none";
+                companyManagerInput.style.display = "block";
+
+                // 변경 완료 후 버튼 텍스트를 "초기"로 변경
+                let changeButton = document.getElementById("changeManagerBtn");
+                changeButton.classList.remove("btn-danger");
+                changeButton.classList.add("btn-light");
+                changeButton.textContent = "재설정";  // 변경 완료 후 버튼을 "초기"로 변경
+
+                let saveManagerBtn = document.querySelector(".saveManagerBtn");
+                saveManagerBtn.style.display = "none";
+            }
+            window.saveManager = saveManager;
+
+            // "초기" 버튼 클릭 시 다시 "변경" 버튼으로 돌아가게 하기
+            document.getElementById("changeManagerBtn").addEventListener("click", function() {
+                let changeButton = document.getElementById("changeManagerBtn");
+                if (changeButton.textContent === "초기") {
+                    // "초기" 버튼을 클릭하면 다시 "변경" 버튼으로 바꿔줍니다.
+                    changeButton.textContent = "변경";
+                    // 버튼 클릭 시 초기값 복원
+                    companyManagerInput.value = initialManagerValue;
+                    memberIdInput.value = initialMemberId;
+                }
+            });
+        });
+
+
 
     </script>
 
@@ -51,13 +131,93 @@
     <div class="container-fluid mt-4">
         <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
         <a href="#" class="custom-link"><span>호텔관리</span></a> /
-        <a href="/chief/company/list" class="custom-link"><span>호텔본사관리</span></a> /
-        <a th:href="@{/chief/company/update(companyId=${companyDTO.companyId})}" class="custom-link">
+        <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}"  href="/admin/company/list" class="custom-link"><span>호텔본사관리</span></a>
+        <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="/chief/company/list" class="custom-link"><span>호텔본사관리</span></a> /
+        <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/company/update(companyId=${companyDTO.companyId})}" class="custom-link">
+            <span>본사수정</span>
+        </a>>
+        <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/company/update(companyId=${companyDTO.companyId})}" class="custom-link">
             <span>본사수정</span>
         </a>
-        <h2 class="mb-3">본사 수정</h2>
+
         <!-- 폼 -->
-        <div class="card p-4 mb-4">
+        <div th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="card p-4 mb-4">
+
+            <h2 >본사 수정</h2>
+
+            <div class="row g-3 align-items-center">
+                <form action="/admin/company/update" method="post" enctype="multipart/form-data" th:object="${companyDTO}">
+                    <input type="hidden" class="form-control companyId" id="companyId" name="companyId" th:field="*{companyId}">
+
+                    <div class="mb-3 mt-3">
+                        <label for="companyName" class="form-label">본사명:</label>
+                        <input type="text" class="form-control" id="companyName" name="companyName" th:field="*{companyName}">
+                    </div>
+
+                    <div class="mb-3 mt-3">
+                        <label for="companyManager" class="form-label">담당자: </label>
+
+                        <!-- 변경 버튼 (id 추가) -->
+                        <button id="changeManagerBtn" type="button" class="btn btn-sm btn-light" onclick="toggleManagerSelect()">변경</button>
+
+                        <!-- 변경 완료 버튼 (초기에 숨김) -->
+                        <button type="button" class="btn btn-sm btn-success saveManagerBtn" style="display: none;" onclick="saveManager()">변경 완료</button>
+
+                        <!-- 초기에 보이는 현재 관리자명 -->
+                        <input type="text" class="form-control" id="companyManager" name="companyManager" th:field="*{companyManager}" readonly>
+
+                        <!-- 호텔장 선택 드롭다운 (초기에 숨김) -->
+                        <select id="companyManagerSel" name="companyManagerSel" class="form-select" style="display: none;">
+                            <th:block th:each="memberDTO : ${memberDTOS}">
+                                <option th:value="${memberDTO.memberName}" th:text="${memberDTO.memberName}" th:data-id="${memberDTO.memberId}">김호텔장</option>
+                            </th:block>
+                            <th:block th:if="${#lists.isEmpty(memberDTOS)}">
+                                <option value="">표시할 호텔장이 없습니다. 먼저 호텔장 가입 후 등록해주세요.</option>
+                            </th:block>
+                        </select>
+
+                        <!-- 선택된 담당자의 memberId를 저장할 숨겨진 input -->
+                        <input type="hidden" id="memberId" name="memberId" th:field="*{memberId}" required>
+
+                    </div>
+
+                    <!-- 기존 이미지 표시 및 삭제 버튼 추가 -->
+                    <div class="oldImageFiles" th:each="img, iterStat : ${companyDTO.companyImgDTOList}">
+                        <label>기존 이미지: (수정을 원한다면 기존 이미지를 삭제해주세요)</label>
+                        <div>
+                            <img th:src="@{'/upload/' + ${img.imagePath}}" alt="old" width="100" id="image-{{iterStat.index}}">
+                            <!-- 이미지 삭제 버튼, 이미지 아이디를 전달 -->
+                            <button type="button" class="imgDelBtn" th:onclick="'deleteOldImage(' + ${img.imageId} + ')'" ><i class="bi bi-trash"></i></button>
+                        </div>
+                    </div>
+
+
+                    <!-- 새 이미지 업로드 및 미리보기 -->
+                    <div class="newImageFiles">
+                        <label for="newImageFiles">새 이미지:</label>
+                        <input type="file" id="newImageFiles" name="newImageFiles" multiple accept="image/*" onchange="validateImage(event)">
+                        <small>이미지 파일(PNG, JPG, GIF, BMP, JFIF, WEBP)만 업로드 가능합니다. 1장만 선택 가능합니다.</small>
+                    </div>
+
+                    <!-- 미리보기 이미지 표시 -->
+                    <div id="imagePreviewContainer">
+                        <!-- 미리보기가 여기 나타날 것입니다 -->
+                    </div>
+
+                    <div style="text-align: right">
+                        <a class="btn btn-danger" th:href="@{/chief/company/delete(companyId=${companyDTO.companyId})}"><i class="bi bi-trash"></i></a>
+                        <button type="submit" class="btn btn-primary">등록</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+        <!-- 폼 -->
+        <div th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="card p-4 mb-4">
+
+            <h2 >본사 수정</h2>
+
             <div class="row g-3 align-items-center">
                 <form action="/chief/company/update" method="post" enctype="multipart/form-data" th:object="${companyDTO}">
                     <input type="hidden" class="form-control companyId" id="companyId" name="companyId" th:field="*{companyId}">
@@ -68,9 +228,30 @@
                     </div>
 
                     <div class="mb-3 mt-3">
-                        <!--수정은 관리자명 입력 변경 가능-->
-                        <label for="companyManager" class="form-label">본사관리자명:</label>
-                        <input type="text" class="form-control" id="companyManager" name="companyManager" th:field="*{companyManager}">
+                        <label for="companyManager" class="form-label">담당자: </label>
+
+                        <!-- 변경 버튼 (id 추가) -->
+                        <button id="changeManagerBtn" type="button" class="btn btn-sm btn-light" onclick="toggleManagerSelect()">변경</button>
+
+                        <!-- 변경 완료 버튼 (초기에 숨김) -->
+                        <button type="button" class="btn btn-sm btn-success saveManagerBtn" style="display: none;" onclick="saveManager()">변경 완료</button>
+
+                        <!-- 초기에 보이는 현재 관리자명 -->
+                        <input type="text" class="form-control" id="companyManager" name="companyManager" th:field="*{companyManager}" readonly>
+
+                        <!-- 호텔장 선택 드롭다운 (초기에 숨김) -->
+                        <select id="companyManagerSel" name="companyManagerSel" class="form-select" style="display: none;">
+                            <th:block th:each="memberDTO : ${memberDTOS}">
+                                <option th:value="${memberDTO.memberName}" th:text="${memberDTO.memberName}" th:data-id="${memberDTO.memberId}">김호텔장</option>
+                            </th:block>
+                            <th:block th:if="${#lists.isEmpty(memberDTOS)}">
+                                <option value="">표시할 호텔장이 없습니다. 먼저 호텔장 가입 후 등록해주세요.</option>
+                            </th:block>
+                        </select>
+
+                        <!-- 선택된 담당자의 memberId를 저장할 숨겨진 input -->
+                        <input type="hidden" id="memberId" name="memberId" th:field="*{memberId}" required>
+
                     </div>
 
                     <!-- 기존 이미지 표시 및 삭제 버튼 추가 -->

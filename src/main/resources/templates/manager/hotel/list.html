@@ -71,13 +71,38 @@
     <div class="container-fluid mt-4">
         <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
         <a href="#" class="custom-link"><span>호텔관리</span></a> /
-        <a href="/chief/hotel/list" class="custom-link">
-            <span>호텔지사관리</span>
-        </a>
+        <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/admin/hotel/list" class="custom-link"><span>호텔지사관리</span></a>
+        <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="/chief/hotel/list" class="custom-link"><span>호텔지사관리</span></a>
         <h2 class="mb-3">호텔 지사 관리</h2>
 
         <!-- 검색 영역 -->
-        <div class="card p-4 mb-4">
+        <div th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="card p-4 mb-4">
+            <form action="/admin/hotel/list" method="get">
+                <!--<input type="hidden" name="companyId" th:value="${companyId}">-->
+                <div class="row g-3 align-items-center">
+                    <h5 class="card-title">지사 찾기</h5>
+                    <div class="col-md-6">
+                        <select name="searchType" class="form-select">
+                            <option value="company" th:selected="${searchType == 'company'}">본사명</option>
+                            <option value="name" th:selected="${searchType == 'name'}">지사명</option>
+                            <option value="location" th:selected="${searchType == 'location'}">지역</option>
+                            <option value="address" th:selected="${searchType == 'address'}">주소</option>
+                            <option value="rating" th:selected="${searchType == 'rating'}">별점</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <input type="text" name="keyword" class="form-control" placeholder="검색어를 입력하세요">
+                    </div>
+                </div>
+                <!-- 조회 버튼 -->
+                <div class="text-center mt-4">
+                    <!--<button type="submit" class="btn btn-dark w-25" th:formaction="@{ /manager/hotel/list(companyId=${companyId}, searchType=${searchType}, keyword=${keyword}) }">조회</button>-->
+                    <button type="submit" class="btn btn-dark w-25">조회</button>
+                </div>
+            </form>
+        </div>
+
+        <div th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="card p-4 mb-4">
             <form action="/chief/hotel/list" method="get">
                 <!--<input type="hidden" name="companyId" th:value="${companyId}">-->
                 <div class="row g-3 align-items-center">
@@ -153,10 +178,14 @@
                             <!--<td class="align-middle text-center">별점</td>--> <!-- 별점은 나중에 -->
                             <td class="align-middle text-center">
                                 <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/hotel/read(hotelId=${data.hotelId})}" class="btn btn-info btn-sm">보기</a>
+                                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/hotel/update(hotelId=${data.hotelId})}"  class="btn btn-warning btn-sm">수정</a>
+                                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/chief/hotel/delete(hotelId=${data.hotelId})}" style="text-decoration: none; color: black" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')"><i class="bi bi-trash"></i></a>
+
                                 <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/hotel/read(hotelId=${data.hotelId})}" class="btn btn-info btn-sm">보기</a>
-                                <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" th:href="@{/manager/hotel/read(hotelId=${data.hotelId})}" class="btn btn-info btn-sm">보기</a>
                                 <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/hotel/update(hotelId=${data.hotelId})}"  class="btn btn-warning btn-sm">수정</a>
-                                <a th:href="@{/chief/hotel/delete(hotelId=${data.hotelId})}" style="text-decoration: none; color: black" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')"><i class="bi bi-trash"></i></a>
+                                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/hotel/delete(hotelId=${data.hotelId})}" style="text-decoration: none; color: black" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')"><i class="bi bi-trash"></i></a>
+
+                                <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" th:href="@{/manager/hotel/read(hotelId=${data.hotelId})}" class="btn btn-info btn-sm">보기</a>
                             </td>
                         </tr>
                     </th:block>
@@ -176,10 +205,15 @@
 
                 <!-- 추가 버튼 -->
                 <div class="text-end mt-3">
-                    <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="btn btn-success" href="/admin/company/list">본사관리</a> <!--only admin-->
-                    <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="btn btn-success" href="/chief/company/list">본사관리</a> <!--only chief-->
-                    <button th:if="${#authorization.expression('hasRole(''CHIEF'')')}"  class="btn btn-dark" onclick="location.href='/chief/hotel/register'">등록</button> <!--only chief-->
-                    <button th:if="${#authorization.expression('hasRole(''CHIEF'')')}"  type="button" class="btn btn-primary modalBtn">간편 등록</button> <!--only chief-->
+                    <!--ADMIN-->
+                    <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="btn btn-success" href="/admin/company/list">본사관리</a>
+                    <button th:if="${#authorization.expression('hasRole(''ADMIN'')')}"  class="btn btn-dark" onclick="location.href='/admin/hotel/register'">등록</button>
+                    <!--<button th:if="${#authorization.expression('hasRole(''ADMIN'')')}"  type="button" class="btn btn-primary modalBtn">간편 등록</button>-->
+
+                    <!--CHIEF-->
+                    <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="btn btn-success" href="/chief/company/list">본사관리</a>
+                    <button th:if="${#authorization.expression('hasRole(''CHIEF'')')}"  class="btn btn-dark" onclick="location.href='/chief/hotel/register'">등록</button>
+                    <!--<button th:if="${#authorization.expression('hasRole(''CHIEF'')')}"  type="button" class="btn btn-primary modalBtn">간편 등록</button>-->
                 </div>
 
 
@@ -258,14 +292,14 @@
                             <label for="hotelPhone" class="form-label">호텔전화:</label>
                             <input type="text" class="form-control" id="hotelPhone" name="hotelPhone" required>
                         </div>
-                        <div class="mb-3 mt-3">
+                        <!--<div class="mb-3 mt-3">
                             <label for="hotelEmail" class="form-label">담당자:</label>
                             <select id="hotelEmail" name="hotelEmail" class="form-select">
                                 <th:block th:each="memberDTOS : ${memberDTOS}">
                                     <option th:value="${memberDTOS.memberEmail}" th:text="${memberDTOS.memberName}">뒤에바</option>
                                 </th:block>
                             </select>
-                        </div>
+                        </div>-->
                         <div class="mb-3 mt-3">
                             <label for="hotelCheckIn" class="form-label">호텔 체크인:</label>
                             <select id="hotelCheckIn" name="hotelCheckIn" class="form-select">

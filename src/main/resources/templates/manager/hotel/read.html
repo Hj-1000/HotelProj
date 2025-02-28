@@ -230,8 +230,14 @@
             <div class="text-end mt-3">
                 <!--관리자-->
                 <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="btn btn-primary" style="background-color: black" href="/admin/hotel/list">지사 관리</a>
+                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="btn btn-warning" th:href="@{/manager/roomService/category/list(hotelId=${hotelDTO.hotelId})}">룸서비스</a>
+                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/manager/room/register" class="btn btn-success modalBtn">객실 등록</a>
+                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="btn btn-primary" th:href="@{/admin/hotel/update(hotelId=${hotelDTO.hotelId})}">수정</a>
+                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="btn btn-danger" th:href="@{/admin/hotel/delete(hotelId=${hotelDTO.hotelId})}"><i class="bi bi-trash"></i></a>
                 <!--호텔장-->
                 <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="btn btn-primary" style="background-color: black" href="/chief/hotel/list">지사 관리</a>
+                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="btn btn-warning" th:href="@{/manager/roomService/category/list(hotelId=${hotelDTO.hotelId})}">룸서비스</a>
+                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="/manager/room/register" class="btn btn-success modalBtn">객실 등록</a>
                 <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="btn btn-primary" th:href="@{/chief/hotel/update(hotelId=${hotelDTO.hotelId})}">수정</a>
                 <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="btn btn-danger" th:href="@{/chief/hotel/delete(hotelId=${hotelDTO.hotelId})}"><i class="bi bi-trash"></i></a>
                 <!--매니저-->

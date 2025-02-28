@@ -155,9 +155,9 @@ public class ChiefCompanyController {
                 }
             }
 
-            List<MemberDTO> memberDTOS = hotelService.getAllManagers();
+            /*List<MemberDTO> memberDTOS = hotelService.getAllManagers();
             model.addAttribute("memberDTOS", memberDTOS);
-            model.addAttribute("memberDTO", new MemberDTO());
+            model.addAttribute("memberDTO", new MemberDTO());*/
 
             model.addAttribute("companyDTO", companyDTO);
             model.addAttribute("hotelDTOS", hotelDTOS.getContent());  // 현재 페이지의 객실 목록
