@@ -1,7 +1,9 @@
 package com.ntt.ntt.Repository;
 
 
+import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Entity.Reservation;
+import com.ntt.ntt.Entity.Room;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -71,4 +73,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
     @Query("SELECT r FROM Reservation r LEFT JOIN FETCH r.payments WHERE r.member.memberId = :memberId")
     Page<Reservation> findAllByMember_MemberIdWithPayments(Integer memberId, Pageable pageable);
 
+    // 특정 회원이 특정 객실을 예약한 적이 있는지 확인
+    boolean existsByMemberAndRoom(Member member, Room room);
 }

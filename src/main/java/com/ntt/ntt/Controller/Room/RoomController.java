@@ -2,7 +2,9 @@ package com.ntt.ntt.Controller.Room;
 
 
 import com.ntt.ntt.DTO.HotelDTO;
+import com.ntt.ntt.DTO.MemberDTO;
 import com.ntt.ntt.DTO.RoomDTO;
+import com.ntt.ntt.Service.MemberService;
 import com.ntt.ntt.Service.RoomService;
 import com.ntt.ntt.Service.hotel.HotelService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +31,7 @@ import java.util.Map;
 public class RoomController {
 
     private final RoomService roomService;
+    private final MemberService memberService;
 
     // 2025-02-24 추천 호텔목록을 띄우기 위해 추가
     private final HotelService hotelService;
@@ -93,14 +97,21 @@ public class RoomController {
 
     // 특정 객실 상세보기 페이지
     @GetMapping("/room/{roomId}")
-    public String getRoomDetail(@PathVariable Integer roomId, Model model) {
+    public String getRoomDetail(@PathVariable Integer roomId, Model model, Principal principal) {
         log.info("객실 상세보기 요청 - Room ID: {}", roomId);
 
         try {
             RoomDTO room = roomService.readRoom(roomId);
             model.addAttribute("room", room);
+
+            // 로그인한 사용자의 ID 가져오기
+            if (principal != null) {
+                MemberDTO member = memberService.findByEmail(principal.getName());
+                model.addAttribute("memberId", member.getMemberId());
+            }
+
             return "detail"; // detail.html 반환
-        } catch (IllegalArgumentException e) { // 예외 발생 시 404 페이지 반환
+        } catch (IllegalArgumentException e) {
             log.warn("객실을 찾을 수 없습니다. Room ID: {}", roomId);
             model.addAttribute("errorMessage", "요청하신 객실을 찾을 수 없습니다.");
             return "error/404"; // 404 페이지로 이동

@@ -2,7 +2,6 @@ package com.ntt.ntt.Service;
 
 import com.ntt.ntt.Constant.Role;
 import com.ntt.ntt.DTO.MemberDTO;
-import com.ntt.ntt.Entity.Company;
 import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Repository.MemberRepository;
@@ -14,7 +13,6 @@ import com.ntt.ntt.Repository.hotel.HotelRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -365,5 +363,11 @@ public class MemberService implements UserDetailsService {
                 .orElseThrow(() -> new RuntimeException("회원 정보가 존재하지 않습니다."));
     }
 
+    // memberEmail로 회원 조회
+    public MemberDTO findByEmail(String email) {
+        Member member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("해당 이메일의 회원을 찾을 수 없습니다: " + email));
+        return modelMapper.map(member, MemberDTO.class);
+    }
 
 }

@@ -252,7 +252,6 @@ public class ReservationService {
     }
 
     // 유저 취소 승인 메서드
-    // 유저 취소 승인 메서드
     public void approveCancelReservation(Integer reservationId) {
         // 예약 조회
         Reservation reservation = reservationRepository.findById(reservationId)

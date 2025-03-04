@@ -52,9 +52,9 @@
           <th>예약 관리</th>
           <th>룸 서비스</th>
           <th>결제</th>
-          <th>삭제</th>
           <th>결제완료금액</th>
           <th>결제필요금액</th>
+          <th>삭제</th>
         </tr>
         </thead>
         <tbody>
@@ -119,8 +119,10 @@
                     th:disabled="${reservation.reservationStatus != '예약'}"
                     onclick="requestPay(event)">결제</button>
           </td>
+          <td class="paymenttest1" th:text="${reservation.paymentTotalPrice}"></td>
+          <td class="paymenttest2" th:text="${reservation.totalPrice + reservation.totalServiceOrderPrice - reservation.paymentTotalPrice}"></td>
+          <!-- 삭제 아이콘 -->
           <td class="text-center">
-            <!-- 삭제 아이콘 -->
             <i class="bi bi-trash-fill delete-icon"
                role="button"
                th:data-reservation-id="${reservation.reservationId}"
@@ -133,8 +135,6 @@
               <span>00:00</span>
             </div>
           </td>
-          <td class="paymenttest1" th:text="${reservation.paymentTotalPrice}"></td>
-          <td class="paymenttest2" th:text="${reservation.totalPrice + reservation.totalServiceOrderPrice - reservation.paymentTotalPrice}"></td>
         </tr>
         </tbody>
       </table>
@@ -296,26 +296,113 @@
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: new URLSearchParams({ reservationId: reservationId })
           })
-            .then(response => {
-              if (!response.ok) {
-                throw new Error("서버 응답 오류: " + response.status);
-              }
-              return response.json();
-            })
-            .then(data => {
-              if (data.success) {
-                alert(data.message);
-                rowElement.remove();
-              } else {
-                throw new Error(data.message);
-              }
-            })
-            .catch(error => {
-              console.error("삭제 중 오류 발생:", error);
-              alert("삭제 중 오류가 발생했습니다: " + error.message);
-            });
+                  .then(response => {
+                    if (!response.ok) {
+                      throw new Error("서버 응답 오류: " + response.status);
+                    }
+                    return response.json();
+                  })
+                  .then(data => {
+                    if (data.success) {
+                      alert(data.message);
+
+                      reloadReservationList();
+                    } else {
+                      throw new Error(data.message);
+                    }
+                  })
+                  .catch(error => {
+                    console.error("삭제 중 오류 발생:", error);
+                    alert("삭제 중 오류가 발생했습니다: " + error.message);
+                  });
         });
       });
+
+      //  삭제 후 현재 페이지 목록을 다시 불러오는 함수 추가
+      function reloadReservationList() {
+        const currentPage = new URLSearchParams(window.location.search).get("page") || 0;
+
+        fetch("/myPage/reservationList?page=" + currentPage)
+                .then(response => response.text())
+                .then(html => {
+                  const parser = new DOMParser();
+                  const newDoc = parser.parseFromString(html, "text/html");
+                  const newTable = newDoc.querySelector(".table"); // 예약 목록 테이블 선택
+                  document.querySelector(".table").innerHTML = newTable.innerHTML; // 기존 목록 교체
+                  attachDeleteEvent(); // 삭제 이벤트 다시 바인딩
+                  initCountdownTimers();
+                })
+                .catch(error => console.error("목록 갱신 중 오류 발생:", error));
+      }
+
+      //  삭제 이벤트 다시 바인딩
+      function attachDeleteEvent() {
+        document.querySelectorAll(".delete-icon").forEach(icon => {
+          icon.addEventListener("click", function () {
+            const reservationId = this.getAttribute("data-reservation-id");
+            let rowElement = this.closest("tr");
+
+            if (!confirm("해당 예약 내역을 삭제하시겠습니까?")) {
+              return;
+            }
+
+            fetch("/myPage/reservation/delete", {
+              method: "POST",
+              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+              body: new URLSearchParams({ reservationId: reservationId })
+            })
+                    .then(response => {
+                      if (!response.ok) {
+                        throw new Error("서버 응답 오류: " + response.status);
+                      }
+                      return response.json();
+                    })
+                    .then(data => {
+                      if (data.success) {
+                        alert(data.message);
+                        reloadReservationList();
+                      } else {
+                        throw new Error(data.message);
+                      }
+                    })
+                    .catch(error => {
+                      console.error("삭제 중 오류 발생:", error);
+                      alert("삭제 중 오류가 발생했습니다: " + error.message);
+                    });
+          });
+        });
+      }
+
+      /* 타이머 초기화 함수 */
+      function initCountdownTimers() {
+        document.querySelectorAll(".countdown-timer").forEach(timer => {
+          let timeRemaining = parseInt(timer.getAttribute("data-time-remaining"), 10);
+
+          if (isNaN(timeRemaining) || timeRemaining <= 0) {
+            timer.innerText = "삭제됨";
+            return;
+          }
+
+          function updateTimer() {
+            if (timeRemaining <= 0) {
+              timer.querySelector("span").innerText = "00:00:00"; // 00:00:00 고정
+              return;
+            }
+
+            const hours = Math.floor(timeRemaining / 3600);
+            const minutes = Math.floor((timeRemaining % 3600) / 60);
+            const seconds = timeRemaining % 60;
+
+            timer.querySelector("span").innerText =
+                    `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            timeRemaining--;
+          }
+
+
+          updateTimer();
+          setInterval(updateTimer, 1000);
+        });
+      }
 
       // 예약 자동 삭제 카운트다운 타이머
       document.querySelectorAll(".countdown-timer").forEach(timer => {

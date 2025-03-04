@@ -270,6 +270,7 @@
                                                     this.getAttribute('data-reservationEnd')
                                                 )">
                                         </button>
+
                                     </div>
                                 </th:block>
 
@@ -1296,9 +1297,16 @@
                 registerCount.appendChild(option);
             }
 
+            // memberId가 올바르지 않으면 빈 값으로 초기화
+            if (!memberId || isNaN(memberId)) {
+                console.warn("유효하지 않은 memberId 값:", memberId);
+                memberId = "";
+            }
+
+            registerMemberId.value = memberId;
+
             //  회원 정보 자동 입력 (로그인된 사용자)
             if (memberId) {
-                registerMemberId.value = memberId;
                 fetch(`/manager/room/reservation/member/details?memberId=${memberId}`)
                     .then(response => {
                         if (!response.ok) throw new Error("해당 ID를 가진 회원이 존재하지 않습니다.");
@@ -1322,11 +1330,8 @@
                         registerMemberEmail.setAttribute("disabled", "true");
                     });
             } else {
-                registerMemberId.value = "";
                 registerMemberName.value = "";
                 registerMemberEmail.value = "";
-
-                // 회원 ID가 없을 경우 disabled 유지
                 registerMemberName.setAttribute("disabled", "true");
                 registerMemberEmail.setAttribute("disabled", "true");
             }
