@@ -48,11 +48,6 @@ public class PaymentService {
         List<ServiceOrder> pendingOrders = serviceOrderRepository
                 .findByReservationAndServiceOrderStatus(reservation, ServiceOrderStatus.PENDING);
 
-        if (pendingOrders.isEmpty()) {
-            throw new IllegalStateException("결제할 수 있는 대기중(PENDING) 상태의 주문이 없습니다.");
-        }
-
-
         // 기존 결제 정보 조회 (reservationId로 조회)
         Payment existingPayment = paymentRepository.findByReservation(reservation);
 
@@ -63,14 +58,15 @@ public class PaymentService {
             existingPayment.setTotalPrice(existingPayment.getTotalPrice() + paymentDTO.getTotalPrice()); // 기존값 + 새로운값
             existingPayment.setModDate(LocalDateTime.now());
 
-            for (ServiceOrder order : pendingOrders) {
-                order.setServiceOrderStatus(ServiceOrderStatus.COMPLETED);
-                serviceOrderRepository.save(order);
+            // PENDING 상태의 주문이 있을 경우 COMPLETED로 변경
+            if (!pendingOrders.isEmpty()) {
+                for (ServiceOrder order : pendingOrders) {
+                    order.setServiceOrderStatus(ServiceOrderStatus.COMPLETED);
+                    serviceOrderRepository.save(order);
+                }
             }
             // 업데이트 후 저장
-            paymentRepository.save(existingPayment);
-
-            return existingPayment;
+            return paymentRepository.save(existingPayment);
 
         } else {
             // 기존 결제 정보가 없으면 새로 결제 정보 저장
@@ -84,22 +80,24 @@ public class PaymentService {
             payment.setRegDate(LocalDateTime.now());
             payment.setModDate(LocalDateTime.now());
 
-            for (ServiceOrder order : pendingOrders) {
-                order.setServiceOrderStatus(ServiceOrderStatus.COMPLETED);
-                serviceOrderRepository.save(order);
+            // PENDING 상태의 주문이 있을 경우 COMPLETED로 변경
+            if (!pendingOrders.isEmpty()) {
+                for (ServiceOrder order : pendingOrders) {
+                    order.setServiceOrderStatus(ServiceOrderStatus.COMPLETED);
+                    serviceOrderRepository.save(order);
+                }
             }
 
             // 새로운 결제 정보 저장
-            paymentRepository.save(payment);
-            return payment;
-        }
 
+            return paymentRepository.save(payment);
+        }
 
     }
 
     // 결제 내역 조회 및 검색 기능
     public List<PaymentDTO> getFilteredPaymentsByRoomIds(List<Integer> roomIds, String hotelName, String roomName, String minPrice, String maxPrice, String startDate, String endDate) {
-        List<Payment> payments = paymentRepository.findAll();
+        List<Payment> payments = paymentRepository.findByRoomRoomIdIn(roomIds);
 
         if (hotelName != null && !hotelName.isEmpty()) {
             payments = payments.stream()

@@ -22,7 +22,7 @@
 <div layout:fragment="content">
     <div class="container-fluid mt-4">
         <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
-        <a href="#" class="custom-link"><span>매출관리</span></a>
+        <a href="/manager/sales" class="custom-link"><span>매출관리</span></a>
         <h2 class="mb-3">매출관리</h2>
         <div class="card p-4">
             <form th:action="@{/manager/sales}" method="get">
@@ -75,14 +75,15 @@
                     <thead>
                     <tr>
                         <th style="background-color: #f8f9fa; width: 6%">주문번호</th>
-                        <th style="background-color: #f8f9fa; width: 10%">객실 금액</th>
-                        <th style="background-color: #f8f9fa; width: 10%">룸서비스 금액</th>
-                        <th style="background-color: #f8f9fa; width: 10%">총 금액</th>
-                        <th style="background-color: #f8f9fa; width: 10%">결제 완료금액</th>
-                        <th style="background-color: #f8f9fa; width: 10%">미결제 금액</th>
-                        <th style="background-color: #f8f9fa; width: 12%">지사명</th>
-                        <th style="background-color: #f8f9fa; width: 12%">객실명</th>
-                        <th style="background-color: #f8f9fa; width: 10%">결제 상태</th>
+                        <th style="background-color: #f8f9fa; width: 10%">회원명</th>
+                        <th style="background-color: #f8f9fa; width: 9%">객실 금액</th>
+                        <th style="background-color: #f8f9fa; width: 9%">룸서비스 금액</th>
+                        <th style="background-color: #f8f9fa; width: 9%">총 금액</th>
+                        <th style="background-color: #f8f9fa; width: 9%">결제 완료금액</th>
+                        <th style="background-color: #f8f9fa; width: 9%">미결제 금액</th>
+                        <th style="background-color: #f8f9fa; width: 10%">지사명</th>
+                        <th style="background-color: #f8f9fa; width: 10%">객실명</th>
+                        <th style="background-color: #f8f9fa; width: 9%">결제 상태</th>
                         <th style="background-color: #f8f9fa; width: 10%">최종 결제일</th>
                     </tr>
                     </thead>
@@ -90,6 +91,7 @@
                     <th:block th:each="paymentDTO, iterStat : ${paymentDTOList}">
                         <tr style="vertical-align: middle;">
                             <td th:text="${paymentDTO.paymentId}">1</td>
+                            <td th:text="${reservationList[iterStat.index].memberName}">1</td>
 
                             <td th:if="${reservationList[iterStat.index].roomPrice != null}" th:text="'₩' + ${#numbers.formatInteger(reservationList[iterStat.index].roomPrice, 1, 'COMMA')}">객실 금액</td>
                             <td th:if="${reservationList[iterStat.index].totalServiceOrderPrice != null}" th:text="'₩' + ${#numbers.formatInteger(reservationList[iterStat.index].totalServiceOrderPrice, 1, 'COMMA')}">룸서비스 금액</td>
