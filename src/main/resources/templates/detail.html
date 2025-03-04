@@ -9,6 +9,10 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <!-- Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <link rel="stylesheet" th:href="@{/css/user.css}">
     <link rel="stylesheet" th:href="@{/css/detail.css}">
 </head>
@@ -17,7 +21,7 @@
 <div layout:fragment="content">
 
     <!-- 예약 모달 -->
-    <div class="modal fade" id="reservationModal" tabindex="-1" aria-labelledby="reservationModalLabel" aria-hidden="true">
+    <div class="modal fade" id="reservationModal" tabindex="-1" aria-labelledby="reservationModalLabel">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -25,8 +29,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="reservationForm">
-                        <input type="hidden" id="roomId" name="roomId">
+                    <form id="reservationForm" >
+                        <input type="hidden" id="roomId" name="roomId" th:value="${room.roomId}">
                         <div class="mb-3">
                             <label for="reservationCount" class="form-label">
                                 예약 인원 <span id="recommendedCountText"></span>
@@ -74,7 +78,8 @@
         <div class="room-card reservation-info d-flex justify-content-between align-items-center"
              th:data-room-id="${room.roomId}"
              th:data-stay-start="${room.stayStart}"
-             th:data-stay-end="${room.stayEnd}">
+             th:data-stay-end="${room.stayEnd}"
+             th:data-room-type="${room.roomType}">
             <div>
                 <p class="period"><strong>예약 기간:</strong> <span th:text="${room.reservationStart}"></span> ~ <span th:text="${room.reservationEnd}"></span></p>
                 <p class="period"><strong>숙박 기간:</strong> <span th:text="${room.stayStart}"></span> ~ <span th:text="${room.stayEnd}"></span></p>
@@ -228,7 +233,7 @@
 
                     let roomCard = button.closest(".room-card");
                     if (!roomCard) {
-                        console.error("Error: `roomCard` element not found.");
+                        console.error("Error: roomCard element not found.");
                         return;
                     }
 
@@ -297,34 +302,83 @@
         });
 
         document.addEventListener("DOMContentLoaded", function () {
-            // roomType 요소 가져오기
-            const roomTypeElement = document.getElementById("roomType");
+            let roomTypeElement = document.getElementById("roomType");
+
+            if (!roomTypeElement || !roomTypeElement.dataset.roomType) {
+                console.warn(" roomType 데이터가 존재하지 않음. 다른 방법으로 가져옵니다...");
+
+                let roomCard = document.querySelector(".room-card"); // room-card에서 가져오기
+                if (roomCard && roomCard.dataset.roomType) {
+                    roomTypeElement = roomCard;
+                }
+            }
 
             if (roomTypeElement) {
-                // data-room-type 속성에서 값 가져오기
                 const roomType = roomTypeElement.dataset.roomType;
-
-                console.log("roomType ->", roomType); // 콘솔에서 확인
+                console.log(" roomType (최종) ->", roomType);
 
                 if (roomType) {
-                    // 객실 타입에 따른 추천 인원 정보 가져오기
                     const recommendedText = getRecommendedTextByRoomType(roomType);
-
-                    // recommendedCountText 요소가 존재하는지 확인 후 업데이트
                     const recommendedTextElement = document.getElementById("recommendedCountText");
+
                     if (recommendedTextElement) {
                         recommendedTextElement.innerHTML = `<span style="color: orange; font-weight: bold;">${recommendedText}</span>`;
                     } else {
-                        console.error("Element with ID 'recommendedCountText' not found.");
+                        console.error("ERROR: Element with ID 'recommendedCountText' not found.");
                     }
                 } else {
-                    console.warn("roomType 값이 비어 있음!");
+                    console.warn(" roomType 값이 비어 있음!");
                 }
-            } else {
-                console.error("Element with ID 'roomType' not found.");
             }
         });
 
+        document.addEventListener("DOMContentLoaded", function () {
+            const reservationModal = document.getElementById("reservationModal");
+
+            // 모달 열릴 때 실행할 이벤트
+            reservationModal.addEventListener("shown.bs.modal", function () {
+                const roomCard = document.querySelector(".room-card");
+                const roomId = roomCard.dataset.roomId;
+                const roomType = roomCard.dataset.roomType;
+                const stayStart = roomCard.dataset.stayStart;
+                const stayEnd = roomCard.dataset.stayEnd;
+
+                console.log(" roomType (최종) ->", roomType);
+                console.log(" Room ID:", roomId);
+
+                document.getElementById("roomId").value = roomId;
+
+                // 예약 인원 및 추천 텍스트 업데이트
+                updateReservationCountOptions(roomType);
+                updateRecommendedCountText(roomType);
+
+                // 체크인 & 체크아웃 날짜 설정
+                document.getElementById("checkInDate").min = stayStart;
+                document.getElementById("checkInDate").max = stayEnd;
+                document.getElementById("checkOutDate").min = stayStart;
+                document.getElementById("checkOutDate").max = stayEnd;
+            });
+        });
+
+        //  예약 인원 옵션 업데이트 함수
+        function updateReservationCountOptions(roomType) {
+            const maxPeople = getMaxPeopleByRoomType(roomType);
+            const reservationCount = document.getElementById("reservationCount");
+
+            reservationCount.innerHTML = ""; // 기존 옵션 제거
+            for (let i = 1; i <= maxPeople; i++) {
+                let option = document.createElement("option");
+                option.value = i;
+                option.text = `${i}명`;
+                reservationCount.appendChild(option);
+            }
+        }
+
+        // 추천 인원 텍스트 업데이트 함수
+        function updateRecommendedCountText(roomType) {
+            const recommendedText = getRecommendedTextByRoomType(roomType);
+            document.getElementById("recommendedCountText").innerHTML = `<span style="color: orange; font-weight: bold;">${recommendedText}</span>`;
+        }
 
 
         function getMaxPeopleByRoomType(roomType) {
@@ -456,6 +510,7 @@
                 })
                     .then(response => response.json())
                     .then(data => {
+                        console.log("DEBUG: 서버 응답 =", data);
                         if (data.success) {
                             alert("예약이 완료되었습니다!");
                             location.reload();
@@ -476,7 +531,7 @@
 
                 // stayEnd 값이 유효한지 확인
                 if (!stayEnd) {
-                    console.warn(`Invalid stayEnd for roomCard:`, roomCard);
+                    console.warn(`Invalid stayEnd for roomCard: ${roomCard}`);
                     return;
                 }
 
@@ -514,7 +569,7 @@
         document.addEventListener("DOMContentLoaded", function () {
             var reservationModal = document.getElementById("reservationModal");
 
-            // 모달 열릴 때 `aria-hidden` 제거
+            // 모달 열릴 때 aria-hidden 제거
             reservationModal.addEventListener("shown.bs.modal", function () {
                 console.log("Modal opened - removing aria-hidden");
                 reservationModal.removeAttribute("aria-hidden");
@@ -528,18 +583,69 @@
                 }, 100);
             });
 
-            // 모달 닫힐 때 `aria-hidden` 추가
+            // 모달 닫힐 때 aria-hidden 추가
             reservationModal.addEventListener("hidden.bs.modal", function () {
                 console.log("Modal closed - setting aria-hidden=true");
                 reservationModal.setAttribute("aria-hidden", "true");
             });
 
-            // Bootstrap 모달 초기화 (이전 객체 중복 방지)
+            // Bootstrap 모달 초기화
             let modalInstance = bootstrap.Modal.getInstance(reservationModal);
             if (!modalInstance) {
                 new bootstrap.Modal(reservationModal);
             }
         });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            let roomId = document.getElementById("roomId").value;
+
+            fetch(`/reservation/booked-dates/${roomId}`)
+                .then(response => response.json())
+                .then(data => {
+                    let disabledDates = [];
+
+                    data.forEach(reservation => {
+                        let startDate = new Date(reservation.checkIn);
+                        let endDate = new Date(reservation.checkOut);
+
+                        while (startDate <= endDate) {
+                            disabledDates.push(startDate.toISOString().split("T")[0]); // YYYY-MM-DD 형식
+                            startDate.setDate(startDate.getDate() + 1);
+                        }
+                    });
+
+                    console.log(" 비활성화할 날짜 목록: ", disabledDates);
+
+                    //  flatpickr에서 올바른 ISO 8601 포맷으로 변환
+                    function formatToISO(dateStr) {
+                        return dateStr.replace(" ", "T").slice(0, 16); // "2025-03-25 23:40" → "2025-03-25T23:40"
+                    }
+
+                    flatpickr("#checkInDate", {
+                        enableTime: true,
+                        dateFormat: "Y-m-d H:i",
+                        minDate: "today",
+                        disable: disabledDates,
+                        time_24hr: true,
+                        onClose: function (selectedDates, dateStr) {
+                            document.getElementById("checkInDate").value = formatToISO(dateStr);
+                        }
+                    });
+
+                    flatpickr("#checkOutDate", {
+                        enableTime: true,
+                        dateFormat: "Y-m-d H:i",
+                        minDate: "today",
+                        disable: disabledDates,
+                        time_24hr: true,
+                        onClose: function (selectedDates, dateStr) {
+                            document.getElementById("checkOutDate").value = formatToISO(dateStr);
+                        }
+                    });
+                })
+                .catch(error => console.error(" 예약된 날짜를 불러오는 중 오류 발생:", error));
+        });
+
     </script>
 </div>
 <div th:replace="~{fragments/footer::footer}"></div>

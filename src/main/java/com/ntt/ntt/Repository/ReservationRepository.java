@@ -22,7 +22,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
     // 특정 방의 모든 예약 정보 가져오기 (필요 시 사용)
     List<Reservation> findAllByRoom_RoomId(Integer roomId);
 
-
     // 특정 회원의 모든 예약 정보 가져오기
     @Query("SELECT r FROM Reservation r WHERE r.member.memberId = :memberId")
     Page<Reservation> findAllByMember_MemberId(Integer memberId, Pageable pageable);
@@ -33,13 +32,16 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
     // 특정 방이 예약되었는지 여부 확인
     boolean existsByRoom_RoomId(Integer roomId);
 
+    // 특정 방에 '예약' 상태의 예약이 존재하는지 확인하는 메서드 추가
+    boolean existsByRoom_RoomIdAndReservationStatus(Integer roomId, String reservationStatus);
+
     // 특정 방의 예약을 삭제 (예약 취소 기능)
     void deleteByRoom_RoomId(Integer roomId);
 
     // 특정 방이 예약되었는지 확인 (새로운 예약과 겹치는 경우)
     @Query("SELECT COUNT(r) > 0 FROM Reservation r " +
             "WHERE r.room.roomId = :roomId " +
-            "AND (:checkOutDate > r.checkInDate AND :checkInDate < r.checkOutDate) " +
+            "AND (r.checkInDate < :checkOutDate AND r.checkOutDate > :checkInDate) " +
             "AND (:excludeReservationId IS NULL OR r.reservationId <> :excludeReservationId)")
     boolean isRoomAlreadyBooked(@Param("roomId") Integer roomId,
                                 @Param("checkInDate") LocalDateTime checkInDate,

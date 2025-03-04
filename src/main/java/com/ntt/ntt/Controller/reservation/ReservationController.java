@@ -5,6 +5,7 @@ import com.ntt.ntt.DTO.ReservationDTO;
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Entity.Room;
 import com.ntt.ntt.Repository.MemberRepository;
+import com.ntt.ntt.Repository.ReservationRepository;
 import com.ntt.ntt.Repository.RoomRepository;
 import com.ntt.ntt.Service.ReservationService;
 import com.ntt.ntt.Service.RoomService;
@@ -23,13 +24,11 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,6 +43,7 @@ public class ReservationController {
     private final RoomService roomService;
     private final MemberRepository memberRepository;
     private final RoomRepository roomRepository;
+    private final ReservationRepository reservationRepository;
 
     // 날짜 형식 지정
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
@@ -58,7 +58,6 @@ public class ReservationController {
             Integer count = reservationDTO.getCount();
             var checkInDate = reservationDTO.getCheckInDate();
             var checkOutDate = reservationDTO.getCheckOutDate();
-
 
             if (userDetails == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -108,7 +107,6 @@ public class ReservationController {
         }
     }
 
-
     @Operation(summary = "호텔 예약내역 조회", description = "호텔 예약내역 조회 페이지로 이동한다.")
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/myPage/reservationList")
@@ -144,6 +142,21 @@ public class ReservationController {
         return "myPage/reservationList";
     }
 
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/reservation/booked-dates/{roomId}")
+    public ResponseEntity<?> getBookedDatesForm(@PathVariable Integer roomId) {
+        if (roomId == null) {
+            return ResponseEntity.badRequest().body(" 방 ID가 필요합니다.");
+        }
+
+        List<Map<String, String>> bookedDates = reservationService.getBookedDatesByRoom(roomId);
+
+        if (bookedDates.isEmpty()) {
+            return ResponseEntity.ok(Collections.emptyList()); // 빈 배열 반환
+        }
+
+        return ResponseEntity.ok(bookedDates);
+    }
 
     //  고객예약 취소 요청
     @PreAuthorize("isAuthenticated()")
@@ -205,6 +218,4 @@ public class ReservationController {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }
     }
-
-
 }
