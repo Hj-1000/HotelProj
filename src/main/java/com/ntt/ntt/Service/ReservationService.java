@@ -130,7 +130,15 @@ public class ReservationService {
 
         log.info("조회된 예약 개수 (Service): {}", reservationsPage.getTotalElements());
 
-        return reservationsPage.map(ReservationDTO::fromEntity);
+        return reservationsPage.map(reservation -> {
+            ReservationDTO dto = ReservationDTO.fromEntity(reservation);
+
+            Integer totalServiceOrderPrice = serviceOrderRepository.getTotalOrderPriceByReservation(reservation.getReservationId());
+            dto.setTotalServiceOrderPrice(totalServiceOrderPrice != null ? totalServiceOrderPrice : 0);
+
+            return dto;
+        });
+
     }
 
     // 3. 특정 방의 예약 정보 조회

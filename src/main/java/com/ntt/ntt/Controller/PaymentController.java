@@ -3,8 +3,10 @@ package com.ntt.ntt.Controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ntt.ntt.DTO.*;
 import com.ntt.ntt.Entity.Member;
+import com.ntt.ntt.Entity.Room;
 import com.ntt.ntt.Repository.MemberRepository;
 import com.ntt.ntt.Repository.RoomRepository;
+import com.ntt.ntt.Repository.company.CompanyRepository;
 import com.ntt.ntt.Repository.hotel.HotelRepository;
 import com.ntt.ntt.Service.PaymentService;
 import com.ntt.ntt.Service.ReservationService;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
@@ -32,6 +35,7 @@ public class PaymentController {
     private final MemberRepository memberRepository;
     private final HotelRepository hotelRepository;
     private final RoomRepository roomRepository;
+    private final CompanyRepository companyRepository;
 
     // 결제 정보를 저장
     @PostMapping("/payment")
@@ -64,11 +68,46 @@ public class PaymentController {
             Member member = memberRepository.findByMemberEmail(userEmail)
                     .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다."));
 
-            // 로그인한 사용자가 관리하는 호텔 ID 목록 가져오기
-            List<Integer> hotelIds = hotelRepository.findHotelIdsByMemberId(member.getMemberId());
+            // 로그인한 사용자의 역할 확인
+            boolean isManager = userDetails.getAuthorities().stream()
+                    .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_MANAGER"));
+            boolean isChief = userDetails.getAuthorities().stream()
+                    .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_CHIEF"));
+            boolean isAdmin = userDetails.getAuthorities().stream()
+                    .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
 
-            // 해당 호텔들에 속한 roomId 목록 가져오기
-            List<Integer> roomIds = roomRepository.findRoomIdsByHotelIds(hotelIds);
+            List<Integer> roomIds;
+
+            if (isManager) {
+                // MANAGER 인 경우 로그인한 사용자가 관리하는 호텔 ID 목록 가져오기
+                List<Integer> hotelIds = hotelRepository.findHotelIdsByMemberId(member.getMemberId());
+
+                // 해당 호텔들에 속한 roomId 목록 가져오기
+                roomIds = roomRepository.findRoomIdsByHotelIds(hotelIds);
+
+            } else if (isChief) {
+                // CHIEF 인 경우 로그인한 사용자가 관리하는 본사 ID 목록 가져오기
+                List<Integer> companyIds = companyRepository.findCompanyIdsByMemberId(member.getMemberId());
+
+                // 해당 본사에 속한 호텔 ID 목록 가져오기
+                List<Integer> hotelIds = hotelRepository.findHotelIdsByCompanyIds(companyIds);
+
+                // 해당 호텔들에 속한 roomId 목록 가져오기
+                roomIds = roomRepository.findRoomIdsByHotelIds(hotelIds);
+
+            }else if (isAdmin) {
+                // ADMIN 인 경우 모든 방 목록 가져오기
+                List<Room> allRooms = roomRepository.findAll();
+
+                // Room ID만 추출하여 List<Integer>로 변환
+                roomIds = allRooms.stream()
+                        .map(Room::getRoomId) // Room 객체에서 roomId 추출
+                        .collect(Collectors.toList());
+
+            } else {
+                // 관리자의 역할을 가진 사용자가 아니면 예외 처리
+                throw new RuntimeException("권한이 없습니다.");
+            }
 
             // 필터링된 결제내역 리스트 가져오기
             List<PaymentDTO> filteredPayments = paymentService.getFilteredPaymentsByRoomIds(roomIds, hotelName, roomName, minPrice, maxPrice, startDate, endDate);

@@ -5,6 +5,8 @@ import com.ntt.ntt.Entity.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -26,5 +28,8 @@ public interface CompanyRepository extends JpaRepository<Company, Integer> {
     Page<Company> findByCompanyNameLikeOrCompanyManagerLikeAndMember_MemberId(String companyName, String companyManager, Integer memberId, Pageable pageable);
     // memberId로만 회사 조회
     Page<Company> findByMember_MemberId(Integer memberId, Pageable pageable);
+
+    @Query("SELECT c.companyId FROM Company c WHERE c.member.memberId = :memberId")
+    List<Integer> findCompanyIdsByMemberId(@Param("memberId") Integer memberId);
 
 }
