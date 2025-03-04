@@ -22,7 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -45,19 +47,21 @@ public class ReservationService {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 방을 찾을 수 없습니다. roomId: " + roomId));
 
-        if (!room.getRoomStatus()) {
-            log.warn("이미 예약된 방입니다. roomId: {}", roomId);
-            throw new IllegalStateException("이미 예약된 방입니다.");
+
+        // 중복 예약 검사 (날짜 기준으로 검사)
+        boolean alreadyBooked = reservationRepository.isRoomAlreadyBooked(roomId, checkInDate, checkOutDate, null);
+        if (alreadyBooked) {
+            log.warn("해당 날짜에 이미 예약이 존재합니다. roomId: {}", roomId);
+            throw new IllegalArgumentException("해당 날짜에 이미 예약이 존재합니다.");
         }
 
         // 회원 정보 확인
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원 정보를 찾을 수 없습니다. memberId: " + memberId));
 
-        // 중복 예약 방지
-        if (reservationRepository.isRoomAlreadyBooked(roomId, checkInDate, checkOutDate, null)) {
-            throw new IllegalArgumentException("해당 날짜에 이미 예약이 존재합니다.");
-        }
+        //  시간 단위를 분까지만 유지 (초 제거)
+        checkInDate = checkInDate.truncatedTo(ChronoUnit.MINUTES);
+        checkOutDate = checkOutDate.truncatedTo(ChronoUnit.MINUTES);
 
         //  숙박 가능 기간 가져오기
         String stayStartStr = room.getStayStart();
@@ -81,6 +85,7 @@ public class ReservationService {
             throw new IllegalArgumentException("체크아웃 날짜는 체크인 날짜보다 이후여야 합니다.");
         }
 
+        // 예약 인원 제한
         if (count < 1 || count > 6) {
             log.warn("잘못된 예약 인원 수: {}", count);
             throw new IllegalArgumentException("예약 인원 수는 최소 1명, 최대 6명까지 가능합니다.");
@@ -239,29 +244,36 @@ public class ReservationService {
     }
 
     // 유저 취소 승인 메서드
+    // 유저 취소 승인 메서드
     public void approveCancelReservation(Integer reservationId) {
+        // 예약 조회
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 예약을 찾을 수 없습니다."));
 
+        //  취소 요청 상태인지 확인
         if (!"취소 요청".equals(reservation.getReservationStatus())) {
             throw new IllegalArgumentException("취소 요청된 예약만 승인할 수 있습니다.");
         }
 
+        //  예약 상태를 '취소 완료'로 변경
         reservation.setReservationStatus("취소 완료");
         reservation.setCancelConfirmedAt(LocalDateTime.now());
 
-        log.info("[approveCancelReservation] 업데이트 전 - reservationId={}, cancelConfirmedAt={}",
-                reservation.getReservationId(), reservation.getCancelConfirmedAt());
-
-        // 변경사항을 즉시 반영
+        //  변경사항을 즉시 반영
         reservationRepository.saveAndFlush(reservation);
 
-        // DB 반영 확인을 위해 강제 재조회
-        Reservation updatedReservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new IllegalArgumentException("DB 반영 확인 중 예약을 찾을 수 없습니다."));
+        log.info("[approveCancelReservation] 예약 취소 승인 완료 - reservationId={}, cancelConfirmedAt={}",
+                reservation.getReservationId(), reservation.getCancelConfirmedAt());
 
-        log.info("[approveCancelReservation] 업데이트 후 확인 - reservationId={}, cancelConfirmedAt={}",
-                updatedReservation.getReservationId(), updatedReservation.getCancelConfirmedAt());
+        //  해당 방의 모든 예약이 취소되었는지 확인 후, roomStatus를 true로 복구
+        Integer roomId = reservation.getRoom().getRoomId();
+        boolean hasOtherReservations = reservationRepository.existsByRoom_RoomIdAndReservationStatus(roomId, "예약");
+
+        if (!hasOtherReservations) {
+            reservation.getRoom().setRoomStatus(true); // 방을 다시 예약 가능하도록 변경
+            roomRepository.save(reservation.getRoom());
+            log.info(" 모든 예약이 취소되어 방 상태 복구: roomId={}", roomId);
+        }
     }
 
     /* 키워드 검색 메서드 */
@@ -363,6 +375,18 @@ public class ReservationService {
             reservationRepository.deleteAll(expiredReservations);
             log.info("[deleteExpiredReservations] {}개의 만료된 예약을 삭제했습니다.", expiredReservations.size());
         }
+    }
+
+    /* 예약된 날짜 목록 조회 메서드 */
+    public List<Map<String, String>> getBookedDatesByRoom(Integer roomId) {
+        List<Reservation> reservations = reservationRepository.findAllByRoom_RoomId(roomId);
+
+        return reservations.stream().map(reservation -> {
+            Map<String, String> map = new HashMap<>();
+            map.put("checkIn", reservation.getCheckInDate().truncatedTo(ChronoUnit.MINUTES).toString()); // 초 제거
+            map.put("checkOut", reservation.getCheckOutDate().truncatedTo(ChronoUnit.MINUTES).toString());
+            return map;
+        }).collect(Collectors.toList());
     }
 
 }
