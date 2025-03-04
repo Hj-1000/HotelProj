@@ -44,8 +44,8 @@ public class PaymentController {
         }
     }
 
-    // 매출관리페이지
-    @Operation(summary = "매출관리", description = "매출관리 페이지로 이동한다.")
+    // 매니저 매출관리페이지
+    @Operation(summary = "지사 매출관리", description = "매니저 매출관리 페이지로 이동한다.")
     @GetMapping("/manager/sales")
     public String getSales(@AuthenticationPrincipal UserDetails userDetails,
                            @RequestParam(required = false) String hotelName,
@@ -84,7 +84,7 @@ public class PaymentController {
             }
 
             // 예약 정보 가져오기
-            Page<ReservationDTO> reservationsPage = reservationService.getUserReservations(member.getMemberId(), pageable);
+            Page<ReservationDTO> reservationsPage = reservationService.getAllReservations(pageable);
             List<ReservationDTO> reservations = reservationsPage.getContent();
 
             // 결제 내역과 예약 내역을 묶어서 모델에 전달
