@@ -108,6 +108,73 @@
             text-align: right;
             margin-bottom: 20px;
         }
+
+        /* FAQ 버튼 스타일 */
+        .faq-btn {
+            display: inline-block;
+            background:mintcream;
+            color: black;
+            font-size: 14px;  /* 제목 크기 줄이기 */
+            font-weight: bold;
+            padding: 8px 16px;  /* 패딩 줄이기 */
+            border-radius: 20px;
+            border: none;
+            text-decoration: none;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            margin-left: 15px;  /* 왼쪽 여백 추가 */
+        }
+
+        /* FAQ 버튼 호버 효과 */
+        .faq-btn:hover {
+            background: azure;
+            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* 모달 내용 스타일 */
+        .modal-body ul {
+            list-style-type: none; /* 기본 리스트 스타일 제거 */
+            padding: 0;
+        }
+
+        .modal-body li {
+            margin-bottom: 20px; /* 항목 간 간격을 넓힘 */
+            font-size: 16px; /* 폰트 크기 조정 */
+            line-height: 1.6; /* 줄 간격 늘리기 */
+            padding: 10px 15px; /* 항목 간 여백 추가 */
+            background-color: white; /* 항목 배경 색상 추가 */
+            border-radius: 8px; /* 둥근 테두리 추가 */
+            word-wrap: break-word; /* 단어가 길어지면 줄바꿈하도록 설정 */
+            word-break: break-word; /* 긴 단어도 줄바꿈되도록 설정 */
+            overflow-wrap: break-word; /* 긴 단어가 넘칠 경우 자동으로 줄바꿈 */
+            max-width: 100%; /* 모달 내부에서 넘치지 않도록 */
+            border: 2px solid lavender;
+        }
+
+
+        .modal-header {
+            color: white; /* 제목 색상 */
+            background: mintcream;
+            padding: 15px;
+            border-top-left-radius: 10px; /* 왼쪽 상단 둥글게 */
+            border-top-right-radius: 10px; /* 오른쪽 상단 둥글게 */
+            display: flex;
+            justify-content: center; /* 가운데 정렬 */
+            align-items: center; /* 수직 가운데 정렬 */
+        }
+
+        .modal-title {
+            text-align: center; /* 텍스트 가운데 정렬 */
+            width: 100%; /* 100% 너비로 설정 */
+            font-weight: bold; /* 제목 진하게 */
+            font-size: 20px; /* 제목 크기 */
+            color: black;
+            margin-top: 30px;
+        }
+
+
+
     </style>
 </head>
 <body>
@@ -117,8 +184,47 @@
 <!-- 본문 -->
 <div layout:fragment="content" class="list-container">
 <div class="container">
-    <h1>Q&A 목록</h1>
+    <!-- FAQ 버튼 -->
+    <button type="button" class="faq-btn" data-bs-toggle="modal" data-bs-target="#faqModal">
+        FAQ (가장 많은 질문)
+    </button>
 
+    <!-- FAQ 모달 -->
+    <div class="modal fade" id="faqModal" tabindex="-1" aria-labelledby="faqModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="faqModalLabel">많이 하는 질문</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- FAQ 내용 -->
+                    <ul>
+                        <li>
+                            <strong>질문 유형:</strong> 계정문의 <br>
+                            <strong>내용:</strong> 비밀번호를 변경하고싶은데 어떻게하나요? <br>
+                            <strong>답변:</strong> 홈페이지 ㅡ> 마이메뉴 ㅡ> 내정보 클릭후 <br>회원정보 수정에서 변경하실수 있습니다.<br><hr>
+                            <strong>비밀번호 변경 바로가기:</strong><a th:href="@{/myPage/update}">비밀번호 변경</a> 📎
+                        </li>
+                        <li>
+                            <strong>질문 유형:</strong> 호텔문의 <br>
+                            <strong>내용:</strong> 예약 완료한 방은 어디서 보나요? <br>
+                            <strong>답변:</strong> 홈페이지 ㅡ> 마이메뉴 ㅡ> 예약내역 클릭후 <br>방을 확인하실수 있습니다.<hr>
+                            <strong>예약한 방 바로 확인하기:</strong><a th:href="@{/myPage/reservationList}">예약내역</a> 📆
+                        </li>
+                        <li>
+                            <strong>질문 유형:</strong> 계정문의 <br>
+                            <strong>내용:</strong> 비밀번호를 못찾아서 로그인을 못해요 <br>
+                            <strong>답변:</strong> 홈페이지 ㅡ> 로그인 클릭후 <br>비밀번호 찾기 클릭후 이메일을 입력하고 인증코드를 통해 <br>임시 비밀번호를 발급받으실수 있습니다.<br><hr>
+                            <strong>임시 비밀번호 찾기:</strong><a th:href="@{/user/findPassword}">임시 비밀번호 발급받기</a> ✏
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h1>Q&A 목록</h1>
     <form action="/qna/list" method="get" class="search-bar">
         <input type="text" name="keyword" placeholder="검색어" class="form-control" style="width: 250px;">
         <select name="qnaCategory" class="form-select" style="width: 250px; margin-left: 10px;">
