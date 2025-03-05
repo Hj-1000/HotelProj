@@ -342,6 +342,11 @@
 
                             <div class="text-end mb-3 me-3" style="margin-top: -50px;">
                                 <div>
+                                    <!-- 지도 열기/닫기 버튼 -->
+                                    <button class="btn btn-outline-primary" id="mapToggleBtn1" onclick="toggleMap()" th:if="${#authentication.name != 'anonymousUser'}" style="width: 120px;">
+                                        지도 열기
+                                        <i class="bi bi-map"></i>
+                                    </button>
                                     <!-- 찜 추가 버튼 (처음에는 보이게 설정) -->
                                     <button class="btn btn-outline-danger likeBtn" th:data-hotel-id="${hotelDTO.hotelId}" onclick="addLike()" style="width: 120px; display: none;">
                                         스크랩 <!--<i class="fa-regular fa-heart"></i>-->
@@ -358,6 +363,11 @@
 
                             <div class="text-end mb-3 me-3" th:if="${#authentication.name == 'anonymousUser'}" style="margin-top: -50px;">
                                 <div>
+                                    <!-- 지도 열기/닫기 버튼 (비회원용) -->
+                                    <button class="btn btn-outline-primary" id="mapToggleBtn2" onclick="toggleMap()" style="width: 120px;">
+                                        지도 열기
+                                        <i class="bi bi-map"></i>
+                                    </button>
                                     <!-- 찜 추가 버튼 (비회원용) -->
                                     <button class="btn btn-outline-danger nya" style="width: 120px; display: none;" onclick="addLike()">
                                         스크랩 <!--<i class="fa-regular fa-heart"></i>-->
@@ -371,244 +381,329 @@
                     </div>
                 </div>
 
+                <!-- 지도 영역 -->
+                <div class="container" id="mapContainer" style="overflow: hidden; height: 0; transition: height 0.5s ease; margin-bottom: 10px;">
+                    <div class="bg-secondary text-white d-flex justify-content-center" style="height: 500px; margin-bottom: 10px; background-color: #f0f0f0;">
+                        <div class="map_wrap" style="width: 100%; height: 100%;">
+                            <div id="map" style="width:100%;height:100%;position:relative;overflow:hidden;"></div>
+                        </div>
+                </div>
 
-                <div th:if="${hotelDTOS != null and !#lists.isEmpty(hotelDTOS)}" class="row">
-                    <div class="col-md-3" th:each="data : ${hotelDTOS}">
-                        <div class="card image-hover-container">
-                            <div class="image-container">
+                <script type="text/javascript"
+                        src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=0cb0450151c2b892da76c0d5dcd6535a&libraries=services"></script>
 
-                                <!-- Hover 시 나타나는 예약 버튼 -->
-                                <div class="hover-overlay">
-                                    <a th:href="@{/hotel/read(hotelId=${data.hotelId})}" class="btn btn-hover">자세히 보기</a>
-                                </div>
+                <script>
+                    var mapContainer = document.getElementById('map'), // 지도를 표시할 div
+                        mapOption = {
+                            center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
+                            level: 3 // 지도의 확대 레벨
+                        };
+
+                    // 지도 확대
+                    function zoomIn() {
+                        map.setLevel(map.getLevel() - 1);
+                    }
+
+                    // 지도 축소
+                    function zoomOut() {
+                        map.setLevel(map.getLevel() + 1);
+                    }
+
+                    // 지도를 생성합니다
+                    var map = new kakao.maps.Map(mapContainer, mapOption);
+
+                    // 주소-좌표 변환 객체를 생성합니다
+                    var geocoder = new kakao.maps.services.Geocoder();
+
+                    // Thymeleaf에서 호텔 주소와 이름 값을 가져옴
+                    var hotelAddress = "[[${hotelDTO.hotelAddress}]]";  // 호텔 주소
+                    var hotelName = "[[${hotelDTO.hotelName}]]";  // 호텔 이름
+
+                    // 주소로 좌표를 검색합니다
+                    geocoder.addressSearch(hotelAddress, function(result, status) {
+
+                        // 정상적으로 검색이 완료됐으면
+                        if (status === kakao.maps.services.Status.OK) {
+
+                            var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+
+                            // 결과값으로 받은 위치를 마커로 표시합니다
+                            var marker = new kakao.maps.Marker({
+                                map: map,
+                                position: coords
+                            });
+
+                            // 인포윈도우로 장소에 대한 설명을 표시합니다
+                            var infowindow = new kakao.maps.InfoWindow({
+                                content: '<div style="width:200px;text-align:center;padding:10px;font-size:14px;color:black;">' + hotelName + '</div>'  // 호텔 이름 표시
+                            });
+                            infowindow.open(map, marker);
+
+                            // 지도의 중심을 결과값으로 받은 위치로 이동시킵니다
+                            map.setCenter(coords);
+                        }
+                    });
+
+                    // 지도 열기/닫기 토글 함수
+                    function toggleMap() {
+                        var mapContainer = document.getElementById("mapContainer");
+                        var mapBtn = document.getElementById("mapToggleBtn");
+                        var mapIcon = document.getElementById("mapIcon");
+
+                        // 현재 지도 영역의 높이가 0이면 펼쳐지고, 아니면 접히도록 설정
+                        if (mapContainer.style.height === "0px") {
+                            mapContainer.style.height = "500px";  // 펼쳤을 때 높이 설정
+                            mapBtn.innerHTML = '지도 닫기 <i class="bi bi-map-fill"></i>';
+                            mapBtn.classList.remove("btn-outline-primary");
+                            mapBtn.classList.add("btn-primary");
+                        } else {
+                            mapContainer.style.height = "0px";  // 접었을 때 높이 설정
+                            mapBtn.innerHTML = '지도 열기 <i class="bi bi-map"></i>';
+                            mapBtn.classList.remove("btn-primary");
+                            mapBtn.classList.add("btn-outline-primary");
+                        }
+                    }
+                </script>
+            </div>
+
+
+            <div th:if="${hotelDTOS != null and !#lists.isEmpty(hotelDTOS)}" class="row">
+                <div class="col-md-3" th:each="data : ${hotelDTOS}">
+                    <div class="card image-hover-container">
+                        <div class="image-container">
+
+                            <!-- Hover 시 나타나는 예약 버튼 -->
+                            <div class="hover-overlay">
+                                <a th:href="@{/hotel/read(hotelId=${data.hotelId})}" class="btn btn-hover">자세히 보기</a>
                             </div>
-                            <div class="card-body text-left">
-                                <!-- 상태 버튼 -->
-                                <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-                                    <a th:href="@{'/hotel/list?searchType=location&keyword=' + ${data.hotelLocation}}" style="text-decoration: none">
-                                        <div class="badge bg-secondary" th:text="${data.hotelLocation}">지역</div>
-                                    </a>
-                                </div>
-                                <!-- 객실 타입 버튼 -->
+                        </div>
+                        <div class="card-body text-left">
+                            <!-- 상태 버튼 -->
+                            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                                <a th:href="@{'/hotel/list?searchType=location&keyword=' + ${data.hotelLocation}}" style="text-decoration: none">
+                                    <div class="badge bg-secondary" th:text="${data.hotelLocation}">지역</div>
+                                </a>
                             </div>
-                            <h4 th:text="${data.hotelName}" class="card-title">호텔 이름</h4>
-                            <p class="card-text"> 체크인-체크아웃: <span th:text="${data.hotelCheckIn}"></span>시 - <span th:text="${data.hotelCheckOut}"></span>시</p>
-                            <input type="hidden" class="hotelId" th:value="${data.hotelId}">
-                            <div class="hotel-actions">
-                                <p th:text="${data.CheapestRoomPrice} + ' KRW~ ' " class="card-text money"> 0 KRW</p>
+                            <!-- 객실 타입 버튼 -->
+                        </div>
+                        <h4 th:text="${data.hotelName}" class="card-title">호텔 이름</h4>
+                        <p class="card-text"> 체크인-체크아웃: <span th:text="${data.hotelCheckIn}"></span>시 - <span th:text="${data.hotelCheckOut}"></span>시</p>
+                        <input type="hidden" class="hotelId" th:value="${data.hotelId}">
+                        <div class="hotel-actions">
+                            <p th:text="${data.CheapestRoomPrice} + ' KRW~ ' " class="card-text money"> 0 KRW</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+            <!-- 객실 리뷰부분 -->
+            <div class="card border-light-shadow" style="width: 950px; margin: auto; padding-top: 17px; padding-bottom: 20px;">
+                <div style="width: 950px; margin: auto">
+                    <div style="margin-bottom: -20px">
+                        <h4 style="margin-bottom: -24px">&ensp;객실 리뷰</h4> <span>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;(<span class="roomReview">2,298</span>)&ensp; <i class="bi bi-star-fill"></i> <span class="hotelRating">4.9</span>점</span>
+                    </div>
+                    <div style="text-align: right; margin-bottom: 15px; margin-top: -10px; font-size: small">
+                        전체보기>&emsp;
+                    </div>
+                    <div class="row" style="width: 950px; margin: auto">
+                        <!--th:if 돌려서 최신리뷰 3개-->
+                        <div class="col-4">
+                            <div class="card border-light-shadow review-card" style="margin: -3px; padding: 15px; height: 150px">
+                                <!-- 객실 리뷰 -->
+                                <!--별점-->
+                                <p>
+                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                </p>
+                                <!--th:if 별점이 i점 이라면~-->
+                                <!--<p>
+                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star"></i>
+                                </p>
+                                <p>
+                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star"></i>
+                                </p>
+                                <p>
+                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star"></i>
+                                </p>
+                                <p>
+                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star"></i>
+                                </p>-->
+                                좋아요
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="card border-light-shadow review-card" style="margin: -3px; padding: 15px; height: 150px">
+                                <p>
+                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star"></i>
+                                </p>
+                                <!-- 객실 리뷰 -->
+                                바퀴벌레나옴
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="card border-light-shadow review-card" style="margin: -3px; padding: 15px; height: 150px">
+                                <!-- 객실 리뷰 -->
+                                <p>
+                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
+                                    <i class="bi bi-star"></i>
+                                </p>
+                                좋네요
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
+            <!--랄라-->
 
-
-
-                <!-- 객실 리뷰부분 -->
-                <div class="card border-light-shadow" style="width: 950px; margin: auto; padding-top: 17px; padding-bottom: 20px;">
-                    <div style="width: 950px; margin: auto">
-                        <div style="margin-bottom: -20px">
-                            <h4 style="margin-bottom: -24px">&ensp;객실 리뷰</h4> <span>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;(<span class="roomReview">2,298</span>)&ensp; <i class="bi bi-star-fill"></i> <span class="hotelRating">4.9</span>점</span>
+            <!--예약 날짜 선택-->
+            <!--<div style="margin: auto">
+                <div style="margin-top: 50px; width: 930px">
+                    <h4> 날짜 선택</h4>
+                    <div class="row">
+                        <div class="col-6">
+                            <input type="date" class="form-control" id="checkInDate" name="checkInDate" required>
                         </div>
-                        <div style="text-align: right; margin-bottom: 15px; margin-top: -10px; font-size: small">
-                            전체보기>&emsp;
-                        </div>
-                        <div class="row" style="width: 950px; margin: auto">
-                            <!--th:if 돌려서 최신리뷰 3개-->
-                            <div class="col-4">
-                                <div class="card border-light-shadow review-card" style="margin: -3px; padding: 15px; height: 150px">
-                                    <!-- 객실 리뷰 -->
-                                    <!--별점-->
-                                    <p>
-                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star-fill"></i>
-                                    </p>
-                                    <!--th:if 별점이 i점 이라면~-->
-                                    <!--<p>
-                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star"></i>
-                                    </p>
-                                    <p>
-                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star"></i>
-                                    </p>
-                                    <p>
-                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star"></i>
-                                    </p>
-                                    <p>
-                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star"></i>
-                                    </p>-->
-                                    좋아요
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="card border-light-shadow review-card" style="margin: -3px; padding: 15px; height: 150px">
-                                    <p>
-                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star"></i>
-                                    </p>
-                                    <!-- 객실 리뷰 -->
-                                    바퀴벌레나옴
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="card border-light-shadow review-card" style="margin: -3px; padding: 15px; height: 150px">
-                                    <!-- 객실 리뷰 -->
-                                    <p>
-                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star"></i>
-                                    </p>
-                                    좋네요
-                                </div>
-                            </div>
+                        <div class="col-6">
+                            <input type="date" class="form-control" id="checkOutDate" name="checkOutDate" required>
                         </div>
                     </div>
                 </div>
+            </div>-->
 
-                <!--랄라-->
+            <!-- 객실 목록 -->
+            <div class="col ">
+                <div >
 
-                <!--예약 날짜 선택-->
-                <!--<div style="margin: auto">
-                    <div style="margin-top: 50px; width: 930px">
-                        <h4> 날짜 선택</h4>
-                        <div class="row">
-                            <div class="col-6">
-                                <input type="date" class="form-control" id="checkInDate" name="checkInDate" required>
-                            </div>
-                            <div class="col-6">
-                                <input type="date" class="form-control" id="checkOutDate" name="checkOutDate" required>
-                            </div>
-                        </div>
-                    </div>
-                </div>-->
+                    <div class="container">
 
-                <!-- 객실 목록 -->
-                <div class="col ">
-                    <div >
+                        <!-- Room List Section -->
+                        <section class="py-5">
+                            <div class="container">
+                                <h4 class="mb-3">객실 선택</h4>
 
-                        <div class="container">
+                                <th:block th:if="${rooms == null || #lists.isEmpty(rooms)}">
+                                    <div style="text-align: center">
+                                        <img src="/img/empty.png" alt="No likes available" width="400px">
+                                        <p>목록이 비어있습니다!</p>
+                                    </div>
+                                </th:block>
 
-                            <!-- Room List Section -->
-                            <section class="py-5">
-                                <div class="container">
-                                    <h4 class="mb-3">객실 선택</h4>
-
-                                    <th:block th:if="${rooms == null || #lists.isEmpty(rooms)}">
-                                        <div style="text-align: center">
-                                            <img src="/img/empty.png" alt="No likes available" width="400px">
-                                            <p>목록이 비어있습니다!</p>
-                                        </div>
-                                    </th:block>
-
-                                    <th:block th:unless="${rooms == null || #lists.isEmpty(rooms)}">
-                                        <div id="room-list" class="row">
-                                            <div class="col-md-4" th:each="room : ${rooms}">
-                                                <div class="room-card"
-                                                     th:data-room-id="${room.roomId}"
-                                                     th:data-stay-start="${room.stayStart}"
-                                                     th:data-stay-end="${room.stayEnd}">
-                                                    <!-- 수정된 부분: sold-out-overlay 추가 -->
-                                                    <div class="room-image">
-                                                        <img th:if="${!#lists.isEmpty(room.roomImageDTOList)}"
-                                                             th:src="@{'/upload/' + ${room.roomImageDTOList[0].imagePath}}"
-                                                             class="card-img-top"
-                                                             th:alt="${room.roomName}" width="100%">
-                                                        <img th:if="${#lists.isEmpty(room.roomImageDTOList)}"
-                                                             src="/img/default_img.jpg"
-                                                             class="card-img-top"
-                                                             alt="Default Room Image" width="100%">
-                                                        <!-- 예약 종료-->
-                                                        <div class="sold-out-overlay" th:if="${!room.roomStatus}">
-                                                            예약 종료
-                                                        </div>
+                                <th:block th:unless="${rooms == null || #lists.isEmpty(rooms)}">
+                                    <div id="room-list" class="row">
+                                        <div class="col-md-4" th:each="room : ${rooms}">
+                                            <div class="room-card"
+                                                 th:data-room-id="${room.roomId}"
+                                                 th:data-stay-start="${room.stayStart}"
+                                                 th:data-stay-end="${room.stayEnd}">
+                                                <!-- 수정된 부분: sold-out-overlay 추가 -->
+                                                <div class="room-image">
+                                                    <img th:if="${!#lists.isEmpty(room.roomImageDTOList)}"
+                                                         th:src="@{'/upload/' + ${room.roomImageDTOList[0].imagePath}}"
+                                                         class="card-img-top"
+                                                         th:alt="${room.roomName}" width="100%">
+                                                    <img th:if="${#lists.isEmpty(room.roomImageDTOList)}"
+                                                         src="/img/default_img.jpg"
+                                                         class="card-img-top"
+                                                         alt="Default Room Image" width="100%">
+                                                    <!-- 예약 종료-->
+                                                    <div class="sold-out-overlay" th:if="${!room.roomStatus}">
+                                                        예약 종료
                                                     </div>
-                                                    <div class="room-text">
-                                                        <div class="d-flex justify-content-start gap-2 mb-3">
-                                                            <!-- 예약 가능 여부 -->
-                                                            <span th:text="(${room.roomStatus} ? '예약 가능' : '예약 불가')"
-                                                                  class="badge"
-                                                                  th:classappend="${room.roomStatus} ? 'bg-success text-white' : 'bg-danger text-white'">
+                                                </div>
+                                                <div class="room-text">
+                                                    <div class="d-flex justify-content-start gap-2 mb-3">
+                                                        <!-- 예약 가능 여부 -->
+                                                        <span th:text="(${room.roomStatus} ? '예약 가능' : '예약 불가')"
+                                                              class="badge"
+                                                              th:classappend="${room.roomStatus} ? 'bg-success text-white' : 'bg-danger text-white'">
                                 </span>
-                                                            <span th:text="${room.roomType}" class="badge bg-dark text-white"></span>
-                                                        </div>
-                                                        <h5 th:text="${room.roomName}" class="card-title"></h5>
-                                                        <span>체크인 : <span th:text="${hotelDTO.hotelCheckIn}">체크인</span>시 - </span> <span>체크아웃 : <span th:text="${hotelDTO.hotelCheckOut}">체크아웃</span>시</span>
-                                                        <div class="room-actions">
-                                                            <p class="room-price mb-0"
-                                                               th:text="${room.formattedRoomPrice != null ? room.formattedRoomPrice + ' ' + '~' : '가격 미정'}"></p>
-                                                            <!--<button class="btn btn-book" style="width: 100px"
-                                                                    th:text="${room.roomStatus ? '예약하기' : '예약 불가'}"
-                                                                    th:classappend="${room.roomStatus ? 'btn-dark' : 'btn-danger text-bold'}"
-                                                                    th:disabled="${!room.roomStatus}">
-                                                            </button>-->
-                                                            <button class="btn btn-book"
-                                                                    th:data-room-id="${room.roomId}"
-                                                                    th:text="${room.roomStatus ? '자세히 보기' : '예약 불가'}"
-                                                                    th:classappend="${room.roomStatus ? 'btn-dark' : 'btn-danger text-bold'}"
-                                                                    th:disabled="${!room.roomStatus}"
-                                                                    onclick="goToRoomDetail(this)">
-                                                            </button>
-                                                        </div>
+                                                        <span th:text="${room.roomType}" class="badge bg-dark text-white"></span>
+                                                    </div>
+                                                    <h5 th:text="${room.roomName}" class="card-title"></h5>
+                                                    <span>체크인 : <span th:text="${hotelDTO.hotelCheckIn}">체크인</span>시 - </span> <span>체크아웃 : <span th:text="${hotelDTO.hotelCheckOut}">체크아웃</span>시</span>
+                                                    <div class="room-actions">
+                                                        <p class="room-price mb-0"
+                                                           th:text="${room.formattedRoomPrice != null ? room.formattedRoomPrice + ' ' + '~' : '가격 미정'}"></p>
+                                                        <!--<button class="btn btn-book" style="width: 100px"
+                                                                th:text="${room.roomStatus ? '예약하기' : '예약 불가'}"
+                                                                th:classappend="${room.roomStatus ? 'btn-dark' : 'btn-danger text-bold'}"
+                                                                th:disabled="${!room.roomStatus}">
+                                                        </button>-->
+                                                        <button class="btn btn-book"
+                                                                th:data-room-id="${room.roomId}"
+                                                                th:text="${room.roomStatus ? '자세히 보기' : '예약 불가'}"
+                                                                th:classappend="${room.roomStatus ? 'btn-dark' : 'btn-danger text-bold'}"
+                                                                th:disabled="${!room.roomStatus}"
+                                                                onclick="goToRoomDetail(this)">
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-
-                                    </th:block>
-
-                                    <!-- 버튼 -->
-                                    <div class="text-end mt-3">
-                                        <a class="btn btn-primary" style="background-color: black" href="/hotel/list">목록</a>
                                     </div>
-                                </div>
-                            </section>
 
-                        </div>
+                                </th:block>
+
+                                <!-- 버튼 -->
+                                <div class="text-end mt-3">
+                                    <a class="btn btn-primary" style="background-color: black" href="/hotel/list">목록</a>
+                                </div>
+                            </div>
+                        </section>
 
                     </div>
+
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- 로그인된 상태 -->
-    <div sec:authorize="isAuthenticated()">
-        <script th:inline="javascript">
-            var isLoggedIn = true;
-            console.log("isLoggedIn:", isLoggedIn);
-        </script>
-    </div>
+<!-- 로그인된 상태 -->
+<div sec:authorize="isAuthenticated()">
+    <script th:inline="javascript">
+        var isLoggedIn = true;
+        console.log("isLoggedIn:", isLoggedIn);
+    </script>
+</div>
 
-    <!-- 로그인되지 않은 상태 -->
-    <div sec:authorize="!isAuthenticated()">
-        <script th:inline="javascript">
-            var isLoggedIn = false;
-            console.log("isLoggedIn:", isLoggedIn);
-        </script>
-    </div>
+<!-- 로그인되지 않은 상태 -->
+<div sec:authorize="!isAuthenticated()">
+    <script th:inline="javascript">
+        var isLoggedIn = false;
+        console.log("isLoggedIn:", isLoggedIn);
+    </script>
+</div>
 
 </div>
 

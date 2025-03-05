@@ -267,24 +267,6 @@ public class AdminController {
         }
     }
 
-    // 설정한 주소가 지도로 잘 나오는지 테스트용으로 만듦, 기능 구현 완성 이후에는 삭제하기
-    @GetMapping("/admin/mapTest")
-    public String read(@RequestParam Integer hotelId, Model model, RedirectAttributes redirectAttributes) {
-        try {
-            HotelDTO hotelDTO = hotelService.read(hotelId);
-            model.addAttribute("hotelDTO", hotelDTO);
-            return "/admin/mapTest";
-
-        } catch (NullPointerException e) {
-            // Flash Attribute로 메시지를 전달
-            redirectAttributes.addFlashAttribute("message", "해당 지사가 없습니다!");
-            return "redirect:/manager/hotel/list"; // 목록 페이지로 리다이렉트
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("message", "서버 오류가 있습니다!");
-            return "redirect:/manager/hotel/list"; // 목록 페이지로 리다이렉트
-        }
-    }
-
     // 알림기능 구현
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
