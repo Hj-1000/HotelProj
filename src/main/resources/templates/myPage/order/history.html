@@ -103,7 +103,7 @@
             <div th:each="order, stat : ${orders.content}" class="card mb-3">
 
                 <!-- 취소된 주문 -->
-                <div th:if="${order.serviceOrderStatus.name() == 'CANCELED'}" class="card mb-3 canceled-order">
+                <div th:if="${order.serviceOrderStatus.name() == 'CANCELED'}" class="card canceled-order">
                     <div class="card-header bg-danger text-white">
                         NO.<span th:text="${(pageInfo.currentPage - 1) * orders.size + stat.index + 1}"></span>
                         주문번호: <span th:text="${order.serviceOrderId}"></span>
@@ -126,7 +126,7 @@
                 </div>
 
                 <!-- 대기중 주문 -->
-                <div th:if="${order.serviceOrderStatus.name() == 'PENDING'}" class="card mb-3 pending-order">
+                <div th:if="${order.serviceOrderStatus.name() == 'PENDING'}" class="card pending-order">
                     <div class="card-header bg-warning text-dark">
                         NO.<span th:text="${(pageInfo.currentPage - 1) * orders.size + stat.index + 1}"></span>
                         주문번호: <span th:text="${order.serviceOrderId}"></span>
@@ -152,7 +152,7 @@
                 </div>
 
                 <!-- 완료된 주문 -->
-                <div th:if="${order.serviceOrderStatus.name() == 'COMPLETED'}" class="card mb-3 completed-order">
+                <div th:if="${order.serviceOrderStatus.name() == 'COMPLETED'}" class="card completed-order">
                     <div class="card-header bg-success text-white">
                         NO.<span th:text="${(pageInfo.currentPage - 1) * orders.size + stat.index + 1}"></span>
                         주문번호: <span th:text="${order.serviceOrderId}"></span>

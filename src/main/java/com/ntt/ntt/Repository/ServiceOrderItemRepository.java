@@ -11,4 +11,6 @@ public interface ServiceOrderItemRepository extends JpaRepository<ServiceOrderIt
 
     //구매이력
     List<ServiceOrderItem> findByServiceOrder_ServiceOrderId(Integer serviceOrderId);
+
+    List<ServiceOrderItem> findByServiceMenu_ServiceMenuId(Integer serviceMenuId);
 }

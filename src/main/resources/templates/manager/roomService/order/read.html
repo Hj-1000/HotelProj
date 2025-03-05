@@ -8,6 +8,22 @@
     <title>주문 상세보기</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script th:inline="javascript">
+        $(document).ready(function () {
+            $(".delBtn").click(function (event) {
+                var serviceOrderId = $(this).data('id');  // 삭제하려는 주문 ID 가져오기
+                var confirmed = confirm("정말로 삭제하시겠습니까?");
+
+                if (confirmed) {
+                    // 확인을 누르면 삭제 URL로 이동
+                    window.location.href = '/manager/order/delete?serviceOrderId=' + serviceOrderId;
+                } else {
+                    event.preventDefault(); // 취소 시 아무 작업도 하지 않음
+                }
+            });
+        });
+        // 삭제 버튼 클릭 시 확인 메시지 표시
+    </script>
 </head>
 <body>
 <div id="wrapper" layout:fragment="content">
@@ -59,6 +75,7 @@
         <!-- 뒤로 가기 -->
         <div class="text-end mt-4">
             <a th:href="@{/manager/order/list}" class="btn btn-secondary">목록으로</a>
+            <a th:href="@{/manager/order/delete(serviceOrderId=${serviceOrderHistoryDTO.serviceOrderId})}" class="btn btn-danger delBtn"><i class="bi bi-trash"></i></a>
         </div>
     </div>
 </div>

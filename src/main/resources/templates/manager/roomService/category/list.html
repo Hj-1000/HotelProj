@@ -40,6 +40,17 @@
                 $("#modalHotelId").val(currentHotelId);
             });
 
+            // 삭제 버튼 클릭 시 확인 메시지 표시
+            $(".delBtn").click(function (event) {
+                // 삭제 전에 확인 메시지 띄우기
+                var confirmed = confirm("정말로 삭제하시겠습니까?");
+
+                // 사용자가 확인을 누르면 삭제가 진행됨
+                if (!confirmed) {
+                    event.preventDefault(); // 삭제 방지
+                }
+            });
+
             // 이미지 미리보기 기능
             function previewImage(event) {
                 let previewContainer = $("#imagePreviewContainer");
