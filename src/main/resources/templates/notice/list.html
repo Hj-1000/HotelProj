@@ -69,7 +69,7 @@
             <td th:text="${#temporals.format(data.regDate, 'yyyy-MM-dd hh:mm')}">2024-12-18 12:00</td>
             <td th:text="${#temporals.format(data.modDate, 'yyyy-MM-dd hh:mm')}">2024-12-18 12:00</td>
             <td>
-              <a th:href="@{/notice/update(noticeId=${data.noticeId})}">수정</a> /
+              <a th:href="@{/notice/update(noticeId=${data.noticeId})}"><i class="bi bi-pen"></i></a> /
               <a th:href="@{/notice/delete(noticeId=${data.noticeId})}" class="delete-link"><i class="bi bi-trash"></i></a>
             </td>
           </tr>

@@ -66,7 +66,7 @@
           </div>
           <div class="card-footer">
             <form th:action="@{/notice/update}" method="post" enctype="multipart/form-data">
-            <a th:href="@{/notice/update(noticeId=${noticeDTO.noticeId})}" class="btn btn-primary">수정</a>
+            <a th:href="@{/notice/update(noticeId=${noticeDTO.noticeId})}" class="btn btn-primary"><i class="bi bi-pen"></i></a>
 
             <button type="button" class="btn btn-danger"
                     th:onclick="|location.href='@{/notice/list}'|">취소</button>
