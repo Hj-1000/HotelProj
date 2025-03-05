@@ -34,7 +34,7 @@ public class EmailService {
                     + "<div style='width: 100%; max-width: 540px; padding: 20px; border-radius: 10px; border: 1px solid #ddd;'>"
                     + "<div style='display: flex; align-items: center;'>"
                     + "<img src='cid:resetImage' alt='Reset Image' style='width: 100px; height: 100px; margin-right: 10px;' />"
-                    + "<h2 style='color: #4CAF50; font-family: Arial, sans-serif;'>NTT호텔 비밀번호 인증 코드 이메일입니다.</h2>"
+                    + "<h2 style='font-family: Arial, sans-serif;'>NTT호텔 비밀번호 인증 코드 이메일입니다.</h2>"
                     + "</div>"
                     + "<hr style='border: none; height: 1px; background-color: #ddd; margin: 10px 0;'>"
                     + "<p style='font-size: 16px; padding-left: 110px;'><br></p>"
@@ -45,7 +45,7 @@ public class EmailService {
                     + "<p style='font-size: 16px; padding-left: 110px;'>코드를 정확하게 입력해주세요.</p>"
                     + "<p style='font-size: 16px; padding-left: 110px;'>감사합니다, NTT호텔</p>"
                     + "<p style='font-size: 16px; padding-left: 110px;'><br></p>"
-                    + "<p style='font-size: 14px; padding-left: 110px;'>*본인이 요청한 인증이 아니라면 관리자에게 문의해주세요.</p>"
+                    + "<p style='font-size: 14px; padding-left: 110px;'>*인증 코드를 요청한 적 없다면 관리자에게 문의해주세요.</p>"
                     + "<p style='font-size: 16px; padding-left: 110px;'><br></p>"
                     + "</div>"
                     + "</body></html>";
