@@ -38,8 +38,12 @@ public class ServiceMenuManagerController {
     @GetMapping("/register")
     public String registerForm(@RequestParam(required = false) Integer serviceCateId, Model model){
         //검증처리가 필요하면 빈 MenuDTO를 생성해서 전달한다.
-        List<ServiceCateDTO> serviceCateDTOS = serviceCateService.getAllServiceCate();
-        model.addAttribute("serviceCateDTOS", serviceCateDTOS);
+        if (serviceCateId != null) {
+            ServiceCateDTO serviceCateDTO = serviceCateService.read(serviceCateId);
+            Integer hotelId = serviceCateDTO.getHotelId().getHotelId();
+            List<ServiceCateDTO> serviceCateDTOS = serviceCateService.listByHotel(hotelId);
+            model.addAttribute("serviceCateDTOS", serviceCateDTOS);
+        }
         model.addAttribute("serviceMenuDTO", new ServiceMenuDTO());
         model.addAttribute("selectServiceCateId", serviceCateId);
         return "/manager/roomService/menu/register";

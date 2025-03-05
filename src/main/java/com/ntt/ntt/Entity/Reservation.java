@@ -48,5 +48,8 @@ public class Reservation extends BaseEntity {
     private Room room;
 
     @OneToMany(mappedBy = "reservation", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<ServiceOrder> serviceOrders;
+
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Payment> payments;
 }
