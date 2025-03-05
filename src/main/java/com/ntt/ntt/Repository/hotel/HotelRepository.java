@@ -2,9 +2,11 @@ package com.ntt.ntt.Repository.hotel;
 
 import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.Member;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -68,4 +70,13 @@ public interface HotelRepository extends JpaRepository<Hotel, Integer> {
 
     @Query("SELECT h.hotelId FROM Hotel h WHERE h.company.companyId IN :companyIds")
     List<Integer> findHotelIdsByCompanyIds(@Param("companyIds") List<Integer> companyIds);
+
+    // 호텔 평점 업데이트
+    @Transactional
+    @Modifying
+    @Query("UPDATE Hotel h SET h.hotelRating = " +
+            "(SELECT COALESCE(ROUND(AVG(rr.rating), 1), 0) FROM RoomReview rr JOIN rr.room r WHERE r.hotelId.hotelId = h.hotelId) " +
+            "WHERE h.hotelId = :hotelId")
+    void updateHotelRating(@Param("hotelId") Integer hotelId);
+
 }

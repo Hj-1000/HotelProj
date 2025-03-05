@@ -6,6 +6,7 @@ import com.ntt.ntt.Entity.*;
 import com.ntt.ntt.Repository.ImageRepository;
 import com.ntt.ntt.Repository.MemberRepository;
 import com.ntt.ntt.Repository.RoomRepository;
+import com.ntt.ntt.Repository.RoomReviewRepository;
 import com.ntt.ntt.Repository.company.CompanyRepository;
 import com.ntt.ntt.Repository.hotel.HotelRepository;
 import com.ntt.ntt.Service.ImageService;
@@ -39,6 +40,7 @@ public class HotelService {
     private final CompanyRepository companyRepository;
     private final RoomRepository roomRepository;
     private final MemberRepository memberRepository;
+    private final RoomReviewRepository roomReviewRepository;
 
     private final ModelMapper modelMapper;
 
@@ -506,12 +508,19 @@ public class HotelService {
             throw new IllegalStateException("ModelMapper가 초기화되지 않았습니다.");
         }
 
-        // hotelId를 통해 회사 정보 불러오기
+        // hotelId를 통해 호텔 정보 불러오기
         Optional<Hotel> hotel = hotelRepository.findById(hotelId);
-        HotelDTO hotelDTO = modelMapper.map(hotel, HotelDTO.class);
+        if (hotel.isEmpty()) {
+            throw new IllegalArgumentException("호텔 정보를 찾을 수 없습니다.");
+        }
 
-        //이미지 경로에서 c:/data/ 제거 코드 -> (파일명.파일확장자 만 빼오기 위해)
-        //추후 더 간단하게 합쳐서 하나하나 입력할 필요 없이 다같이 사용 가능하도록 ImgService에 추가 할 예정
+        HotelDTO hotelDTO = modelMapper.map(hotel.get(), HotelDTO.class);
+
+        // 객실 리뷰 개수 계산 (DB에서)
+        Integer roomReviewCount = roomReviewRepository.countReviewsByHotelId(hotelId);
+        hotelDTO.setRoomReviewCount(roomReviewCount);  // 호텔 DTO에 리뷰 개수 설정
+
+        // 이미지 경로에서 c:/data/ 제거 코드
         List<ImageDTO> imgDTOList = imageRepository.findByHotel_HotelId(hotelDTO.getHotelId())
                 .stream().map(imagefile -> {
                     // 여기서 이미지 경로를 상대 경로로 변환
@@ -524,6 +533,7 @@ public class HotelService {
 
         return hotelDTO;
     }
+
 
     // hotelId에 맞는 방들을 가져오는 메서드
     public Page<RoomDTO> roomListByHotel(Integer hotelId, Pageable page) {

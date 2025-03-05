@@ -24,5 +24,8 @@ public interface RoomReviewRepository extends JpaRepository<RoomReview, Integer>
     //  특정 객실의 최근 3개 리뷰 조회
     List<RoomReview> findTop3ByRoom_RoomIdOrderByReviewDateDesc(Integer roomId);
 
+    // 호텔Id를 토대로 객실리뷰 수 계산
+    @Query("SELECT COUNT(rr) FROM RoomReview rr JOIN rr.room r WHERE r.hotelId.hotelId = :hotelId")
+    Integer countReviewsByHotelId(Integer hotelId);
 
 }

@@ -8,6 +8,7 @@ import com.ntt.ntt.Repository.MemberRepository;
 import com.ntt.ntt.Repository.ReservationRepository;
 import com.ntt.ntt.Repository.RoomRepository;
 import com.ntt.ntt.Repository.RoomReviewRepository;
+import com.ntt.ntt.Repository.hotel.HotelRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class RoomReviewService {
     private final RoomRepository roomRepository;
     private final MemberRepository memberRepository;
     private final ReservationRepository reservationRepository;
+    private final HotelRepository hotelRepository;
 
     // 1. 리뷰 등록
     public RoomReviewDTO registerReview(RoomReviewDTO reviewDTO) {
@@ -53,6 +55,11 @@ public class RoomReviewService {
 
         RoomReview savedReview = roomReviewRepository.save(roomReview);
         log.info(" 리뷰 저장 완료: {}", savedReview);
+
+        // 리뷰 저장 후 호텔 평점 업데이트 2025-03-05 추가
+        Integer hotelId = room.getHotelId().getHotelId();  // 호텔 ID 가져오기
+        hotelRepository.updateHotelRating(hotelId);
+        log.info("호텔 평점 업데이트 완료: 호텔 ID = {}", hotelId);
 
         return RoomReviewDTO.fromEntity(savedReview);
     }

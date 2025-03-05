@@ -32,7 +32,7 @@ public class Hotel extends BaseEntity {
     @Column(length = 255)
     private String hotelInfo;
     // 호텔 평점
-    private Integer hotelRating;
+    private Double  hotelRating;
     // 호텔 전화번호
     @Column(length = 20)
     private String hotelPhone;
