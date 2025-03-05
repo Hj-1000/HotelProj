@@ -67,12 +67,13 @@
           </div>
           <div class="mb-3 mt-3">
             <label for="companyManager" class="form-label">담당자:</label>
-            <select id="companyManager" name="companyManager" class="form-select" onchange="updateMemberId(); checkHotelManagerSelection();">
+            <select id="companyManager" name="companyManager" class="form-select" onchange="updateMemberId(); checkHotelManagerSelection();" required>
+              <option value="" disabled selected>담당자를 선택해주세요</option>
               <th:block th:each="memberDTO : ${memberDTOS}">
                 <option th:value="${memberDTO.memberName}" th:text="${memberDTO.memberName}" th:data-id="${memberDTO.memberId}">김호텔장</option>
               </th:block>
               <th:block th:if="${#lists.isEmpty(memberDTOS)}">
-                <option value="표시할 호텔장이 없습니다.">표시할 호텔장이 없습니다. 먼저 호텔장 가입 후 등록해주세요.</option>
+                <option value="" disabled>표시할 호텔장이 없습니다. 먼저 호텔장 가입 후 등록해주세요.</option>
               </th:block>
             </select>
 
