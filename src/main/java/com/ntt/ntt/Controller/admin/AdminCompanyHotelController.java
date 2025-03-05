@@ -425,6 +425,30 @@ public class AdminCompanyHotelController {
         return "redirect:/admin/hotel/read?hotelId=" + hotelId;
     }
 
+    //삭제
+    @Operation(summary = "관리자용 호텔 삭제", description = "hotelId에 맞는 호텔을 삭제한다.")
+    @GetMapping("/hotel/delete")
+    public String hotelDelete(Integer hotelId, RedirectAttributes redirectAttributes) {
+
+        // 삭제 전 호텔 정보 조회
+        HotelDTO hotelDTO = hotelService.findById(hotelId);  // 호텔 정보를 먼저 가져옴
+
+        if (hotelDTO == null) {
+            redirectAttributes.addFlashAttribute("error", "해당 호텔을 찾을 수 없습니다.");
+            return "redirect:/admin/hotel/list";
+        }
+
+        // 삭제 수행
+        hotelService.delete(hotelId);
+
+        // 삭제한 지사의 companyId 가져오기
+        Integer companyId = hotelDTO.getCompanyId();
+
+        redirectAttributes.addFlashAttribute("message", "해당 지사 삭제가 완료되었습니다.");
+
+        return "redirect:/admin/hotel/list";  // companyId를 쿼리 파라미터로 전달
+    }
+
 
 
 

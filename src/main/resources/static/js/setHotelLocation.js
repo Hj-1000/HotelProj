@@ -14,25 +14,34 @@ function setHotelLocationBasedOnAddress(address) {
         location = '서초/교대/사당';
     } else if (address.includes('서울 잠실') || address.includes('서울 송파') || address.includes('서울 강동')) {
         location = '잠실/송파/강동';
-    } else if (address.includes('서울 홍대') || address.includes('서울 합정') || address.includes('서울 서대문')) {
-        location = '홍대/합정/서대문';
-    } else if (address.includes('서울 구로') || address.includes('서울 신도림') || address.includes('서울 금천') || address.includes('서울 영등포')) {
-        location = '구로/신도림/금천/영등포';
-    } else if (address.includes('서울 김포공항') || address.includes('서울 강서') || address.includes('서울 양천구')) {
+    } else if (address.includes('서울 마포구 동교동') || address.includes('서울 마포구 합정') || address.includes('서울 마포구 상암') || address.includes('서울 마포구')) {
+        location = '홍대/합정/상암/마포';
+    } else if (address.includes('서울 구로') || address.includes('서울 신도림') || address.includes('서울 금천')) {
+        location = '구로/신도림/금천';
+    } else if (address.includes('서울 김포공항') || address.includes('서울 강서') || address.includes('서울 양천')) {
         location = '김포공항/강서/양천';
     } else if (address.includes('서울 건대입구') || address.includes('서울 성수') || address.includes('서울 성동')) {
         location = '건대입구/성수/성동';
-    } else if (address.includes('서울 종로') || address.includes('서울 광화문') || address.includes('서울 명동') || address.includes('서울 중구')) {
-        location = '종로/광화문/명동/중구';
-    } else if (address.includes('서울 동대문') || address.includes('서울 을지로') || address.includes('서울 청계천')) {
-        location = '동대문/을지로/청계천';
+    } else if (address.includes('서울 종로') || address.includes('서울 광화문') || address.includes('서울 명동') || address.includes('서울 청계천')) {
+        location = '종로/광화문/청계천/명동';
+    } else if (address.includes('서울 동대문') || address.includes('서울 을지로') || address.includes('서울 중구')) {
+        location = '동대문/을지로/중구';
     } else if (address.includes('서울 용산') || address.includes('서울 이태원') || address.includes('서울 여의도')) {
         location = '용산/이태원/여의도';
-    } else if (address.includes('서울 노원') || address.includes('서울 중랑') || address.includes('서울 도봉') || address.includes('서울 강북')) {
-        location = '노원/중랑/도봉/강북';
-    } else if (address.includes('서울 성북') || address.includes('서울 종로') || address.includes('서울 광진')) {
-        location = '성북/종로/광진';
+    } else if (address.includes('서울 노원') || address.includes('서울 중랑') || address.includes('서울 도봉')) {
+        location = '노원/중랑/도봉';
+    } else if (address.includes('서울 성북') || address.includes('서울 광진')) {
+        location = '성북/광진';
+    } else if (address.includes('서울 강북') || address.includes('서울 도봉구') || address.includes('서울 노원구')) {
+        location = '강북구/도봉구/노원구';
+    } else if (address.includes('서울 은평구') || address.includes('서울 서대문구') ) {
+        location = '은평구/서대문구';
+    } else if (address.includes('서울 양천구') || address.includes('서울 강서구') || address.includes('서울 구로구')) {
+        location = '양천구/강서구/구로구';
+    } else if (address.includes('서울 동작구') || address.includes('서울 관악구') || address.includes('서울 금천구')) {
+        location = '동작구/관악구/금천구';
     }
+
 
 
     // 경기도 (도 이름 없이 도시별 처리)
@@ -100,6 +109,8 @@ function setHotelLocationBasedOnAddress(address) {
         location = '수성구/달서구/북구';
     } else if (address.includes('대구 서구') || address.includes('대구 동구') || address.includes('대구 달성군')) {
         location = '서구/동구/달성군';
+    } else if (address.includes('대구 군위군') || address.includes('대구 고령군') || address.includes('대구 청도군') || address.includes('대구 칠곡군')) {
+        location = '군위군/고령군/청도군/칠곡군';
     }
 
     // 광주
@@ -167,9 +178,9 @@ function setHotelLocationBasedOnAddress(address) {
     }
 
     // 전북
-    else if (address.includes('전북 전주') || address.includes('전북 군산') || address.includes('전북 익산')) {
+    else if (address.includes('전북특별자치도 전주') || address.includes('전북특별자치도 군산') || address.includes('전북특별자치도 익산')) {
         location = '전주/군산/익산';
-    } else if (address.includes('전북 정읍') || address.includes('전북 남원') || address.includes('전북 완주')) {
+    } else if (address.includes('전북특별자치도 정읍') || address.includes('전북특별자치도 남원') || address.includes('전북특별자치도 완주')) {
         location = '정읍/남원/완주';
     }
 
@@ -211,27 +222,30 @@ function setHotelLocationBasedOnAddress(address) {
 
 
     // 제주도
-    else if (address.includes('제주특별자치도 한림읍') || address.includes('제주특별자치도 애월읍')) {
-        location = '제주/한림/애월';
-    } else if (address.includes('제주특별자치도 중문') || address.includes('제주특별자치도 대정읍') || address.includes('제주특별자치도 서귀포시 대포복개로') || address.includes('제주특별자치도 서귀포시 대포로')) {
-        location = '서귀포/중문/대정';
-    } else if (address.includes('제주특별자치도 성산읍') || address.includes('제주특별자치도 서귀포시 표선면') || address.includes('제주특별자치도 송악산')) {
+    else if (address.includes('제주특별자치도 서귀포시 대림') ||address.includes('제주특별자치도 서귀포시 성산읍') || address.includes('제주특별자치도 서귀포시 표선면') || address.includes('제주특별자치도 서귀포시 송악산')) {
         location = '성산/표선/송악산';
-    } else if (address.includes('제주특별자치도 구좌읍') || address.includes('제주특별자치도 조천읍') || address.includes('제주특별자치도 용담동')) {
-        location = '구좌/조천/용담';
-    } else if (address.includes('제주특별자치도 남원읍') || address.includes('제주특별자치도 한경면') || address.includes('제주특별자치도 성산읍')) {
+    } else if (address.includes('제주특별자치도 제주시 구좌읍') || address.includes('제주특별자치도 제주시 조천읍') || address.includes('제주특별자치도 제주시 용담동')) {
+        location = '구좌/조천/용담동';
+    } else if (address.includes('제주특별자치도 서귀포시 남원읍') || address.includes('제주특별자치도 서귀포시 한경면') || address.includes('제주특별자치도 서귀포시 성산읍')) {
         location = '남원/한경/성산';
-    } else if (address.includes('제주특별자치도 제주공항') || address.includes('제주특별자치도 서광로') || address.includes('제주특별자치도 동문시장')) {
+    } else if (address.includes('제주특별자지토 제주시 공항') || address.includes('제주특별자치도 제주시 서광로') || address.includes('제주특별자치도 제주시 동문시장')) {
         location = '제주공항/서광로/동문시장';
-    } else if (address.includes('제주특별자치도 안덕면') || address.includes('제주특별자치도 서귀포시 호근동') || address.includes('제주특별자치도 대포동')) {
-        location = '안덕면/호근동/대포동';
-    } else if (address.includes('제주특별자치도 대림동') || address.includes('제주특별자치도 송악산') || address.includes('제주특별자치도 애월읍')) {
-        location = '대림동/송악산/애월읍';
-    } else if (address.includes('제주특별자치도 이호동') || address.includes('제주특별자치도 용수리') || address.includes('제주특별자치도 제주대학교')) {
+    } else if (address.includes('제주특별자치도 서귀포시 안덕면') || address.includes('제주특별자치도 서귀포시 호근동') || address.includes('제주특별자치도 서귀포시 대포동')) {
+        location = '안덕면/호근동/대포';
+    } else if (address.includes('제주특별자치도 제주시 이호동') || address.includes('제주특별자치도 제주시 용수리') || address.includes('제주특별자치도 제주시 제주대학교')) {
         location = '이호동/용수리/제주대학교';
-    } else if (address.includes('제주특별자치도 중산간도로') || address.includes('제주특별자치도 천지연폭포') || address.includes('제주특별자치도 미로공원')) {
+    } else if (address.includes('제주특별자치도 제주시 중산간도로') || address.includes('제주특별자치도 제주시 천지연폭포') || address.includes('제주특별자치도 제주시 미로공원')) {
         location = '중산간도로/천지연폭포/미로공원';
     }
+
+
+    // 모든 조건들이 맞지 않았을 때 or 해당 조건이 맞을 때만 적용해야함
+    else if (address.includes('제주특별자치도 제주시 한림읍') || address.includes('제주특별자치도 제주시 애월읍') || address.includes('제주특별자치도 제주시')) {
+        location = '제주/한림/애월';
+    } else if (address.includes('제주특별자치도 서귀포시 중문') || address.includes('제주특별자치도 서귀포시 대정읍') || address.includes('제주특별자 서귀포시')) {
+        location = '서귀포/중문/대정';
+    }
+
 
 
     document.getElementById('hotelLocation').value = location;
