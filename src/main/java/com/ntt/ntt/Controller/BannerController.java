@@ -1,7 +1,11 @@
 package com.ntt.ntt.Controller;
 
 import com.ntt.ntt.DTO.BannerDTO;
+import com.ntt.ntt.DTO.ImageDTO;
 import com.ntt.ntt.Entity.Banner;
+import com.ntt.ntt.Entity.Image;
+import com.ntt.ntt.Repository.BannerRepository;
+import com.ntt.ntt.Repository.ImageRepository;
 import com.ntt.ntt.Service.BannerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -13,8 +17,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import com.ntt.ntt.Service.ImageService;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 //@RequiredArgsConstructor
@@ -25,21 +30,46 @@ public class BannerController {
 
 
     private final BannerService bannerService;
+    private final ImageService imageService;
+    private final ImageRepository imageRepository;
 
     @Autowired
-    public BannerController(BannerService bannerService) {
+    public BannerController(BannerService bannerService, ImageService imageService, ImageRepository imageRepository) {
         this.bannerService = bannerService;
+        this.imageService = imageService;
+        this.imageRepository=imageRepository;
+
     }
 
     // 배너 목록 페이지
+//    @GetMapping("/banner/list")
+//    public String listBanners(Model model) {
+//        List<BannerDTO> bannerDTOList = bannerService.list();
+//        model.addAttribute("bannerDTOList", bannerDTOList);
+//
+//        return "banner/list";
+//    }
     @GetMapping("/banner/list")
-    public String listBanners(Model model) {
-        List<BannerDTO> bannerDTOList = bannerService.list();
+    public String bannerList(Model model) {
+        List<BannerDTO> bannerDTOList = bannerService.list(); // 배너 목록 가져오기
+
+        for (BannerDTO banner : bannerDTOList) {
+            List<Image> images = imageRepository.findByBanner_BannerId(banner.getBannerId());
+
+            List<ImageDTO> imageDTOs = images.stream()
+                    .map(ImageDTO::fromEntity) //  fromEntity 메서드 활용하여 변환
+                    .collect(Collectors.toList());
+
+            banner.setBannerImageDTOList(imageDTOs);
+        }
+
         model.addAttribute("bannerDTOList", bannerDTOList);
-//        List<Banner> banners = bannerService.getAllBanners();
+
+//        List<Banner> banners=bannerService.list();
 //        model.addAttribute("banners", banners);
         return "banner/list";
     }
+
 
     @GetMapping("/banner/register")
     public String registerForm(@AuthenticationPrincipal UserDetails userDetails, Model model) {
