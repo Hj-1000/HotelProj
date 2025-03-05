@@ -142,7 +142,38 @@
             </ul>
         </section>
 
-        <!-- 리뷰 섹션 -->
+        <!-- 리뷰  -->
+
+        <!-- 수정 모달 -->
+        <div class="modal fade" id="editReviewModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">리뷰 수정</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="editReviewId">
+                        <div class="mb-3">
+                            <label for="editReviewText" class="form-label">리뷰 내용</label>
+                            <textarea id="editReviewText" class="form-control"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editRating" class="form-label">평점</label>
+                            <select id="editRating" class="form-control">
+                                <option value="5">★★★★★ (5점)</option>
+                                <option value="4">★★★★☆ (4점)</option>
+                                <option value="3">★★★☆☆ (3점)</option>
+                                <option value="2">★★☆☆☆ (2점)</option>
+                                <option value="1">★☆☆☆☆ (1점)</option>
+                            </select>
+                        </div>
+                        <button type="button" id="saveReviewChanges" class="btn btn-primary">수정 완료</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <section class="review-section mb-5 p-4 border rounded">
             <h3 class="mb-3 fw-bold">이용 후기</h3>
             <!--  리뷰 작성 폼 (로그인한 사용자만 보이도록 설정) -->
@@ -179,7 +210,26 @@
             <!--  리뷰 목록 표시 -->
             <h4 class="mt-4">다른 이용자의 후기</h4>
             <div id="reviewList">
-                <p class="text-muted">로딩 중...</p>
+                <div class="border p-3 mb-3 rounded" th:each="review : ${reviews}" th:data-review-id="${review.reviewId}">
+                    <p>
+                        <strong th:text="${review.memberName} ?: '익명'"></strong> -
+                        <span th:utext="'★'.repeat(${review.rating}) + '☆'.repeat(5 - ${review.rating})"></span>
+                    </p>
+                    <p th:text="${review.reviewText}"></p>
+                    <p class="text-muted small" th:text="${#temporals.format(review.reviewDate, 'yyyy. MM. dd. a hh:mm')}"></p>
+
+                    <!--  본인 리뷰일 경우 수정/삭제 버튼 표시 -->
+                    <div th:if="${#authentication.principal.memberId == review.memberId}">
+                        <button class="btn btn-sm btn-outline-primary edit-review-btn"
+                                th:data-review-id="${review.reviewId}"
+                                th:data-review-text="${review.reviewText}"
+                                th:data-review-rating="${review.rating}">수정
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger delete-review-btn"
+                                th:data-review-id="${review.reviewId}">삭제
+                        </button>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -689,76 +739,142 @@
 
         /* 리뷰 함수 */
         document.addEventListener("DOMContentLoaded", function () {
-            let roomIdElement = document.getElementById("reviewRoomId");
-            const memberIdElement = document.getElementById("reviewMemberId");
-            let roomId = roomIdElement ? roomIdElement.value : "";
-            const memberId = memberIdElement ? memberIdElement.value : "";
+            console.log(" JavaScript 초기화됨!");
 
-            //  roomId가 없으면 URL에서 직접 추출
-            if (!roomId || roomId.trim() === "") {
-                console.warn("roomId가 설정되지 않음. URL에서 가져옵니다.");
-                const pathSegments = window.location.pathname.split("/");
-                roomId = pathSegments[pathSegments.length - 1];
-            }
+            const roomId = getRoomIdFromURL(); // URL에서 roomId 가져오기
+            const memberId = document.getElementById("reviewMemberId")?.value || null; // 로그인한 사용자 ID
+            const reviewList = document.getElementById("reviewList");
 
-            //  리뷰 목록 불러오기
+            /*  리뷰 목록 불러오기 */
             function loadReviews() {
-                console.log("리뷰 목록 불러오기 실행");
-                const reviewList = document.getElementById("reviewList");
-
                 fetch(`/reviews/room/${roomId}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error("서버 응답 오류");
-                        }
-                        return response.json();
-                    })
+                    .then(response => response.json())
                     .then(data => {
-                        console.log("서버 응답:", data);
-
-                        // 기존 리뷰 목록 초기화
                         reviewList.innerHTML = "";
 
-                        if (!Array.isArray(data)) {
-                            console.error("리뷰 데이터가 배열이 아닙니다.", data);
-                            reviewList.innerHTML = "<p class='text-muted'>리뷰 데이터를 불러올 수 없습니다.</p>";
+                        if (!Array.isArray(data) || data.length === 0) {
+                            reviewList.innerHTML = "<p class='text-muted'>등록된 후기가 없습니다.</p>";
                             return;
                         }
 
-                        if (data.length === 0) {
-                            reviewList.innerHTML = "<p class='text-muted'>아직 등록된 후기가 없습니다.</p>";
-                            return;
-                        }
-
-                        // 리뷰 데이터 반복하여 추가
                         data.forEach(review => {
                             const reviewItem = document.createElement("div");
                             reviewItem.classList.add("border", "p-3", "mb-3", "rounded");
+                            reviewItem.setAttribute("data-review-id", review.reviewId); // 리뷰 ID 저장
+
+                            // 본인 리뷰인 경우 수정/삭제 버튼 추가
+                            let actionButtons = "";
+                            if (memberId && memberId == review.memberId) {
+                                actionButtons = `
+                            <button class="btn btn-sm btn-outline-primary edit-review-btn" data-review-id="${review.reviewId}" data-review-text="${review.reviewText}" data-review-rating="${review.rating}">수정</button>
+                            <button class="btn btn-sm btn-outline-danger delete-review-btn" data-review-id="${review.reviewId}">삭제</button>
+                        `;
+                            }
+
                             reviewItem.innerHTML = `
-                                <p><strong>${review.memberName || "익명"}</strong> - ${"★".repeat(review.rating)} ${"☆".repeat(5 - review.rating)}</p>
-                                <p>${review.reviewText}</p>
-                                <p class="text-muted small">${new Date(review.reviewDate).toLocaleString()}</p>
-                            `;
+                        <p><strong>${review.memberName || "익명"}</strong> - ${"★".repeat(review.rating)} ${"☆".repeat(5 - review.rating)}</p>
+                        <p>${review.reviewText}</p>
+                        <p class="text-muted small">${new Date(review.reviewDate).toLocaleString()}</p>
+                        <div>${actionButtons}</div>
+                    `;
+
                             reviewList.appendChild(reviewItem);
                         });
 
-                        console.log(" 리뷰 목록 렌더링 완료");
+                        // 수정 및 삭제 버튼에 이벤트 리스너 추가
+                        document.querySelectorAll(".edit-review-btn").forEach(button =>
+                            button.addEventListener("click", openEditReviewModal)
+                        );
+                        document.querySelectorAll(".delete-review-btn").forEach(button =>
+                            button.addEventListener("click", deleteReview)
+                        );
                     })
-                    .catch(error => {
-                        console.error(" 리뷰 불러오기 오류:", error);
-                        reviewList.innerHTML = "<p class='text-danger'>리뷰를 불러오는 중 오류가 발생했습니다.</p>";
-                    });
+                    .catch(error => console.error(" 리뷰 불러오기 오류:", error));
             }
 
-            // 페이지 로드 시 리뷰 불러오기 실행
-            if (roomId) {
-                loadReviews();
-            } else {
-                console.warn(" roomId가 설정되지 않았습니다. 리뷰를 불러올 수 없습니다.");
+            /*  리뷰 수정 모달 열기 */
+            function openEditReviewModal(event) {
+                const button = event.currentTarget;
+                const reviewId = button.getAttribute("data-review-id");
+                const reviewText = button.getAttribute("data-review-text");
+                const reviewRating = button.getAttribute("data-review-rating");
+
+                document.getElementById("editReviewId").value = reviewId;
+                document.getElementById("editReviewText").value = reviewText;
+                document.getElementById("editRating").value = reviewRating;
+
+                const editReviewModal = new bootstrap.Modal(document.getElementById("editReviewModal"));
+                editReviewModal.show();
             }
 
+            /*  리뷰 수정 요청 */
+            document.getElementById("saveReviewChanges").addEventListener("click", function () {
+                const reviewId = document.getElementById("editReviewId").value;
+                const reviewText = document.getElementById("editReviewText").value;
+                const reviewRating = document.getElementById("editRating").value;
 
-            //  리뷰 작성 기능
+                console.log(" 수정할 reviewId:", reviewId);
+                console.log(" 리뷰 수정 요청 - reviewId:", reviewId);
+                console.log(" 요청 URL:", `/reviews/update/${reviewId}`);
+
+                if (!reviewId || isNaN(reviewId)) {
+                    alert("잘못된 리뷰 ID입니다.");
+                    return;
+                }
+
+                fetch(`/reviews/update/${reviewId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ reviewText, rating: reviewRating })
+                })
+                    .then(response => {
+                        console.log(" 서버 응답 상태코드:", response.status);
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            alert("리뷰가 수정되었습니다!");
+                            location.reload();
+                        } else {
+                            alert("리뷰 수정 실패: " + data.message);
+                        }
+                    })
+                    .catch(error => console.error(" 리뷰 수정 오류:", error));
+            });
+
+            /*  리뷰 삭제 요청 */
+            function deleteReview(event) {
+                const reviewId = event.currentTarget.getAttribute("data-review-id");
+
+                if (!confirm("정말로 이 리뷰를 삭제하시겠습니까?")) {
+                    return;
+                }
+
+                fetch(`/reviews/delete/${reviewId}`, {
+                    method: "DELETE"
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("리뷰가 삭제되었습니다!");
+                            location.reload();
+                        } else {
+                            alert("리뷰 삭제 실패: " + data.message);
+                        }
+                    })
+                    .catch(error => console.error(" 리뷰 삭제 오류:", error));
+            }
+
+            reviewList.addEventListener("click", function (event) {
+                if (event.target.classList.contains("edit-review-btn")) {
+                    openEditReviewModal(event);
+                }
+                if (event.target.classList.contains("delete-review-btn")) {
+                    deleteReview(event);
+                }
+            });
+
+            /*  리뷰 작성 요청 */
             document.getElementById("submitReview").addEventListener("click", function () {
                 const rating = document.getElementById("rating").value;
                 const reviewText = document.getElementById("reviewText").value;
@@ -779,27 +895,23 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ roomId, memberId, rating, reviewText })
                 })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error("리뷰 등록 실패");
-                        }
-                        return response.json();
-                    })
+                    .then(response => response.json())
                     .then(data => {
                         if (data.success) {
                             alert("리뷰가 등록되었습니다!");
                             document.getElementById("reviewForm").reset();
                             loadReviews();
                         } else {
-                            alert(data.message || "리뷰 등록 중 오류가 발생했습니다.");
+                            alert("리뷰 등록 실패: " + data.message);
                         }
                     })
-                    .catch(error => {
-                        console.error(" 리뷰 등록 오류:", error);
-                        alert("리뷰 등록 중 오류가 발생했습니다.");
-                    });
+                    .catch(error => console.error(" 리뷰 등록 오류:", error));
             });
+
+            /*  페이지 로드 시 리뷰 목록 불러오기 */
+            loadReviews();
         });
+
     </script>
 </div>
 <div th:replace="~{fragments/footer::footer}"></div>
