@@ -119,7 +119,7 @@
                 </div>
                 <!-- 조회 버튼 -->
                 <div class="text-center mt-4">
-                    <button type="submit" class="btn btn-primary w-25" style="background-color: black">조회</button>
+                    <button type="submit" class="btn btn-dark w-25">조회</button>
                 </div>
             </form>
         </div>
@@ -133,14 +133,13 @@
         <div class="card">
             <div class="card-body">
                 <!--<h5 class="card-title">본사 목록</h5>-->
-                <table class="table table-bordered text-center">
-                    <thead>
+                <table class="table table-bordered text-center table-hover">
+                    <thead class="table-dark">
                     <tr>
-                        <th style="width: 13%">이미지</th>
+                        <th style="width: 10%">이미지</th>
                         <th style="width: 27%">본사명</th>
-                        <th style="width: 20%">관리자명</th>
+                        <th style="width: 23%">관리자명</th>
                         <th style="width: 13%">지사수</th>
-                        <!--<th style="width: 10%">매장수</th>-->
                         <th style="width: 15%">작업</th>
                     </tr>
                     </thead>
@@ -149,23 +148,21 @@
                     <th:block th:unless="${#lists.isEmpty(companyDTOS)}"><!--값이 없으면이 아니면(있으면)-->
                         <tr th:each="data:${companyDTOS}">
 <!--                            <td th:text="${data.companyId}">1</td>-->
-                            <td class="align-middle text-center" style="height: 100px">
+                            <td class="align-middle text-center" style="height: 50px">
                                 <img th:if="${data.companyImgDTOList != null and !data.companyImgDTOList.isEmpty()}"
                                      th:src="@{'/upload/' + ${data.companyImgDTOList[0].imagePath}}"
-                                     alt="Room Image"
-                                     class="room-image" width="100px" >
+                                     alt="company Image"
+                                     class="company-image" height="50px">
                                 <span th:if="${data.companyImgDTOList == null or data.companyImgDTOList.isEmpty()}">
                                     <img src="/img/default_img.jpg" width="100px">
                                 </span>
                             </td>
-                            <td class="align-middle text-center">
-                                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/company/read(companyId=${data.companyId})}" style="text-decoration: none; color: black" th:text="${data.companyName}">NTT호텔</a>
-                                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/company/read(companyId=${data.companyId})}" style="text-decoration: none; color: black" th:text="${data.companyName}">NTT호텔</a>
+                            <td th:text="${data.companyName}" class="align-middle text-center">
+                                <!--<a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/company/read(companyId=${data.companyId})}" style="text-decoration: none; color: black" th:text="${data.companyName}">NTT호텔</a>
+                                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/company/read(companyId=${data.companyId})}" style="text-decoration: none; color: black" th:text="${data.companyName}">NTT호텔</a>-->
                             </td>
                             <td th:text="${data.companyManager}" class="align-middle text-center">우리</td>
-                            <!--나중에 지사수, 매장수 업데이트할거임~!-->
                             <td th:text="${data.hotelCount}" class="align-middle text-center">2</td>
-                            <!--<td class="align-middle text-center">2</td>-->
                             <td class="align-middle text-center">
                                 <!--admin-->
                                 <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/company/read(companyId=${data.companyId})}" class="btn btn-info btn-sm">보기</a>

@@ -153,16 +153,15 @@
                 <table class="table table-bordered text-center" id="hotelTable">
                     <thead class="table-dark">
                     <tr>
-                        <th>이미지</th>
-                        <th>본사명</th>
-                        <th>지사명</th>
-                        <th>주소</th>
-                        <th>전화번호</th>
-                        <th>이메일</th>
-                        <th>체크인</th>
-                        <th>체크아웃</th>
-                        <th>별점</th>
-                        <th><i class="bi bi-trash"></i></th>
+                        <th style="width: 10%">이미지</th>
+                        <th style="width: 10%">본사명</th>
+                        <th style="width: 15%">지사명</th>
+                        <th style="width: 20%">주소</th>
+                        <th style="width: 10%">담당자이메일</th>
+                        <th style="width: 10%">전화번호</th>
+                        <th style="width: 8%">체크인-체크아웃</th>
+                        <th style="width: 5%">평점</th>
+                        <th style="width: 10%">관리</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -184,11 +183,11 @@
                                 <a th:href="@{/manager/hotel/read(hotelId=${data.hotelId})}" style="text-decoration: none" th:text="${data.hotelName}" >지사명</a>
                             </td>
                             <td th:text="${data.hotelAddress}" class="align-middle text-center">주소</td>
-                            <td th:text="${data.hotelPhone}" class="align-middle text-center">전화번호</td>
                             <td th:text="${data.hotelEmail}" class="align-middle text-center">이메일</td>
-                            <td th:text="${data.hotelCheckIn}" class="align-middle text-center">체크인</td>
-                            <td th:text="${data.hotelCheckOut}" class="align-middle text-center">체크아웃</td>
-                            <td class="align-middle text-center">별점</td> <!-- 별점은 나중에 -->
+                            <td th:text="${data.hotelPhone}" class="align-middle text-center">전화번호</td>
+                            <td class="align-middle text-center">
+                                <span th:text="${data.hotelCheckIn}">체크인</span>:00-<span th:text="${data.hotelCheckOut}">체크아웃</span>:00</td>
+                            <td th:text="${data.hotelRating}" class="align-middle text-center">평점</td>
                             <td class="align-middle text-center">
                                 <a th:href="@{/manager/hotel/read(hotelId=${data.hotelId})}" class="btn btn-info btn-sm">보기</a>
                                 <a th:href="@{/chief/hotel/update(hotelId=${data.hotelId})}"  class="btn btn-warning btn-sm">수정</a>
