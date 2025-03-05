@@ -42,40 +42,66 @@
       <th style="width: 15%">삭제여부</th>
     </tr>
     </thead>
-  <tbody>
-<!--  <tr th:if="${lists.isEmpty(bannerDTOList)}">-->
-<!--      <td class="text-center">배너이미지가 없습니다</td>-->
+      <tbody th:if="${bannerDTOList != null}">
+      <tr th:each="data, stat : ${bannerDTOList}">
+          <td th:text="${data.bannerTitle}"></td>
+          <td th:text="${data.bannerStatus ? '활성' : '비활성'}"></td>
+          <td>
+              <div th:if="${data.bannerImageDTOList != null}" th:each="img : ${data.bannerImageDTOList}">
+<!--                  <img th:src="@{'/upload/' + ${data.bannerImageDTOList.imagePath}}" width="300px" height="200px">-->
+                  <img th:src="@{'/upload/' + ${img.imagePath}}" width="300px" height="200px">
+              </div>
+          </td>
+          <td>
+              <form th:action="@{/banner/delete}" method="post" onsubmit="return confirm('정말로 삭제하시겠습니까?');">
+                  <input type="hidden" name="bannerId" th:value="${data.bannerId}">
+                  <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i></button>
+              </form>
+          </td>
+      </tr>
+      </tbody>
+      <tr th:if="${bannerDTOList == null or #lists.isEmpty(bannerDTOList)}">
+          <td colspan="4" class="text-center">배너 이미지가 없습니다</td>
+      </tr>
+
+
+      <!--  <tbody th:if="${bannerDTOList != null}">-->
+<!--&lt;!&ndash;  <tr th:if="${lists.isEmpty(bannerDTOList)}">&ndash;&gt;-->
+<!--&lt;!&ndash;      <td class="text-center">배너이미지가 없습니다</td>&ndash;&gt;-->
+<!--&lt;!&ndash;  </tr>&ndash;&gt;-->
+<!--  <tr th:each="data, stat : ${bannerDTOList}">-->
+<!--&lt;!&ndash;  <tr th:each="banner : ${banners}">&ndash;&gt;-->
+<!--&lt;!&ndash;    <td th:text="${banner.bannerId}"></td>&ndash;&gt;-->
+<!--    <td th:text="${data.bannerTitle}"></td>-->
+<!--    <td th:text="${data.bannerStatus ? '활성' : '비활성'}"></td>-->
+<!--&lt;!&ndash;    <td th:text="${banner.bannerRank}"></td>&ndash;&gt;-->
+<!--    <td>-->
+<!--        <div th:if="${data.bannerImageDTOList != null}" th:each="img : ${data.bannerImageDTOList}">-->
+
+<!--        &lt;!&ndash;        <div th:each="img : ${data.bannerImageDTOList}">&lt;!&ndash;그림파일이 존재하면&ndash;&gt;&ndash;&gt;-->
+<!--            <img th:src="@{'/upload/' + ${img.imagePath}}" width="300px" height="200px">-->
+<!--        </div>-->
+<!--&lt;!&ndash;        <a th:href="@{/banner/{bannerId}(bannerId=${banner.bannerId})}">이미지</a>&ndash;&gt;-->
+
+<!--    </td>-->
+<!--    <td>-->
+<!--&lt;!&ndash;            <a th:href="@{banner/delete(bannerId=${data.bannerId})}" class="delete-link"><i class="bi bi-trash"></i></a>&ndash;&gt;-->
+
+<!--        <form th:action="@{/banner/delete}" method="post" onsubmit="return confirm('정말로 삭제하시겠습니까?');">-->
+
+<!--            <input type="hidden" name="bannerId" th:value="${data.bannerId}">-->
+<!--            <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i></button>-->
+<!--        </form>-->
+
+
+<!--    </td>-->
 <!--  </tr>-->
-  <tr th:each="data, stat : ${bannerDTOList}">
-<!--  <tr th:each="banner : ${banners}">-->
-<!--    <td th:text="${banner.bannerId}"></td>-->
-    <td th:text="${data.bannerTitle}"></td>
-    <td th:text="${data.bannerStatus ? '활성' : '비활성'}"></td>
-<!--    <td th:text="${banner.bannerRank}"></td>-->
-    <td>
-        <div th:each="img : ${data.bannerImageDTOList}"><!--그림파일이 존재하면-->
-            <img th:src="@{'/upload/' + ${img.imagePath}}" width="300px" height="200px">
-        </div>
-<!--        <a th:href="@{/banner/{bannerId}(bannerId=${banner.bannerId})}">이미지</a>-->
-
-    </td>
-    <td>
-<!--      <form th:action="@{/banner/delete/{bannerId}(bannerId=${data.bannerId})}" method="post" enctype="multipart/form-data">-->
-<!--        <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i></button>-->
-<!--      </form>-->
-<!--            <a th:href="@{banner/delete(bannerId=${data.bannerId})}" class="delete-link"><i class="bi bi-trash"></i></a>-->
-        <form th:action="@{/banner/delete}" method="post" onsubmit="return confirm('정말로 삭제하시겠습니까?');">
-            <input type="hidden" name="bannerId" th:value="${data.bannerId}">
-            <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i></button>
-        </form>
+<!--  <tr th:if="${#lists.isEmpty(bannerDTOList)}">-->
+<!--      <td colspan="4" class="text-center">배너 이미지가 없습니다</td>-->
+<!--  </tr>-->
 
 
-    </td>
-  </tr>
-  <tr th:if="${#lists.isEmpty(bannerDTOList)}">
-      <td colspan="4" class="text-center">배너 이미지가 없습니다</td>
-  </tr>
-  </tbody>
+<!--  </tbody>-->
 </table>
       <div class="row mt-5">
         <div class="col-2">

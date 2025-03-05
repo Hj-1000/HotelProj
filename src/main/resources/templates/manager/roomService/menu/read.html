@@ -88,7 +88,7 @@
             <!-- 추가 버튼 -->
             <div class="text-end mt-3">
                 <a class="btn btn-primary" style="background-color: black" th:href="@{/manager/roomService/menu/list(serviceCateId=${serviceMenuDTO.serviceCateId.serviceCateId})}">목록</a>
-                <a class="btn btn-primary" th:href="@{/manager/roomService/menu/update(serviceMenuId=${serviceMenuDTO.serviceMenuId})}">수정</a>
+                <a class="btn btn-primary" th:href="@{/manager/roomService/menu/update(serviceMenuId=${serviceMenuDTO.serviceMenuId})}"><i class="bi bi-pen"></i></a>
                 <a class="btn btn-danger delBtn" th:href="@{/manager/roomService/menu/delete(serviceMenuId=${serviceMenuDTO.serviceMenuId})}"><i class="bi bi-trash"></i></a>
             </div>
 

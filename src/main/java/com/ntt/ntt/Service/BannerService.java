@@ -99,7 +99,10 @@ public class BannerService {
                 .map(banner -> modelMapper.map(banner, BannerDTO.class))
                 .collect(Collectors.toList());
     }
-
+    //배너이미지 불러오기
+    public List<Image> getBannerImages(Integer bannerId) {
+        return imageRepository.findByBanner_BannerId(bannerId);
+    }
 
 
 

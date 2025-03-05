@@ -38,6 +38,7 @@ public class ImageDTO {
 
     private String imageDescription;
 
+
     public static ImageDTO fromEntity(Image image) {
         return new ImageDTO(
                 image.getImageId(),
