@@ -8,6 +8,30 @@
     <title>NTT호텔 - 서비스 오더 관리</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script th:inline="javascript">
+        $(document).ready(function () {
+            // 세션에서 message를 가져온다
+            var message = [[${message}]];
+
+            // message가 null이 아니라면 알림창을 띄우고 세션에서 삭제한다.
+            if (message != null && message != '') {
+                alert(message);
+            }
+
+            $(".delBtn").click(function (event) {
+                var serviceOrderId = $(this).data('id');  // 삭제하려는 주문 ID 가져오기
+                var confirmed = confirm("정말로 삭제하시겠습니까?");
+
+                if (confirmed) {
+                    // 확인을 누르면 삭제 URL로 이동
+                    window.location.href = '/manager/order/delete?serviceOrderId=' + serviceOrderId;
+                } else {
+                    event.preventDefault(); // 취소 시 아무 작업도 하지 않음
+                }
+            });
+        });
+        // 삭제 버튼 클릭 시 확인 메시지 표시
+    </script>
 
 </head>
 <body>
@@ -71,7 +95,9 @@
                             <!-- 수정 버튼 -->
                             <button type="button" class="btn btn-warning btn-sm" th:onclick="|location.href='/manager/order/update?serviceOrderId=' + ${data.serviceOrderId}|">수정</button>
                             <!-- 삭제 버튼 -->
-                            <button type="button" class="btn btn-danger btn-sm" th:onclick="|location.href='/manager/order/delete?serviceOrderId=' + ${data.serviceOrderId}|"><i class="bi bi-trash"></i></button>
+                            <button type="button" class="btn btn-danger btn-sm delBtn" th:data-id="${data.serviceOrderId}">
+                                <i class="bi bi-trash"></i>
+                            </button>
                         </td>
                     </tr>
                     </tbody>
@@ -105,5 +131,9 @@
         </div>
     </div>
 </div>
+
+
+
+
 </body>
 </html>
