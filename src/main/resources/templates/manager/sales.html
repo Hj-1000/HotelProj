@@ -60,27 +60,6 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">결제 상태</label>
-                            <div class="d-flex flex-wrap gap-3">
-                                <div class="form-check form-check-card px-0" style="margin-left: 30px; margin-top: 7px">
-                                    <input class="form-check-input" type="radio" id="all" name="paymentStatus" value="" checked>
-                                    <label class="form-check-label" for="all">전체</label>
-                                </div>
-                                <div class="form-check form-check-card" style="margin-top: 7px">
-                                    <input class="form-check-input" type="radio" id="completed" name="paymentStatus" value="결제 완료">
-                                    <label class="form-check-label" for="completed">결제 완료</label>
-                                </div>
-                                <div class="form-check form-check-card" style="margin-top: 7px">
-                                    <input class="form-check-input" type="radio" id="pending" name="paymentStatus" value="결제 필요">
-                                    <label class="form-check-label" for="pending">결제 필요</label>
-                                </div>
-                                <div class="form-check form-check-card" style="margin-top: 7px">
-                                    <input class="form-check-input" type="radio" id="refund" name="paymentStatus" value="결제 필요">
-                                    <label class="form-check-label" for="refund">환불 필요</label>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
                 <div class="text-center mt-3">
@@ -136,6 +115,25 @@
                     </th:block>
                     </tbody>
                 </table>
+                <div class="d-flex flex-wrap gap-3" id="paymentStatusFilter">
+                    결제 상태 :
+                    <div class="form-check form-check-card px-0" style="margin-left: 30px;">
+                        <input class="form-check-input" type="radio" id="all" name="paymentStatus" value="" checked onchange="filterTable()">
+                        <label class="form-check-label" for="all">전체</label>
+                    </div>
+                    <div class="form-check form-check-card">
+                        <input class="form-check-input" type="radio" id="completed" name="paymentStatus" value="완료" onchange="filterTable()">
+                        <label class="form-check-label" for="completed">결제 완료</label>
+                    </div>
+                    <div class="form-check form-check-card">
+                        <input class="form-check-input" type="radio" id="pending" name="paymentStatus" value="필요" onchange="filterTable()">
+                        <label class="form-check-label" for="pending">결제 필요</label>
+                    </div>
+                    <div class="form-check form-check-card">
+                        <input class="form-check-input" type="radio" id="refund" name="paymentStatus" value="환불" onchange="filterTable()">
+                        <label class="form-check-label" for="refund">환불 필요</label>
+                    </div>
+                </div>
                 <div th:if="${totalPages > 1}" class="pagination d-flex justify-content-center">
                     <ul class="pagination">
                         <!-- 이전 버튼 -->
@@ -202,23 +200,22 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script th:inline="javascript">
-        document.getElementById("applyDateRange").addEventListener("click", function(event) {
-            event.preventDefault(); // 폼 기본 제출 방지
-
-            let selectedStatus = document.querySelector('input[name="paymentStatus"]:checked').value;
+        // 결제 상태 필터링
+        function filterTable() {
+            let filterValue = document.querySelector("input[name='paymentStatus']:checked").value; // 선택된 라디오 버튼 값 가져오기
             let rows = document.querySelectorAll("#paymentTable tbody tr");
 
             rows.forEach(row => {
                 let statusText = row.querySelector("td:nth-child(10) span").innerText.trim(); // 결제 상태 텍스트 가져오기
 
-                if (selectedStatus === "" || statusText.includes(selectedStatus)) {
+                // 필터 값이 빈 값일 경우 모든 항목을 표시, 아니면 필터 값에 맞는 항목만 표시
+                if (filterValue === "" || statusText.includes(filterValue)) {
                     row.style.display = ""; // 표시
                 } else {
                     row.style.display = "none"; // 숨김
                 }
             });
-        });
-
+        }
         document.addEventListener("DOMContentLoaded", function () {
             var salesData = /*[[${salesDataJson}]]*/ '[]';
             salesData = salesData ? JSON.parse(salesData) : [];

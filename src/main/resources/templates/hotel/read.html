@@ -344,7 +344,7 @@
                             <div class="text-end mb-3 me-3" style="margin-top: -50px;">
                                 <div>
                                     <!-- 지도 열기/닫기 버튼 -->
-                                    <button class="btn btn-outline-primary" id="mapToggleBtn1" onclick="toggleMap()" th:if="${#authentication.name != 'anonymousUser'}" style="width: 120px;">
+                                    <button class="btn btn-outline-primary" id="mapToggleBtn1" onclick="toggleMap1()" th:if="${#authentication.name != 'anonymousUser'}" style="width: 120px;">
                                         지도 열기
                                         <i class="bi bi-map"></i>
                                     </button>
@@ -365,7 +365,7 @@
                             <div class="text-end mb-3 me-3" th:if="${#authentication.name == 'anonymousUser'}" style="margin-top: -50px;">
                                 <div>
                                     <!-- 지도 열기/닫기 버튼 (비회원용) -->
-                                    <button class="btn btn-outline-primary" id="mapToggleBtn2" onclick="toggleMap()" style="width: 120px;">
+                                    <button class="btn btn-outline-primary" id="mapToggleBtn2" onclick="toggleMap2()" style="width: 120px;">
                                         지도 열기
                                         <i class="bi bi-map"></i>
                                     </button>
@@ -446,22 +446,40 @@
                     });
 
                     // 지도 열기/닫기 토글 함수
-                    function toggleMap() {
+                    function toggleMap1() {
                         var mapContainer = document.getElementById("mapContainer");
-                        var mapBtn = document.getElementById("mapToggleBtn");
-                        var mapIcon = document.getElementById("mapIcon");
+                        var mapBtn1 = document.getElementById("mapToggleBtn1");
 
                         // 현재 지도 영역의 높이가 0이면 펼쳐지고, 아니면 접히도록 설정
                         if (mapContainer.style.height === "0px") {
                             mapContainer.style.height = "500px";  // 펼쳤을 때 높이 설정
-                            mapBtn.innerHTML = '지도 닫기 <i class="bi bi-map-fill"></i>';
-                            mapBtn.classList.remove("btn-outline-primary");
-                            mapBtn.classList.add("btn-primary");
+                            mapBtn1.innerHTML = '지도 닫기 <i class="bi bi-map-fill"></i>';
+                            mapBtn1.classList.remove("btn-outline-primary");
+                            mapBtn1.classList.add("btn-primary");
                         } else {
                             mapContainer.style.height = "0px";  // 접었을 때 높이 설정
-                            mapBtn.innerHTML = '지도 열기 <i class="bi bi-map"></i>';
-                            mapBtn.classList.remove("btn-primary");
-                            mapBtn.classList.add("btn-outline-primary");
+                            mapBtn1.innerHTML = '지도 열기 <i class="bi bi-map"></i>';
+                            mapBtn1.classList.remove("btn-primary");
+                            mapBtn1.classList.add("btn-outline-primary");
+                        }
+                    }
+
+                    // 지도 열기/닫기 토글 함수
+                    function toggleMap2() {
+                        var mapContainer = document.getElementById("mapContainer");
+                        var mapBtn2 = document.getElementById("mapToggleBtn2");
+
+                        // 현재 지도 영역의 높이가 0이면 펼쳐지고, 아니면 접히도록 설정
+                        if (mapContainer.style.height === "0px") {
+                            mapContainer.style.height = "500px";  // 펼쳤을 때 높이 설정
+                            mapBtn2.innerHTML = '지도 닫기 <i class="bi bi-map-fill"></i>';
+                            mapBtn2.classList.remove("btn-outline-primary");
+                            mapBtn2.classList.add("btn-primary");
+                        } else {
+                            mapContainer.style.height = "0px";  // 접었을 때 높이 설정
+                            mapBtn2.innerHTML = '지도 열기 <i class="bi bi-map"></i>';
+                            mapBtn2.classList.remove("btn-primary");
+                            mapBtn2.classList.add("btn-outline-primary");
                         }
                     }
                 </script>

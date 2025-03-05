@@ -118,7 +118,7 @@
                         <th style="background-color: #f8f9fa; width: 12%">연락처</th>
                         <th style="background-color: #f8f9fa; width: 12%">등록일</th>
                         <th style="background-color: #f8f9fa; width: 10%">상태</th>
-                        <th style="background-color: #f8f9fa; width: 6%"><i class="bi bi-pen"></i></th>
+                        <th style="background-color: #f8f9fa; width: 6%">수정</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -140,7 +140,7 @@
                             <td th:text="${hotelDTO.member != null ? hotelDTO.member.memberName : 'N/A'}">회원 이름</td>
                             <input type="text" class="form-control" id="memberName" name="memberName" placeholder="이름" th:value="${hotelDTO.member != null ? hotelDTO.member.memberName : 'N/A'}" hidden="hidden">
                             <td>
-                                <a th:href="@{/company/read(companyId=${hotelDTO.companyId})}" th:text="${hotelDTO.member != null ? hotelDTO.companyName : 'N/A'}">본사명</a>
+                                <a th:href="@{/chief/company/read(companyId=${hotelDTO.companyId})}" th:text="${hotelDTO.member != null ? hotelDTO.companyName : 'N/A'}">본사명</a>
                             </td>
                             <td>
                                 <a th:href="@{/manager/hotel/read(hotelId=${hotelDTO.hotelId})}" th:text="${hotelDTO.member != null ?  hotelDTO.hotelName : 'N/A'}">지사명</a>
@@ -154,7 +154,7 @@
                                 </select>
                             </td>
                             <td>
-                                <button type="submit" class="btn btn-primary">수정</button>
+                                <button type="submit" class="btn btn-primary"><i class="bi bi-pen"></i></button>
                             </td>
                             </form>
                         </tr>
