@@ -168,12 +168,12 @@
                             <!--<td class="align-middle text-center">2</td>-->
                             <td class="align-middle text-center">
                                 <!--admin-->
-                                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/company/read(companyId=${data.companyId})}" class="btn btn-info btn-sm">보기</a>
-                                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/company/update(companyId=${data.companyId})}"  class="btn btn-warning btn-sm">수정</a>
+                                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/company/read(companyId=${data.companyId})}" class="btn btn-info btn-sm"><i class="bi bi-eye"></i></a>
+                                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/company/update(companyId=${data.companyId})}"  class="btn btn-warning btn-sm"><i class="bi bi-pen"></i></a>
                                 <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/company/delete(companyId=${data.companyId})}" style="text-decoration: none; color: black" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')"><i class="bi bi-trash"></i></a>
                                 <!--chief-->
-                                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/company/read(companyId=${data.companyId})}" class="btn btn-info btn-sm">보기</a>
-                                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/company/update(companyId=${data.companyId})}"  class="btn btn-warning btn-sm">수정</a>
+                                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/company/read(companyId=${data.companyId})}" class="btn btn-info btn-sm"><i class="bi bi-eye"></i></a>
+                                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/company/update(companyId=${data.companyId})}"  class="btn btn-warning btn-sm"><i class="bi bi-pen"></i></a>
                                 <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/company/delete(companyId=${data.companyId})}" style="text-decoration: none; color: black" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')"><i class="bi bi-trash"></i></a>
                             </td>
                         </tr>

@@ -177,15 +177,15 @@
                                 <span th:text="${data.hotelCheckIn}">체크인</span>:00-<span th:text="${data.hotelCheckOut}">체크아웃</span>:00</td>
                             <!--<td class="align-middle text-center">별점</td>--> <!-- 별점은 나중에 -->
                             <td class="align-middle text-center">
-                                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/hotel/read(hotelId=${data.hotelId})}" class="btn btn-info btn-sm">보기</a>
-                                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/hotel/update(hotelId=${data.hotelId})}"  class="btn btn-warning btn-sm">수정</a>
+                                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/hotel/read(hotelId=${data.hotelId})}" class="btn btn-info btn-sm"><i class="bi bi-eye"></i></a>
+                                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/hotel/update(hotelId=${data.hotelId})}"  class="btn btn-warning btn-sm"><i class="bi bi-pen"></i></a>
                                 <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/hotel/delete(hotelId=${data.hotelId})}" style="text-decoration: none; color: black" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')"><i class="bi bi-trash"></i></a>
 
-                                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/hotel/read(hotelId=${data.hotelId})}" class="btn btn-info btn-sm">보기</a>
-                                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/hotel/update(hotelId=${data.hotelId})}"  class="btn btn-warning btn-sm">수정</a>
+                                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/hotel/read(hotelId=${data.hotelId})}" class="btn btn-info btn-sm"><i class="bi bi-eye"></i></a>
+                                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/hotel/update(hotelId=${data.hotelId})}"  class="btn btn-warning btn-sm"><i class="bi bi-pen"></i></a>
                                 <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/hotel/delete(hotelId=${data.hotelId})}" style="text-decoration: none; color: black" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')"><i class="bi bi-trash"></i></a>
 
-                                <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" th:href="@{/manager/hotel/read(hotelId=${data.hotelId})}" class="btn btn-info btn-sm">보기</a>
+                                <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" th:href="@{/manager/hotel/read(hotelId=${data.hotelId})}" class="btn btn-info btn-sm"><i class="bi bi-eye"></i></a>
                             </td>
                         </tr>
                     </th:block>

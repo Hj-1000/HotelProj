@@ -133,7 +133,7 @@
                 <button type="button" class="btn btn-success modalBtn">메뉴 등록</button>
                 <a class="btn btn-primary" style="background-color: purple" th:href="@{/manager/roomService/menu/list(serviceCateId=${serviceCateDTO.serviceCateId})}">메뉴 관리</a>
                 <a class="btn btn-primary" style="background-color: black" th:href="@{/manager/roomService/category/list(hotelId=${serviceCateDTO.hotelId.hotelId})}">목록</a>
-                <a class="btn btn-primary" th:href="@{/manager/roomService/category/update(serviceCateId=${serviceCateDTO.serviceCateId})}">수정</a>
+                <a class="btn btn-primary" th:href="@{/manager/roomService/category/update(serviceCateId=${serviceCateDTO.serviceCateId})}"><i class="bi bi-pen"></i></a>
                 <a class="btn btn-danger delBtn" th:href="@{/manager/roomService/category/delete(serviceCateId=${serviceCateDTO.serviceCateId})}"><i class="bi bi-trash "></i></a>
             </div>
 
