@@ -126,14 +126,18 @@ public class PaymentController {
             Page<ReservationDTO> reservationsPage = reservationService.getAllReservations(pageable);
             List<ReservationDTO> reservations = reservationsPage.getContent();
 
-            // 예약 리스트에서 결제 내역에 해당하는 예약만 필터링
+            // 필터링된 결제 내역 리스트 정렬
+            filteredPayments.sort(Comparator.comparing(PaymentDTO::getReservationId).reversed());  // 예약 번호 기준 내림차순 정렬
+
+            // 예약 내역 필터링 후 정렬
             List<ReservationDTO> filteredReservations = reservations.stream()
                     .filter(reservation -> filteredPayments.stream()
-                            .anyMatch(payment -> payment.getReservationId().equals(reservation.getReservationId()))) // 예약 ID가 결제 ID와 일치하는 예약만 필터링
+                            .anyMatch(payment -> payment.getReservationId().equals(reservation.getReservationId())))
+                    .sorted(Comparator.comparing(ReservationDTO::getReservationId).reversed())  // 예약 번호 기준 내림차순 정렬
                     .collect(Collectors.toList());
 
             // 결제 내역과 예약 내역을 묶어서 모델에 전달
-            model.addAttribute("paymentDTOList", pagedPayments);
+            model.addAttribute("paymentDTOList", filteredPayments);
             model.addAttribute("reservationList", filteredReservations);
             model.addAttribute("pageNumber", page);
             model.addAttribute("totalPages", (int) Math.ceil((double) filteredPayments.size() / size));
