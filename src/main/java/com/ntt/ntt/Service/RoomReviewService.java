@@ -147,4 +147,12 @@ public class RoomReviewService {
         roomReviewRepository.delete(roomReview);
         log.info(" 리뷰 삭제 완료: reviewId={}", reviewId);
     }
+
+    // 9. 본인 리뷰인지 확인
+    public boolean isReviewOwner(Integer reviewId, String username) {
+        RoomReview review = roomReviewRepository.findById(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 리뷰가 존재하지 않습니다."));
+
+        return review.getMember().getMemberEmail().equals(username);
+    }
 }

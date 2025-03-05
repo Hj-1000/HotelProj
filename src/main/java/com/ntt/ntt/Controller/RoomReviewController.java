@@ -4,11 +4,14 @@ import com.ntt.ntt.DTO.RoomReviewDTO;
 import com.ntt.ntt.Service.RoomReviewService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/reviews")
@@ -98,18 +101,40 @@ public class RoomReviewController {
 
     //  7. 특정 리뷰 수정
     @PutMapping("/update/{reviewId}")
-    public ResponseEntity<RoomReviewDTO> updateReview(
-            @PathVariable Integer reviewId, @RequestBody RoomReviewDTO reviewDTO) {
-        log.info("리뷰 수정 요청: reviewId={}, {}", reviewId, reviewDTO);
-        RoomReviewDTO updatedReview = roomReviewService.updateReview(reviewId, reviewDTO);
-        return ResponseEntity.ok(updatedReview);
+    @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER') or @roomReviewService.isReviewOwner(#reviewId, authentication.principal.username)")
+    public ResponseEntity<?> updateReview(
+            @PathVariable Integer reviewId,
+            @RequestBody RoomReviewDTO reviewDTO) {
+        log.info("리뷰 수정 요청: reviewId={}, reviewDTO={}", reviewId, reviewDTO);
+
+        if (reviewId == null) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "리뷰 ID가 누락되었습니다."));
+        }
+
+        try {
+            RoomReviewDTO updatedReview = roomReviewService.updateReview(reviewId, reviewDTO);
+            log.info(" 리뷰 수정 성공: {}", updatedReview);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (Exception e) {
+            log.error(" 리뷰 수정 중 오류 발생: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "message", e.getMessage()));
+        }
     }
 
     //  8. 특정 리뷰 삭제
-    @DeleteMapping("/delete/{reviewId}")
-    public ResponseEntity<String> deleteReview(@PathVariable Integer reviewId) {
+    @PostMapping("/delete/{reviewId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER') or @roomReviewService.isReviewOwner(#reviewId, authentication.principal.username)")
+    public ResponseEntity<?> deleteReview(@PathVariable Integer reviewId) {
         log.info("리뷰 삭제 요청: reviewId={}", reviewId);
-        roomReviewService.deleteReview(reviewId);
-        return ResponseEntity.ok("리뷰가 삭제되었습니다.");
+
+        try {
+            roomReviewService.deleteReview(reviewId);
+            return ResponseEntity.ok(Map.of("success", true, "message", "리뷰가 삭제되었습니다."));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("success", false, "message", e.getMessage()));
+        }
     }
+
 }
