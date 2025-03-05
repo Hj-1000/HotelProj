@@ -40,7 +40,6 @@ public class ServiceCateService{
 
     private final ImageRepository imageRepository;
     private final ServiceCateRepository serviceCateRepository;
-    private final ServiceMenuRepository serviceMenuRepository;
     private final HotelRepository hotelRepository;
 
     private final ModelMapper modelMapper;
