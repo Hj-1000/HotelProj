@@ -127,11 +127,11 @@ public class PaymentController {
             List<ReservationDTO> reservations = reservationsPage.getContent();
 
             // 필터링된 결제 내역 리스트 정렬
-            filteredPayments.sort(Comparator.comparing(PaymentDTO::getReservationId).reversed());  // 예약 번호 기준 내림차순 정렬
+            pagedPayments.sort(Comparator.comparing(PaymentDTO::getReservationId).reversed());  // 예약 번호 기준 내림차순 정렬
 
             // 예약 내역 필터링 후 정렬
             List<ReservationDTO> filteredReservations = reservations.stream()
-                    .filter(reservation -> filteredPayments.stream()
+                    .filter(reservation -> pagedPayments.stream()
                             .anyMatch(payment -> payment.getReservationId().equals(reservation.getReservationId())))
                     .sorted(Comparator.comparing(ReservationDTO::getReservationId).reversed())  // 예약 번호 기준 내림차순 정렬
                     .collect(Collectors.toList());
