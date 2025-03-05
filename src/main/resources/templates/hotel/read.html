@@ -559,10 +559,17 @@
                                                         <div class="room-actions">
                                                             <p class="room-price mb-0"
                                                                th:text="${room.formattedRoomPrice != null ? room.formattedRoomPrice + ' ' + '~' : '가격 미정'}"></p>
-                                                            <button class="btn btn-book" style="width: 100px"
+                                                            <!--<button class="btn btn-book" style="width: 100px"
                                                                     th:text="${room.roomStatus ? '예약하기' : '예약 불가'}"
                                                                     th:classappend="${room.roomStatus ? 'btn-dark' : 'btn-danger text-bold'}"
                                                                     th:disabled="${!room.roomStatus}">
+                                                            </button>-->
+                                                            <button class="btn btn-book"
+                                                                    th:data-room-id="${room.roomId}"
+                                                                    th:text="${room.roomStatus ? '자세히 보기' : '예약 불가'}"
+                                                                    th:classappend="${room.roomStatus ? 'btn-dark' : 'btn-danger text-bold'}"
+                                                                    th:disabled="${!room.roomStatus}"
+                                                                    onclick="goToRoomDetail(this)">
                                                             </button>
                                                         </div>
                                                     </div>
@@ -700,8 +707,15 @@
         checkOutInput.addEventListener("change", calculateStayAndPrice);
     });
 
+    function goToRoomDetail(button) {
+        let roomId = button.getAttribute("data-room-id");
+        if (roomId) {
+            window.location.href = `/room/${roomId}`;
+        }
+    }
+
     /* 비로그인 , 로그인 예외처리 */
-    function addReservationButtonEvent(parentElement = document) {
+    /*function addReservationButtonEvent(parentElement = document) {
         parentElement.querySelectorAll('.btn-book').forEach(button => {
             if (!button.hasAttribute("data-event-added")) { // 중복 방지
                 button.setAttribute("data-event-added", "true");
@@ -786,7 +800,7 @@
                 });
             }
         });
-    }
+    }*/
 
     function getMaxPeopleByRoomType(roomType) {
         const roomCapacity = {
