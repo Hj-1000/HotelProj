@@ -11,7 +11,7 @@
 /* 배너 이미지 */
 .room-banner {
     width: 100vw;
-    height: 600px;
+    height: 650px;
     position: relative;
     overflow: hidden;
 }
@@ -158,6 +158,26 @@
     font-size: 14px;
     margin-bottom: 5px;
 }
+
+
+/* 리뷰 */
+.review-item {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.review-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 16px;
+}
+
+
 
 /* 예약 문의 */
 .contact-info {

@@ -1,12 +1,15 @@
 package com.ntt.ntt.Controller;
 
+import com.ntt.ntt.DTO.RoomDTO;
 import com.ntt.ntt.DTO.RoomReviewDTO;
 import com.ntt.ntt.Service.RoomReviewService;
+import com.ntt.ntt.Service.RoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -20,6 +23,7 @@ import java.util.Map;
 public class RoomReviewController {
 
     private final RoomReviewService roomReviewService;
+    private final RoomService roomService;
 
     //  1. 리뷰 등록
     @PostMapping("/register")
@@ -74,7 +78,6 @@ public class RoomReviewController {
         }
     }
 
-
     //  4. 특정 객실의 최근 3개 리뷰 조회
     @GetMapping("/room/{roomId}/recent")
     public ResponseEntity<List<RoomReviewDTO>> getRecentReviewsByRoomId(@PathVariable Integer roomId) {
@@ -99,7 +102,7 @@ public class RoomReviewController {
         return ResponseEntity.ok(averageRating);
     }
 
-    //  7. 특정 리뷰 수정
+    //  7. 리뷰 수정
     @PutMapping("/update/{reviewId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER') or @roomReviewService.isReviewOwner(#reviewId, authentication.principal.username)")
     public ResponseEntity<?> updateReview(
@@ -122,7 +125,7 @@ public class RoomReviewController {
         }
     }
 
-    //  8. 특정 리뷰 삭제
+    //  8. 리뷰 삭제
     @PostMapping("/delete/{reviewId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER') or @roomReviewService.isReviewOwner(#reviewId, authentication.principal.username)")
     public ResponseEntity<?> deleteReview(@PathVariable Integer reviewId) {
@@ -137,4 +140,17 @@ public class RoomReviewController {
         }
     }
 
+    //  9. 객실 상세보기
+    @GetMapping("/room/detail/{roomId}")
+    public String getRoomDetail(@PathVariable Integer roomId, Model model) {
+        log.info("객실 상세보기 요청 - Room ID: {}", roomId);
+
+        RoomDTO room = roomService.readRoom(roomId);
+        List<RoomReviewDTO> reviews = roomReviewService.getReviewsByRoomId(roomId);
+
+        model.addAttribute("room", room);
+        model.addAttribute("reviews", reviews);
+
+        return "detail"; // Thymeleaf 템플릿 반환
+    }
 }
