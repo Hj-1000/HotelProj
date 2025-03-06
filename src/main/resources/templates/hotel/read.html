@@ -67,6 +67,18 @@
             display: block;
             transition: transform 0.5s ease-in-out;
         }*/
+
+        .image-box {
+            width:100%;
+            height:230px;
+            overflow:hidden;
+        }
+
+        .rooms-img {
+            width:100%;
+            height:100%;
+            object-fit:cover;
+        }
     </style>
 
 
@@ -522,15 +534,19 @@
             <div class="card border-light-shadow" style="width: 950px; margin: auto; padding-top: 17px; padding-bottom: 20px;">
                 <div style="width: 950px; margin: auto">
                     <div style="margin-bottom: -20px">
-                        <h4 style="margin-bottom: -24px">&ensp;객실 리뷰</h4> <span>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;(<span th:text="${hotelDTO.roomReviewCount}" class="roomReview">2,298</span>)&ensp; <i class="bi bi-star-fill"></i> <span th:text="${hotelDTO.hotelRating}" class="hotelRating">4.9</span>점</span>
+                        <h4 style="margin-bottom: -24px">&ensp;객실 리뷰</h4>
+                        <span>
+                            &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;(<span th:text="${hotelDTO.roomReviewCount}" class="roomReview">2,298</span>)&ensp;
+                            <i class="bi bi-star-fill"></i> <span th:text="${hotelDTO.hotelRating}" class="hotelRating">4.9</span>점
+                        </span>
                     </div>
                     <div style="text-align: right; margin-bottom: 15px; margin-top: -10px; font-size: small">
-                        전체보기>&emsp;
+                        <a href="#">전체보기></a>&emsp;
                     </div>
-                    <div class="row" style="width: 950px; margin: auto">
+                    <div class="row" style="width: 920px; margin: auto">
                         <!--th:if 돌려서 최신리뷰 3개-->
                         <div class="col-4">
-                            <div class="card border-light-shadow review-card" style="margin: -3px; padding: 15px; height: 150px">
+                            <div class="card border-light-shadow review-card" style="margin: -5px; padding: 15px; height: 150px">
                                 <!-- 객실 리뷰 -->
                                 <!--별점-->
                                 <p>
@@ -573,7 +589,7 @@
                             </div>
                         </div>
                         <div class="col-4">
-                            <div class="card border-light-shadow review-card" style="margin: -3px; padding: 15px; height: 150px">
+                            <div class="card border-light-shadow review-card" style="margin: -5px; padding: 15px; height: 150px">
                                 <p>
                                     <i class="bi bi-star-fill" style="margin-right: -3px"></i>
                                     <i class="bi bi-star-fill" style="margin-right: -3px"></i>
@@ -586,7 +602,7 @@
                             </div>
                         </div>
                         <div class="col-4">
-                            <div class="card border-light-shadow review-card" style="margin: -3px; padding: 15px; height: 150px">
+                            <div class="card border-light-shadow review-card" style="margin: -5px; padding: 15px; height: 150px">
                                 <!-- 객실 리뷰 -->
                                 <p>
                                     <i class="bi bi-star-fill" style="margin-right: -3px"></i>
@@ -626,7 +642,7 @@
                     <div class="container">
 
                         <!-- Room List Section -->
-                        <section class="py-5">
+                        <section class="py-5" >
                             <div class="container">
                                 <h4 class="mb-3">객실 선택</h4>
 
@@ -637,7 +653,7 @@
                                     </div>
                                 </th:block>
 
-                                <th:block th:unless="${rooms == null || #lists.isEmpty(rooms)}">
+                                <th:block th:unless="${rooms == null || #lists.isEmpty(rooms)}" >
                                     <div th:each="room : ${rooms}">
 
                                         <div class="room"
@@ -648,11 +664,11 @@
 
                                             <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
                                                 <!--이미지-->
-                                                <div class="col-auto d-none d-lg-block">
-                                                    <div style="height: 230px">
+                                                <div class="col-5 d-none d-lg-block">
+                                                    <div class="image-box">
                                                         <img th:if="${!#lists.isEmpty(room.roomImageDTOList)}"
                                                              th:src="@{'/upload/' + ${room.roomImageDTOList[0].imagePath}}"
-                                                             class="bd-placeholder-img"
+                                                             class="bd-placeholder-img rooms-img"
                                                              th:alt="${room.roomName}" height="100%">
                                                         <img th:if="${#lists.isEmpty(room.roomImageDTOList)}"
                                                              src="/img/default_img.jpg"
@@ -665,7 +681,7 @@
                                                     </div>
                                                 </div>
                                                 <!--방 설명-->
-                                                <div class="col p-4 d-flex flex-column position-static">
+                                                <div class="col-7 p-4 d-flex flex-column position-static" style="padding-bottom: -15px">
                                                     <div class="d-flex justify-content-start gap-2 mb-1">
                                                         <!-- 예약 가능 여부 -->
                                                         <!--<span th:text="(${room.roomStatus} ? '예약 가능' : '예약 불가')"
@@ -677,7 +693,7 @@
                                                     <h3 th:text="${room.roomName}" class="mb-2">객실명</h3>
                                                     <p th:text="'예약 기간 : ' + ${room.reservationStart} + ' ~ ' + ${room.reservationEnd}" class="card-text" style="margin-bottom: 1px"></p>
                                                     <p th:text="'숙박 기간 : ' + ${room.stayStart} + ' ~ ' + ${room.stayEnd}" class="card-text"></p>
-                                                    <div class="room-actions" style="margin-top: -5px">
+                                                    <div class="room-actions" style="margin-top: -5px; ">
                                                         <p class="room-price mb-0"
                                                            th:text="${room.formattedRoomPrice != null ? room.formattedRoomPrice + ' ' + 'KRW' : '가격 미정'}"></p>
                                                         <button class="btn btn-book btn-dark" style="width: 110px"
@@ -763,7 +779,7 @@
                                 </th:block>-->
 
                                 <!-- 버튼 -->
-                                <div class="text-end mt-3">
+                                <div class="text-end mt-5">
                                     <a class="btn btn-dark" href="/hotel/list">목록</a>
                                 </div>
                             </div>

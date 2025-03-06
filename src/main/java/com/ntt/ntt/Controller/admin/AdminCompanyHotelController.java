@@ -217,8 +217,15 @@ public class AdminCompanyHotelController {
     @Operation(summary = "관리자용 본사 수정 처리", description = "본사를 수정 처리 한다.")
     @GetMapping("/company/update")
     public String updateHTML(Integer companyId, Model model) {
+
         CompanyDTO companyDTO = companyService.read(companyId);
         model.addAttribute("companyDTO", companyDTO);
+
+        // 호텔장 목록 가져오기
+        List<MemberDTO> memberDTOS = companyService.getAllChiefs();
+        model.addAttribute("memberDTOS", memberDTOS);
+        model.addAttribute("memberDTO", new MemberDTO());
+
         return "/chief/company/update";
     }
     //수정처리
