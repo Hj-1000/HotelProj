@@ -239,20 +239,20 @@ public class ImageService {
                 String filename = filenames.get(i);
                 if (filename != null) {
                     Image image = new Image();
-                    image.setBanner(new Banner(bannerId)); // 수정: bannerId 사용
+                    image.setBanner(new Banner(bannerId));
                     image.setImageName(filename);
                     image.setImageOriginalName(imageFiles.get(i).getOriginalFilename());
-//                    image.setImagePath(IMG_LOCATION + filename);
-                    image.setImagePath("/upload/" + filename);
-//                    image.setImagePath(filename);
-                    imageRepository.save(image); // DB 저장
+                    // 전체 경로에서 파일명만 추출
+                    String savedFileName = filename.substring(filename.lastIndexOf("/") + 1);
+                    image.setImagePath(savedFileName);
+                    imageRepository.save(image);
                 }
             }
         } catch (Exception e) {
             throw new RuntimeException("이미지 데이터 저장 실패: " + e.getMessage(), e);
         }
 
-        return filenames; // 저장된 파일명 리스트 반환
+        return filenames;
     }
 
     // 공지사항 이미지 등록

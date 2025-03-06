@@ -57,7 +57,16 @@ public class BannerController {
             List<Image> images = imageRepository.findByBanner_BannerId(banner.getBannerId());
 
             List<ImageDTO> imageDTOs = images.stream()
-                    .map(ImageDTO::fromEntity) //  fromEntity 메서드 활용하여 변환
+                    .map(image -> {
+                        ImageDTO dto = ImageDTO.fromEntity(image);
+                        // 이미지 경로가 전체 경로를 포함하고 있다면 파일명만 추출
+                        if (dto.getImagePath() != null) {
+                            if (dto.getImagePath().contains("/")) {
+                                dto.setImagePath(dto.getImagePath().substring(dto.getImagePath().lastIndexOf("/") + 1));
+                            }
+                        }
+                        return dto;
+                    })
                     .collect(Collectors.toList());
 
             banner.setBannerImageDTOList(imageDTOs);
@@ -98,7 +107,7 @@ public class BannerController {
     }
 
 
-     // 배너 삭제
+    // 배너 삭제
 //    @GetMapping("/banner/delete")
 //    public String deleteForm(@RequestParam Integer bannerId, List<MultipartFile> MultipartFile){
 //        bannerService.delete(bannerId);
