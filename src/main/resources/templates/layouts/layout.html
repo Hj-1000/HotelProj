@@ -82,7 +82,8 @@
                     <li class="nav-item">
                         <a href="#" class="nav-link text-white dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#admin-service-menu" aria-expanded="false"><i class="bi bi-cup-hot"></i> 룸 서비스 관리</a>
                         <ul class="collapse list-unstyled ps-3" id="admin-service-menu">
-                            <li><a href="/manager/roomService/category/list" class="nav-link text-white">카테고리 관리</a></li>
+                            <li><a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" href="/manager/roomService/category/list" class="nav-link text-white">카테고리 관리</a></li>
+                            <li><a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="/chief/roomService/category/list" class="nav-link text-white">카테고리 관리</a></li>
                             <li><a href="/manager/roomService/menu/list" class="nav-link text-white">메뉴 관리</a></li>
                             <li><a href="/manager/order/list" class="nav-link text-white">주문 관리</a></li>
                         </ul>

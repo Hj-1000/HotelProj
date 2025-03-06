@@ -1,4 +1,4 @@
-package com.ntt.ntt.Controller.serviceCategory;
+package com.ntt.ntt.Controller.chief;
 
 import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.ServiceCateDTO;
@@ -7,9 +7,8 @@ import com.ntt.ntt.Service.MemberService;
 import com.ntt.ntt.Service.ServiceCateService;
 import com.ntt.ntt.Util.PaginationUtil;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,14 +28,13 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
+@RequestMapping("chief/roomService/category")
+@AllArgsConstructor
 @Log4j2
-@RequiredArgsConstructor
-@RequestMapping("manager/roomService/category") //url roomService아래에
-@Tag(name = "ServiceCateManagerController", description = "룸서비스 카테고리 정보")
-public class ServiceCateManagerController {
+public class ChiefServiceCateController {
     private final ServiceCateService serviceCateService;
-    private final MemberService memberService;
     private final PaginationUtil paginationUtil;
+    private final MemberService memberService;
 
     @Operation(summary = "등록폼", description = "등록폼 페이지로 이동한다.")
     @GetMapping("/register")
@@ -58,30 +56,32 @@ public class ServiceCateManagerController {
     public String registerProc(ServiceCateDTO serviceCateDTO,
                                @RequestParam("imageFiles") List<MultipartFile> imageFiles,
                                RedirectAttributes redirectAttributes) {
-        log.info("post에서 등록할 serviceCateDTO" + serviceCateDTO);
+        log.info("post에서 등록할 serviceCateDTO: " + serviceCateDTO);
         serviceCateService.register(serviceCateDTO, imageFiles);
 
-        // 등록된 지사의 hotelId 가져오기
-        Integer hotelId = serviceCateDTO.getHotelId().getHotelId();  // 2025-02-11 추가
+        Integer memberId = serviceCateDTO.getHotelId().getCompany().getMember().getMemberId();
 
         redirectAttributes.addFlashAttribute("message", "카테고리 등록이 완료되었습니다.");
-        return "redirect:/manager/roomService/category/list?hotelId=" + hotelId;  // hotelId를 쿼리 파라미터로 전달 2025-02-11 추가
+        return "redirect:/chief/roomService/category/list?page=1&memberId=" + memberId;
     }
 
-    @Operation(summary = "매니저의 카테고리 목록", description = "매니저가 속한 지사의 카테고리 목록을 조회한다.")
+
+    //CHIEF의 카테고리의 전체목록
+    @Operation(summary = "호텔장의 카테고리목록", description = "호텔장이 속한 본사의 카테고리 목록을 조회한다.")
     @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER')")
     @GetMapping("/list")
-    public String listSearch(@RequestParam(required = false) String keyword,
-                             @RequestParam(required = false) String searchType,
-                             @RequestParam(required = false) Integer hotelId, // hotelId 2024-02-11 추가
-                             @PageableDefault(page = 1) Pageable page,
-                             Authentication authentication,
-                             Model model) {
+    public String listByCHIEF(@RequestParam(required = false) String keyword,
+                              @RequestParam(required = false) String searchType,
+                              @RequestParam(required = false) Integer hotelId, // hotelId 2024-02-11 추가
+                              @PageableDefault(page = 1) Pageable page,
+                              Authentication authentication,
+                              Model model) {
 
+        //로그인한 사용자의 memberId
         Integer memberId = getLoggedInMemberId(authentication);
 
         // 검색 기능을 포함한 서비스 호출
-        Page<ServiceCateDTO> serviceCateDTOS = serviceCateService.listByManager(page, keyword, searchType, hotelId, memberId);
+        Page<ServiceCateDTO> serviceCateDTOS = serviceCateService.listByChief(page, keyword, searchType, hotelId, memberId);
 
         // 페이지 정보 계산 (PaginationUtil 사용)
         Map<String, Integer> pageInfo = paginationUtil.pagination(serviceCateDTOS);
@@ -110,60 +110,10 @@ public class ServiceCateManagerController {
         model.addAttribute("hotelId", hotelId); // 2024-02-11 추가
         model.addAttribute("hotelDTOS", hotelDTOS);
         model.addAttribute("hotelDTO", new HotelDTO());
+        model.addAttribute("memberId", memberId);
 
         return "/manager/roomService/category/list";
     }
-
-
-    @Operation(summary = "개별조회", description = "해당번호의 데이터를 조회한다.")
-    @GetMapping("/read")
-    public String read(Integer serviceCateId, Model model) {
-        try {
-            ServiceCateDTO serviceCateDTO =
-                    serviceCateService.read(serviceCateId);
-            model.addAttribute("serviceCateDTO", serviceCateDTO);
-            return "/manager/roomService/category/read";
-        } catch (EntityNotFoundException e) {
-            model.addAttribute("error", "해당 카테고리를 찾을 수 없습니다");
-            return "/manager/roomService/category/list";
-        } catch (Exception e) {
-            model.addAttribute("error", "서버 오류가 발생했습니다.");
-            return "/manager/roomService/category/list";
-        }
-    }
-    @Operation(summary = "수정폼", description = "해당 데이터를 조회 후 수정폼페이지로 이동한다.")
-    @GetMapping("/update")
-    public String updateForm(Integer serviceCateId, Model model) {
-        ServiceCateDTO serviceCateDTO =
-                serviceCateService.read(serviceCateId);
-        model.addAttribute("serviceCateDTO",serviceCateDTO);
-
-
-        return "/manager/roomService/category/update";
-    }
-
-    @Operation(summary = "수정창", description = "수정할 내용을 데이터베이스에 저장 후 목록페이지로 이동한다.")
-    @PostMapping("/update")
-    public String updateProc(ServiceCateDTO serviceCateDTO, @RequestParam("imageFiles") List<MultipartFile> imageFiles,
-                             RedirectAttributes redirectAttributes) {
-        serviceCateService.update(serviceCateDTO, imageFiles);
-        redirectAttributes.addFlashAttribute("message", "카테고리 수정이 완료되었습니다.");
-        return "redirect:/manager/roomService/category/read?serviceCateId="+ serviceCateDTO.getServiceCateId();
-    }
-
-    @Operation(summary = "삭제처리", description = "해당 데이터를 삭제 후 목록페이지로 이동한다.")
-    @GetMapping("/delete")
-    public String deleteForm(Integer serviceCateId, RedirectAttributes redirectAttributes) {
-        //삭제 전 카테고리 정보 조회
-        ServiceCateDTO serviceCateDTO = serviceCateService.read(serviceCateId);
-
-        serviceCateService.delete(serviceCateId);
-        redirectAttributes.addFlashAttribute("message", "카테고리 삭제가 완료되었습니다.");
-        Integer hotelId = serviceCateDTO.getHotelId().getHotelId();
-
-        return "redirect:/manager/roomService/category/list?hotelId=" + hotelId;
-    }
-
     private Integer getLoggedInMemberId(Authentication authentication) {
         // authentication이 null이 아니고, 인증된 사용자가 있는지 확인
         if (authentication == null || authentication.getPrincipal() == null) {
@@ -187,5 +137,61 @@ public class ServiceCateManagerController {
         }
 
         return member.getMemberId(); // memberId 반환
+    }
+
+    @Operation(summary = "개별조회", description = "해당번호의 데이터를 조회한다.")
+    @GetMapping("/read")
+    public String read(Integer serviceCateId, Model model) {
+        try {
+            ServiceCateDTO serviceCateDTO =
+                    serviceCateService.read(serviceCateId);
+            model.addAttribute("serviceCateDTO", serviceCateDTO);
+            return "/manager/roomService/category/read";
+        } catch (EntityNotFoundException e) {
+            model.addAttribute("error", "해당 카테고리를 찾을 수 없습니다");
+            return "/manager/roomService/category/list";
+        } catch (Exception e) {
+            model.addAttribute("error", "서버 오류가 발생했습니다.");
+            return "/manager/roomService/category/list";
+        }
+    }
+
+    @Operation(summary = "수정폼", description = "해당 데이터를 조회 후 수정폼페이지로 이동한다.")
+    @GetMapping("/update")
+    public String updateForm(Integer serviceCateId, Model model) {
+        ServiceCateDTO serviceCateDTO =
+                serviceCateService.read(serviceCateId);
+        model.addAttribute("serviceCateDTO",serviceCateDTO);
+
+
+        return "/manager/roomService/category/update";
+    }
+
+    @Operation(summary = "수정창", description = "수정할 내용을 데이터베이스에 저장 후 목록페이지로 이동한다.")
+    @PostMapping("/update")
+    public String updateProc(ServiceCateDTO serviceCateDTO,
+                             @RequestParam("imageFiles") List<MultipartFile> imageFiles,
+                             RedirectAttributes redirectAttributes) {
+        serviceCateService.update(serviceCateDTO, imageFiles);
+        redirectAttributes.addFlashAttribute("message", "카테고리 수정이 완료되었습니다.");
+
+
+        Integer memberId = serviceCateDTO.getHotelId().getCompany().getMember().getMemberId();
+
+        return "redirect:/chief/roomService/category/list?page=1&memberId=" + memberId;
+    }
+
+    @Operation(summary = "삭제처리", description = "해당 데이터를 삭제 후 목록페이지로 이동한다.")
+    @GetMapping("/delete")
+    public String deleteForm(Integer serviceCateId, RedirectAttributes redirectAttributes) {
+        ServiceCateDTO serviceCateDTO = serviceCateService.read(serviceCateId);
+
+        serviceCateService.delete(serviceCateId);
+        redirectAttributes.addFlashAttribute("message", "카테고리 삭제가 완료되었습니다.");
+
+
+        Integer memberId = serviceCateDTO.getHotelId().getCompany().getMember().getMemberId();
+
+        return "redirect:/chief/roomService/category/list?page=1&memberId=" + memberId;
     }
 }

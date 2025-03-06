@@ -93,13 +93,14 @@ public class ServiceCateService{
 
     }
     //서비스 카테고리 목록
+    //Manager이 사용할 카테고리의 전체목록
     /*--------------------------------
     함수명 : Page<ServiceCateDTO> list(Pageable page, String keyword, String searchType, Integer hotelId)
     인수 : 조회할 페이지 정보
     출력 : 해당 데이터들(list)과 page 정보를 전달
     설명 : 요청한 페이지번호에 해당하는 데이터를 조회해서 전달
     --------------------------------*/
-    public Page<ServiceCateDTO> list(Pageable page, String keyword, String searchType, Integer hotelId) {
+    public Page<ServiceCateDTO> listByManager(Pageable page, String keyword, String searchType, Integer hotelId, Integer memberId) {
         int currentPage = page.getPageNumber() - 1; // 0-based index
         int pageSize = 10;
         Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.ASC, "serviceCateId"));
@@ -111,19 +112,72 @@ public class ServiceCateService{
             if ("name".equals(searchType)) {
                 // 검색어 + hotelId 기준으로 필터링 2024-02-11 추가
                 if (hotelId != null) {
-                    serviceCatePage = serviceCateRepository.findByServiceCateNameLikeAndHotel_HotelId(keywordLike, hotelId, pageable);
+                    serviceCatePage = serviceCateRepository.findByServiceCateNameLikeAndHotel_HotelIdAndHotel_Member_MemberId(keywordLike, hotelId, memberId,pageable);
                 } else {
-                    serviceCatePage = serviceCateRepository.findByServiceCateNameLike(keywordLike, pageable);
+                    serviceCatePage = serviceCateRepository.findByServiceCateNameLikeAndHotel_Member_MemberId(keywordLike, memberId,pageable);
                 }
             } else {
                 serviceCatePage = (hotelId != null)
-                        ? serviceCateRepository.findByHotel_HotelId(hotelId, pageable)
-                        : serviceCateRepository.findAll(pageable);
+                        ? serviceCateRepository.findByHotel_HotelIdAndHotel_Member_MemberId(hotelId, memberId, pageable)
+                        : serviceCateRepository.findByHotel_Member_MemberId(memberId,pageable);
             }
         } else {
             serviceCatePage = (hotelId != null)
-                    ? serviceCateRepository.findByHotel_HotelId(hotelId, pageable)
-                    : serviceCateRepository.findAll(pageable);
+                    ? serviceCateRepository.findByHotel_HotelIdAndHotel_Member_MemberId(hotelId, memberId, pageable)
+                    : serviceCateRepository.findByHotel_Member_MemberId(memberId,pageable);
+        }
+
+        // DTO 변환
+        return serviceCatePage.map(entity -> {
+            ServiceCateDTO serviceCateDTO = modelMapper.map(entity, ServiceCateDTO.class);
+            List<ImageDTO> imageDTOList = imageRepository.findByServiceCate_ServiceCateId(serviceCateDTO.getServiceCateId())
+                    .stream().map(imagefile -> {
+                        imagefile.setImagePath(imagefile.getImagePath().replace("c:/data/", ""));
+                        return modelMapper.map(imagefile, ImageDTO.class);
+                    })
+                    .collect(Collectors.toList());
+            serviceCateDTO.setServiceCateImageDTOList(imageDTOList);
+            return serviceCateDTO;
+        });
+    }
+
+    //서비스 카테고리 목록
+    //CHIEF 사용할 카테고리의 전체목록
+    /*--------------------------------
+    함수명 : Page<ServiceCateDTO> list(Pageable page, String keyword, String searchType, Integer hotelId)
+    인수 : 조회할 페이지 정보
+    출력 : 해당 데이터들(list)과 page 정보를 전달
+    설명 : 요청한 페이지번호에 해당하는 데이터를 조회해서 전달
+    --------------------------------*/
+    public Page<ServiceCateDTO> listByChief(Pageable page, String keyword, String searchType, Integer hotelId, Integer memberId) {
+        int currentPage = page.getPageNumber() - 1; // 0-based index
+        int pageSize = 10;
+
+        Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.ASC, "serviceCateId"));
+        Page<ServiceCate> serviceCatePage;
+
+        if (keyword != null && !keyword.isEmpty()) {
+            String keywordLike = "%" + keyword + "%";
+
+            if ("name".equals(searchType)) {
+                if (hotelId != null) {
+                    // 호텔 ID와 멤버 ID로 검색
+                    serviceCatePage = serviceCateRepository.findByServiceCateNameLikeAndHotel_HotelIdAndHotel_Company_Member_MemberId(
+                            keywordLike, hotelId, memberId, pageable);
+                } else {
+                    // 호텔 ID가 없더라도 memberId로 제한
+                    serviceCatePage = serviceCateRepository.findByServiceCateNameLikeAndHotel_Company_Member_MemberId(
+                            keywordLike, memberId, pageable);
+                }
+            } else {
+                serviceCatePage = (hotelId != null)
+                        ? serviceCateRepository.findByHotel_HotelIdAndHotel_Company_Member_MemberId(hotelId, memberId, pageable)
+                        : serviceCateRepository.findByHotel_Company_Member_MemberId(memberId, pageable);
+            }
+        } else {
+            serviceCatePage = (hotelId != null)
+                    ? serviceCateRepository.findByHotel_HotelIdAndHotel_Company_Member_MemberId(hotelId, memberId, pageable)
+                    : serviceCateRepository.findByHotel_Company_Member_MemberId(memberId, pageable);
         }
 
         // DTO 변환

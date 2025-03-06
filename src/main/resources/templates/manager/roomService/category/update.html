@@ -65,7 +65,38 @@
             <h2 class="mb-3">카테고리 수정</h2>
             <div class="card">
                 <div class="card-body">
-                    <form th:action="@{/manager/roomService/category/update}" method="post" enctype="multipart/form-data"
+                    <form th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:action="@{/chief/roomService/category/update}" method="post" enctype="multipart/form-data"
+                    th:object="${serviceCateDTO}">
+                        <input type="hidden" name="serviceCateId" th:field="*{serviceCateId}">
+
+                        <div class="mb-3 mt-3">
+                            <label for="serviceCateName" class="form-label">카테고리 명:</label>
+                            <input type="text" class="form-control" style="width: 300px"
+                                   placeholder="카테고리를 입력하세요."
+                                   name="serviceCateName"
+                                   id="serviceCateName"
+                                   minlength="2" required
+                                   title="최소 2글자 이상 작성해주세요.">
+                        </div>
+                        <!-- 새 이미지 업로드 및 미리보기 -->
+                        <div>
+                            <label for="newImageFiles">카테고리 이미지:</label>
+                            <input type="file" id="newImageFiles" name="imageFiles" multiple onchange="previewImage(event)">
+                            <small>이미지를 선택해 주세요.</small>
+                        </div>
+
+                        <!-- 미리보기 이미지 표시 -->
+                        <div id="imagePreviewContainer">
+                            <!-- 미리보기가 여기 나타날 것입니다 -->
+                        </div>
+
+                        <div style="text-align: right">
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-pen"></i></button>
+                            <a class="btn btn-primary" style="background-color: black" th:href="@{/chief/roomService/category/list}">목록</a>
+                            <button type="reset" class="btn btn-secondary">초기화</button>
+                        </div>
+                    </form>
+                    <form th:if="${#authorization.expression('hasRole(''MANAGER'')')}" th:action="@{/manager/roomService/category/update}" method="post" enctype="multipart/form-data"
                     th:object="${serviceCateDTO}">
                         <input type="hidden" name="serviceCateId" th:field="*{serviceCateId}">
 
