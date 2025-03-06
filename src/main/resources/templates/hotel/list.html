@@ -22,6 +22,7 @@
     <link rel="stylesheet" th:href="@{/css/hotelList.css}">
 
     <style>
+
         .banner-container {
             width:100%;
             height:400px;
@@ -71,7 +72,7 @@
             text-align: center; /* 텍스트 가운데 정렬 */
         }
         .mapBtn {
-            width: 100px;
+            width: 300px;
         }
 
         /*.hotel-card {*/
@@ -354,7 +355,7 @@
     <!-- hotel List Section -->
     <section class="py-5">
         <div class="container">
-            <div class="container1 mt-5 mb-5">
+            <div class="container1 mt-3 mb-5">
                 <br>
                 <h2 class="d-flex justify-content-center mb-3">어디로 갈까요?</h2>
                 <div class="d-flex justify-content-center mt-2" role="search">
@@ -583,20 +584,20 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-3">
-                            <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
-                                <button type="button" class="btn btn-light" data-target="su" onclick="changeButtonClass(this)">서울</button>
-                                <button type="button" class="btn btn-light" data-target="gk" onclick="changeButtonClass(this)">경기</button>
-                                <button type="button" class="btn btn-light" data-target="ic" onclick="changeButtonClass(this)">인천</button>
-                                <button type="button" class="btn btn-light" data-target="jj" onclick="changeButtonClass(this)">제주</button>
-                                <button type="button" class="btn btn-light" data-target="bs" onclick="changeButtonClass(this)">부산</button>
-                                <button type="button" class="btn btn-light" data-target="dg" onclick="changeButtonClass(this)">대구</button>
-                                <button type="button" class="btn btn-light" data-target="gj" onclick="changeButtonClass(this)">광주</button>
-                                <button type="button" class="btn btn-light" data-target="dj" onclick="changeButtonClass(this)">대전</button>
-                                <button type="button" class="btn btn-light" data-target="us" onclick="changeButtonClass(this)">울산</button>
-                                <button type="button" class="btn btn-light" data-target="gw" onclick="changeButtonClass(this)">강원</button>
-                                <button type="button" class="btn btn-light" data-target="gs" onclick="changeButtonClass(this)">경상</button>
-                                <button type="button" class="btn btn-light" data-target="je" onclick="changeButtonClass(this)">전라</button>
-                                <button type="button" class="btn btn-light" data-target="cc" onclick="changeButtonClass(this)">충청</button>
+                            <div class="btn-group-vertical" role="group" aria-label="Vertical button group" style="width: 100%; margin-right: -5px">
+                                <button type="button" class="btn btn-light " data-target="su" onclick="changeButtonClass(this)">서울</button>
+                                <button type="button" class="btn btn-light " data-target="gk" onclick="changeButtonClass(this)">경기</button>
+                                <button type="button" class="btn btn-light " data-target="ic" onclick="changeButtonClass(this)">인천</button>
+                                <button type="button" class="btn btn-light " data-target="jj" onclick="changeButtonClass(this)">제주</button>
+                                <button type="button" class="btn btn-light " data-target="bs" onclick="changeButtonClass(this)">부산</button>
+                                <button type="button" class="btn btn-light " data-target="dg" onclick="changeButtonClass(this)">대구</button>
+                                <button type="button" class="btn btn-light " data-target="gj" onclick="changeButtonClass(this)">광주</button>
+                                <button type="button" class="btn btn-light " data-target="dj" onclick="changeButtonClass(this)">대전</button>
+                                <button type="button" class="btn btn-light " data-target="us" onclick="changeButtonClass(this)">울산</button>
+                                <button type="button" class="btn btn-light " data-target="gw" onclick="changeButtonClass(this)">강원</button>
+                                <button type="button" class="btn btn-light " data-target="gs" onclick="changeButtonClass(this)">경상</button>
+                                <button type="button" class="btn btn-light " data-target="je" onclick="changeButtonClass(this)">전라</button>
+                                <button type="button" class="btn btn-light " data-target="cc" onclick="changeButtonClass(this)">충청</button>
                             </div>
                         </div>
                         <div class="col-9">
@@ -606,14 +607,17 @@
                                 <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=신사/청담/압구정">신사/청담/압구정</a>
                                 <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=서초/교대/사당">서초/교대/사당</a>
                                 <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=잠실/송파/강동">잠실/송파/강동</a>
-                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=홍대/합정/마포/서대문">홍대/합정/마포/서대문</a>
-                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=구로/신도림/금천/영등포">구로/신도림/금천/영등포</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=홍대/합정/상암/마포">홍대/합정/상암/마포</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=구로/신도림/금천">구로/신도림/금천</a>
                                 <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=김포공항/강서/양천">김포공항/강서/양천</a>
                                 <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=건대입구/성수/성동">건대입구/성수/성동</a>
-                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=종로/광화문/명동/중구">종로/광화문/명동/중구</a>
-                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=동대문/을지로/성북">동대문/을지로/성북</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=종로/광화문/청계천/명동">종로/광화문/청계천/명동</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=동대문/을지로/중구">동대문/을지로/중구</a>
                                 <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=용산/이태원/여의도">용산/이태원/여의도</a>
-                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=노원/중랑/도봉/강북">노원/중랑/도봉/강북</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=노원/중랑/도봉">노원/중랑/도봉</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=성북/광진/강북">성북/광진/강북</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=은평/서대문">은평/서대문</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=동작/관악">동작/관악</a>
                             </ul>
 
                             <!-- 부산 -->
@@ -622,37 +626,52 @@
                                 <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=중구/남포/영도">중구/남포/영도</a>
                                 <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=동래/연제/금정">동래/연제/금정</a>
                                 <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=사하/강서/사상">사하/강서/사상</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=북구/울주/기장">북구/울주/기장</a>
                             </ul>
                             <!-- 제주 -->
                             <ul class="region-list jj list-group" style="display: none;">
-                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=제주">제주</a>
-                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=서귀포">서귀포</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=제주/한림/애월">제주/한림/애월</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=서귀포/중문/대정">서귀포/중문/대정</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=성산/표선/송악산">성산/표선/송악산</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=구좌/조천/용담동">구좌/조천/용담동</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=남원/한경/성산">남원/한경/성산</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=제주공항/서광로/동문시장">제주공항/서광로/동문시장</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=안덕면/호근동/대포">안덕면/호근동/대포</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=이호동/용수리/제주대학교">이호동/용수리/제주대학교</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=중산간도로/천지연폭포/미로공원">중산간도로/천지연폭포/미로공원</a>
                             </ul>
                             <!-- 경기 -->
                             <ul class="region-list gk list-group" style="display: none;">
                                 <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=수원">수원</a>
                                 <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=고양">고양</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=용인">용인</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=성남">성남</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=화성">화성</a>
                                 <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=부천">부천</a>
                                 <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=광명/시흥">광명/시흥</a>
-                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=성남/용인/광주">성남/용인/광주</a>
-                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=안양/군포/의왕">안양/군포/의왕</a>
-                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=안산/화성/오산">안산/화성/오산</a>
-                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=평택/이천/여주">평택/이천/여주</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=하남/광주">하남/광주</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=안양/군포/의왕/과천">안양/군포/의왕/과천</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=안산/오산">안산/오산</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=평택/이천/여주/안성">평택/이천/여주/안성</a>
                                 <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=의정부/남양주/구리">의정부/남양주/구리</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=가평/양평/여주">가평/양평/여주</a>
                                 <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=파주/양주/동두천">파주/양주/동두천</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=포천/연천">포천/연천</a>
                             </ul>
                             <!-- 인천 -->
                             <ul class="region-list ic list-group" style="display: none;">
                                 <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=송도/연수/남동">송도/연수/남동</a>
                                 <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=부평/계양">부평/계양</a>
                                 <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=중구/동구/미추홀">중구/동구/미추홀</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=서구/강화/옹진">서구/강화/옹진</a>
                             </ul>
 
                             <!-- 대구 -->
                             <ul class="region-list dg list-group" style="display: none;">
                                 <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=중구/동성로/남구">중구/동성로/남구</a>
-                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=수성구/달서구">수성구/달서구</a>
-                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=북구/서구/동구">북구/서구/동구</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=수성구/달서구/북구">수성구/달서구/북구</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=서구/동구/달성군">서구/동구/달성군</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=군위군/고령군/청도군/칠곡군">군위군/고령군/청도군/칠곡군</a>
                             </ul>
 
                             <!-- 광주 -->
@@ -675,28 +694,44 @@
 
                             <!-- 강원 -->
                             <ul class="region-list gw list-group" style="display: none;">
-                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=춘천/홍천">춘천/홍천</a>
-                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=원주/횡성">원주/횡성</a>
                                 <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=강릉/동해/삼척">강릉/동해/삼척</a>
-                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=속초/양양/고성">속초/양양/고성</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=양양/속초/고성">양양/속초/고성</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=춘천/홍천/평창">춘천/홍천/평창</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=원주/횡성/영월">원주/횡성/영월</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=정선/태백/사북">정선/태백/사북</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=철원/화천/양구/인제">철원/화천/양구/인제</a>
                             </ul>
-                            <!-- 경상 -->
-                            <ul class="region-list gs list-group" style="display: none;">
-                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=포항/경주">포항/경주</a>
-                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=구미/안동/문경">구미/안동/문경</a>
-                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=창원/김해/양산">창원/김해/양산</a>
+                            <!-- 충청 -->
+                            <ul class="region-list cc list-group" style="display: none;">
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=대전">청주/충주/제천</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=천안/아산/당진">천안/아산/당진</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=보은/옥천/영동">보은/옥천/영동</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=진천/음성/증평">진천/음성/증평</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=괴산/단양">괴산/단양</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=논산/계룡/금산">논산/계룡/금산</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=서산/홍성/예산">서산/홍성/예산</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=서천/보령">서천/보령</a>
                             </ul>
                             <!-- 전라 -->
                             <ul class="region-list je list-group" style="display: none;">
                                 <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=전주/군산/익산">전주/군산/익산</a>
                                 <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=여수/순천/광양">여수/순천/광양</a>
                                 <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=목포/나주/무안">목포/나주/무안</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=목포/나주/무안">정읍/남원/완주</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=목포/나주/무안">담양/순천/해남</a>
                             </ul>
-                            <!-- 충청 -->
-                            <ul class="region-list cc list-group" style="display: none;">
-                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=대전">청주/충주/제천</a>
-                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=천안/아산/당진">천안/아산/당진</a>
-                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=보령/서천">보령/서천</a>
+                            <!-- 경상 -->
+                            <ul class="region-list gs list-group" style="display: none;">
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=포항/경주/영천">포항/경주/영천</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=구미/안동/문경">구미/안동/문경</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=김천/상주/칠곡">김천/상주/칠곡</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=영주/의성/청송">영주/의성/청송</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=울진/영덕">울진/영덕</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=창원/김해/양산">창원/김해/양산</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=진주/사천/밀양">진주/사천/밀양</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=통영/거제/고성">통영/거제/고성</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=함안/의령/창녕">함안/의령/창녕</a>
+                                <a class="location-link list-group-item list-group-item-action" href="/hotel/list?searchType=location&keyword=하동/남해">하동/남해</a>
                             </ul>
                         </div>
                     </div>

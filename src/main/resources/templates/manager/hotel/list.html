@@ -136,46 +136,47 @@
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">지사 목록</h5>
-                <table class="table table-bordered text-center">
-                    <thead>
+                <table class="table table-bordered text-center table-hover">
+                    <thead class="table-dark">
                     <tr>
-                        <th style="width: 13%">이미지</th>
+                        <th style="width: 10%">이미지</th>
                         <th style="width: 10%">본사명</th>
                         <th style="width: 15%">지사명</th>
                         <th style="width: 20%">주소</th>
-                        <th style="width: 10%">전화번호</th>
                         <th style="width: 10%">담당자이메일</th>
-                        <th style="width: 10%">체크인-체크아웃</th>
-                        <!--<th style="width: 5%">별점</th>-->
-                        <th style="width: 5%"><i class="bi bi-trash"></i></th>
+                        <th style="width: 10%">전화번호</th>
+                        <th style="width: 8%">체크인-체크아웃</th>
+                        <th style="width: 5%">평점</th>
+                        <th style="width: 10%">관리</th>
                     </tr>
                     </thead>
                     <tbody>
 
                     <th:block th:unless="${#lists.isEmpty(hotelDTOS)}"><!--값이 없으면이 아니면(있으면)-->
                         <tr th:each="data:${hotelDTOS}">
-<!--                            <td th:text="${data.hotelId}">호텔번호</td>-->
-                            <td class="align-middle text-center" style="height: 100px">
+                            <!--                            <td th:text="${data.hotelId}">호텔번호</td>-->
+                            <td class="align-middle text-center" style="height: 80px">
                                 <img th:if="${data.hotelImgDTOList != null and !data.hotelImgDTOList.isEmpty()}"
                                      th:src="@{'/upload/' + ${data.hotelImgDTOList[0].imagePath}}"
                                      alt="Room Image"
-                                     class="room-image" width="100px" >
+                                     class="hotel-image"height="80px">
                                 <span th:if="${data.hotelImgDTOList == null or data.hotelImgDTOList.isEmpty()}">
-                                    <img src="/img/default_img.jpg" width="100px">
+                                    <img src="/img/default_img.jpg" width="50px">
                                 </span>
                             </td>
                             <td th:text="${data.companyName}" class="align-middle text-center">본사명</td>
-                            <td class="align-middle text-center">
-                                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/hotel/read(hotelId=${data.hotelId})}" style="text-decoration: none; color: black" th:text="${data.hotelName}" >지사명</a>
+                            <td th:text="${data.hotelName}" class="align-middle text-center">
+                                지사명
+                                <!--<a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/hotel/read(hotelId=${data.hotelId})}" style="text-decoration: none; color: black" th:text="${data.hotelName}" >지사명</a>
                                 <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/hotel/read(hotelId=${data.hotelId})}" style="text-decoration: none; color: black" th:text="${data.hotelName}" >지사명</a>
-                                <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" th:href="@{/manager/hotel/read(hotelId=${data.hotelId})}" style="text-decoration: none; color: black" th:text="${data.hotelName}" >지사명</a>
+                                <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" th:href="@{/manager/hotel/read(hotelId=${data.hotelId})}" style="text-decoration: none; color: black" th:text="${data.hotelName}" >지사명</a>-->
                             </td>
                             <td th:text="${data.hotelAddress}" class="align-middle text-center">주소</td>
-                            <td th:text="${data.hotelPhone}" class="align-middle text-center">전화번호</td>
                             <td th:text="${data.hotelEmail}" class="align-middle text-center">이메일</td>
+                            <td th:text="${data.hotelPhone}" class="align-middle text-center">전화번호</td>
                             <td class="align-middle text-center">
                                 <span th:text="${data.hotelCheckIn}">체크인</span>:00-<span th:text="${data.hotelCheckOut}">체크아웃</span>:00</td>
-                            <!--<td class="align-middle text-center">별점</td>--> <!-- 별점은 나중에 -->
+                            <td th:text="${data.hotelRating}" class="align-middle text-center">평점</td>
                             <td class="align-middle text-center">
                                 <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/hotel/read(hotelId=${data.hotelId})}" class="btn btn-info btn-sm"><i class="bi bi-eye"></i></a>
                                 <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/hotel/update(hotelId=${data.hotelId})}"  class="btn btn-warning btn-sm"><i class="bi bi-pen"></i></a>

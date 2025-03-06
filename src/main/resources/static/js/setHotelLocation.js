@@ -30,16 +30,12 @@ function setHotelLocationBasedOnAddress(address) {
         location = '용산/이태원/여의도';
     } else if (address.includes('서울 노원') || address.includes('서울 중랑') || address.includes('서울 도봉')) {
         location = '노원/중랑/도봉';
-    } else if (address.includes('서울 성북') || address.includes('서울 광진')) {
-        location = '성북/광진';
-    } else if (address.includes('서울 강북') || address.includes('서울 도봉구') || address.includes('서울 노원구')) {
-        location = '강북구/도봉구/노원구';
+    } else if (address.includes('서울 성북') || address.includes('서울 광진') || address.includes('서울 강북')) {
+        location = '성북/광진/강북';
     } else if (address.includes('서울 은평구') || address.includes('서울 서대문구') ) {
-        location = '은평구/서대문구';
-    } else if (address.includes('서울 양천구') || address.includes('서울 강서구') || address.includes('서울 구로구')) {
-        location = '양천구/강서구/구로구';
-    } else if (address.includes('서울 동작구') || address.includes('서울 관악구') || address.includes('서울 금천구')) {
-        location = '동작구/관악구/금천구';
+        location = '은평/서대문';
+    } else if (address.includes('서울 동작구') || address.includes('서울 관악구')) {
+        location = '동작/관악';
     }
 
 
@@ -137,10 +133,8 @@ function setHotelLocationBasedOnAddress(address) {
     // 강원
     else if (address.includes('강원특별자치도 강릉') || address.includes('강원특별자치도 동해') || address.includes('강원 삼척')) {
         location = '강릉/동해/삼척';
-    } else if (address.includes('강원특별자치도 속초') || address.includes('강원특별자치도 양양')) {
-        location = '속초/양양';
-    } else if (address.includes('강원특별자치도 고성') || address.includes('강원특별자치도 동해') || address.includes('강원특별자치도 강릉')) {
-        location = '고성/동해/강릉';
+    } else if (address.includes('강원특별자치도 속초') || address.includes('강원특별자치도 양양') || address.includes('강원특별자치도 고성')) {
+        location = '양양/속초/고성';
     } else if (address.includes('강원특별자치도 춘천') || address.includes('강원특별자치도 홍천') || address.includes('강원 평창')) {
         location = '춘천/홍천/평창';
     } else if (address.includes('강원특별자치도 원주') || address.includes('강원특별자치도 횡성') || address.includes('강원 영월')) {

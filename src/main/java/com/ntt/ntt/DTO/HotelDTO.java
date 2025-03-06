@@ -32,7 +32,8 @@ public class HotelDTO {
     @NotBlank(message = "호텔 설명은 필수 입력값입니다.")
     private String hotelInfo;
 
-    private Integer hotelRating;
+    private Double hotelRating;
+    private Integer roomReviewCount;
 
     @NotBlank(message = "호텔 전화는 필수 입력값입니다.")
     private String hotelPhone;

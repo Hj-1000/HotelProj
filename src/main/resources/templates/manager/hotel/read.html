@@ -197,11 +197,15 @@
                                 </th:block>
                             </td>
                             <td>호텔 본사</td>
-                            <td colspan="3"><span th:text="${hotelDTO.companyName}">본사명</span></td>
+                            <td ><span th:text="${hotelDTO.companyName}">본사명</span></td>
+                            <td>지역</td>
+                            <td ><span th:text="${hotelDTO.hotelLocation}">지역</span></td>
                         </tr>
                         <tr class="table-light">
-                            <td>지역</td>
-                            <td colspan="3"><span th:text="${hotelDTO.hotelLocation}">지역</span></td>
+                            <td>평점</td>
+                            <td ><span th:text="${hotelDTO.hotelRating}">평점</span>점</td>
+                            <td>리뷰</td>
+                            <td ><span th:text="${hotelDTO.roomReviewCount}">리뷰개수</span>개</td>
                         </tr>
                         <tr class="table-light">
                             <td>담당자</td>
