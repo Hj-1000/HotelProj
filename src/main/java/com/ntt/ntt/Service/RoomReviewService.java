@@ -10,11 +10,14 @@ import com.ntt.ntt.Repository.RoomRepository;
 import com.ntt.ntt.Repository.RoomReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -74,24 +77,31 @@ public class RoomReviewService {
     }
 
 
-    // 3. 특정 객실의 모든 리뷰 조회 (읽기 전용)
+    // 3. 특정 객실의 모든 리뷰 조회
     @Transactional(readOnly = true)
-    public List<RoomReviewDTO> getReviewsByRoomId(Integer roomId) {
-        log.info("객실 리뷰 목록 조회: roomId={}", roomId);
+    public Page<RoomReviewDTO> getReviewsByRoomId(Integer roomId, int page, int size) {
+        log.info("DEBUG: getReviewsByRoomId 호출 - roomId: {}, page: {}, size: {}", roomId, page, size);
 
-        List<RoomReview> reviews = roomReviewRepository.findAllByRoom_RoomId(roomId);
+        try {
+            PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "reviewDate"));
 
-        if (reviews == null || reviews.isEmpty()) {
-            return Collections.emptyList(); // Null 방지
+            // 리뷰 데이터 조회
+            Page<RoomReview> reviews = roomReviewRepository.findByRoom_RoomIdOrderByReviewDateDesc(roomId, pageRequest);
+
+            log.info("DEBUG: 리뷰 조회 결과 개수 = {}", reviews.getTotalElements());
+
+            // 결과가 null이면 빈 페이지 반환
+            return Optional.ofNullable(reviews)
+                    .orElse(Page.empty(pageRequest))
+                    .map(RoomReviewDTO::fromEntity);
+        } catch (Exception e) {
+            log.error("ERROR: 리뷰 조회 중 예외 발생 - roomId: {}, message: {}", roomId, e.getMessage());
+            return Page.empty();
         }
-
-        return reviews.stream()
-                .map(RoomReviewDTO::fromEntity)
-                .collect(Collectors.toList());
     }
 
 
-    // 4. 특정 객실의 최근 3개 리뷰 조회 (읽기 전용)
+    // 4. 특정 객실의 최근 3개 리뷰 조회
     @Transactional(readOnly = true)
     public List<RoomReviewDTO> getRecentReviewsByRoomId(Integer roomId) {
         log.info("객실 최근 리뷰 조회: roomId={}", roomId);
@@ -100,7 +110,7 @@ public class RoomReviewService {
                 .collect(Collectors.toList());
     }
 
-    // 5. 특정 회원이 작성한 리뷰 조회 (읽기 전용)
+    // 5. 특정 회원이 작성한 리뷰 조회
     @Transactional(readOnly = true)
     public List<RoomReviewDTO> getReviewsByMemberId(Integer memberId) {
         log.info("회원 리뷰 목록 조회: memberId={}", memberId);
@@ -109,7 +119,7 @@ public class RoomReviewService {
                 .collect(Collectors.toList());
     }
 
-    // 6. 객실 평균 평점 조회 (읽기 전용)
+    // 6. 객실 평균 평점 조회
     @Transactional(readOnly = true)
     public Double getAverageRatingByRoomId(Integer roomId) {
         log.info("객실 평균 평점 조회: roomId={}", roomId);

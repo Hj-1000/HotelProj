@@ -159,8 +159,33 @@
     margin-bottom: 5px;
 }
 
-
 /* 리뷰 */
+.review-section {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+.review-box {
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+}
+
+
+.review-form-container {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
 .review-item {
     position: relative;
     display: flex;
@@ -174,10 +199,168 @@
 .review-meta {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    font-size: 1rem;
+    color: #666;
+}
+
+.review-meta .review-name {
+    font-weight: bold;
     font-size: 16px;
+    color: #333;
+}
+
+.review-meta .review-date {
+    font-size: 12px;
+    color: gray;
+}
+
+.review-stars {
+    font-size: 1.25rem;
+    color: gold;
+}
+
+.review-text {
+    margin-top: 10px;
+    font-size: 16px;
+    color: #444;
+    line-height: 1.5;
+}
+
+#submitReview {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+#submitReview:hover {
+    background-color: #0056b3;
+}
+
+.review-buttons {
+    margin-top: 10px;
+    text-align: right;
+}
+
+.review-buttons button {
+    margin-left: 5px;
+    font-size: 12px;
+}
+
+#star-rating {
+    display: flex;
+    gap: 5px;
+    font-size: 1.75rem;
+    cursor: pointer;
+    position: relative;
+}
+
+#star-rating .star {
+    color: #ccc;
+    transition: color 0.3s ease, transform 0.2s ease-in-out;
+}
+
+#star-rating .star:hover {
+    color: gold;
+    transform: scale(1.2);
+}
+
+/* 클릭한 별점 강조 */
+#star-rating .star.selected {
+    color: gold;
+}
+
+#star-click-hint {
+    position: absolute;
+    top: -15px;
+    left: 140px;
+    background-color: #ffcc00;
+    color: #000;
+    font-weight: bold;
+    padding: 3px 5px;
+    border-radius: 10px;
+    font-size: 12px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transform: rotate(-15deg);
+    animation: clickHintBlink 1.5s infinite alternate;
 }
 
 
+/* 별점 별도 색상 적용 */
+.rating-5 { color: gold !important;}
+.rating-4 { color: green !important;}
+.rating-3 { color: blue !important;}
+.rating-2 { color: orange !important;}
+.rating-1 { color: red !important;}
+
+#star-rating .star.selected {
+    color: gold;
+}
+
+/* More 버튼 */
+.real-more {
+    display: block;
+    margin: 20px auto;
+    width: 100%;
+    text-align: center;
+    background-color: #000000;
+    color: #ffffff;
+    border-radius: 5px;
+    padding: 12px;
+    font-size: 1.25rem;
+    font-weight: bold;
+    transition: all 0.3s ease-in-out;
+    border: 2px solid transparent;
+}
+
+.real-more:hover {
+    background-color: #ffffff;
+    color: #000000;
+    border: 2px solid #000000;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* 상단으로 이동 버튼 스타일 */
+.scroll-top-btn {
+    position: fixed;
+    bottom: 100px;
+    right: 80px;
+    width: 50px;
+    height: 50px;
+    background-color: black;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    opacity: 0;
+    transform: translateY(100px);
+    z-index: 1000;
+}
+
+/* 버튼이 보일 때 */
+.scroll-top-btn.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 버튼 hover 효과 */
+.scroll-top-btn:hover {
+    background-color: #fff;
+    color: black;
+    border: 2px solid black;
+}
 
 /* 예약 문의 */
 .contact-info {
@@ -199,8 +382,22 @@
     margin-bottom: 5px;
 }
 
+/* 애니메이션 */
+
+@keyframes clickHintBlink {
+    0% {
+        opacity: 1;
+        transform: rotate(15deg) scale(1);
+    }
+    100% {
+        opacity: 0.5;
+        transform: rotate(15deg) scale(1.1);
+    }
+}
+
 
 /* 반응형 */
+
 @media (max-width: 768px) {
     .room-item {
         flex-direction: column;
@@ -215,6 +412,20 @@
     }
 
     .room-description {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 768px) {
+    .review-section {
+        padding: 15px;
+    }
+
+    .review-box {
+        padding: 10px;
+    }
+
+    .review-text {
         font-size: 14px;
     }
 }
