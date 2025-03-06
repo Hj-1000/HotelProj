@@ -234,8 +234,8 @@ public class QnaController {
 
 
     // Qna 수정 처리
-    @PostMapping("/qna/update/{id}")
     @Operation(summary = "수정창", description = "데이터 수정 후 목록페이지로 이동한다.")
+    @PostMapping("/qna/update/{id}")
     public String updateQnaProc(@PathVariable Integer id, QnaDTO qnaDTO, @AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails != null) {
             MemberDTO memberDTO = memberService.read(userDetails.getUsername());
@@ -252,8 +252,8 @@ public class QnaController {
 
 
     // 질문 삭제 처리
-    @PostMapping("/qna/delete/{id}")
     @Operation(summary = "삭제", description = "데이터를 삭제할수있다.")
+    @PostMapping("/qna/delete/{id}")
     public String deleteQnaProc(@PathVariable("id") Integer id, @AuthenticationPrincipal UserDetails userDetails) {
         // 질문 찾기
         Qna qna = qnaRepository.findById(id).orElse(null);
@@ -276,8 +276,8 @@ public class QnaController {
     }
 
     // 댓글 작성 처리
-    @PostMapping("/qna/reply/register/{qnaId}")
     @Operation(summary = "댓글등록", description = "상세보기 창에서 댓글을 등록한다.")
+    @PostMapping("/qna/reply/register/{qnaId}")
     public String registerReplyProc(@PathVariable Integer qnaId, String replyContent, @AuthenticationPrincipal UserDetails userDetails, Model model) {
         if (userDetails != null && userDetails.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"))) {
@@ -293,8 +293,8 @@ public class QnaController {
     }
 
     // 댓글 수정
-    @GetMapping("/reply/update/{id}")
     @Operation(summary = "댓글수정폼", description = "댓글을 수정한다.")
+    @GetMapping("/reply/update/{id}")
     public String updateReplyForm(@PathVariable Integer id, Model model) {
         Reply reply = replyService.findById(id);
         model.addAttribute("reply", reply);
@@ -302,8 +302,8 @@ public class QnaController {
     }
 
     // 댓글 삭제
-    @GetMapping("/reply/delete/{id}")
     @Operation(summary = "댓글삭제", description = "댓글삭제 후 해당 상세보기 페이지로 이동한다.")
+    @GetMapping("/reply/delete/{id}")
     public String deleteReplyForm(@PathVariable Integer id) {
         replyService.deleteReply(id);
         return "redirect:/qna/read/{qnaId}"; // 댓글 삭제 후 Q&A 페이지로 리디렉션
