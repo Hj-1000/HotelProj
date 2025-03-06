@@ -115,7 +115,6 @@ public class PaymentController {
             // 페이징 처리
             int startIdx = page * size;
             int endIdx = Math.min(startIdx + size, filteredPayments.size());
-            List<PaymentDTO> pagedPayments = filteredPayments.subList(startIdx, endIdx);
 
             Optional<Member> memberOptional = memberRepository.findByMemberEmail(userDetails.getUsername());
             if (memberOptional.isEmpty()) {
@@ -126,23 +125,26 @@ public class PaymentController {
             Page<ReservationDTO> reservationsPage = reservationService.getAllReservations(pageable);
             List<ReservationDTO> reservations = reservationsPage.getContent();
 
-            // 필터링된 결제 내역 리스트 정렬
-            pagedPayments.sort(Comparator.comparing(PaymentDTO::getReservationId).reversed());  // 예약 번호 기준 내림차순 정렬
+            // 필터링된 결제 내역 리스트를 ReservationId 기준으로 정렬
+            filteredPayments.sort(Comparator.comparing(PaymentDTO::getReservationId));
+
+            // 정렬 후 페이징 처리
+            List<PaymentDTO> pagedPayments = new ArrayList<>(filteredPayments.subList(startIdx, endIdx));
 
             // 예약 내역 필터링 후 정렬
             List<ReservationDTO> filteredReservations = reservations.stream()
-                    .filter(reservation -> pagedPayments.stream()
+                    .filter(reservation -> filteredPayments.stream()
                             .anyMatch(payment -> payment.getReservationId().equals(reservation.getReservationId())))
-                    .sorted(Comparator.comparing(ReservationDTO::getReservationId).reversed())  // 예약 번호 기준 내림차순 정렬
+                    .sorted(Comparator.comparing(ReservationDTO::getReservationId))
                     .collect(Collectors.toList());
 
             // 결제 내역과 예약 내역을 묶어서 모델에 전달
-            model.addAttribute("paymentDTOList", filteredPayments);
+            model.addAttribute("paymentDTOList", pagedPayments);
             model.addAttribute("reservationList", filteredReservations);
             model.addAttribute("pageNumber", page);
             model.addAttribute("totalPages", (int) Math.ceil((double) filteredPayments.size() / size));
             model.addAttribute("size", size);
-            model.addAttribute("filteredPayments", filteredPayments);  // 전체 결제 내역도 전달
+            model.addAttribute("filteredPayments", pagedPayments);  // 전체 결제 내역도 전달
 
             // JSON으로 변환할 데이터 리스트 생성
             List<Map<String, Object>> salesData = new ArrayList<>();
