@@ -95,7 +95,7 @@ public class PaymentController {
                 // 해당 호텔들에 속한 roomId 목록 가져오기
                 roomIds = roomRepository.findRoomIdsByHotelIds(hotelIds);
 
-            }else if (isAdmin) {
+            } else if (isAdmin) {
                 // ADMIN 인 경우 모든 방 목록 가져오기
                 List<Room> allRooms = roomRepository.findAll();
 
@@ -105,7 +105,7 @@ public class PaymentController {
                         .collect(Collectors.toList());
 
             } else {
-                // 관리자의 역할을 가진 사용자가 아니면 예외 처리
+                // USER 인 경우(MANAGER, CHIEF, ADMIN 모두 아닌 경우) 예외 처리
                 throw new RuntimeException("권한이 없습니다.");
             }
 

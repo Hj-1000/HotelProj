@@ -239,10 +239,10 @@
                 }
 
                 // 자동 체크 이벤트 리스너 추가
-                document.getElementById('memberEmailInput').addEventListener("blur", emailCheck);
-                document.getElementById('memberPassword').addEventListener("blur", passwordCheck);
-                document.getElementById('memberPasswordCheck').addEventListener("blur", passwordCheck);
-                document.getElementById('memberPhone').addEventListener("blur", phoneCheck);
+                document.getElementById('memberEmailInput').addEventListener("input", emailCheck);
+                document.getElementById('memberPassword').addEventListener("input", passwordCheck);
+                document.getElementById('memberPasswordCheck').addEventListener("input", passwordCheck);
+                document.getElementById('memberPhone').addEventListener("input", phoneCheck);
                 document.getElementById('memberPhone').addEventListener("input", function(event) {
                     // 전화번호 입력 시 숫자만 허용
                     this.value = this.value.replace(/[^0-9]/g, "");
@@ -264,6 +264,10 @@
                         return false;
                     }
                     if(passwordCheckMessage === "비밀번호가 일치하지 않습니다.") {
+                        alert("비밀번호를 확인해주세요.");
+                        return false;
+                    }
+                    if(passwordCheckMessage === "비밀번호를 확인해주세요.") {
                         alert("비밀번호를 확인해주세요.");
                         return false;
                     }
