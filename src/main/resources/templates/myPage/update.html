@@ -164,6 +164,10 @@
                 alert("비밀번호를 확인해주세요.");
                 return false;
             }
+            if (passwordCheckMessage === "비밀번호를 확인해주세요.") {
+                alert("비밀번호를 확인해주세요.");
+                return false;
+            }
             if (document.getElementById('memberPhone').value && phoneCheckMessage === "전화번호는 11자리여야 합니다.") {
                 alert("전화번호를 확인해주세요.");
                 return false;
@@ -237,9 +241,9 @@
         }
 
         // 자동 체크 이벤트 리스너 추가
-        document.getElementById('memberPassword').addEventListener("blur", passwordCheck);
-        document.getElementById('memberPasswordCheck').addEventListener("blur", passwordCheck);
-        document.getElementById('memberPhone').addEventListener("blur", phoneCheck);
+        document.getElementById('memberPassword').addEventListener("input", passwordCheck);
+        document.getElementById('memberPasswordCheck').addEventListener("input", passwordCheck);
+        document.getElementById('memberPhone').addEventListener("input", phoneCheck);
         document.getElementById('memberPhone').addEventListener("input", function(event) {
             // 전화번호 입력 시 숫자만 허용
             this.value = this.value.replace(/[^0-9]/g, "");
