@@ -48,8 +48,8 @@ public class PaymentController {
         }
     }
 
-    // 매니저 매출관리페이지
-    @Operation(summary = "지사 매출관리", description = "매니저 매출관리 페이지로 이동한다.")
+    // 매출관리페이지
+    @Operation(summary = "지사 매출관리", description = "매출관리 페이지로 이동한다.")
     @GetMapping("/manager/sales")
     public String getSales(@AuthenticationPrincipal UserDetails userDetails,
                            @RequestParam(required = false) String hotelName,
