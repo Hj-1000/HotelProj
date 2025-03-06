@@ -651,6 +651,13 @@ public class RoomService {
         return new PageImpl<>(roomDTOs, pageable, roomsPage.getTotalElements());
     }
 
+    // 객실 ID에 해당하는 객실을 조회하고, 해당 객실의 호텔 ID를 가져오는 메서드 2025-03-06
+    public Integer getHotelIdByRoomId(Integer roomId) {
+        // 객실 ID로 객실을 찾고, 해당 객실의 호텔 ID를 리턴
+        Room room = roomRepository.findById(roomId).orElseThrow(() -> new RuntimeException("객실을 찾을 수 없습니다."));
+        return room.getHotelId().getHotelId();  // 호텔 ID 반환
+    }
+
 
     public void updateReservationEnd(Integer roomId, String reservationEnd) {
         log.info("[updateReservationEnd] 요청됨 - roomId: {}, reservationEnd: {}", roomId, reservationEnd);
