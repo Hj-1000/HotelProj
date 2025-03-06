@@ -21,7 +21,6 @@
     <link rel="stylesheet" th:href="@{/css/roomList.css}">
 
     <style>
-
         .hotel-images {
             display: grid;
             grid-template-columns: 2fr 1fr 1fr;
@@ -240,10 +239,6 @@
             });
         }
 
-
-
-
-
     </script>
 
 </head>
@@ -277,53 +272,6 @@
                             </th:block>
                         </div>
 
-
-
-                        <!--슬라이드였던것-->
-                        <!--<div id="carouselExampleIndicators" class="carousel slide">
-                            <div class="carousel-indicators">
-                                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-                                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
-                                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
-                            </div>
-                            <div class="carousel-inner">
-                                &lt;!&ndash; 이미지가 있는 슬라이드를 생성 &ndash;&gt;
-                                <th:block th:each="img, iterStat : ${hotelDTO.hotelImgDTOList}">
-                                    <div class="carousel-item image-box" th:classappend="${iterStat.index == 0 ? ' active' : ''}">
-                                        <img th:src="@{'/upload/' + ${img.imagePath}}" class="hotelImg" alt="hotel Image" width="100%" />
-                                    </div>
-                                </th:block>
-
-                                &lt;!&ndash; 기본 이미지를 채우기 위한 부분 (이미지가 부족할 때) &ndash;&gt;
-                                <th:block th:if="${hotelDTO.hotelImgDTOList.size() < 3}">
-                                    &lt;!&ndash; 1개의 기본 이미지 추가 &ndash;&gt;
-                                    <div class="carousel-item image-box" th:classappend="${hotelDTO.hotelImgDTOList.size() == 0 ? ' active' : ''}">
-                                        <img src="/img/default_img.jpg" class="hotelImg" alt="default Image" width="100%" />
-                                    </div>
-                                </th:block>
-                                <th:block th:if="${hotelDTO.hotelImgDTOList.size() == 1}">
-                                    &lt;!&ndash; 2개의 기본 이미지 추가 &ndash;&gt;
-                                    <div class="carousel-item image-box">
-                                        <img src="/img/default_img.jpg" class="hotelImg" alt="default Image" width="100%" />
-                                    </div>
-                                </th:block>
-                                <th:block th:if="${hotelDTO.hotelImgDTOList.size() == 2}">
-                                    &lt;!&ndash; 1개의 기본 이미지 추가 &ndash;&gt;
-                                    <div class="carousel-item image-box">
-                                        <img src="/img/default_img.jpg" class="hotelImg" alt="default Image" width="100%" />
-                                    </div>
-                                </th:block>
-                            </div>
-                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Previous</span>
-                            </button>
-                            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Next</span>
-                            </button>
-                        </div>-->
-
                         <div>
                             <!--등록한 사진이 없을 때-->
                             <th:block th:unless="${hotelDTO.hotelImgDTOList.size() != 0}">
@@ -350,13 +298,11 @@
 
                             </div>
 
-
-                            <!--                            <span th:text="${hotelDTO.hotelInfo}">상세정보</span>-->
-
-                            <div class="text-end mb-3 me-3" style="margin-top: -50px;">
+                            <!--<span th:text="${hotelDTO.hotelInfo}">상세정보</span>-->
+                            <div class="text-end mb-3" style="margin-top: -50px; padding-right: -10px">
                                 <div>
                                     <!-- 지도 열기/닫기 버튼 -->
-                                    <button class="btn btn-outline-primary" id="mapToggleBtn1" onclick="toggleMap1()" th:if="${#authentication.name != 'anonymousUser'}" style="width: 120px;">
+                                    <button class="btn btn-outline-primary" id="mapToggleBtn1" onclick="toggleMap1()" th:if="${#authentication.name != 'anonymousUser'}" style="width: 120px; margin-right: 10px">
                                         지도 열기
                                         <i class="bi bi-map"></i>
                                     </button>
@@ -497,131 +443,54 @@
                 </script>
             </div>
 
-
-            <div th:if="${hotelDTOS != null and !#lists.isEmpty(hotelDTOS)}" class="row">
-                <div class="col-md-3" th:each="data : ${hotelDTOS}">
-                    <div class="card image-hover-container">
-                        <div class="image-container">
-
-                            <!-- Hover 시 나타나는 예약 버튼 -->
-                            <div class="hover-overlay">
-                                <a th:href="@{/hotel/read(hotelId=${data.hotelId})}" class="btn btn-hover">자세히 보기</a>
-                            </div>
-                        </div>
-                        <div class="card-body text-left">
-                            <!-- 상태 버튼 -->
-                            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-                                <a th:href="@{'/hotel/list?searchType=location&keyword=' + ${data.hotelLocation}}" style="text-decoration: none">
-                                    <div class="badge bg-secondary" th:text="${data.hotelLocation}">지역</div>
-                                </a>
-                            </div>
-                            <!-- 객실 타입 버튼 -->
-                        </div>
-                        <h4 th:text="${data.hotelName}" class="card-title">호텔 이름</h4>
-                        <p class="card-text"> 체크인-체크아웃: <span th:text="${data.hotelCheckIn}"></span>시 - <span th:text="${data.hotelCheckOut}"></span>시</p>
-                        <input type="hidden" class="hotelId" th:value="${data.hotelId}">
-                        <div class="hotel-actions">
-                            <p th:text="${data.CheapestRoomPrice} + ' KRW~ ' " class="card-text money"> 0 KRW</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-
-
             <!-- 객실 리뷰부분 -->
-            <div class="card border-light-shadow" style="width: 950px; margin: auto; padding-top: 17px; padding-bottom: 20px;">
-                <div style="width: 950px; margin: auto">
+            <div class="card border" style="width: 940px; margin: auto; padding-top: 17px; padding-bottom: 20px;">
+                <div style="width: 950px; margin: auto;">
                     <div style="margin-bottom: -20px">
-                        <h4 style="margin-bottom: -24px">&ensp;객실 리뷰</h4>
+                        <h4 style="margin-bottom: -24px; margin-left: 13px">&ensp;객실 리뷰</h4>
                         <span>
-                            &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;(<span th:text="${hotelDTO.roomReviewCount}" class="roomReview">2,298</span>)&ensp;
-                            <i class="bi bi-star-fill"></i> <span th:text="${hotelDTO.hotelRating}" class="hotelRating">4.9</span>점
+                            &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;(<span th:text="${hotelDTO.roomReviewCount}" class="roomReview">2,298</span>)&ensp;
+                            <i class="bi bi-star-fill"></i>
+                            <span th:if="${hotelDTO.hotelRating != null and hotelDTO.hotelRating != ''}" th:text="${hotelDTO.hotelRating}+'점'" class="hotelRating">평점</span>
+                            <span th:if="${hotelDTO.hotelRating == null and hotelDTO.hotelRating == ''}" class="hotelRating">작성된 리뷰가 없습니다!</span>
                         </span>
                     </div>
-                    <div style="text-align: right; margin-bottom: 15px; margin-top: -10px; font-size: small">
-                        <a href="#">전체보기></a>&emsp;
+                    <div style="text-align: right; margin-bottom: 15px; margin-top: -10px; margin-right: 15px; font-size: small">
+                        <a href="/hotel/reviewAll">전체보기></a>&emsp;
                     </div>
-                    <div class="row" style="width: 920px; margin: auto">
-                        <!--th:if 돌려서 최신리뷰 3개-->
-                        <div class="col-4">
-                            <div class="card border-light-shadow review-card" style="margin: -5px; padding: 15px; height: 150px">
-                                <!-- 객실 리뷰 -->
-                                <!--별점-->
-                                <p>
-                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                </p>
-                                <!--th:if 별점이 i점 이라면~-->
-                                <!--<p>
-                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star"></i>
-                                </p>
-                                <p>
-                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star"></i>
-                                </p>
-                                <p>
-                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star"></i>
-                                </p>
-                                <p>
-                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star"></i>
-                                </p>-->
-                                좋아요
+                    <div class="row" style="width: 920px; margin: auto; padding-right: 13px">
+                        <!--등록된 리뷰가 있을 때-->
+                        <th:block th:unless="${latestReviews == null or #lists.isEmpty(latestReviews)}">
+                            <div class="col-4" th:each="review : ${latestReviews}" >
+                                <div class="card border-light review-card" style="margin: -5px; padding: 15px; height: 150px; background-color: #f3f4f7">
+                                    <!-- 별점 표시 -->
+                                    <p>
+                                        <i class="bi bi-star-fill" th:if="${review.rating >= 1}" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star-fill" th:if="${review.rating >= 2}" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star-fill" th:if="${review.rating >= 3}" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star-fill" th:if="${review.rating >= 4}" style="margin-right: -3px"></i>
+                                        <i class="bi bi-star-fill" th:if="${review.rating >= 5}" style="margin-right: -3px"></i>
+                                    </p>
+                                    <p th:text="${review.reviewText}">리뷰 내용</p>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="card border-light-shadow review-card" style="margin: -5px; padding: 15px; height: 150px">
-                                <p>
-                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star"></i>
-                                </p>
-                                <!-- 객실 리뷰 -->
-                                바퀴벌레나옴
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="card border-light-shadow review-card" style="margin: -5px; padding: 15px; height: 150px">
-                                <!-- 객실 리뷰 -->
-                                <p>
-                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star-fill" style="margin-right: -3px"></i>
-                                    <i class="bi bi-star"></i>
-                                </p>
-                                좋네요
-                            </div>
+                        </th:block>
+                        <!-- 등록 된 리뷰가 없을 경우 -->
+                        <div th:if="${latestReviews == null or #lists.isEmpty(latestReviews)}" class="text-center mt-4">
+                            <p class="text-muted">등록 된 후기가 없습니다.</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!--랄라-->
+            <!--배너-->
+                <div>
+
+                </div>
 
             <!--예약 날짜 선택-->
-            <!--<div style="margin: auto">
+                <!--일단 허전해서 냅둠-->
+            <div style="margin: auto">
                 <div style="margin-top: 50px; width: 930px">
                     <h4> 날짜 선택</h4>
                     <div class="row">
@@ -633,158 +502,87 @@
                         </div>
                     </div>
                 </div>
-            </div>-->
+            </div>
 
             <!-- 객실 목록 -->
+
             <div class="col ">
                 <div >
 
-                    <div class="container">
+                    <!-- Room List Section -->
+                    <section class="py-5">
+                        <div class="card border-light" style="width: 950px; margin: auto; padding: 15px">
+                            <h4 class="mb-3">객실 선택</h4>
 
-                        <!-- Room List Section -->
-                        <section class="py-5" >
-                            <div class="container">
-                                <h4 class="mb-3">객실 선택</h4>
+                            <th:block th:if="${rooms == null || #lists.isEmpty(rooms)}">
+                                <div style="text-align: center">
+                                    <img src="/img/empty.png" alt="No likes available" width="400px">
+                                    <p>목록이 비어있습니다!</p>
+                                </div>
+                            </th:block>
 
-                                <th:block th:if="${rooms == null || #lists.isEmpty(rooms)}">
-                                    <div style="text-align: center">
-                                        <img src="/img/empty.png" alt="No likes available" width="400px">
-                                        <p>목록이 비어있습니다!</p>
-                                    </div>
-                                </th:block>
+                            <th:block th:unless="${rooms == null || #lists.isEmpty(rooms)}" >
+                                <div th:each="room : ${rooms}">
 
-                                <th:block th:unless="${rooms == null || #lists.isEmpty(rooms)}" >
-                                    <div th:each="room : ${rooms}">
+                                    <div class="room"
+                                         th:classappend="${!room.roomStatus} ? 'sold-out' : ''"
+                                         th:data-room-id="${room.roomId}"
+                                         th:data-stay-start="${room.stayStart}"
+                                         th:data-stay-end="${room.stayEnd}">
 
-                                        <div class="room"
-                                             th:classappend="${!room.roomStatus} ? 'sold-out' : ''"
-                                             th:data-room-id="${room.roomId}"
-                                             th:data-stay-start="${room.stayStart}"
-                                             th:data-stay-end="${room.stayEnd}">
-
-                                            <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
-                                                <!--이미지-->
-                                                <div class="col-5 d-none d-lg-block">
-                                                    <div class="image-box">
-                                                        <img th:if="${!#lists.isEmpty(room.roomImageDTOList)}"
-                                                             th:src="@{'/upload/' + ${room.roomImageDTOList[0].imagePath}}"
-                                                             class="bd-placeholder-img rooms-img"
-                                                             th:alt="${room.roomName}" height="100%">
-                                                        <img th:if="${#lists.isEmpty(room.roomImageDTOList)}"
-                                                             src="/img/default_img.jpg"
-                                                             class="bd-placeholder-img"
-                                                             alt="Default Room Image">
-                                                        <!-- 예약 종료-->
-                                                        <!--<div class="sold-out-overlay" th:if="${!room.roomStatus}">
-                                                            예약 종료
-                                                        </div>-->
-                                                    </div>
-                                                </div>
-                                                <!--방 설명-->
-                                                <div class="col-7 p-4 d-flex flex-column position-static" style="padding-bottom: -15px">
-                                                    <div class="d-flex justify-content-start gap-2 mb-1">
-                                                        <!-- 예약 가능 여부 -->
-                                                        <!--<span th:text="(${room.roomStatus} ? '예약 가능' : '예약 불가')"
-                                                              class="badge"
-                                                              th:classappend="${room.roomStatus} ? 'bg-success text-white' : 'bg-danger text-white'">
-                                                        </span>-->
-                                                        <span th:text="${room.roomType}" class="badge bg-dark text-white"></span>
-                                                    </div>
-                                                    <h3 th:text="${room.roomName}" class="mb-2">객실명</h3>
-                                                    <p th:text="'예약 기간 : ' + ${room.reservationStart} + ' ~ ' + ${room.reservationEnd}" class="card-text" style="margin-bottom: 1px"></p>
-                                                    <p th:text="'숙박 기간 : ' + ${room.stayStart} + ' ~ ' + ${room.stayEnd}" class="card-text"></p>
-                                                    <div class="room-actions" style="margin-top: -5px; ">
-                                                        <p class="room-price mb-0"
-                                                           th:text="${room.formattedRoomPrice != null ? room.formattedRoomPrice + ' ' + 'KRW' : '가격 미정'}"></p>
-                                                        <button class="btn btn-book btn-dark" style="width: 110px"
-                                                                th:data-room-id="${room.roomId}"
-                                                                onclick="goToRoomDetail(this)">
-                                                            자세히보기
-                                                        </button>
-                                                        <!--기존버튼-->
-                                                        <!--<button class="btn btn-book"
-                                                                th:data-room-id="${room.roomId}"
-                                                                th:text="${room.roomStatus ? '자세히 보기' : '예약 불가'}"
-                                                                th:classappend="${room.roomStatus ? 'btn-dark' : 'btn-danger text-bold'}"
-                                                                th:disabled="${!room.roomStatus}"
-                                                                onclick="goToRoomDetail(this)">
-                                                        </button>-->
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                </th:block>
-
-                                <!--기존 레이아웃!-->
-                                <!--<th:block th:unless="${rooms == null || #lists.isEmpty(rooms)}">
-                                    <div id="room-list" class="row">
-                                        <div class="col-md-4" th:each="room : ${rooms}">
-                                            <div class="room-card"
-                                                 th:classappend="${!room.roomStatus} ? 'sold-out' : ''"
-                                                 th:data-room-id="${room.roomId}"
-                                                 th:data-stay-start="${room.stayStart}"
-                                                 th:data-stay-end="${room.stayEnd}">
-                                                <div class="room-image">
+                                        <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 h-md-250 position-relative card-hover">
+                                            <!--이미지-->
+                                            <div class="col-5 d-none d-lg-block">
+                                                <div class="image-box">
                                                     <img th:if="${!#lists.isEmpty(room.roomImageDTOList)}"
                                                          th:src="@{'/upload/' + ${room.roomImageDTOList[0].imagePath}}"
-                                                         class="card-img-top"
-                                                         th:alt="${room.roomName}">
+                                                         class="bd-placeholder-img rooms-img"
+                                                         th:alt="${room.roomName}" height="100%">
                                                     <img th:if="${#lists.isEmpty(room.roomImageDTOList)}"
                                                          src="/img/default_img.jpg"
-                                                         class="card-img-top"
+                                                         class="bd-placeholder-img"
                                                          alt="Default Room Image">
-
-                                                    &lt;!&ndash; 예약 종료&ndash;&gt;
-                                                    &lt;!&ndash;<div class="sold-out-overlay" th:if="${!room.roomStatus}">
+                                                    <!-- 예약 종료-->
+                                                    <!--<div class="sold-out-overlay" th:if="${!room.roomStatus}">
                                                         예약 종료
-                                                    </div>&ndash;&gt;
-
+                                                    </div>-->
                                                 </div>
-                                                <div class="room-text">
-                                                    <div class="d-flex justify-content-start gap-2 mb-3">
-                                                        &lt;!&ndash; 예약 가능 여부 &ndash;&gt;
-                                                        &lt;!&ndash;<span th:text="(${room.roomStatus} ? '예약 가능' : '예약 불가')"
-                                                              class="badge"
-                                                              th:classappend="${room.roomStatus} ? 'bg-success text-white' : 'bg-danger text-white'">
-                                                        </span>&ndash;&gt;
-                                                        <span th:text="${room.roomType}" class="badge bg-dark text-white"></span>
-                                                    </div>
-                                                    <h5 th:text="${room.roomName}" class="card-title"></h5>
-                                                    <p th:text="'예약 기간 : ' + ${room.reservationStart} + ' ~ ' + ${room.reservationEnd}" class="card-text"></p>
-                                                    <p th:text="'숙박 기간 : ' + ${room.stayStart} + ' ~ ' + ${room.stayEnd}" class="card-text"></p>
-                                                    <p th:text=" ${room.roomInfo}" class="card-text room-description"></p>
-                                                    <div class="room-actions">
-                                                        <p class="room-price mb-0"
-                                                           th:text="${room.formattedRoomPrice != null ? room.formattedRoomPrice + ' ' + 'KRW' : '가격 미정'}"></p>
-                                                        <button class="btn btn-book btn-dark" style="width: 100px"
-                                                                th:data-room-id="${room.roomId}"
-                                                                onclick="goToRoomDetail(this)">
-                                                            자세히보기
-                                                        </button>
-                                                        &lt;!&ndash;기존버튼&ndash;&gt;
-                                                        &lt;!&ndash;<button class="btn btn-book"
-                                                                th:data-room-id="${room.roomId}"
-                                                                th:text="${room.roomStatus ? '자세히 보기' : '예약 불가'}"
-                                                                th:classappend="${room.roomStatus ? 'btn-dark' : 'btn-danger text-bold'}"
-                                                                th:disabled="${!room.roomStatus}"
-                                                                onclick="goToRoomDetail(this)">
-                                                        </button>&ndash;&gt;
-                                                    </div>
+                                            </div>
+                                            <!--방 설명-->
+                                            <div class="col-7 p-4 d-flex flex-column position-static" style="padding-bottom: -15px">
+                                                <div class="d-flex justify-content-start gap-2 mb-1">
+                                                    <!-- 예약 가능 여부 -->
+                                                    <!--<span th:text="(${room.roomStatus} ? '예약 가능' : '예약 불가')"
+                                                          class="badge"
+                                                          th:classappend="${room.roomStatus} ? 'bg-success text-white' : 'bg-danger text-white'">
+                                                    </span>-->
+                                                    <span th:text="${room.roomType}" class="badge bg-dark text-white"></span>
+                                                </div>
+                                                <h3 th:text="${room.roomName}" class="mb-2">객실명</h3>
+                                                <p th:text="'예약 기간 : ' + ${room.reservationStart} + ' ~ ' + ${room.reservationEnd}" class="card-text" style="margin-bottom: 1px"></p>
+                                                <p th:text="'숙박 기간 : ' + ${room.stayStart} + ' ~ ' + ${room.stayEnd}" class="card-text"></p>
+                                                <div class="room-actions" style="margin-top: -5px; ">
+                                                    <p class="room-price mb-0"
+                                                       th:text="${room.formattedRoomPrice != null ? room.formattedRoomPrice + ' ' + 'KRW' : '가격 미정'}"></p>
+                                                    <button class="btn btn-book btn-dark" style="width: 110px"
+                                                            th:data-room-id="${room.roomId}"
+                                                            onclick="goToRoomDetail(this)">
+                                                        자세히보기
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
+
                                     </div>
-                                </th:block>-->
-
-                                <!-- 버튼 -->
-                                <div class="text-end mt-5">
-                                    <a class="btn btn-dark" href="/hotel/list">목록</a>
                                 </div>
-                            </div>
-                        </section>
+                            </th:block>
 
+                        </div>
+                    </section>
+
+                    <!-- 버튼 -->
+                    <div class="text-end mt-5">
+                        <a class="btn btn-dark" href="/hotel/list">목록</a>
                     </div>
 
                 </div>

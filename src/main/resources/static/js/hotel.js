@@ -13,6 +13,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
 })
 
+document.addEventListener('keydown', function(event) {
+    if ((event.keyCode || event.which) === 13) {
+        event.preventDefault();
+    }
+}, true);
+
 
 // 이미지 미리보기 함수
 function previewImage(event) {

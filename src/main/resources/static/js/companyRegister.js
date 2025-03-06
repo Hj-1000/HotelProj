@@ -28,3 +28,9 @@ $(document).ready(function() {
         $('#memberId').val(memberId);  // 숨겨진 input에 memberId 값 설정
     }
 });
+
+document.addEventListener('keydown', function(event) {
+    if ((event.keyCode || event.which) === 13) {
+        event.preventDefault();
+    }
+}, true);

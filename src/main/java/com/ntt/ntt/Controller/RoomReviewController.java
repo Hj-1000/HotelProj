@@ -173,4 +173,12 @@ public class RoomReviewController {
     }
 
 
+    //  10. 특정 호텔의 최근 3개 리뷰 조회
+    @GetMapping("/{hotelId}/recent")
+    public ResponseEntity<List<RoomReviewDTO>> getRecentReviewsByHotelId(@PathVariable Integer hotelId) {
+        log.info("호텔 최근 3개 리뷰 조회 요청: roomId={}", hotelId);
+        List<RoomReviewDTO> reviews = roomReviewService.getLatestReviewsByHotelId(hotelId);
+        return ResponseEntity.ok(reviews);
+    }
+
 }

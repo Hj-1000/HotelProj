@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -172,4 +173,16 @@ public class RoomReviewService {
 
         return review.getMember().getMemberEmail().equals(username);
     }
+
+
+    // 10. 호텔ID를 통하여 최신 리뷰 3개 가져오는 메서드
+    @Transactional(readOnly = true)
+    public List<RoomReviewDTO> getLatestReviewsByHotelId(Integer hotelId) {
+        log.info("객실 최근 리뷰 조회: roomId={}", hotelId);
+        Pageable pageable = PageRequest.of(0, 3);
+        return roomReviewRepository.findTop3ByHotelIdOrderByReviewDateDesc(hotelId, pageable)
+                .stream().map(RoomReviewDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
 }

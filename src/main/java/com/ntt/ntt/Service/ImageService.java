@@ -6,12 +6,17 @@ import com.ntt.ntt.Util.FileUpload;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import net.coobird.thumbnailator.Thumbnails;
 
 @Service
 @Transactional
@@ -24,6 +29,40 @@ public class ImageService {
 
     @Value("c:/data/")
     private String IMG_LOCATION;
+
+    // 썸네일
+    public File getThumbnail(String imagePath) throws IOException {
+        File inputFile = new File(imagePath);
+
+        // 썸네일이 저장될 경로를 설정합니다.
+        String thumbnailPath = imagePath.substring(0, imagePath.lastIndexOf("/")) + "/thumbnail_" + inputFile.getName();
+        File thumbnailFile = new File(thumbnailPath);
+
+        // 썸네일이 이미 존재하지 않으면 생성
+        if (!thumbnailFile.exists()) {
+            // 썸네일 생성 (원본 파일을 변경하지 않고 새로운 파일에 썸네일 저장)
+            Thumbnails.of(inputFile)
+                    .size(200, 150)  // 썸네일 크기
+                    .outputQuality(0.8)  // 압축 품질
+                    .toFile(thumbnailFile);  // 썸네일을 새로운 파일로 저장
+        }
+
+        return thumbnailFile;  // 썸네일 파일 반환
+    }
+
+    public File getImageThumbnail(Integer imageId) throws IOException {
+        // 이미지 정보 조회
+        Image image = imageRepository.findById(imageId)
+                .orElseThrow(() -> new RuntimeException("이미지를 찾을 수 없습니다."));
+
+        // 원본 이미지 경로
+        String imagePath = image.getImagePath();  // 원본 이미지 경로 가져오기
+
+        // 썸네일 생성
+        return getThumbnail(imagePath);
+    }
+
+
 
     // 본사 이미지 등록
     public List<String> registerCompanyImage(Integer companyId, List<MultipartFile> imageFiles) {

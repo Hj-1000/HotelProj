@@ -1,12 +1,10 @@
 package com.ntt.ntt.Controller.hotel;
 
-import com.ntt.ntt.DTO.CompanyDTO;
-import com.ntt.ntt.DTO.HotelDTO;
-import com.ntt.ntt.DTO.ImageDTO;
-import com.ntt.ntt.DTO.RoomDTO;
+import com.ntt.ntt.DTO.*;
 import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.Room;
 import com.ntt.ntt.Repository.hotel.HotelRepository;
+import com.ntt.ntt.Service.RoomReviewService;
 import com.ntt.ntt.Service.RoomService;
 import com.ntt.ntt.Service.hotel.HotelService;
 import com.ntt.ntt.Util.PaginationUtil;
@@ -35,10 +33,8 @@ import java.util.stream.Collectors;
 public class HotelController {
 
     private final HotelService hotelService;
-    private final RoomService roomService;
+    private final RoomReviewService roomReviewService;
     private final PaginationUtil paginationUtil;
-    private final HotelRepository hotelRepository;
-
 
     //호텔목록
     @Operation(summary = "사용자용 호텔 목록", description = "전체 호텔 목록 페이지로 이동한다.")
@@ -94,60 +90,6 @@ public class HotelController {
         return "/hotel/list";
     }
 
-
-    //읽기
-//    @GetMapping("/read")
-//    public String read(@RequestParam Integer hotelId,
-//                       @RequestParam(value = "keyword", required = false) String keyword,
-//                       @RequestParam(value = "category", required = false) String category,
-//                       @PageableDefault(size = 5, page = 0) Pageable pageable,
-//                       Model model, RedirectAttributes redirectAttributes) {
-//        try {
-//            // 호텔 정보 조회
-//            HotelDTO hotelDTO = hotelService.read(hotelId);
-//
-//            // 방 목록 조회
-//            Page<RoomDTO> roomDTOS = roomService.searchRooms(keyword, category, pageable);
-//
-//            // 방 목록에 관련된 이미지와 가격 포맷팅 처리
-//            for (RoomDTO room : roomDTOS) {
-//                if (room.getRoomImageDTOList() != null && !room.getRoomImageDTOList().isEmpty()) {
-//                    log.info("Room ID: {} - 이미지 개수: {}", room.getRoomId(), room.getRoomImageDTOList().size());
-//                } else {
-//                    log.info("Room ID: {} - 이미지 없음", room.getRoomId());
-//                }
-//                // 가격 포맷팅
-//                if (room.getFormattedRoomPrice() == null) {
-//                    String formattedPrice = String.format("%,d", room.getRoomPrice());
-//                    room.setFormattedRoomPrice(formattedPrice);
-//                }
-//            }
-//
-//            // 페이지네이션 정보 생성
-//            Map<String, Integer> pageInfo = PaginationUtil.pagination(roomDTOS);
-//            model.addAllAttributes(pageInfo); // 페이지 정보 추가
-//
-//            model.addAttribute("hotelDTO", hotelDTO);
-//
-//            // 모델에 방 목록 추가
-//            model.addAttribute("rooms", roomDTOS);
-//            model.addAttribute("keyword", keyword); // 검색 키워드 전달
-//            model.addAttribute("category", category); // 검색 카테고리 전달
-//
-//            return "/hotel/read"; // 호텔 상세 보기 페이지로 이동
-//
-//        } catch (NullPointerException e) {
-//            // 호텔이 없는 경우 처리
-//            redirectAttributes.addFlashAttribute("message", "해당 호텔이 없습니다!");
-//            return "redirect:/hotel/list"; // 목록 페이지로 리다이렉트
-//        } catch (Exception e) {
-//            // 서버 오류 처리
-//            redirectAttributes.addFlashAttribute("message", "서버 오류가 있습니다!");
-//            return "redirect:/hotel/list"; // 목록 페이지로 리다이렉트
-//        }
-//    }
-
-
     //읽기
     @Operation(summary = "사용자용 호텔 상세", description = "hotelId에 맞는 호텔 목록 페이지로 이동한다.")
     @GetMapping("/read")
@@ -156,11 +98,15 @@ public class HotelController {
                        Model model,
                        RedirectAttributes redirectAttributes) {
         try {
+            // 호텔 정보 조회
             HotelDTO hotelDTO = hotelService.read(hotelId);
             if (hotelDTO == null) {
                 redirectAttributes.addFlashAttribute("message", "해당 호텔이 존재하지 않습니다!");
                 return "redirect:/hotel/list";
             }
+
+            // 최신 리뷰 3개 조회
+            List<RoomReviewDTO> latestReviews = roomReviewService.getLatestReviewsByHotelId(hotelId);
 
             // Pageable 객체 생성
             Pageable pageable = PageRequest.of(page, 10);  // 10개씩 표시
@@ -182,10 +128,11 @@ public class HotelController {
                 }
             }
 
+            // 모델에 데이터 추가
             model.addAttribute("hotelDTO", hotelDTO);
             model.addAttribute("rooms", roomsForHotel);  // 현재 페이지의 객실 목록
-//            model.addAttribute("totalPages", roomsForHotel.getTotalPages());  // 총 페이지 수
             model.addAttribute("currentPage", page);  // 현재 페이지
+            model.addAttribute("latestReviews", latestReviews); // 최신 리뷰 3개 추가
 
             return "/hotel/read";
         } catch (Exception e) {
@@ -194,5 +141,12 @@ public class HotelController {
         }
     }
 
+    // 해당 호텔 전체 리뷰
+    @Operation(summary = "사용자용 호텔 상세", description = "hotelId에 맞는 호텔 리뷰 목록 페이지로 이동한다.")
+    @GetMapping("/reviewAll")
+    public String reviewList() {
+
+        return "/hotel/reviewList";
+    }
 
 }
