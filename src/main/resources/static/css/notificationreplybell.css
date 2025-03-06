@@ -30,44 +30,62 @@
 #notification-reply-list {
     position: absolute;
     top: 40px;
-    right: -95px;
-    width: 250px;
-    max-height: 300px;
+    right: -110px;
+    width: 280px; /* ✅ 너비 살짝 늘림 */
+    max-height: 350px;
     overflow-y: auto;
-    background-color: white;
+    background-color: #fff;
     border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 12px; /* ✅ 둥근 모서리 */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* ✅ 더 부드러운 그림자 */
     list-style: none;
     padding: 10px 0;
     display: none;
     z-index: 1000;
 }
 
-/* 알림 항목 스타일 */
+/* 알림 스타일 */
 #notification-reply-list li {
-    padding: 10px;
-    font-size: 14px;
-    border-bottom: 1px solid #eee;
-    transition: background 0.3s;
-    white-space: normal; /* ✅ 자동 줄바꿈 허용 */
-    word-wrap: break-word; /* ✅ 긴 단어도 줄바꿈 */
-    max-width: 230px; /* ✅ 적절한 최대 너비 설정 */
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #f8f9fa; /* ✅ 부드러운 배경색 */
+    padding: 12px 15px;
+    border-radius: 10px; /* ✅ 둥근 모서리 */
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* ✅ 부드러운 그림자 */
+    font-size: 15px;
+    color: #333;
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+    white-space: normal;
+    word-wrap: normal;
 }
 
-
-#notification-reply-list li:last-child {
-    border-bottom: none;
+/* 아이콘 추가 */
+#notification-reply-list li::before {
+    content: "🔔"; /* ✅ 알림 아이콘 */
+    font-size: 18px;
+    color: #007bff;
 }
 
+/* 특정 텍스트 강조 */
+#notification-reply-list li strong {
+    font-weight: bold;
+    color: #007bff; /* ✅ Q&A 강조 색상 */
+}
+
+/* 마우스 올렸을 때 효과 */
 #notification-reply-list li:hover {
-    background-color: #f5f5f5;
+    background-color: #e9ecef; /* ✅ 살짝 밝은 색 */
+    transform: scale(1.02);
 }
 
 /* 알림이 없을 때 메시지 스타일 */
 #notification-reply-list li.empty {
     text-align: center;
     color: gray;
+    font-size: 13px;
 }
 
 /* 애니메이션 효과 추가 */
@@ -77,6 +95,6 @@
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
+    from { opacity: 0; transform: translateY(-5px); }
     to { opacity: 1; transform: translateY(0); }
 }
