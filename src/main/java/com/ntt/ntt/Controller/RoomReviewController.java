@@ -6,12 +6,14 @@ import com.ntt.ntt.Service.RoomReviewService;
 import com.ntt.ntt.Service.RoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -31,11 +33,23 @@ public class RoomReviewController {
         log.info("리뷰 등록 요청: {}", reviewDTO);
         try {
             RoomReviewDTO savedReview = roomReviewService.registerReview(reviewDTO);
-            return ResponseEntity.ok(Collections.singletonMap("success", true));
+
+            //  memberName을 포함한 JSON 반환
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "reviewId", savedReview.getReviewId(),
+                    "roomId", savedReview.getRoomId(),
+                    "memberId", savedReview.getMemberId(),
+                    "memberName", savedReview.getMemberName(),
+                    "rating", savedReview.getRating(),
+                    "reviewText", savedReview.getReviewText(),
+                    "reviewDate", savedReview.getReviewDate()
+            ));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Collections.singletonMap("message", e.getMessage()));
         }
     }
+
 
     //  2. 특정 리뷰 조회
     @GetMapping("/{reviewId}")
@@ -60,22 +74,14 @@ public class RoomReviewController {
 
     //  3. 특정 객실의 모든 리뷰 조회
     @GetMapping("/room/{roomId}")
-    public ResponseEntity<?> getReviewsByRoomId(@PathVariable Integer roomId) {
-        log.info("객실 리뷰 조회 요청: roomId={}", roomId);
-        try {
-            List<RoomReviewDTO> reviews = roomReviewService.getReviewsByRoomId(roomId);
+    public ResponseEntity<?> getReviewsByRoomId(
+            @PathVariable Integer roomId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
-            if (reviews.isEmpty()) {
-                return ResponseEntity.ok(Collections.emptyList()); // 빈 배열 반환
-            }
-
-            return ResponseEntity.ok(reviews);
-        } catch (Exception e) {
-            log.error("객실 리뷰 조회 중 오류 발생: roomId={}, error={}", roomId, e.getMessage());
-
-            // `ResponseEntity<?>` 사용하여 타입 불일치 해결
-            return ResponseEntity.status(500).body(Collections.singletonMap("error", "리뷰를 불러오는 중 오류 발생"));
-        }
+        log.info("객실 리뷰 조회 요청: roomId={}, page={}, size={}", roomId, page, size);
+        Page<RoomReviewDTO> reviewPage = roomReviewService.getReviewsByRoomId(roomId, page, size);
+        return ResponseEntity.ok(reviewPage);
     }
 
     //  4. 특정 객실의 최근 3개 리뷰 조회
@@ -143,14 +149,28 @@ public class RoomReviewController {
     //  9. 객실 상세보기
     @GetMapping("/room/detail/{roomId}")
     public String getRoomDetail(@PathVariable Integer roomId, Model model) {
-        log.info("객실 상세보기 요청 - Room ID: {}", roomId);
+        log.info("🔍 객실 상세보기 요청 - roomId: {}", roomId);
 
         RoomDTO room = roomService.readRoom(roomId);
-        List<RoomReviewDTO> reviews = roomReviewService.getReviewsByRoomId(roomId);
+        Page<RoomReviewDTO> reviewPage = roomReviewService.getReviewsByRoomId(roomId, 0, 10);
+
+        log.info(" 리뷰 개수 (Controller): {}", reviewPage.getTotalElements());
+
+        // Thymeleaf에서 리스트로 인식하도록 명확하게 변환
+        List<RoomReviewDTO> reviews = new ArrayList<>(reviewPage.getContent());
+
+        log.info(" 변환된 reviews 리스트 크기: {}", reviews.size());
+        reviews.forEach(review -> log.info("📝 리뷰 정보: ID={}, 내용={}, 작성자={}",
+                review.getReviewId(),
+                review.getReviewText(),
+                review.getMemberName()));
 
         model.addAttribute("room", room);
         model.addAttribute("reviews", reviews);
+        model.addAttribute("totalReviews", reviewPage.getTotalElements()); // 전체 리뷰 개수 추가
 
-        return "detail"; // Thymeleaf 템플릿 반환
+        return "detail";
     }
+
+
 }
