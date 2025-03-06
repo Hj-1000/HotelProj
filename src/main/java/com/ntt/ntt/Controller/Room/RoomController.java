@@ -1,12 +1,14 @@
 package com.ntt.ntt.Controller.Room;
 
 
+import com.ntt.ntt.DTO.BannerDTO;
 import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.MemberDTO;
 import com.ntt.ntt.DTO.RoomDTO;
 import com.ntt.ntt.Service.MemberService;
 import com.ntt.ntt.Service.RoomService;
 import com.ntt.ntt.Service.hotel.HotelService;
+import com.ntt.ntt.Service.BannerService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -32,10 +34,8 @@ public class RoomController {
 
     private final RoomService roomService;
     private final MemberService memberService;
-
-    // 2025-02-24 추천 호텔목록을 띄우기 위해 추가
     private final HotelService hotelService;
-
+    private final BannerService bannerService;
 
     /* -----------유저 페이지----------- */
 
@@ -43,12 +43,17 @@ public class RoomController {
     public String mainPageForm(Model model) {
         // 추천 호텔 목록 가져오기
         List<HotelDTO> recommendedHotels = hotelService.listRecommendedHotels();
+        
+        // 활성화된 배너 목록 가져오기
+        List<BannerDTO> activeBanners = bannerService.getActiveBanners();
 
         // 로그로 확인
         log.info("Recommended hotels sent to index page: {}", recommendedHotels);
+        log.info("Active banners sent to index page: {}", activeBanners);
 
-        // 모델에 추천 방 데이터를 추가
+        // 모델에 추천 방 데이터와 배너 데이터를 추가
         model.addAttribute("recommendedHotels", recommendedHotels);
+        model.addAttribute("activeBanners", activeBanners);
 
         return "index"; // index.html 반환
     }

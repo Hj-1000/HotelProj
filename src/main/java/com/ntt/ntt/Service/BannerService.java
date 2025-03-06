@@ -104,7 +104,30 @@ public class BannerService {
         return imageRepository.findByBanner_BannerId(bannerId);
     }
 
-
+    // 활성화된 배너 목록 가져오기
+    public List<BannerDTO> getActiveBanners() {
+        List<Banner> banners = bannerRepository.findByBannerStatus(true);
+        List<BannerDTO> bannerDTOList = banners.stream()
+                .map(banner -> {
+                    BannerDTO dto = modelMapper.map(banner, BannerDTO.class);
+                    List<Image> images = imageRepository.findByBanner_BannerId(banner.getBannerId());
+                    List<ImageDTO> imageDTOs = images.stream()
+                            .map(image -> {
+                                ImageDTO imageDTO = ImageDTO.fromEntity(image);
+                                if (imageDTO.getImagePath() != null) {
+                                    if (imageDTO.getImagePath().contains("/")) {
+                                        imageDTO.setImagePath(imageDTO.getImagePath().substring(imageDTO.getImagePath().lastIndexOf("/") + 1));
+                                    }
+                                }
+                                return imageDTO;
+                            })
+                            .collect(Collectors.toList());
+                    dto.setBannerImageDTOList(imageDTOs);
+                    return dto;
+                })
+                .collect(Collectors.toList());
+        return bannerDTOList;
+    }
 
 }
 
