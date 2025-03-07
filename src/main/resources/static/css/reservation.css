@@ -322,13 +322,11 @@ h2 {
 
 .close {
     position: absolute;
-    top: 15px;
+    top: 20px;
     right: 15px;
     width: 40px;
     height: 40px;
-    background-color: black;
-    color: white;
-    font-size: 24px;
+    font-size: 2.5rem;
     font-weight: bold;
     border: none;
     border-radius: 50%;
@@ -340,7 +338,6 @@ h2 {
 }
 
 .close:hover {
-    background-color: #333;
     transform: scale(1.1);
 }
 

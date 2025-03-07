@@ -1,4 +1,4 @@
-package com.ntt.ntt.Controller;
+package com.ntt.ntt.Controller.RoomReview;
 
 import com.ntt.ntt.DTO.RoomDTO;
 import com.ntt.ntt.DTO.RoomReviewDTO;
@@ -110,7 +110,7 @@ public class RoomReviewController {
 
     //  7. 리뷰 수정
     @PutMapping("/update/{reviewId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER') or @roomReviewService.isReviewOwner(#reviewId, authentication.principal.username)")
+    @PreAuthorize("@roomReviewService.isReviewOwner(#reviewId, authentication.principal.username)")
     public ResponseEntity<?> updateReview(
             @PathVariable Integer reviewId,
             @RequestBody RoomReviewDTO reviewDTO) {
@@ -133,7 +133,7 @@ public class RoomReviewController {
 
     //  8. 리뷰 삭제
     @PostMapping("/delete/{reviewId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER') or @roomReviewService.isReviewOwner(#reviewId, authentication.principal.username)")
+    @PreAuthorize("@roomReviewService.isReviewOwner(#reviewId, authentication.principal.username)")
     public ResponseEntity<?> deleteReview(@PathVariable Integer reviewId) {
         log.info("리뷰 삭제 요청: reviewId={}", reviewId);
 
@@ -160,7 +160,7 @@ public class RoomReviewController {
         List<RoomReviewDTO> reviews = new ArrayList<>(reviewPage.getContent());
 
         log.info(" 변환된 reviews 리스트 크기: {}", reviews.size());
-        reviews.forEach(review -> log.info("📝 리뷰 정보: ID={}, 내용={}, 작성자={}",
+        reviews.forEach(review -> log.info(" 리뷰 정보: ID={}, 내용={}, 작성자={}",
                 review.getReviewId(),
                 review.getReviewText(),
                 review.getMemberName()));
@@ -172,8 +172,7 @@ public class RoomReviewController {
         return "detail";
     }
 
-
-    //  3. 특정 호텔의 모든 리뷰 조회
+    //  10. 특정 호텔의 모든 리뷰 조회
     @GetMapping("/hotel/{hotelId}")
     public ResponseEntity<?> getReviewsByHotelId( @PathVariable Integer hotelId,
                                                   @RequestParam(defaultValue = "0") int page,
@@ -183,6 +182,5 @@ public class RoomReviewController {
         Page<RoomReviewDTO> reviewPage = roomReviewService.getReviewsByHotelId(hotelId, page, size);
         return ResponseEntity.ok(reviewPage);
     }
-
 
 }
