@@ -499,8 +499,7 @@
 
                 </div>
 
-            <!--예약 날짜 선택-->
-                <!--일단 허전해서 냅둠-->
+            <!--예약 날짜 선택--> <!--일단 허전해서 냅둠-->
             <div style="margin: auto">
                 <div style="margin-top: 50px; width: 930px">
                     <h4> 날짜 선택</h4>
@@ -516,13 +515,12 @@
             </div>
 
             <!-- 객실 목록 -->
-
             <div class="col ">
                 <div >
 
                     <!-- Room List Section -->
                     <section class="py-5">
-                        <div class="card border-light" style="width: 950px; margin: auto; padding: 15px">
+                        <div class="" style="width: 950px; margin: auto; padding: 15px">
                             <h4 class="mb-3">객실 선택</h4>
 
                             <th:block th:if="${rooms == null || #lists.isEmpty(rooms)}">
@@ -591,15 +589,16 @@
                         </div>
                     </section>
 
-                    <!-- 버튼 -->
-                    <div class="text-end mt-5">
-                        <a class="btn btn-dark" href="/hotel/list">목록</a>
-                    </div>
+
 
                 </div>
             </div>
         </div>
     </div>
+        <!-- 버튼 -->
+        <div class="text-end mt-3 mb-3">
+            <a class="btn btn-dark" href="/hotel/list">목록</a>
+        </div>
 </div>
 
 <!-- 로그인된 상태 -->
