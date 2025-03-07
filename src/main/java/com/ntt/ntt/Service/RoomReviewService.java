@@ -185,4 +185,27 @@ public class RoomReviewService {
                 .collect(Collectors.toList());
     }
 
+    // 11. 호텔ID를 통하여 최신 리뷰 전부 가져오는 메서드
+    @Transactional(readOnly = true)
+    public Page<RoomReviewDTO> getReviewsByHotelId(Integer hotelId, int page, int size) {
+        log.info("DEBUG: getReviewsByHotelId 호출 - hotelId: {}, page: {}, size: {}", hotelId, page, size);
+
+        try {
+            PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "reviewDate"));
+
+            // 리뷰 데이터 조회
+            Page<RoomReview> reviews = roomReviewRepository.findByHotelIdOrderByReviewDateDesc(hotelId, pageRequest);
+
+            log.info("DEBUG: 리뷰 조회 결과 개수 = {}", reviews.getTotalElements());
+
+            // 결과가 null이면 빈 페이지 반환
+            return Optional.ofNullable(reviews)
+                    .orElse(Page.empty(pageRequest))
+                    .map(RoomReviewDTO::fromEntity);
+        } catch (Exception e) {
+            log.error("ERROR: 리뷰 조회 중 예외 발생 - roomId: {}, message: {}", hotelId, e.getMessage());
+            return Page.empty();
+        }
+    }
+
 }

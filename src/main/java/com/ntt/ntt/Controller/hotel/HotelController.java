@@ -105,7 +105,7 @@ public class HotelController {
                 return "redirect:/hotel/list";
             }
 
-            // 최신 리뷰 3개 조회
+            // 최신 리뷰 조회
             List<RoomReviewDTO> latestReviews = roomReviewService.getLatestReviewsByHotelId(hotelId);
 
             // Pageable 객체 생성
@@ -144,7 +144,16 @@ public class HotelController {
     // 해당 호텔 전체 리뷰
     @Operation(summary = "사용자용 호텔 상세", description = "hotelId에 맞는 호텔 리뷰 목록 페이지로 이동한다.")
     @GetMapping("/reviewAll")
-    public String reviewList() {
+    public String reviewList(@RequestParam Integer hotelId, Model model,
+                             RedirectAttributes redirectAttributes) {
+
+        // 호텔 정보 조회
+        HotelDTO hotelDTO = hotelService.read(hotelId);
+        if (hotelDTO == null) {
+            redirectAttributes.addFlashAttribute("message", "해당 호텔이 존재하지 않습니다!");
+            return "redirect:/hotel/list";
+        }
+        model.addAttribute("hotelDTO", hotelDTO);
 
         return "/hotel/reviewList";
     }
