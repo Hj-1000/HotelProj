@@ -95,6 +95,28 @@
     border-radius: 0;
 }
 
+/* 공유하기 버튼  */
+.btn-outline-dark:hover {
+    background-color: #000000;
+    color: white;
+}
+
+/* 예약하기 버튼  */
+
+.btn-dark {
+    background-color: #000000 !important;
+}
+
+.btn-dark.btn-book:hover {
+    background-color: transparent !important;
+    color: #000000 !important;
+    border: 1px solid black !important;
+}
+
+.btn-dark.btn-book:hover i {
+    color: #000000 !important;
+}
+
 /* 주요 혜택 */
 .room-item-wrapper {
     margin-top: 20px;
@@ -103,6 +125,14 @@
 .room-item-wrapper .room-item .room-item-box {
     display: flex;
     gap: 3rem;
+    opacity: 0;
+    transform: translateX(-200px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.room-item-wrapper .room-item .room-item-box.active {
+    opacity: 1;
+    transform: translateX(0);
 }
 
 .room-details {
@@ -117,8 +147,20 @@
 }
 
 .room-image {
-    object-fit: cover;
+    position: relative;
+    overflow: hidden;
+    height: auto;
 }
+
+.room-image img {
+    object-fit: cover;
+    transition: transform 0.3s ease-in-out;
+}
+
+.room-image img:hover {
+    transform: scale(1.05);
+}
+
 
 .room-details-title {
     font-size: 2.5rem;
@@ -165,7 +207,6 @@
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
-    margin-top: 20px;
 }
 
 .review-box {
@@ -288,7 +329,7 @@
     align-items: center;
     gap: 5px;
     transform: rotate(-15deg);
-    animation: clickHintBlink 1.5s infinite alternate;
+    animation: clickHintBlink .8s infinite alternate;
 }
 
 
@@ -306,7 +347,7 @@
 /* More 버튼 */
 .real-more {
     display: block;
-    margin: 20px auto;
+    margin: 0px auto;
     width: 100%;
     text-align: center;
     background-color: #000000;
@@ -382,6 +423,70 @@
     margin-bottom: 5px;
 }
 
+
+.btn10 {
+    text-transform: uppercase!important;
+    text-transform: capitalize;
+    overflow: hidden!important;
+    -webkit-transition: all .3s ease-in-out;
+    -moz-transition: all .3s ease-in-out;
+    -o-transition: all .3s ease-in-out;
+    transition: all .3s ease-in-out;
+    z-index:10;
+}
+
+
+
+.btn10::before {
+    content: '';
+    width: 0%;
+    height: 100%;
+    display: block;
+    background: #e9f4ff;
+    position: absolute;
+    -ms-transform: skewX(-20deg);
+    -webkit-transform: skewX(-20deg);
+    transform: skewX(-20deg);
+    left: -10%;
+    opacity: 1;
+    top: 0;
+    z-index: -12;
+    -moz-transition: all .7s cubic-bezier(0.77, 0, 0.175, 1);
+    -o-transition: all .7s cubic-bezier(0.77, 0, 0.175, 1);
+    -webkit-transition: all .7s cubic-bezier(0.77, 0, 0.175, 1);
+    transition: all .7s cubic-bezier(0.77, 0, 0.175, 1);
+    box-shadow:2px 0px 14px rgba(0,0,0,.6);
+}
+
+.btn10::after {
+    content: '';
+    width: 0%;
+    height: 100%;
+    display: block;
+    background: #47b7f6;
+    position: absolute;
+    -ms-transform: skewX(-20deg);
+    -webkit-transform: skewX(-20deg);
+    transform: skewX(-20deg);
+    left: -10%;
+    opacity: 0;
+    top: 0;
+    z-index: -15;
+    -webkit-transition: all .94s cubic-bezier(.2,.95,.57,.99);
+    -moz-transition: all .4s cubic-bezier(.2,.95,.57,.99);
+    -o-transition: all .4s cubic-bezier(.2,.95,.57,.99);
+    transition: all .4s cubic-bezier(.2,.95,.57,.99);
+    box-shadow: 2px 0px 14px rgba(0,0,0,.6);
+}
+.btn10:hover::before{
+    opacity:1;
+    width: 116%;
+}
+.btn10:hover::after{
+    opacity:1;
+    width: 120%;
+}
+
 /* 애니메이션 */
 
 @keyframes clickHintBlink {
@@ -391,7 +496,7 @@
     }
     100% {
         opacity: 0.5;
-        transform: rotate(15deg) scale(1.1);
+        transform: rotate(25deg) scale(1.1);
     }
 }
 

@@ -386,11 +386,14 @@ public class ReservationService {
 
     /* 예약된 날짜 목록 조회 메서드 */
     public List<Map<String, String>> getBookedDatesByRoom(Integer roomId) {
-        List<Reservation> reservations = reservationRepository.findAllByRoom_RoomId(roomId);
+        List<Reservation> reservations = reservationRepository.findAllByRoom_RoomId(roomId)
+                .stream()
+                .filter(reservation -> "예약".equals(reservation.getReservationStatus())) // 예약된 상태만 가져오기
+                .collect(Collectors.toList());
 
         return reservations.stream().map(reservation -> {
             Map<String, String> map = new HashMap<>();
-            map.put("checkIn", reservation.getCheckInDate().truncatedTo(ChronoUnit.MINUTES).toString()); // 초 제거
+            map.put("checkIn", reservation.getCheckInDate().truncatedTo(ChronoUnit.MINUTES).toString());
             map.put("checkOut", reservation.getCheckOutDate().truncatedTo(ChronoUnit.MINUTES).toString());
             return map;
         }).collect(Collectors.toList());
