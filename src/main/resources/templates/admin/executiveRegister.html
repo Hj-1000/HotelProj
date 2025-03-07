@@ -71,6 +71,202 @@
                         <input type="text" class="form-control" id="memberPhone" name="memberPhone" placeholder="'-' 없이 숫자만 입력해주세요.">
                         <small id="phoneCheckMessage" style="display: none;"></small>
                     </div>
+                    <div class="mb-3" onclick="openModal(event, 'termsModal')">
+                        <input type="checkbox" id="termsCheckbox" style="transform: scale(1.2);">
+                        [필수] 서비스 이용약관 동의
+                    </div>
+                    <div class="mb-3" onclick="openModal(event, 'privacyModal')">
+                        <input type="checkbox" id="privacyCheckbox" style="transform: scale(1.2);">
+                        [필수] 개인정보 수집 및 이용 동의
+                    </div>
+                    <div class="mb-3" onclick="openModal(event, 'adsModal')">
+                        <input type="checkbox" id="adsCheckbox" style="transform: scale(1.2);">
+                        [선택] 광고성 정보 수신 동의
+                    </div>
+
+                    <!-- 모달 (서비스 이용약관) -->
+                    <div class="modal fade" id="termsModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">서비스 이용약관</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
+                                    <h6>제 1 조 (목적)</h6>
+                                    <p>본 약관은 [서비스명] (이하 "회사")가 제공하는 서비스 이용과 관련하여 회사와 이용자의 권리, 의무 및 책임 사항을 규정함을 목적으로 합니다.</p>
+
+                                    <h6>제 2 조 (용어의 정의)</h6>
+                                    <ul>
+                                        <li>"서비스"란 회사가 제공하는 웹사이트 및 관련 서비스를 의미합니다.</li>
+                                        <li>"회원"이란 본 약관에 동의하고 회사가 제공하는 서비스를 이용하는 자를 의미합니다.</li>
+                                        <li>"이용자"란 회원과 비회원을 포함하여 서비스를 이용하는 모든 자를 의미합니다.</li>
+                                    </ul>
+
+                                    <h6>제 3 조 (약관의 효력 및 변경)</h6>
+                                    <ul>
+                                        <li>본 약관은 서비스를 이용하는 모든 이용자에게 적용됩니다.</li>
+                                        <li>회사는 필요한 경우 관련 법령을 위배하지 않는 범위 내에서 약관을 개정할 수 있습니다.</li>
+                                        <li>변경된 약관은 공지 후 일정 기간이 지나면 자동으로 효력이 발생합니다.</li>
+                                    </ul>
+
+                                    <h6>제 4 조 (회원가입 및 계정관리)</h6>
+                                    <ul>
+                                        <li>회원가입은 이용자가 본 약관에 동의하고 필요한 정보를 입력한 후, 회사의 승인을 받으면 완료됩니다.</li>
+                                        <li>회원은 가입 시 제공한 정보가 정확해야 하며, 변경사항이 있을 경우 즉시 수정해야 합니다.</li>
+                                        <li>회사는 다음과 같은 경우 회원가입을 거부하거나 취소할 수 있습니다.</li>
+                                        <ul>
+                                            <li>허위 정보를 기재한 경우</li>
+                                            <li>타인의 정보를 도용한 경우</li>
+                                            <li>기타 서비스 운영에 지장을 초래할 우려가 있는 경우</li>
+                                        </ul>
+                                    </ul>
+
+                                    <h6>제 5 조 (서비스 이용 및 제한)</h6>
+                                    <ul>
+                                        <li>이용자는 본 약관과 관련 법령을 준수하며, 회사의 정상적인 운영을 방해해서는 안 됩니다.</li>
+                                        <li>회사는 다음과 같은 사유가 발생할 경우 서비스 이용을 제한할 수 있습니다.</li>
+                                        <ul>
+                                            <li>불법적인 활동이 발견된 경우</li>
+                                            <li>시스템의 안정성을 해치는 행위를 한 경우</li>
+                                        </ul>
+                                    </ul>
+
+                                    <h6>제 6 조 (개인정보 보호)</h6>
+                                    <ul>
+                                        <li>회사는 회원의 개인정보를 관련 법령에 따라 보호하며, 개인정보 보호정책을 따릅니다.</li>
+                                        <li>회사는 회원의 동의 없이 제3자에게 개인정보를 제공하지 않습니다.</li>
+                                    </ul>
+
+                                    <h6>제 7 조 (책임의 한계 및 면책조항)</h6>
+                                    <ul>
+                                        <li>회사는 천재지변, 시스템 장애 등 불가항력적인 사유로 인한 서비스 중단에 대해 책임을 지지 않습니다.</li>
+                                        <li>이용자가 서비스 이용 중 발생한 손해에 대해 회사의 고의 또는 중대한 과실이 없는 한 책임을 지지 않습니다.</li>
+                                    </ul>
+
+                                    <h6>제 8 조 (이용계약 해지 및 서비스 종료)</h6>
+                                    <ul>
+                                        <li>회원은 언제든지 회사에 요청하여 회원 탈퇴를 할 수 있습니다.</li>
+                                        <li>회사는 내부 운영 사정이나 법적 요건에 따라 서비스의 일부 또는 전부를 변경하거나 종료할 수 있습니다.</li>
+                                    </ul>
+
+                                    <h6>제 9 조 (분쟁 해결 및 준거법)</h6>
+                                    <ul>
+                                        <li>본 약관과 관련하여 발생하는 분쟁은 회사의 본사 소재지를 관할하는 법원에서 해결합니다.</li>
+                                        <li>본 약관은 대한민국 법률에 따라 해석되고 적용됩니다.</li>
+                                    </ul>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" onclick="closeModalAndUncheck('termsCheckbox', 'termsModal')">취소</button>
+                                    <button type="button" class="btn btn-primary" onclick="agreeTerms('termsCheckbox', 'termsModal')">동의</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 모달 (개인정보 수집 및 이용) -->
+                    <div class="modal fade" id="privacyModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">개인정보 수집 및 이용 동의</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
+                                    <h5>제 1 조 (목적)</h5>
+                                    <p>[서비스명] (이하 "회사")는 이용자의 개인정보를 보호하고, 관련 법령을 준수하기 위해 본 개인정보 처리방침을 수립합니다.</p>
+
+                                    <h5>제 2 조 (수집하는 개인정보 항목 및 수집 방법)</h5>
+                                    <p><strong>1. 수집하는 개인정보 항목</strong><br>
+                                        - 회원가입 시: 이름, 이메일 주소, 비밀번호, 연락처<br>
+                                        - 서비스 이용 시: IP 주소, 쿠키, 방문 기록, 결제 정보 (결제 시)
+                                    </p>
+                                    <p><strong>2. 개인정보 수집 방법</strong><br>
+                                        - 회원가입 및 서비스 이용 과정에서 이용자가 직접 입력<br>
+                                        - 로그 분석 도구를 통한 자동 수집
+                                    </p>
+
+                                    <h5>제 3 조 (개인정보의 수집 및 이용 목적)</h5>
+                                    <p>회사는 다음과 같은 목적을 위해 개인정보를 수집하고 이용합니다.</p>
+                                    <ul>
+                                        <li>회원 관리: 회원가입, 본인 확인, 계정 관리, 부정 이용 방지</li>
+                                        <li>서비스 제공: 콘텐츠 제공, 맞춤형 서비스 추천, 고객 지원</li>
+                                        <li>결제 및 정산: 구매 내역 관리, 환불 처리</li>
+                                        <li>법적 의무 준수: 법령 및 규정 준수를 위한 기록 보관</li>
+                                    </ul>
+
+                                    <h5>제 4 조 (개인정보의 보유 및 이용 기간)</h5>
+                                    <p>1. 회원 탈퇴 시 즉시 삭제되며, 법령에 따라 일정 기간 보관될 수 있음</p>
+                                    <ul>
+                                        <li>계약 또는 청약 철회 기록: 5년 (전자상거래법)</li>
+                                        <li>대금 결제 및 재화 공급 기록: 5년 (전자상거래법)</li>
+                                        <li>소비자 불만 및 분쟁 처리 기록: 3년 (전자상거래법)</li>
+                                        <li>로그인 기록: 3개월 (통신비밀보호법)</li>
+                                    </ul>
+
+                                    <h5>제 5 조 (개인정보의 제공 및 위탁)</h5>
+                                    <p>1. 회사는 이용자의 개인정보를 제3자에게 제공하지 않습니다.</p>
+                                    <p>2. 다만, 원활한 서비스 제공을 위해 아래와 같이 개인정보 처리를 위탁할 수 있습니다.</p>
+                                    <ul>
+                                        <li>결제 처리: [결제 대행사명]</li>
+                                        <li>고객 상담 서비스: [고객센터 위탁 업체명]</li>
+                                    </ul>
+
+                                    <h5>제 6 조 (이용자의 권리 및 행사 방법)</h5>
+                                    <p>1. 이용자는 언제든지 자신의 개인정보를 열람, 수정, 삭제 요청할 수 있습니다.</p>
+                                    <p>2. 이용자는 개인정보의 처리 정지를 요구할 수 있으며, 법적 요건에 따라 일부 제한될 수 있습니다.</p>
+                                    <p>3. 요청 방법: 고객센터 또는 이메일을 통해 신청 가능</p>
+
+                                    <h5>제 7 조 (개인정보 보호를 위한 기술적/관리적 조치)</h5>
+                                    <p>1. 개인정보는 암호화되어 저장 및 전송되며, 보안 시스템을 적용하여 보호됩니다.</p>
+                                    <p>2. 회사는 정기적으로 보안 점검을 실시하고, 개인정보 접근 권한을 최소화합니다.</p>
+
+                                    <h5>제 8 조 (개인정보 보호책임자 및 연락처)</h5>
+                                    <p>회사는 개인정보 보호를 위해 아래와 같이 개인정보 보호책임자를 지정합니다.</p>
+                                    <ul>
+                                        <li>개인정보 보호책임자: [담당자명]</li>
+                                        <li>연락처: [이메일 주소 및 전화번호]</li>
+                                        <li>문의 가능 시간: 평일 09:00~18:00 (주말 및 공휴일 제외)</li>
+                                    </ul>
+
+                                    <h5>제 9 조 (개인정보 처리방침의 변경)</h5>
+                                    <p>1. 법령 또는 서비스 변경에 따라 본 방침이 변경될 수 있으며, 변경 사항은 홈페이지를 통해 공지됩니다.</p>
+                                    <p>2. 중요한 사항이 변경될 경우 사전 동의를 받을 수 있습니다.</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" onclick="closeModalAndUncheck('privacyCheckbox', 'privacyModal')">취소</button>
+                                    <button type="button" class="btn btn-primary" onclick="agreeTerms('privacyCheckbox', 'privacyModal')">동의</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 모달 (광고성 정보 수신 동의) -->
+                    <div class="modal fade" id="adsModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">광고성 정보 수신 동의</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
+                                    <h6>광고성 정보 수신 동의 안내</h6>
+                                    <p>회사는 서비스 제공 및 이용자의 편의를 위해 다양한 광고성 정보를 제공합니다. 해당 광고성 정보는 이메일, SMS, 푸시 알림 등을 통해 발송될 수 있습니다.</p>
+
+                                    <h6>광고성 정보 수신 동의</h6>
+                                    <p>아래의 내용을 확인하시고 광고성 정보 수신에 동의하시면, 향후 서비스 관련 광고 및 이벤트 정보를 수신하게 됩니다.</p>
+                                    <ul>
+                                        <li>이메일, SMS, 푸시 알림을 통해 광고성 정보 및 이벤트 정보를 수신합니다.</li>
+                                        <li>수신 동의는 언제든지 철회할 수 있으며, 철회 후에는 더 이상 광고성 정보를 수신하지 않습니다.</li>
+                                    </ul>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" onclick="closeModalAndUncheck('adsCheckbox', 'adsModal')">취소</button>
+                                    <button type="button" class="btn btn-primary" onclick="agreeTerms('adsCheckbox', 'adsModal')">동의</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="text-end mt-4">
                     <p>* 표시는 필수 입력 항목입니다.</p>
@@ -81,6 +277,25 @@
 
             <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
             <script type="text/javascript">
+                // 모달 열기
+                function openModal(event, modalId) {
+                    event.preventDefault(); // 체크 방지
+                    event.target.checked = false; // 체크 해제
+                    let modal = new bootstrap.Modal(document.getElementById(modalId));
+                    modal.show();
+                }
+                // '동의' 클릭시 체크
+                function agreeTerms(checkboxId, modalId) {
+                    document.getElementById(checkboxId).checked = true;
+                    let modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
+                    modal.hide();
+                }
+                // '취소' 클릭시 체크 해제
+                function closeModalAndUncheck(checkboxId, modalId) {
+                    document.getElementById(checkboxId).checked = false;
+                    let modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
+                    modal.hide();
+                }
                 $(document).ready(function() {
                     // #company 선택 시 실행
                     $("#company").change(function() {
@@ -273,6 +488,14 @@
                     }
                     if(document.getElementById('memberPhone').value && phoneCheckMessage === "전화번호는 11자리여야 합니다.") {
                         alert("전화번호를 확인해주세요.");
+                        return false;
+                    }
+                    if (!termsCheckbox.checked) {
+                        alert("서비스 이용약관에 동의해야 회원가입이 가능합니다.");
+                        return false;
+                    }
+                    if (!privacyCheckbox.checked) {
+                        alert("개인정보 수집 및 이용에 동의해야 회원가입이 가능합니다.");
                         return false;
                     }
                     alert("매니저 등록에 성공하였습니다.");
