@@ -68,7 +68,7 @@ public class RoomReviewService {
         return RoomReviewDTO.fromEntity(savedReview);
     }
 
-    // 2. 특정 리뷰 조회 (읽기 전용)
+    // 2. 특정 리뷰 조회
     @Transactional(readOnly = true)
     public RoomReviewDTO getReviewById(Integer reviewId) {
         log.info("리뷰 조회 요청: reviewId={}", reviewId);
@@ -84,11 +84,10 @@ public class RoomReviewService {
         return RoomReviewDTO.fromEntity(roomReview);
     }
 
-
     // 3. 특정 객실의 모든 리뷰 조회
     @Transactional(readOnly = true)
     public Page<RoomReviewDTO> getReviewsByRoomId(Integer roomId, int page, int size) {
-        log.info("DEBUG: getReviewsByRoomId 호출 - roomId: {}, page: {}, size: {}", roomId, page, size);
+        log.info(" getReviewsByRoomId 호출 - roomId: {}, page: {}, size: {}", roomId, page, size);
 
         try {
             PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "reviewDate"));
@@ -96,20 +95,24 @@ public class RoomReviewService {
             // 리뷰 데이터 조회
             Page<RoomReview> reviews = roomReviewRepository.findByRoom_RoomIdOrderByReviewDateDesc(roomId, pageRequest);
 
-            log.info("DEBUG: 리뷰 조회 결과 개수 = {}", reviews.getTotalElements());
+            log.info(" 리뷰 조회 결과 개수 = {}", reviews.getTotalElements());
 
             // 결과가 null이면 빈 페이지 반환
             return Optional.ofNullable(reviews)
                     .orElse(Page.empty(pageRequest))
                     .map(RoomReviewDTO::fromEntity);
         } catch (Exception e) {
-            log.error("ERROR: 리뷰 조회 중 예외 발생 - roomId: {}, message: {}", roomId, e.getMessage());
+            log.error(" 리뷰 조회 중 예외 발생 - roomId: {}, message: {}", roomId, e.getMessage());
             return Page.empty();
         }
     }
 
+    // 4. 모든 리뷰 조회
+    public Page<RoomReviewDTO> getAllReviews(Pageable pageable) {
+        return roomReviewRepository.findAll(pageable).map(RoomReviewDTO::fromEntity);
+    }
 
-    // 4. 특정 객실의 최근 3개 리뷰 조회
+    // 5. 특정 객실의 최근 3개 리뷰 조회
     @Transactional(readOnly = true)
     public List<RoomReviewDTO> getRecentReviewsByRoomId(Integer roomId) {
         log.info("객실 최근 리뷰 조회: roomId={}", roomId);
@@ -118,7 +121,7 @@ public class RoomReviewService {
                 .collect(Collectors.toList());
     }
 
-    // 5. 특정 회원이 작성한 리뷰 조회
+    // 6. 특정 회원이 작성한 리뷰 조회
     @Transactional(readOnly = true)
     public List<RoomReviewDTO> getReviewsByMemberId(Integer memberId) {
         log.info("회원 리뷰 목록 조회: memberId={}", memberId);
@@ -127,14 +130,14 @@ public class RoomReviewService {
                 .collect(Collectors.toList());
     }
 
-    // 6. 객실 평균 평점 조회
+    // 7. 객실 평균 평점 조회
     @Transactional(readOnly = true)
     public Double getAverageRatingByRoomId(Integer roomId) {
         log.info("객실 평균 평점 조회: roomId={}", roomId);
         return roomReviewRepository.findAverageRatingByRoom_RoomId(roomId);
     }
 
-    // 7. 특정 리뷰 수정
+    // 8. 특정 리뷰 수정
     public RoomReviewDTO updateReview(Integer reviewId, RoomReviewDTO reviewDTO) {
         log.info("리뷰 수정 요청: reviewId={}, reviewDTO={}", reviewId, reviewDTO);
 
@@ -156,7 +159,7 @@ public class RoomReviewService {
         return RoomReviewDTO.fromEntity(savedReview);
     }
 
-    // 8. 특정 리뷰 삭제
+    // 9. 특정 리뷰 삭제
     public void deleteReview(Integer reviewId) {
         log.info("리뷰 삭제 요청: reviewId={}", reviewId);
         RoomReview roomReview = roomReviewRepository.findById(reviewId)
@@ -166,7 +169,7 @@ public class RoomReviewService {
         log.info(" 리뷰 삭제 완료: reviewId={}", reviewId);
     }
 
-    // 9. 본인 리뷰인지 확인
+    // 10. 본인 리뷰인지 확인
     public boolean isReviewOwner(Integer reviewId, String username) {
         RoomReview review = roomReviewRepository.findById(reviewId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 리뷰가 존재하지 않습니다."));
@@ -175,7 +178,7 @@ public class RoomReviewService {
     }
 
 
-    // 10. 호텔ID를 통하여 최신 리뷰 3개 가져오는 메서드
+    // 11. 호텔ID를 통하여 최신 리뷰 3개 가져오는 메서드
     @Transactional(readOnly = true)
     public List<RoomReviewDTO> getLatestReviewsByHotelId(Integer hotelId) {
         log.info("객실 최근 리뷰 조회: roomId={}", hotelId);
@@ -185,7 +188,7 @@ public class RoomReviewService {
                 .collect(Collectors.toList());
     }
 
-    // 11. 호텔ID를 통하여 최신 리뷰 전부 가져오는 메서드
+    // 12. 호텔ID를 통하여 최신 리뷰 전부 가져오는 메서드
     @Transactional(readOnly = true)
     public Page<RoomReviewDTO> getReviewsByHotelId(Integer hotelId, int page, int size) {
         log.info("DEBUG: getReviewsByHotelId 호출 - hotelId: {}, page: {}, size: {}", hotelId, page, size);
@@ -207,5 +210,4 @@ public class RoomReviewService {
             return Page.empty();
         }
     }
-
 }
