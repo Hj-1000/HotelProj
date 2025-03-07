@@ -36,4 +36,8 @@ public interface RoomReviewRepository extends JpaRepository<RoomReview, Integer>
     @Query("SELECT rr FROM RoomReview rr JOIN rr.room r WHERE r.hotelId.hotelId = :hotelId ORDER BY rr.reviewDate DESC")
     List<RoomReview> findTop3ByHotelIdOrderByReviewDateDesc(@Param("hotelId") Integer hotelId, Pageable pageable);
 
+    // 특정 호텔의 모든 리뷰 불러오김
+    @Query("SELECT rr FROM RoomReview rr JOIN rr.room r WHERE r.hotelId.hotelId = :hotelId ORDER BY rr.reviewDate DESC")
+    Page<RoomReview> findByHotelIdOrderByReviewDateDesc(@Param("hotelId") Integer hotelId, Pageable pageable);
+
 }
