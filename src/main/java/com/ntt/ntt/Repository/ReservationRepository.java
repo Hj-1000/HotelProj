@@ -43,6 +43,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
     // 특정 방이 예약되었는지 확인 (새로운 예약과 겹치는 경우)
     @Query("SELECT COUNT(r) > 0 FROM Reservation r " +
             "WHERE r.room.roomId = :roomId " +
+            "AND r.reservationStatus = '예약' " + // 추가: 취소된 예약 제외
             "AND (r.checkInDate < :checkOutDate AND r.checkOutDate > :checkInDate) " +
             "AND (:excludeReservationId IS NULL OR r.reservationId <> :excludeReservationId)")
     boolean isRoomAlreadyBooked(@Param("roomId") Integer roomId,
@@ -57,12 +58,18 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
     Page<Reservation> findNonCancelledReservations(Pageable pageable);
 
     // 객실 이름으로 검색
+    @Query("SELECT r FROM Reservation r WHERE r.reservationStatus <> '취소 완료' " +
+            "AND r.room.roomName LIKE %:roomName%")
     Page<Reservation> findByRoom_RoomNameContaining(String roomName, Pageable pageable);
 
     // 예약자 ID로 검색
+    @Query("SELECT r FROM Reservation r WHERE r.reservationStatus <> '취소 완료' " +
+            "AND r.member.memberId = :memberId")
     Page<Reservation> findByMember_MemberId(Integer memberId, Pageable pageable);
 
     // 예약자 이름으로 검색
+    @Query("SELECT r FROM Reservation r WHERE r.reservationStatus <> '취소 완료' " +
+            "AND r.member.memberName LIKE %:memberName%")
     Page<Reservation> findByMember_MemberNameContaining(String memberName, Pageable pageable);
 
     // 취소 완료된 예약 삭제
