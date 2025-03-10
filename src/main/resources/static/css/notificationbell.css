@@ -19,6 +19,47 @@
     padding: 10px;
 }
 
+/* 알림 스타일 */
+#notification-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #f8f9fa; /* ✅ 부드러운 배경색 */
+    padding: 12px 15px;
+    border-radius: 10px; /* ✅ 둥근 모서리 */
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* ✅ 부드러운 그림자 */
+    font-size: 15px;
+    color: #333;
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+    white-space: normal;
+    word-wrap: normal;
+}
+
+/* 아이콘 추가 */
+#notification-list li::before {
+    content: "🔔"; /* ✅ 알림 아이콘 */
+    font-size: 18px;
+}
+
+
+/* 특정 텍스트 강조 */
+#notification-list li strong {
+    font-weight: bold;
+}
+
+/* 마우스 올렸을 때 효과 */
+#notification-list li:hover {
+    background-color: #e9ecef; /* ✅ 살짝 밝은 색 */
+}
+
+/* 알림이 없을 때 메시지 스타일 */
+#notification-list li.empty {
+    text-align: center;
+    color: gray;
+    font-size: 13px;
+}
 
 /* Q&A 섹션을 화면에 고정 */
 #qna-section {
@@ -41,9 +82,6 @@
     transition: background-color 0.3s ease;
 }
 
-.notification-item:hover {
-    background-color: #e2e6ea; /* 마우스 올렸을 때 배경 색상 변화 */
-}
 
 .text-yellow {
     color: #ffbf00; /* 새 알림에 대해 강조된 노란색 */
