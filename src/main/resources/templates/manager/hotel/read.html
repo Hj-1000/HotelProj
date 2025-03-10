@@ -274,7 +274,9 @@
             <!-- 버튼 -->
             <div class="text-end mt-3">
                 <!--공용-->
-                <a class="btn btn-warning" th:href="@{/manager/roomService/category/list(hotelId=${hotelDTO.hotelId})}">룸서비스</a>
+                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="btn btn-warning" th:href="@{/admin/roomService/category/list}">룸서비스</a>
+                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="btn btn-warning" th:href="@{/chief/roomService/category/list}">룸서비스</a>
+                <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" class="btn btn-warning" th:href="@{/manager/roomService/category/list(hotelId=${hotelDTO.hotelId})}">룸서비스</a>
                 <a  href="/manager/room/register" class="btn btn-success modalBtn">객실 등록</a>
                 <!--관리자-->
                 <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="btn btn-primary" style="background-color: black" href="/admin/hotel/list">지사 관리</a>

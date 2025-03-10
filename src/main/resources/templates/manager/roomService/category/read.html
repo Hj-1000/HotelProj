@@ -103,13 +103,17 @@
         <div class="container-fluid mt-4">
             <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
             <a href="#" class="custom-link"><span>룸서비스관리</span></a> /
-            <a href="/manager/roomService/category/list" class="custom-link"><span>카테고리관리</span></a> /
-            <a th:href="@{/manager/roomService/category/read(serviceCateId=${serviceCateId})}" class="custom-link"><span>카테고리상세보기</span></a>
+            <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/admin/roomService/category/list" class="custom-link"><span>카테고리관리</span></a>
+            <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="/chief/roomService/category/list" class="custom-link"><span>카테고리관리</span></a>
+            <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" href="/manager/roomService/category/list" class="custom-link"><span>카테고리관리</span></a> /
+            <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}"  th:href="@{/admin/roomService/category/read(serviceCateId=${serviceCateDTO.serviceCateId})}" class="custom-link"><span>카테고리상세보기</span></a>
+            <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/roomService/category/read(serviceCateId=${serviceCateDTO.serviceCateId})}" class="custom-link"><span>카테고리상세보기</span></a>
+            <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" th:href="@{/manager/roomService/category/read(serviceCateId=${serviceCateDTO.serviceCateId})}" class="custom-link"><span>카테고리상세보기</span></a>
             <h2 class="mb-3">카테고리 상세보기</h2>
 
             <div class="card p-4 mb-4">
                 <div class="row g-3 align-items-center">
-
+                    <h3>카테고리 명 : <a th:text="${serviceCateDTO.serviceCateName}">한식</a></h3>
                     <!--등록한 사진이 있을 때-->
                     <th:block th:if="${serviceCateDTO.serviceCateImageDTOList != 0}">
                         <div th:each="img : ${serviceCateDTO.serviceCateImageDTOList}">
@@ -124,7 +128,7 @@
                         <img src="/img/default_img.jpg" alt="noImage" style="width: 300px"/>
                     </th:block>
 
-                    <h3><a th:text="${serviceCateDTO.serviceCateName}">한식</a></h3>
+
                 </div>
             </div>
 
@@ -136,12 +140,15 @@
                 <!--목록버튼-->
                 <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" class="btn btn-primary" style="background-color: black" th:href="@{/manager/roomService/category/list(hotelId=${serviceCateDTO.hotelId.hotelId})}">목록</a>
                 <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="btn btn-primary" style="background-color: black" th:href="@{/chief/roomService/category/list}">목록</a>
+                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="btn btn-primary" style="background-color: black" th:href="@{/admin/roomService/category/list}">목록</a>
                 <!--수정버튼-->
                 <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" class="btn btn-primary" th:href="@{/manager/roomService/category/update(serviceCateId=${serviceCateDTO.serviceCateId})}"><i class="bi bi-pen"></i></a>
                 <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="btn btn-primary" th:href="@{/chief/roomService/category/update(serviceCateId=${serviceCateDTO.serviceCateId})}"><i class="bi bi-pen"></i></a>
+                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="btn btn-primary" th:href="@{/admin/roomService/category/update(serviceCateId=${serviceCateDTO.serviceCateId})}"><i class="bi bi-pen"></i></a>
                 <!--삭제버튼-->
                 <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" class="btn btn-danger delBtn" th:href="@{/manager/roomService/category/delete(serviceCateId=${serviceCateDTO.serviceCateId})}"><i class="bi bi-trash "></i></a>
                 <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="btn btn-danger delBtn" th:href="@{/chief/roomService/category/delete(serviceCateId=${serviceCateDTO.serviceCateId})}"><i class="bi bi-trash "></i></a>
+                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="btn btn-danger delBtn" th:href="@{/admin/roomService/category/delete(serviceCateId=${serviceCateDTO.serviceCateId})}"><i class="bi bi-trash "></i></a>
             </div>
 
         </div>

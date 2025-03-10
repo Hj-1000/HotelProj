@@ -25,6 +25,8 @@ public class ServiceCateDTO {
 
     private Hotel hotelId;
 
+    private String hotelName;
+
     private LocalDateTime regDate;
 
     private LocalDateTime modDate;

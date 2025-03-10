@@ -80,7 +80,7 @@
     <div class="container-fluid mt-4">
         <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
         <a href="#" class="custom-link"><span>룸서비스관리</span></a> /
-        <a href="/manager/roomService/menu/list" class="custom-link"><span>서비스메뉴관리</span></a> /
+        <a th:href="@{/manager/roomService/menu/list(serviceCateId=${serviceMenuDTO.serviceCateId.serviceCateId})}" class="custom-link"><span>서비스메뉴관리</span></a> /
         <a th:href="@{/manager/roomService/menu/update(serviceMenuId=${serviceMenuDTO.serviceMenuId})}" class="custom-link"><span>메뉴수정</span></a>
         <div class="row">
             <div class="col-12">

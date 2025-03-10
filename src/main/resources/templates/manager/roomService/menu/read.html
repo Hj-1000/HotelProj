@@ -55,7 +55,7 @@
         <div class="container-fluid mt-4">
             <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
             <a href="#" class="custom-link"><span>룸서비스관리</span></a> /
-            <a href="/manager/roomService/menu/list" class="custom-link"><span>서비스메뉴관리</span></a> /
+            <a th:href="@{/manager/roomService/menu/list(serviceCateId=${serviceMenuDTO.serviceCateId.serviceCateId})}" class="custom-link"><span>서비스메뉴관리</span></a> /
             <a th:href="@{/manager/roomService/menu/read(serviceMenuId=${serviceMenuDTO.serviceMenuId})}" class="custom-link"><span>메뉴상세보기</span></a>
             <h2 class="mb-3">메뉴 상세보기</h2>
 
@@ -75,7 +75,7 @@
                             <img src="/img/default_img.jpg" alt="noImage" style="width: 300px"/>
                     </th:block>
 
-                    <h3><a th:text="${serviceMenuDTO.serviceMenuName}">한식</a></h3>
+                    <h3>메뉴명 : <a th:text="${serviceMenuDTO.serviceMenuName}">한식</a></h3>
                     <p>카테고리명 : <span th:text="${serviceMenuDTO.serviceCateName}">카테고리명</span></p>
                     <p>메뉴설명 : <span th:text="${serviceMenuDTO.serviceMenuInfo}">메뉴설명</span></p>
                     <p>메뉴상태 : <span th:text="${serviceMenuDTO.serviceMenuStatus.description}">상세정보</span></p>
