@@ -45,19 +45,6 @@
 
     <!-- 리뷰 목록 -->
     <div class="card">
-        <!-- 검색 -->
-        <div class="row mb-3">
-            <div class="col-md-4">
-                <input type="text" id="searchRoomId" class="form-control" placeholder="객실 ID 검색">
-            </div>
-            <div class="col-md-4">
-                <input type="text" id="searchMemberId" class="form-control" placeholder="회원 ID 검색">
-            </div>
-            <div class="col-md-4">
-                <button class="btn btn-primary" id="searchBtn">검색</button>
-            </div>
-        </div>
-
         <!-- 테이블 -->
         <div class="table-responsive">
             <table class="table table-bordered table-hover text-center">
@@ -74,7 +61,12 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="review : ${reviews.content}">
+                <!-- 검색 결과가 없을 경우 -->
+                <tr th:if="${reviews.isEmpty()}">
+                    <td colspan="8" class="text-center text-warning">현재 검색 결과가 없습니다.</td>
+                </tr>
+                <!-- 검색 결과가 있을 경우 -->
+                <tr th:each="review : ${reviews.content}" th:unless="${reviews.isEmpty()}">
                     <td th:text="${review.reviewId}"></td>
                     <td th:text="${review.roomId}"></td>
                     <td th:text="${review.memberId}"></td>
@@ -97,20 +89,43 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- 객실 리뷰 검색바 -->
+        <div class="search-bar text-center">
+            <form id="searchForm" th:action="@{/manager/room/reviews/list}" method="get">
+                <select name="category">
+                    <option value="">-- 검색 선택 --</option>
+                    <option value="reviewId" th:selected="${category == 'reviewId'}">리뷰 ID</option>
+                    <option value="roomId" th:selected="${category == 'roomId'}">객실 ID</option>
+                    <option value="memberId" th:selected="${category == 'memberId'}">회원 ID</option>
+                    <option value="memberName" th:selected="${category == 'memberName'}">회원 이름</option>
+                </select>
+                <input type="text" name="keyword" placeholder="검색어를 입력하세요" th:value="${keyword}">
+                <button type="submit" class="btn btn-dark search-button">검색</button>
+            </form>
+        </div>
+
         <!-- 페이징 버튼 -->
-        <div class="d-flex justify-content-center mt-3">
+        <div class="d-flex justify-content-center" th:if="${totalPages > 0}">
             <ul class="pagination">
                 <li th:if="${currentPage > 0}" class="page-item">
-                    <a class="page-link" th:href="@{/manager/room/reviews/list(page=${currentPage - 1}, size=10)}">이전</a>
+                    <a class="page-link"
+                       th:href="@{/manager/room/reviews/list(page=${currentPage - 1}, size=10, category=${category}, keyword=${keyword})}">
+                        이전
+                    </a>
                 </li>
-
                 <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}" class="page-item"
                     th:classappend="${i == currentPage} ? 'active' : ''">
-                    <a class="page-link" th:href="@{/manager/room/reviews/list(page=${i}, size=10)}" th:text="${i + 1}"></a>
+                    <a class="page-link"
+                       th:href="@{/manager/room/reviews/list(page=${i}, size=10, category=${category}, keyword=${keyword})}"
+                       th:text="${i + 1}">
+                    </a>
                 </li>
-
                 <li th:if="${currentPage < totalPages - 1}" class="page-item">
-                    <a class="page-link" th:href="@{/manager/room/reviews/list(page=${currentPage + 1}, size=10)}">다음</a>
+                    <a class="page-link"
+                       th:href="@{/manager/room/reviews/list(page=${currentPage + 1}, size=10, category=${category}, keyword=${keyword})}">
+                        다음
+                    </a>
                 </li>
             </ul>
         </div>
@@ -118,6 +133,11 @@
     <script>
 
         $(document).ready(function () {
+            // 검색 조건이 있으면 새로고침 시 검색 조건 초기화 후 이동
+            if (window.location.search.includes("category=") && window.location.search.includes("keyword=")) {
+                history.replaceState(null, null, "/manager/room/reviews/list");
+            }
+
             // 리뷰 수정 모달 열기
             $(document).on("click", ".edit-review-btn", function () {
                 $("#editReviewId").val($(this).data("id"));

@@ -2,6 +2,8 @@ package com.ntt.ntt.Controller.RoomReview;
 
 import com.ntt.ntt.DTO.RoomReviewDTO;
 import com.ntt.ntt.Service.RoomReviewService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -21,51 +23,67 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Log4j2
 @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER')")
+@Tag(name = "RoomReviewManagerController", description = "관리자 리뷰 관리 컨트롤러")
 public class RoomReviewManagerController {
 
     private final RoomReviewService roomReviewService;
 
-    // 1. 모든 리뷰 목록 조회
+    /* -----------관리자 페이지----------- */
+
+    @Operation(summary = "모든 리뷰 목록 조회", description = "관리자가 모든 객실 리뷰를 검색 조건과 함께 조회한다.")
     @GetMapping("/list")
-    public String showReviewList(Model model, @RequestParam(defaultValue = "0") int page,
-                                 @RequestParam(defaultValue = "10") int size) {
-        log.info(" 객실 리뷰 목록 페이지 요청 - 페이지: {}, 사이즈: {}", page, size);
+    public String showReviewListForm(
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Model model) {
 
-        Page<RoomReviewDTO> reviews = roomReviewService.getAllReviews(Pageable.ofSize(size).withPage(page));
+        log.info(" 객실 리뷰 목록 요청 - category: {}, keyword: {}", category, keyword);
 
+        // 검색 조건이 있을 경우 검색 수행
+        Page<RoomReviewDTO> reviews;
+        if (category != null && keyword != null && !keyword.trim().isEmpty()) {
+            reviews = roomReviewService.searchReviews(category, keyword, Pageable.ofSize(size).withPage(page));
+        } else {
+            // 검색 조건이 없을 경우 전체 목록 반환
+            reviews = roomReviewService.getAllReviews(Pageable.ofSize(size).withPage(page));
+        }
         model.addAttribute("reviews", reviews);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", reviews.getTotalPages());
+        model.addAttribute("category", category);
+        model.addAttribute("keyword", keyword);
 
         return "manager/room/reviews/list";
     }
 
-    // 모든 리뷰 목록 반환
+    @Operation(summary = "모든 리뷰 목록 데이터 반환", description = "관리자가 모든 객실 리뷰를 JSON 형식으로 조회한다.")
     @GetMapping("/list/data")
-    public ResponseEntity<Page<RoomReviewDTO>> getReviewListData(Pageable pageable) {
+    public ResponseEntity<Page<RoomReviewDTO>> getReviewListDataForm(Pageable pageable) {
         log.info("🔍 객실 리뷰 목록 JSON 요청");
         Page<RoomReviewDTO> reviews = roomReviewService.getAllReviews(pageable);
         return ResponseEntity.ok(reviews);
     }
 
-    // 2. 특정 객실의 리뷰 조회
+    @Operation(summary = "특정 객실의 리뷰 조회", description = "관리자가 특정 객실의 모든 리뷰를 페이징하여 조회한다.")
     @GetMapping("/room/{roomId}")
-    public ResponseEntity<Page<RoomReviewDTO>> getReviewsByRoomId(@PathVariable Integer roomId, Pageable pageable) {
+    public ResponseEntity<Page<RoomReviewDTO>> getReviewsByRoomIdForm(@PathVariable Integer roomId, Pageable pageable) {
         log.info(" 객실 리뷰 조회 요청 - roomId: {}", roomId);
         return ResponseEntity.ok(roomReviewService.getReviewsByRoomId(roomId, pageable.getPageNumber(), pageable.getPageSize()));
     }
 
-    // 3. 특정 회원이 작성한 모든 리뷰 조회
+    @Operation(summary = "특정 회원이 작성한 모든 리뷰 조회", description = "관리자가 특정 회원이 작성한 모든 리뷰를 조회한다.")
     @GetMapping("/member/{memberId}")
-    public ResponseEntity<?> getReviewsByMemberId(@PathVariable Integer memberId) {
+    public ResponseEntity<?> getReviewsByMemberIdForm(@PathVariable Integer memberId) {
         log.info("🔍 회원 리뷰 조회 요청 - memberId: {}", memberId);
         return ResponseEntity.ok(roomReviewService.getReviewsByMemberId(memberId));
     }
 
-    // 4. 리뷰 수정
+    @Operation(summary = "리뷰 수정", description = "관리자가 특정 리뷰를 수정한다.(관리자 권한이 필요)")
     @PutMapping("/update/{reviewId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> updateReview(
+    public ResponseEntity<?> updateReviewProc(
             @PathVariable Integer reviewId,
             @RequestBody RoomReviewDTO reviewDTO) {
 
@@ -86,10 +104,10 @@ public class RoomReviewManagerController {
         }
     }
 
-    // 5. 리뷰 삭제
+    @Operation(summary = "리뷰 삭제", description = "관리자가 특정 리뷰를 삭제한다.(관리자 권한이 필요)")
     @GetMapping("/delete/{reviewId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> deleteReview(@PathVariable Integer reviewId) {
+    public ResponseEntity<?> deleteReviewForm(@PathVariable Integer reviewId) {
         log.info(" 리뷰 삭제 요청 (ADMIN) - reviewId: {}", reviewId);
 
         try {

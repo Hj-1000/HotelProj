@@ -130,6 +130,52 @@ public class RoomReviewService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public Page<RoomReviewDTO> searchReviews(String category, String keyword, Pageable pageable) {
+        log.info("🔍 리뷰 검색 요청 - category: {}, keyword: {}", category, keyword);
+
+        // 검색어가 없으면 전체 조회 반환
+        if (category == null || keyword == null || keyword.isEmpty()) {
+            return roomReviewRepository.findAll(pageable).map(RoomReviewDTO::fromEntity);
+        }
+
+        // 카테고리에 따라 검색
+        switch (category) {
+            case "reviewId":
+                try {
+                    Integer reviewId = Integer.parseInt(keyword);
+                    return roomReviewRepository.findByReviewId(reviewId, pageable).map(RoomReviewDTO::fromEntity);
+                } catch (NumberFormatException e) {
+                    log.warn(" 리뷰 ID 검색 실패 - 숫자 변환 오류: {}", keyword);
+                    return Page.empty();
+                }
+            case "memberId":
+                try {
+                    Integer memberId = Integer.parseInt(keyword);
+                    return roomReviewRepository.findByMember_MemberId(memberId, pageable).map(RoomReviewDTO::fromEntity);
+                } catch (NumberFormatException e) {
+                    log.warn(" 회원 ID 검색 실패 - 숫자 변환 오류: {}", keyword);
+                    return Page.empty();
+                }
+            case "memberName":
+                return roomReviewRepository.findByMember_MemberNameContainingIgnoreCase(keyword, pageable)
+                        .map(RoomReviewDTO::fromEntity);
+            case "roomId":
+                try {
+                    Integer roomId = Integer.parseInt(keyword);
+                    return roomReviewRepository.findByRoom_RoomIdOrderByReviewDateDesc(roomId, pageable)
+                            .map(RoomReviewDTO::fromEntity);
+                } catch (NumberFormatException e) {
+                    log.warn(" 객실 ID 검색 실패 - 숫자 변환 오류: {}", keyword);
+                    return Page.empty();
+                }
+            default:
+                log.warn(" 잘못된 검색 카테고리: {}", category);
+                return Page.empty();
+        }
+    }
+
+
     // 7. 객실 평균 평점 조회
     @Transactional(readOnly = true)
     public Double getAverageRatingByRoomId(Integer roomId) {

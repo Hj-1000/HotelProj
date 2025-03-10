@@ -69,10 +69,9 @@ h1 {
 
 .card {
     border-radius: 10px;
-    padding: 20px;
+    padding: 30px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     background: #fff;
-    margin-bottom: 2rem;
 }
 
 .table th, .table td {
@@ -80,6 +79,13 @@ h1 {
     vertical-align: middle;
 }
 
+/* 검색바 */
+
+.search-bar select, .search-bar input, .search-bar button {
+    padding: 8px 12px;
+    font-size: 16px;
+    margin-bottom: 4px;
+}
 
 /* 공통 페이징 스타일 */
 .pagination {
