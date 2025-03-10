@@ -40,4 +40,13 @@ public interface RoomReviewRepository extends JpaRepository<RoomReview, Integer>
     @Query("SELECT rr FROM RoomReview rr JOIN rr.room r WHERE r.hotelId.hotelId = :hotelId ORDER BY rr.reviewDate DESC")
     Page<RoomReview> findByHotelIdOrderByReviewDateDesc(@Param("hotelId") Integer hotelId, Pageable pageable);
 
+    // 특정 리뷰 ID 검색
+    Page<RoomReview> findByReviewId(Integer reviewId, Pageable pageable);
+
+    // 특정 회원 ID로 리뷰 검색
+    Page<RoomReview> findByMember_MemberId(Integer memberId, Pageable pageable);
+
+    // 특정 회원 이름으로 리뷰 검색
+    Page<RoomReview> findByMember_MemberNameContainingIgnoreCase(String memberName, Pageable pageable);
+
 }

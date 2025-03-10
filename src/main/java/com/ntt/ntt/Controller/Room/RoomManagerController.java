@@ -9,6 +9,7 @@ import com.ntt.ntt.Repository.ReservationRepository;
 import com.ntt.ntt.Service.ImageService;
 import com.ntt.ntt.Service.RoomService;
 import com.ntt.ntt.Util.PaginationUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -33,7 +34,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/manager/room")
 @RequiredArgsConstructor
 @Log4j2
-@Tag(name = "roomManagerController", description = "관리자 객실 관리 컨트롤러")
+@Tag(name = "RoomManagerController", description = "관리자 객실 관리 컨트롤러")
 public class RoomManagerController {
 
     private final RoomService roomService;
@@ -41,10 +42,9 @@ public class RoomManagerController {
     private final ImageRepository imageRepository;
     private final ImageService imageService;
 
-
     /* -----------관리자 페이지----------- */
 
-    // 1. Room 등록 페이지로 이동
+    @Operation(summary = "객실 등록 페이지", description = "관리자가 객실을 등록할 수 있는 페이지로 이동한다.")
     @GetMapping("/register")
     public String registerRoomForm(Model model) {
         //빈 RoomDTO 전달
@@ -59,7 +59,7 @@ public class RoomManagerController {
         return "manager/room/register";
     }
 
-    // Room 등록
+    @Operation(summary = "객실 등록", description = "관리자가 새로운 객실을 등록한다. 객실 이미지와 배너 이미지는 필수이다.")
     @PostMapping("/register")
     public String registerRoomProc(@ModelAttribute RoomDTO roomDTO,
                                    @RequestParam("imageFile") List<MultipartFile> imageFile,
@@ -86,7 +86,7 @@ public class RoomManagerController {
         return "redirect:/manager/room/list";
     }
 
-    // 2. 모든 객실 조회
+    @Operation(summary = "객실 목록 조회", description = "관리자가 모든 객실을 조회할 수 있는 페이지를 반환한다.")
     @GetMapping("/list")
     public String listForm(
             @RequestParam(value = "page", defaultValue = "0") int page,
@@ -182,7 +182,7 @@ public class RoomManagerController {
         return "manager/room/list";
     }
 
-    // 특정 룸 조회
+    @Operation(summary = "객실 상세 조회", description = "특정 객실의 상세 정보를 조회한다.")
     @GetMapping("/{roomId}")
     public String readRoomForm(@PathVariable Integer roomId, Model model) {
         log.info("Fetching details for roomId: {}", roomId);
@@ -205,7 +205,7 @@ public class RoomManagerController {
         }
     }
 
-    // 3. Room 수정 페이지로 이동
+    @Operation(summary = "객실 수정 페이지", description = "관리자가 객실 정보를 수정할 수 있는 페이지를 반환한다.")
     @GetMapping("/update/{roomId}")
     public String updateRoomForm(@PathVariable Integer roomId, Model model) {
         RoomDTO room = roomService.readRoom(roomId);
@@ -228,7 +228,7 @@ public class RoomManagerController {
         return "manager/room/update";
     }
 
-    // 4. Room 수정
+    @Operation(summary = "객실 정보 수정", description = "관리자가 기존 객실 정보를 수정한다.")
     @PostMapping("/update/{roomId}")
     public String updateRoomProc(@PathVariable Integer roomId,
                                  @ModelAttribute RoomDTO roomDTO,
@@ -371,7 +371,7 @@ public class RoomManagerController {
     }
 
 
-    // 5. Room 삭제
+    @Operation(summary = "객실 삭제", description = "관리자가 특정 객실을 삭제한다.")
     @GetMapping("/delete/{roomId}")
     public String deleteRoomForm(@PathVariable Integer roomId, RedirectAttributes redirectAttributes) {
         try {
@@ -382,5 +382,4 @@ public class RoomManagerController {
         }
         return "redirect:/manager/room/list";
     }
-
 }

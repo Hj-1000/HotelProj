@@ -112,14 +112,15 @@
                     <div class="room-item-box">
                         <!-- 객실 이미지 -->
                         <div class="room-image col-md-4">
-                            <img class=" w-100"
+                            <img class="w-100"
                                  th:src="@{'/upload/' + ${#strings.replace(image.imagePath, 'c:/data/', '')}}"
                                  alt="객실 상세 이미지"/>
                         </div>
                         <!-- 객실 설명 -->
-                        <div class="col-md-8">
+                        <div class="room-text col-md-8">
                             <h2 class="room-details-title" th:text="${image.imageTitle} ?: '이미지 제목 없음'"></h2>
-                            <p class="room-details-description" th:utext="${#strings.replace(image.imageDescription, '\n', '<br/>') ?: '설명이 없습니다.'}"></p>
+                            <p class="room-details-description"
+                               th:utext="${#strings.replace(image.imageDescription, '\n', '<br/>') ?: '설명이 없습니다.'}"></p>
                         </div>
                     </div>
                     <!-- 구분선 -->
@@ -267,7 +268,13 @@
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         entry.target.classList.add("active");
-                        // 한 번만 실행되도록 옵저버 해제
+
+                        setTimeout(() => {
+                            const textElement = entry.target.querySelector(".room-text");
+                            if (textElement) {
+                                textElement.classList.add("active");
+                            }
+                        }, 500);
                         observer.unobserve(entry.target);
                     }
                 });
@@ -865,7 +872,7 @@
             const loadMoreButton = document.createElement("button");
 
             let currentPage = 0;
-            const pageSize = 5;
+            const pageSize = 10;
 
             loadMoreButton.textContent = "More";
             loadMoreButton.classList.add("mt-3", "real-more");

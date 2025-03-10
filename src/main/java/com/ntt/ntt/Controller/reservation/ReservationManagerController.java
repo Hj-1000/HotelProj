@@ -9,6 +9,7 @@ import com.ntt.ntt.Repository.ReservationRepository;
 import com.ntt.ntt.Service.ReservationService;
 import com.ntt.ntt.Service.RoomService;
 import com.ntt.ntt.Util.PaginationUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -36,17 +37,18 @@ import java.util.Optional;
 @RequestMapping("/manager/room/reservation")
 @RequiredArgsConstructor
 @Log4j2
-@Tag(name = "reservationManagerController", description = "관리자 예약 관리 컨트롤러")
+@Tag(name = "ReservationManagerController", description = "관리자 예약 관리 컨트롤러")
 public class ReservationManagerController {
 
     private final ReservationService reservationService;
     private final RoomService roomService;
     private final MemberRepository memberRepository;
     private final ReservationRepository reservationRepository;
-
     private final PaginationUtil paginationUtil;
 
-    // 1. 객실 예약 등록
+    /* -----------관리자 페이지----------- */
+
+    @Operation(summary = "객실 예약 등록", description = "관리자가 특정 객실에 대해 강제로 예약을 등록하는 API")
     @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER')")
     @PostMapping("/register")
     public String registerReservationProc(@RequestParam("roomId") Integer roomId,
@@ -66,7 +68,7 @@ public class ReservationManagerController {
         return "redirect:/manager/room/reservation/list";
     }
 
-    // 2. 방 목록 가져오기
+    @Operation(summary = "객실 예약 목록 조회", description = "관리자가 등록된 모든 예약 목록을 조회하는 페이지.")
     @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER')")
     @GetMapping("/list")
     public String listReservationForm(
@@ -158,7 +160,7 @@ public class ReservationManagerController {
         return "manager/room/reservation/list";
     }
 
-    // 3. 특정 방의 예약 정보 조회
+    @Operation(summary = "특정 객실 예약 정보 조회", description = "관리자가 특정 객실의 예약 정보를 확인하는 API.")
     @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER')")
     @GetMapping("/read")
     public String readReservationForm(@RequestParam("roomId") Integer roomId, Model model) {
@@ -180,7 +182,7 @@ public class ReservationManagerController {
         return "manager/room/reservation/list";
     }
 
-    // 4. 예약 수정
+    @Operation(summary = "예약 정보 수정", description = "관리자가 특정 예약 정보를 수정하는 API.")
     @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER')")
     @PostMapping("/update")
     public String updateReservationProc(
@@ -239,8 +241,7 @@ public class ReservationManagerController {
         }
     }
 
-
-    // 5. 예약 삭제
+    @Operation(summary = "예약 삭제", description = "관리자가 특정 예약을 삭제하는 API.")
     @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER')")
     @PostMapping("/delete")
     public String deleteReservationProc(@RequestParam("reservationId") Integer reservationId, RedirectAttributes redirectAttributes) {
@@ -269,8 +270,7 @@ public class ReservationManagerController {
         return "redirect:/manager/room/reservation/list";
     }
 
-
-    // 6. 방 강제 사용 중지
+    @Operation(summary = "객실 강제 사용 중지", description = "관리자가 특정 객실을 강제로 사용 중지하는 API.")
     @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER')")
     @PostMapping("/disableRoom")
     public String disableRoomProc(@RequestParam("roomId") Integer roomId) {
@@ -278,7 +278,7 @@ public class ReservationManagerController {
         return "redirect:/manager/room/reservation/list?success=disable";
     }
 
-    // 7. 회원 정보 조회 API
+    @Operation(summary = "회원 정보 조회", description = "관리자가 특정 회원의 정보를 조회하는 API.")
     @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER')")
     @GetMapping("/member/details")
     @ResponseBody

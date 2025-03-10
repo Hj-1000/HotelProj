@@ -306,7 +306,11 @@
                     if (data.success) {
                       alert(data.message);
 
-                      reloadReservationList();
+                      //  삭제된 행을 목록에서 제거
+                      rowElement.remove();
+
+                      //  남은 예약 개수 확인 후 목록이 비었으면 "예약 내역 없음" 메시지 표시
+                      checkAndUpdateReservationList();
                     } else {
                       throw new Error(data.message);
                     }
@@ -317,6 +321,22 @@
                   });
         });
       });
+
+      //  예약 개수 확인 후 테이블 업데이트
+      function checkAndUpdateReservationList() {
+        const tableBody = document.querySelector("tbody"); // 예약 목록 테이블
+        const noDataMessage = document.querySelector(".alert-warning"); // "예약 내역 없음" 메시지
+
+        if (!tableBody || !noDataMessage) return;
+
+        const remainingRows = tableBody.querySelectorAll("tr").length;
+
+        if (remainingRows === 0) {
+          // 🚀 테이블이 비었을 때 "예약 내역 없음" 메시지 표시
+          tableBody.innerHTML = ""; // 테이블 내용 제거
+          noDataMessage.style.display = "block"; // 메시지 표시
+        }
+      }
 
       //  삭제 후 현재 페이지 목록을 다시 불러오는 함수 추가
       function reloadReservationList() {

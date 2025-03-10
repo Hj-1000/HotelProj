@@ -4,6 +4,8 @@ import com.ntt.ntt.DTO.RoomDTO;
 import com.ntt.ntt.DTO.RoomReviewDTO;
 import com.ntt.ntt.Service.RoomReviewService;
 import com.ntt.ntt.Service.RoomService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -22,14 +24,17 @@ import java.util.Map;
 @RequestMapping("/reviews")
 @RequiredArgsConstructor
 @Log4j2
+@Tag(name = "RoomReviewController", description = "유저 리뷰 관리 컨트롤러")
 public class RoomReviewController {
 
     private final RoomReviewService roomReviewService;
     private final RoomService roomService;
 
-    //  1. 리뷰 등록
+    /* -----------유저 페이지----------- */
+
+    @Operation(summary = "리뷰 등록", description = "유저가 특정 객실에 대한 리뷰를 등록한다.")
     @PostMapping("/register")
-    public ResponseEntity<?> registerReview(@RequestBody RoomReviewDTO reviewDTO) {
+    public ResponseEntity<?> registerReviewProc(@RequestBody RoomReviewDTO reviewDTO) {
         log.info("리뷰 등록 요청: {}", reviewDTO);
         try {
             RoomReviewDTO savedReview = roomReviewService.registerReview(reviewDTO);
@@ -50,10 +55,9 @@ public class RoomReviewController {
         }
     }
 
-
-    //  2. 특정 리뷰 조회
+    @Operation(summary = "리뷰 조회", description = "리뷰 ID를 기반으로 특정 리뷰를 조회한다.")
     @GetMapping("/{reviewId}")
-    public ResponseEntity<?> getReviewById(@PathVariable Integer reviewId) {
+    public ResponseEntity<?> getReviewByIdForm(@PathVariable Integer reviewId) {
         log.info("리뷰 조회 요청: reviewId={}", reviewId);
 
         try {
@@ -72,9 +76,9 @@ public class RoomReviewController {
         }
     }
 
-    //  3. 특정 객실의 모든 리뷰 조회
+    @Operation(summary = "객실 리뷰 조회", description = "특정 객실의 모든 리뷰를 페이징 처리하여 조회한다.")
     @GetMapping("/room/{roomId}")
-    public ResponseEntity<?> getReviewsByRoomId(
+    public ResponseEntity<?> getReviewsByRoomIdForm(
             @PathVariable Integer roomId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -84,33 +88,33 @@ public class RoomReviewController {
         return ResponseEntity.ok(reviewPage);
     }
 
-    //  4. 특정 객실의 최근 3개 리뷰 조회
+    @Operation(summary = "최근 객실 리뷰 조회", description = "특정 객실의 최근 3개 리뷰를 조회한다.")
     @GetMapping("/room/{roomId}/recent")
-    public ResponseEntity<List<RoomReviewDTO>> getRecentReviewsByRoomId(@PathVariable Integer roomId) {
+    public ResponseEntity<List<RoomReviewDTO>> getRecentReviewsByRoomIdForm(@PathVariable Integer roomId) {
         log.info("객실 최근 3개 리뷰 조회 요청: roomId={}", roomId);
         List<RoomReviewDTO> reviews = roomReviewService.getRecentReviewsByRoomId(roomId);
         return ResponseEntity.ok(reviews);
     }
 
-    //  5. 특정 회원이 작성한 리뷰 조회
+    @Operation(summary = "회원 리뷰 조회", description = "특정 회원이 작성한 모든 리뷰를 조회한다.")
     @GetMapping("/member/{memberId}")
-    public ResponseEntity<List<RoomReviewDTO>> getReviewsByMemberId(@PathVariable Integer memberId) {
+    public ResponseEntity<List<RoomReviewDTO>> getReviewsByMemberIdForm(@PathVariable Integer memberId) {
         log.info("회원 리뷰 조회 요청: memberId={}", memberId);
         List<RoomReviewDTO> reviews = roomReviewService.getReviewsByMemberId(memberId);
         return ResponseEntity.ok(reviews);
     }
 
-    //  6. 객실 평균 평점 조회
+    @Operation(summary = "객실 평균 평점 조회", description = "특정 객실의 평균 평점을 조회한다.")
     @GetMapping("/room/{roomId}/rating")
-    public ResponseEntity<Double> getAverageRatingByRoomId(@PathVariable Integer roomId) {
+    public ResponseEntity<Double> getAverageRatingByRoomIdForm(@PathVariable Integer roomId) {
         log.info("객실 평균 평점 조회 요청: roomId={}", roomId);
         Double averageRating = roomReviewService.getAverageRatingByRoomId(roomId);
         return ResponseEntity.ok(averageRating);
     }
 
-    //  7. 리뷰 수정
+    @Operation(summary = "리뷰 수정", description = "유저가 자신이 작성한 리뷰를 수정한다.")
     @PutMapping("/update/{reviewId}")
-    @PreAuthorize("@roomReviewService.isReviewOwner(#reviewId, authentication.principal.username)")
+    @PreAuthorize("@roomReviewService.isReviewOwnerProc(#reviewId, authentication.principal.username)")
     public ResponseEntity<?> updateReview(
             @PathVariable Integer reviewId,
             @RequestBody RoomReviewDTO reviewDTO) {
@@ -131,9 +135,9 @@ public class RoomReviewController {
         }
     }
 
-    //  8. 리뷰 삭제
+    @Operation(summary = "리뷰 삭제", description = "유저가 자신이 작성한 리뷰를 삭제한다.")
     @PostMapping("/delete/{reviewId}")
-    @PreAuthorize("@roomReviewService.isReviewOwner(#reviewId, authentication.principal.username)")
+    @PreAuthorize("@roomReviewService.isReviewOwnerProc(#reviewId, authentication.principal.username)")
     public ResponseEntity<?> deleteReview(@PathVariable Integer reviewId) {
         log.info("리뷰 삭제 요청: reviewId={}", reviewId);
 
@@ -146,9 +150,9 @@ public class RoomReviewController {
         }
     }
 
-    //  9. 객실 상세보기
+    @Operation(summary = "객실 상세보기", description = "객실 상세보기 페이지를 반환하며, 해당 객실의 리뷰 목록도 함께 제공한다.")
     @GetMapping("/room/detail/{roomId}")
-    public String getRoomDetail(@PathVariable Integer roomId, Model model) {
+    public String getRoomDetailForm(@PathVariable Integer roomId, Model model) {
         log.info("🔍 객실 상세보기 요청 - roomId: {}", roomId);
 
         RoomDTO room = roomService.readRoom(roomId);
@@ -172,15 +176,14 @@ public class RoomReviewController {
         return "detail";
     }
 
-    //  10. 특정 호텔의 모든 리뷰 조회
+    @Operation(summary = "호텔 리뷰 조회", description = "특정 호텔의 모든 리뷰를 조회한다.")
     @GetMapping("/hotel/{hotelId}")
-    public ResponseEntity<?> getReviewsByHotelId( @PathVariable Integer hotelId,
-                                                  @RequestParam(defaultValue = "0") int page,
-                                                  @RequestParam(defaultValue = "10") int size) {
+    public ResponseEntity<?> getReviewsByHotelIdForm( @PathVariable Integer hotelId,
+                                                      @RequestParam(defaultValue = "0") int page,
+                                                      @RequestParam(defaultValue = "10") int size) {
 
         log.info("객실 리뷰 조회 요청: roomId={}, page={}, size={}", hotelId, page, size);
         Page<RoomReviewDTO> reviewPage = roomReviewService.getReviewsByHotelId(hotelId, page, size);
         return ResponseEntity.ok(reviewPage);
     }
-
 }

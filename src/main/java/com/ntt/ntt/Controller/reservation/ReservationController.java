@@ -36,7 +36,7 @@ import java.util.Optional;
 @Controller
 @RequiredArgsConstructor
 @Log4j2
-@Tag(name = "reservationController", description = "유저 예약 관리 컨트롤러")
+@Tag(name = "ReservationController", description = "유저 예약 관리 컨트롤러")
 public class ReservationController {
 
     private final ReservationService reservationService;
@@ -45,10 +45,12 @@ public class ReservationController {
     private final RoomRepository roomRepository;
     private final ReservationRepository reservationRepository;
 
+    /* -----------유저 페이지----------- */
+
     // 날짜 형식 지정
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
 
-
+    @Operation(summary = "호텔 객실 예약", description = "유저가 호텔 객실을 예약하는 API")
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/reservation/register")
     public ResponseEntity<?> registerReservationProc(@AuthenticationPrincipal UserDetails userDetails,
@@ -142,6 +144,7 @@ public class ReservationController {
         return "myPage/reservationList";
     }
 
+    @Operation(summary = "객실 예약된 날짜 조회", description = "특정 객실의 예약된 날짜를 조회하는 API")
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/reservation/booked-dates/{roomId}")
     public ResponseEntity<?> getBookedDatesForm(@PathVariable Integer roomId) {
@@ -158,7 +161,7 @@ public class ReservationController {
         return ResponseEntity.ok(bookedDates);
     }
 
-    //  고객예약 취소 요청
+    @Operation(summary = "유저 예약 취소 요청", description = "유저가 자신의 예약을 취소 요청하는 API")
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/myPage/reservation/cancel")
     public ResponseEntity<?> requestCancelReservationProc(@AuthenticationPrincipal UserDetails userDetails,
@@ -178,7 +181,7 @@ public class ReservationController {
         }
     }
 
-    // 관리자가 취소 요청을 승인
+    @Operation(summary = "관리자 예약 취소 승인", description = "관리자가 유저의 예약 취소 요청을 승인하는 API")
     @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER')")
     @PostMapping("/admin/reservation/cancel")
     public ResponseEntity<?> approveCancelReservationProc(@RequestParam Integer reservationId) {
@@ -190,7 +193,7 @@ public class ReservationController {
         }
     }
 
-    // 유저가 직접 "취소 완료"된 예약을 삭제
+    @Operation(summary = "유저 예약 삭제", description = "유저가 본인의 취소된 예약을 삭제하는 API")
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/myPage/reservation/delete")
     public ResponseEntity<Map<String, Object>> deleteReservationProc(
