@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -314,69 +315,6 @@ public class HotelService {
     }
 
 
-
-
-    //본사별로
-    /*public Page<HotelDTO> listByCompany(Pageable page, String keyword, Integer keyword1, String searchType, Integer companyId) {
-        // 1. 페이지 정보 재가공
-        int currentPage = page.getPageNumber(); // 기존 페이지 번호 그대로 사용
-        int pageSize = page.getPageSize(); // 페이지 사이즈 그대로 사용
-        Pageable pageable = PageRequest.of(
-                currentPage, pageSize,
-                Sort.by(Sort.Direction.ASC, "hotelId") // 최신순으로 정렬
-        );
-
-        // 2. 검색타입에 따른 호텔 조회
-        Page<Hotel> hotels = null;
-
-        if (companyId != null) {
-            // companyId가 있을 경우 해당 회사의 호텔만 조회
-            if (keyword != null && !keyword.isEmpty()) {
-                String keywordLike = "%" + keyword + "%";  // LIKE 조건을 위한 검색어 처리
-
-                // 검색 타입에 따라 조건을 추가
-                if ("name".equals(searchType)) {
-                    // 호텔명 검색
-                    hotels = hotelRepository.findByCompany_CompanyIdAndHotelNameLike(companyId, keywordLike, pageable);
-                } else if ("location".equals(searchType)) {
-                    // 지역 검색
-                    hotels = hotelRepository.findByCompany_CompanyIdAndHotelLocationLike(companyId, keywordLike, pageable);
-                } else if ("address".equals(searchType)) {
-                    // 주소 검색
-                    hotels = hotelRepository.findByCompany_CompanyIdAndHotelAddressLike(companyId, keywordLike, pageable);
-                } else if ("rating".equals(searchType)) {
-                    // 별점 검색
-                    hotels = hotelRepository.findByCompany_CompanyIdAndHotelRating(companyId, keyword1, pageable);
-                }
-            } else {
-                // 검색어가 없으면 해당 companyId에 속한 모든 호텔 조회
-                hotels = hotelRepository.findByCompany_CompanyId(companyId, pageable);
-            }
-        }
-
-        // 3. Hotel -> HotelDTO 변환
-        // Hotel -> HotelDTO 변환
-        Page<HotelDTO> hotelDTOS = hotels.map(entity -> {
-            HotelDTO hotelDTO = modelMapper.map(entity, HotelDTO.class);
-
-            // 호텔에 대한 이미지 리스트 가져오기
-            List<ImageDTO> imgDTOList = imageRepository.findByHotel_HotelId(entity.getHotelId())
-                    .stream()
-                    .map(imagefile -> {
-                        imagefile.setImagePath(imagefile.getImagePath().replace("c:/data/", "")); // 경로 수정
-                        return modelMapper.map(imagefile, ImageDTO.class);
-                    })
-                    .collect(Collectors.toList());
-
-            hotelDTO.setHotelImgDTOList(imgDTOList); // 이미지 DTO 리스트 설정
-            return hotelDTO;
-        });
-
-        return hotelDTOS;
-    }*/
-
-
-
     //일반회원용 호텔 목록
     @Transactional(readOnly = true)
     public Page<HotelDTO> list(Pageable page, String keyword, String searchType, boolean exactMatch) {
@@ -425,7 +363,12 @@ public class HotelService {
                     .min()  // 최솟값 찾기
                     .orElse(0); // 방이 없다면 기본값 0
 
-            hotelDTO.setCheapestRoomPrice(cheapestRoomPrice); // 가장 저렴한 가격 설정
+            // 천 단위로 콤마 추가한 문자열로 변환
+            DecimalFormat decimalFormat = new DecimalFormat("#,###");
+            String formattedPrice = decimalFormat.format(cheapestRoomPrice);
+
+            // 결과를 hotelDTO에 설정
+            hotelDTO.setCheapestRoomPrice(formattedPrice); // String으로 된 가격 설정
 
             return hotelDTO;
         });
@@ -434,10 +377,12 @@ public class HotelService {
     }
 
 
-    // 추천 호텔 목록 가져오기
+    // 추천 호텔 목록 가져오기(별점높은순)
     public List<HotelDTO> listRecommendedHotels() {
-        Pageable pageable = PageRequest.of(0, 4, Sort.by(Sort.Direction.DESC, "hotelId"));
-//        Page<Hotel> hotelPage = hotelRepository.findByHotelRating(true, pageable);
+        // hotelRating을 기준으로 내림차순 정렬
+        Pageable pageable = PageRequest.of(0, 4, Sort.by(Sort.Direction.DESC, "hotelRating").and(Sort.by(Sort.Direction.DESC, "hotelId")));
+
+        // hotelRepository에서 페이지를 가져오기
         Page<Hotel> hotelPage = hotelRepository.findAll(pageable);
 
         List<HotelDTO> hotelDTOS = hotelPage.stream()
@@ -452,6 +397,20 @@ public class HotelService {
                             })
                             .collect(Collectors.toList());
                     hotelDTO.setHotelImgDTOList(imagesDTOList);
+
+                    // 가장 저렴한 roomPrice 찾기
+                    Integer cheapestRoomPrice = hotel.getRooms().stream()
+                            .mapToInt(Room::getRoomPrice)  // roomPrice를 int로 추출
+                            .min()  // 최솟값 찾기
+                            .orElse(0); // 방이 없다면 기본값 0
+
+                    // 천 단위로 콤마 추가한 문자열로 변환
+                    DecimalFormat decimalFormat = new DecimalFormat("#,###");
+                    String formattedPrice = decimalFormat.format(cheapestRoomPrice);
+
+                    // 결과를 hotelDTO에 설정
+                    hotelDTO.setCheapestRoomPrice(formattedPrice); // String으로 된 가격 설정
+
                     return hotelDTO;
                 })
                 .collect(Collectors.toList());
@@ -460,43 +419,6 @@ public class HotelService {
     }
 
 
-//    public Page<HotelDTO> list(Pageable page, String keyword, String searchType, boolean exactMatch) {
-//
-//        int currentPage = page.getPageNumber();  // Page.getPageNumber()는 0부터 시작
-//        int pageSize = 9; // 한 페이지에 9개씩 표시
-//        Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.DESC, "hotelId"));
-//
-//        Page<Hotel> hotels = null;
-//
-//        if (keyword != null && !keyword.isEmpty()) {
-//            if ("name".equals(searchType)) {
-//                // 호텔명이 포함된 경우
-//                hotels = hotelRepository.findByHotelNameLike("%" + keyword + "%", pageable);
-//            } else if ("location".equals(searchType)) {
-//                // 정확히 일치하는 location 검색
-//                if (exactMatch) {
-//                    hotels = hotelRepository.findByHotelLocationEquals(keyword, pageable);
-//                } else {
-//                    // location에서 %가 포함되도록
-//                    hotels = hotelRepository.findByHotelLocationLike("%" + keyword + "%", pageable);
-//                }
-//            } else if ("address".equals(searchType)) {
-//                // 주소 검색
-//                hotels = hotelRepository.findByHotelAddressLike("%" + keyword + "%", pageable);
-//            } else if ("rating".equals(searchType)) {
-//                // 별점 검색
-//                hotels = hotelRepository.findByHotelRating(Integer.parseInt(keyword), pageable);
-//            }
-//        } else {
-//            // 검색어가 없으면 모든 호텔 리스트를 조회
-//            hotels = hotelRepository.findAll(pageable);
-//        }
-//
-//        // Hotel -> HotelDTO 변환
-//        Page<HotelDTO> hotelDTOS = hotels.map(entity -> modelMapper.map(entity, HotelDTO.class));
-//
-//        return hotelDTOS;
-//    }
 
 
     //개별보기
@@ -509,21 +431,26 @@ public class HotelService {
         }
 
         // hotelId를 통해 호텔 정보 불러오기
-        Optional<Hotel> hotel = hotelRepository.findById(hotelId);
-        if (hotel.isEmpty()) {
-            throw new IllegalArgumentException("호텔 정보를 찾을 수 없습니다.");
-        }
+        Hotel hotel = hotelRepository.findById(hotelId)
+                .orElseThrow(() -> new IllegalArgumentException("호텔 정보를 찾을 수 없습니다."));
 
-        HotelDTO hotelDTO = modelMapper.map(hotel.get(), HotelDTO.class);
+        // Hotel → HotelDTO 변환
+        HotelDTO hotelDTO = modelMapper.map(hotel, HotelDTO.class);
+
+        // 🔹 memberName 추가 (hotel.getMember()가 null이 아닐 경우)
+        if (hotel.getMember() != null) {
+            hotelDTO.setMemberName(hotel.getMember().getMemberName());
+        }
 
         // 객실 리뷰 개수 계산 (DB에서)
         Integer roomReviewCount = roomReviewRepository.countReviewsByHotelId(hotelId);
-        hotelDTO.setRoomReviewCount(roomReviewCount);  // 호텔 DTO에 리뷰 개수 설정
+        hotelDTO.setRoomReviewCount(roomReviewCount); // 호텔 DTO에 리뷰 개수 설정
 
-        // 이미지 경로에서 c:/data/ 제거 코드
+        // 이미지 경로에서 c:/data/ 제거
         List<ImageDTO> imgDTOList = imageRepository.findByHotel_HotelId(hotelDTO.getHotelId())
-                .stream().map(imagefile -> {
-                    // 여기서 이미지 경로를 상대 경로로 변환
+                .stream()
+                .map(imagefile -> {
+                    // 이미지 경로를 상대 경로로 변환
                     imagefile.setImagePath(imagefile.getImagePath().replace("c:/data/", ""));
                     return modelMapper.map(imagefile, ImageDTO.class);
                 })
@@ -533,6 +460,7 @@ public class HotelService {
 
         return hotelDTO;
     }
+
 
 
     // hotelId에 맞는 방들을 가져오는 메서드
@@ -570,17 +498,6 @@ public class HotelService {
         return roomDTOS;
     }
 
-//    public Page<RoomDTO> getRoomsByHotelId(Integer hotelId, Pageable pageable) {
-//        // 호텔 ID에 맞는 Room 데이터 조회 (페이징 처리)
-//        Page<Room> roomsPage = roomRepository.findByHotelId_HotelId(hotelId, pageable);
-//
-//        // 각 Room 객체를 RoomDTO로 변환하여 리스트에 추가
-//        List<RoomDTO> roomDTOs = roomsPage.getContent().stream()
-//                .map(room -> modelMapper.map(room, RoomDTO.class))
-//                .collect(Collectors.toList());
-//
-//        return new PageImpl<>(roomDTOs, pageable, roomsPage.getTotalElements());
-//    }
 
 
 

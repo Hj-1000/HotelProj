@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.extern.log4j.Log4j2;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -26,5 +27,7 @@ public class LikeDTO {
     private HotelDTO hotelDTO;
 
     private List<LikeDTO> likeDTOList;
+
+    private LocalDateTime regDate; // 등록 내림차순으로 정렬위하여
 
 }
