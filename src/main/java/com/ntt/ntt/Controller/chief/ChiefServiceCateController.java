@@ -5,6 +5,7 @@ import com.ntt.ntt.DTO.ServiceCateDTO;
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Service.MemberService;
 import com.ntt.ntt.Service.ServiceCateService;
+import com.ntt.ntt.Service.hotel.HotelService;
 import com.ntt.ntt.Util.PaginationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.persistence.EntityNotFoundException;
@@ -33,17 +34,21 @@ import java.util.Map;
 @Log4j2
 public class ChiefServiceCateController {
     private final ServiceCateService serviceCateService;
+    private final HotelService hotelService;
     private final PaginationUtil paginationUtil;
     private final MemberService memberService;
 
     @Operation(summary = "등록폼", description = "등록폼 페이지로 이동한다.")
     @GetMapping("/register")
-    public String registerForm(@RequestParam(required = false) Integer hotelId, Model model){
+    public String registerForm(@RequestParam(required = false) Integer hotelId, Authentication authentication, Model model){
         //검증처리가 필요하면 빈 CateDTO를 생성해서 전달한다.
+
+        Integer memberId = getLoggedInMemberId(authentication);
+
         model.addAttribute("serviceCateDTO", new ServiceCateDTO());
 
         //hotelDTO hotelName 전달하기
-        List<HotelDTO> hotelDTOS = serviceCateService.getAllHotel();
+        List<HotelDTO> hotelDTOS = serviceCateService.getChiefListByHotel(memberId);
         model.addAttribute("selectedHotelId", hotelId);
         model.addAttribute("hotelDTOS", hotelDTOS);
         model.addAttribute("hotelDTO", new HotelDTO());
@@ -96,7 +101,7 @@ public class ChiefServiceCateController {
         int endPage = Math.min(startPage + 9, totalPages); // 최대 페이지 수를 넘기지 않도록
 
         // hotelDTO hotelName 전달하기
-        List<HotelDTO> hotelDTOS = serviceCateService.getAllHotel();
+        List<HotelDTO> hotelDTOS = serviceCateService.getChiefListByHotel(memberId);
 
         // 페이지 정보 업데이트 (동적으로 계산된 startPage, endPage)
         pageInfo.put("startPage", startPage);

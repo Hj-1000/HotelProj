@@ -9,6 +9,7 @@ import com.ntt.ntt.Util.PaginationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -40,12 +41,14 @@ public class ServiceCateManagerController {
 
     @Operation(summary = "등록폼", description = "등록폼 페이지로 이동한다.")
     @GetMapping("/register")
-    public String registerForm(@RequestParam(required = false) Integer hotelId, Model model){
+    public String registerForm(@RequestParam(required = false) Integer hotelId, Authentication authentication, Model model){
         //검증처리가 필요하면 빈 CateDTO를 생성해서 전달한다.
+
+        Integer memberId = getLoggedInMemberId(authentication);
         model.addAttribute("serviceCateDTO", new ServiceCateDTO());
 
         //hotelDTO hotelName 전달하기
-        List<HotelDTO> hotelDTOS = serviceCateService.getAllHotel();
+        List<HotelDTO> hotelDTOS = serviceCateService.getManagerListByHotel(memberId);
         model.addAttribute("selectedHotelId", hotelId);
         model.addAttribute("hotelDTOS", hotelDTOS);
         model.addAttribute("hotelDTO", new HotelDTO());
@@ -57,12 +60,14 @@ public class ServiceCateManagerController {
     @PostMapping("/register")
     public String registerProc(ServiceCateDTO serviceCateDTO,
                                @RequestParam("imageFiles") List<MultipartFile> imageFiles,
-                               RedirectAttributes redirectAttributes) {
+                               RedirectAttributes redirectAttributes,
+                               HttpSession session) {
         log.info("post에서 등록할 serviceCateDTO" + serviceCateDTO);
         serviceCateService.register(serviceCateDTO, imageFiles);
 
         // 등록된 지사의 hotelId 가져오기
         Integer hotelId = serviceCateDTO.getHotelId().getHotelId();  // 2025-02-11 추가
+        session.setAttribute("hotelId", hotelId);// hotelId를 세션에 저장
 
         redirectAttributes.addFlashAttribute("message", "카테고리 등록이 완료되었습니다.");
         return "redirect:/manager/roomService/category/list?hotelId=" + hotelId;  // hotelId를 쿼리 파라미터로 전달 2025-02-11 추가
@@ -76,9 +81,15 @@ public class ServiceCateManagerController {
                              @RequestParam(required = false) Integer hotelId, // hotelId 2024-02-11 추가
                              @PageableDefault(page = 1) Pageable page,
                              Authentication authentication,
+                             HttpSession session,
                              Model model) {
 
         Integer memberId = getLoggedInMemberId(authentication);
+
+        if (hotelId == null) {
+            hotelId = (Integer) session.getAttribute("hotelId");  // session에서 hotelId를 가져옵니다.
+        }
+
 
         // 검색 기능을 포함한 서비스 호출
         Page<ServiceCateDTO> serviceCateDTOS = serviceCateService.listByManager(page, keyword, searchType, hotelId, memberId);
@@ -96,7 +107,7 @@ public class ServiceCateManagerController {
         int endPage = Math.min(startPage + 9, totalPages); // 최대 페이지 수를 넘기지 않도록
 
         // hotelDTO hotelName 전달하기
-        List<HotelDTO> hotelDTOS = serviceCateService.getAllHotel();
+        List<HotelDTO> hotelDTOS = serviceCateService.getManagerListByHotel(memberId);
 
         // 페이지 정보 업데이트 (동적으로 계산된 startPage, endPage)
         pageInfo.put("startPage", startPage);
@@ -110,6 +121,7 @@ public class ServiceCateManagerController {
         model.addAttribute("hotelId", hotelId); // 2024-02-11 추가
         model.addAttribute("hotelDTOS", hotelDTOS);
         model.addAttribute("hotelDTO", new HotelDTO());
+        model.addAttribute("selectedHotelId", hotelId);
 
         return "/manager/roomService/category/list";
     }

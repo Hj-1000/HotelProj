@@ -19,6 +19,7 @@ public interface ServiceCateRepository extends JpaRepository<ServiceCate, Intege
     Page<ServiceCate> findByHotel_HotelIdAndHotel_Company_Member_MemberId(Integer hotelId, Integer memberId, Pageable pageable);
 
     List<ServiceCate> findByHotel_HotelId(Integer hotelId);
+    List<ServiceCate> findByHotel_HotelIdAndHotel_Member_MemberId(Integer hotelId, Integer memberId);
 
     // 검색어 + hotelId 기준 검색 manager용
     Page<ServiceCate> findByServiceCateNameLikeAndHotel_HotelIdAndHotel_Member_MemberId(String keyword, Integer hotelId, Integer memberId,Pageable pageable);

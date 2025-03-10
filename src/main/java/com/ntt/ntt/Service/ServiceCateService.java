@@ -68,6 +68,29 @@ public class ServiceCateService{
         return hotelDTOS;
     }
 
+    /*--------------------------------
+   함수명 : List getManagerListByHotel
+   인수 : 없음
+   출력 : DB에 저장된 호텔 출력
+   설명 : 매니저의 모달창에서 가지고 올 매니저가 속한 HOTEL
+   --------------------------------*/
+    public List<HotelDTO> getManagerListByHotel(Integer memberId) {
+        List<Hotel> hotels = hotelRepository.findByMember_MemberId(memberId);
+
+        List<HotelDTO> hotelDTOS = hotels.stream()
+                .map(a -> new HotelDTO(a.getHotelId(), a.getHotelName())).collect(Collectors.toList());
+
+        return hotelDTOS;
+    }
+
+    public List<HotelDTO> getChiefListByHotel(Integer memberId) {
+        List<Hotel> hotels = hotelRepository.findByCompany_Member_MemberId(memberId);
+
+        List<HotelDTO> hotelDTOS = hotels.stream()
+                .map(a -> new HotelDTO(a.getHotelId(), a.getHotelName())).collect(Collectors.toList());
+
+        return hotelDTOS;
+    }
 
     //서비스 카테고리 등록
     /*--------------------------------
@@ -93,7 +116,7 @@ public class ServiceCateService{
 
     }
     //서비스 카테고리 목록
-    //Manager이 사용할 카테고리의 전체목록
+    //MANAGER가 사용할 카테고리의 전체목록
     /*--------------------------------
     함수명 : Page<ServiceCateDTO> list(Pageable page, String keyword, String searchType, Integer hotelId)
     인수 : 조회할 페이지 정보
@@ -215,6 +238,16 @@ public class ServiceCateService{
     //이건 호텔 카테고리 id가 해당 hotelid에 속한것만 가져오는 메서드
     public List<ServiceCateDTO> listByHotel(Integer hotelId){
         List<ServiceCate> serviceCate = serviceCateRepository.findByHotel_HotelId(hotelId);
+
+        List<ServiceCateDTO> serviceCateDTOS = serviceCate.stream()
+                .map(a -> new ServiceCateDTO(a.getServiceCateId(), a.getServiceCateName())).collect(Collectors.toList());
+
+        return serviceCateDTOS;
+    }
+
+    //이건 매니저가 속한 호텔 카테고리 id가 해당 hotelid에 속한것만 가져오는 메서드
+    public List<ServiceCateDTO> listByManager(Integer hotelId, Integer memberId){
+        List<ServiceCate> serviceCate = serviceCateRepository.findByHotel_HotelIdAndHotel_Member_MemberId(hotelId, memberId);
 
         List<ServiceCateDTO> serviceCateDTOS = serviceCate.stream()
                 .map(a -> new ServiceCateDTO(a.getServiceCateId(), a.getServiceCateName())).collect(Collectors.toList());

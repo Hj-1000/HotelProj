@@ -297,14 +297,15 @@
                         <!--지사명을 통해 지사ID 가져오기 2025-02-11 추가-->
                         <div class="mb-3 mt-3">
                             <label for="modalHotelId" class="form-label">지사명:</label>
-                            <select id="modalHotelId" name="hotelId" class="form-select" disabled>
-                                <th:block th:each="hotelDTOS : ${hotelDTOS}">
-                                    <option th:value="${hotelDTOS.hotelId}"
-                                            th:text="${hotelDTOS.hotelName}"
-                                            th:selected="${hotelDTOS.hotelId == hotelId}">
-                                    </option>
+                            <select id="modalHotelId" name="hotelId" class="form-select">
+                                <th:block th:if="${#lists.isEmpty(hotelDTOS)}">
+                                    <option value="">호텔이 없습니다.</option>
+                                </th:block>
+                                <th:block th:unless="${#lists.isEmpty(hotelDTOS)}">
+                                    <option th:value="${hotelDTOS[0].hotelId}" th:text="${hotelDTOS[0].hotelName}" selected="selected"></option>
                                 </th:block>
                             </select>
+
                         </div>
                         <div class="mb-3">
                             <label for="serviceCateName" class="form-label">카테고리명:</label>
