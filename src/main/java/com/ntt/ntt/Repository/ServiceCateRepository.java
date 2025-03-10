@@ -11,14 +11,21 @@ import java.util.List;
 
 @Repository
 public interface ServiceCateRepository extends JpaRepository<ServiceCate, Integer> {
-    public Page<ServiceCate> findByServiceCateNameLikeAndHotel_Member_MemberId(String keword, Integer memberId,Pageable pageable);
+
+    //Admin용
+    Page<ServiceCate> findByServiceCateNameLikeAndHotel_HotelId(String keyword,Integer hotelId, Pageable pageable);
+    Page<ServiceCate> findByServiceCateNameLike(String keyword,Pageable pageable);
+    Page<ServiceCate> findByHotel_HotelId(Integer hotelId, Pageable pageable);
+
+    //CHIEF용
+    Page<ServiceCate> findByServiceCateNameLikeAndHotel_Member_MemberId(String keyword, Integer memberId,Pageable pageable);
 
     // hotelId 기준 검색
     Page<ServiceCate> findByHotel_HotelIdAndHotel_Member_MemberId(Integer hotelId, Integer memberId,Pageable pageable);
-    //CHIEF용
+
     Page<ServiceCate> findByHotel_HotelIdAndHotel_Company_Member_MemberId(Integer hotelId, Integer memberId, Pageable pageable);
 
-    List<ServiceCate> findByHotel_HotelId(Integer hotelId);
+
     List<ServiceCate> findByHotel_HotelIdAndHotel_Member_MemberId(Integer hotelId, Integer memberId);
 
     // 검색어 + hotelId 기준 검색 manager용
@@ -34,5 +41,9 @@ public interface ServiceCateRepository extends JpaRepository<ServiceCate, Intege
 
     // keyword + memberId 필터링
     Page<ServiceCate> findByServiceCateNameLikeAndHotel_Company_Member_MemberId(String serviceCateName, Integer memberId, Pageable pageable);
+
+
+    //user용
+    List<ServiceCate> findByHotel_HotelId(Integer hotelId);
 
 }

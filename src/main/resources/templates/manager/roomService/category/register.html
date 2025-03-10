@@ -76,14 +76,60 @@
         <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
         <a href="#" class="custom-link"><span>룸서비스관리</span></a> /
 
-        <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="/chief/roomService/category/list" class="custom-link"><span>카테고리관리</span></a> /
+        <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/admin/roomService/category/list" class="custom-link"><span>카테고리관리 /</span></a>
+        <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/admin/roomService/category/register" class="custom-link"><span>카테고리등록</span></a>
+        <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="/chief/roomService/category/list" class="custom-link"><span>카테고리관리 /</span></a>
         <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="/chief/roomService/category/register" class="custom-link"><span>카테고리등록</span></a>
-        <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" href="/manager/roomService/category/list" class="custom-link"><span>카테고리관리</span></a> /
+        <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" href="/manager/roomService/category/list" class="custom-link"><span>카테고리관리 /</span></a>
         <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" href="/manager/roomService/category/register" class="custom-link"><span>카테고리등록</span></a>
         <div class="col-12">
             <h2 class="mb-3">카테고리 등록</h2>
             <div class="card">
                 <div class="card-body">
+                    <form th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:action="@{/admin/roomService/category/register}" method="post" enctype="multipart/form-data" onsubmit="validateForm(event)">
+                        <!--지사명을 통해 지사ID 가져오기 2025-02-11 추가-->
+                        <div class="mb-3 mt-3">
+                            <label for="hotelId" class="form-label">지사명:</label>
+                            <th:block>
+                                <select id="hotelId" name="hotelId" class="form-select" >
+                                    <th:block th:each="hotelDTOS : ${hotelDTOS}">
+                                        <option th:value="${hotelDTOS.hotelId}"
+                                                th:text="${hotelDTOS.hotelName}"
+                                                th:selected="${hotelDTOS.hotelId == selectedHotelId}">
+                                        </option>
+                                    </th:block>
+                                </select>
+                            </th:block>
+                        </div>
+                        <div class="mb-3 mt-3">
+                            <label for="serviceCateName" class="form-label">카테고리 명:</label>
+                            <input type="text" class="form-control" style="width: 300px"
+                                   placeholder="카테고리를 입력하세요."
+                                   name="serviceCateName"
+                                   id="serviceCateName"
+                                   minlength="2" required
+                                   title="최소 2글자 이상 작성해주세요.">
+                        </div>
+                        <!-- 새 이미지 업로드 및 미리보기 -->
+                        <div>
+                            <label for="newImageFiles">카테고리 이미지:</label>
+                            <input type="file" id="newImageFiles" name="imageFiles" multiple onchange="previewImage(event)">
+                            <small>이미지를 선택해 주세요.</small>
+                        </div>
+
+                        <!-- 미리보기 이미지 표시 -->
+                        <div id="imagePreviewContainer">
+                            <!-- 미리보기가 여기 나타날 것입니다 -->
+                        </div>
+
+                        <div style="text-align: right">
+                            <button type="submit" class="btn btn-primary">등록</button>
+                            <button th:if="${#authorization.expression('hasRole(''MANAGER'')')}" type="button" class="btn btn-primary" style="background-color: black" onclick="goToList()">목록</button>
+                            <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/roomService/category/list}"  class="btn btn-primary" style="background-color: black">목록</a>
+                            <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/roomService/category/list}"  class="btn btn-primary" style="background-color: black">목록</a>
+                            <button type="reset" class="btn btn-secondary">초기화</button>
+                        </div>
+                    </form>
                     <form th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:action="@{/chief/roomService/category/register}" method="post" enctype="multipart/form-data" onsubmit="validateForm(event)">
                         <!--지사명을 통해 지사ID 가져오기 2025-02-11 추가-->
                         <div class="mb-3 mt-3">

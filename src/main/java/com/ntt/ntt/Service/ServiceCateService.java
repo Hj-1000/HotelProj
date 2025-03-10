@@ -59,11 +59,11 @@ public class ServiceCateService{
     출력 : DB에 저장된 호텔 출력
     설명 : DB에 저장된 호텔을 목록형식으로 출력
     --------------------------------*/
-    public List<HotelDTO> getAllHotel() {
+    public List<HotelDTO> getAdminListByHotel() {
         List<Hotel> hotels = hotelRepository.findAll();
 
         List<HotelDTO> hotelDTOS = hotels.stream()
-                .map(a -> new HotelDTO(a.getHotelId(), a.getHotelName())).collect(Collectors.toList());
+                .map(a -> modelMapper.map(a, HotelDTO.class)).collect(Collectors.toList());
 
         return hotelDTOS;
     }
@@ -78,7 +78,7 @@ public class ServiceCateService{
         List<Hotel> hotels = hotelRepository.findByMember_MemberId(memberId);
 
         List<HotelDTO> hotelDTOS = hotels.stream()
-                .map(a -> new HotelDTO(a.getHotelId(), a.getHotelName())).collect(Collectors.toList());
+                .map(a -> modelMapper.map(a, HotelDTO.class)).collect(Collectors.toList());
 
         return hotelDTOS;
     }
@@ -87,7 +87,8 @@ public class ServiceCateService{
         List<Hotel> hotels = hotelRepository.findByCompany_Member_MemberId(memberId);
 
         List<HotelDTO> hotelDTOS = hotels.stream()
-                .map(a -> new HotelDTO(a.getHotelId(), a.getHotelName())).collect(Collectors.toList());
+                .map(a -> modelMapper.map(a, HotelDTO.class)).collect(Collectors.toList());
+
 
         return hotelDTOS;
     }
@@ -115,6 +116,55 @@ public class ServiceCateService{
         log.info("ServiceCate object after mapping: {}", serviceCate);
 
     }
+
+
+    public Page<ServiceCateDTO> listByAdmin(Pageable page, String keyword, String searchType, Integer hotelId) {
+        int currentPage = page.getPageNumber() - 1; // 0-based index
+        int pageSize = 10;
+        Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.ASC, "hotel.hotelId").and(Sort.by(Sort.Direction.ASC, "serviceCateId")));
+
+        Page<ServiceCate> serviceCatePage;
+
+        if (keyword != null && !keyword.isEmpty()) {
+            String keywordLike = "%" + keyword + "%";
+            if ("name".equals(searchType)) {
+                // 검색어 + hotelId 기준으로 필터링 2024-02-11 추가
+                if (hotelId != null) {
+                    serviceCatePage = serviceCateRepository.findByServiceCateNameLikeAndHotel_HotelId(keywordLike, hotelId, pageable);
+                } else {
+                    serviceCatePage = serviceCateRepository.findByServiceCateNameLike(keywordLike,pageable);
+                }
+            } else {
+                serviceCatePage = (hotelId != null)
+                        ? serviceCateRepository.findByHotel_HotelId(hotelId, pageable)
+                        : serviceCateRepository.findAll(pageable);
+            }
+        } else {
+            serviceCatePage = (hotelId != null)
+                    ? serviceCateRepository.findByHotel_HotelId(hotelId, pageable)
+                    : serviceCateRepository.findAll(pageable);
+        }
+
+        // DTO 변환
+        return serviceCatePage.map(entity -> {
+            ServiceCateDTO serviceCateDTO = modelMapper.map(entity, ServiceCateDTO.class);
+            String hotelName = Optional.ofNullable(entity.getHotel())
+                    .map(Hotel::getHotelName)
+                    .orElse("미지정 지사");
+            serviceCateDTO.setHotelName(hotelName);
+            List<ImageDTO> imageDTOList = imageRepository.findByServiceCate_ServiceCateId(serviceCateDTO.getServiceCateId())
+                    .stream().map(imagefile -> {
+                        imagefile.setImagePath(imagefile.getImagePath().replace("c:/data/", ""));
+                        return modelMapper.map(imagefile, ImageDTO.class);
+                    })
+                    .collect(Collectors.toList());
+            serviceCateDTO.setServiceCateImageDTOList(imageDTOList);
+            return serviceCateDTO;
+        });
+    }
+
+
+
     //서비스 카테고리 목록
     //MANAGER가 사용할 카테고리의 전체목록
     /*--------------------------------
@@ -126,7 +176,7 @@ public class ServiceCateService{
     public Page<ServiceCateDTO> listByManager(Pageable page, String keyword, String searchType, Integer hotelId, Integer memberId) {
         int currentPage = page.getPageNumber() - 1; // 0-based index
         int pageSize = 10;
-        Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.ASC, "serviceCateId"));
+        Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.ASC, "hotel.hotelId").and(Sort.by(Sort.Direction.ASC, "serviceCateId")));
 
         Page<ServiceCate> serviceCatePage;
 
@@ -153,6 +203,10 @@ public class ServiceCateService{
         // DTO 변환
         return serviceCatePage.map(entity -> {
             ServiceCateDTO serviceCateDTO = modelMapper.map(entity, ServiceCateDTO.class);
+            String hotelName = Optional.ofNullable(entity.getHotel())
+                    .map(Hotel::getHotelName)
+                    .orElse("미지정 지사");
+            serviceCateDTO.setHotelName(hotelName);
             List<ImageDTO> imageDTOList = imageRepository.findByServiceCate_ServiceCateId(serviceCateDTO.getServiceCateId())
                     .stream().map(imagefile -> {
                         imagefile.setImagePath(imagefile.getImagePath().replace("c:/data/", ""));
@@ -176,7 +230,7 @@ public class ServiceCateService{
         int currentPage = page.getPageNumber() - 1; // 0-based index
         int pageSize = 10;
 
-        Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.ASC, "serviceCateId"));
+        Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.ASC, "hotel.hotelId").and(Sort.by(Sort.Direction.ASC, "serviceCateId")));
         Page<ServiceCate> serviceCatePage;
 
         if (keyword != null && !keyword.isEmpty()) {
@@ -206,6 +260,12 @@ public class ServiceCateService{
         // DTO 변환
         return serviceCatePage.map(entity -> {
             ServiceCateDTO serviceCateDTO = modelMapper.map(entity, ServiceCateDTO.class);
+
+            String hotelName = Optional.ofNullable(entity.getHotel())
+                    .map(Hotel::getHotelName)
+                    .orElse("미지정 지사");
+            serviceCateDTO.setHotelName(hotelName);
+
             List<ImageDTO> imageDTOList = imageRepository.findByServiceCate_ServiceCateId(serviceCateDTO.getServiceCateId())
                     .stream().map(imagefile -> {
                         imagefile.setImagePath(imagefile.getImagePath().replace("c:/data/", ""));
