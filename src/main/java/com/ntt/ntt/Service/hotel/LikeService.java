@@ -4,10 +4,7 @@ package com.ntt.ntt.Service.hotel;
 import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.ImageDTO;
 import com.ntt.ntt.DTO.LikeDTO;
-import com.ntt.ntt.Entity.Hotel;
-import com.ntt.ntt.Entity.LikeHotel;
-import com.ntt.ntt.Entity.Likes;
-import com.ntt.ntt.Entity.Member;
+import com.ntt.ntt.Entity.*;
 import com.ntt.ntt.Repository.ImageRepository;
 import com.ntt.ntt.Repository.MemberRepository;
 import com.ntt.ntt.Repository.hotel.HotelRepository;
@@ -18,6 +15,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,43 +31,6 @@ public class LikeService {
     private final ModelMapper modelMapper;
     private final ImageRepository imageRepository;
 
-    //등록
-//    public Integer likeRegister(LikeDTO likeDTO, String memberEmail) {
-//        System.out.println("찜 요청 받은 이메일: " + likeDTO.getMemberEmail());
-//
-//        // 회원 조회
-//        Member member = memberRepository.findByMemberEmail(memberEmail)
-//                .orElseThrow(() -> new NoSuchElementException("해당 이메일의 회원이 존재하지 않습니다."));
-//
-//        // 기존 Likes 조회 (없으면 새로 생성)
-//        Likes like = likeRepository.findByMember_MemberEmail(memberEmail);
-//        if (like == null) {
-//            like = Likes.builder()
-//                    .member(member)
-//                    .build();
-//            likeRepository.save(like);
-//        }
-//
-//        // 호텔 조회 (Optional 처리)
-//        Hotel hotel = hotelRepository.findById(likeDTO.getHotelId())
-//                .orElseThrow(() -> new NoSuchElementException("해당 호텔이 존재하지 않습니다."));
-//
-//        // LikeHotel 매핑
-//        LikeHotel likehotel = modelMapper.map(likeDTO, LikeHotel.class);
-//        likehotel.setLikes(like);
-//        likehotel.setHotel(hotel);
-//        likehotel.setCreatedBy(memberEmail);  // createBy에 memberEmail 설정
-//
-//        // 기존 찜 데이터가 존재하면 ID를 유지하여 업데이트
-//        likeHotelRepository.findByHotel_HotelId(likeDTO.getHotelId())
-//                .stream().findFirst()
-//                .ifPresent(existingLikeHotel -> likehotel.setLikeHotelId(existingLikeHotel.getLikeHotelId()));
-//
-//        // 저장
-//        likeHotelRepository.save(likehotel);
-//
-//        return likehotel.getLikeHotelId();
-//    }
 
     //이미 즐겨찾기가 되어있는지 확인하고 등록 메소드
     public String likeRegister(LikeDTO likeDTO, String memberEmail) {
@@ -119,9 +80,6 @@ public class LikeService {
         likeHotelRepository.deleteByHotel_HotelIdAndMember_MemberId(hotelId, memberId);
     }
 
-
-
-
     //목록
     public List<LikeDTO> likeList(String email) {
         try {
@@ -144,6 +102,7 @@ public class LikeService {
                             LikeDTO likeDTO = LikeDTO.builder()
                                     .likeHotelId(likehotel.getLikeHotelId())
                                     .hotelDTO(hotelDTO)
+                                    .regDate(likehotel.getRegDate())  // regDate 필드 추가
                                     .build();
 
                             List<ImageDTO> hotelImageDTOList = imageRepository.findByHotel_HotelId(likehotel.getHotel().getHotelId())
@@ -157,7 +116,21 @@ public class LikeService {
                                 System.out.println("likeDTO의 getHotelDTO()가 null입니다!");
                             }
 
+                            // 가장 저렴한 roomPrice 찾기
+                            Integer cheapestRoomPrice = likehotel.getHotel().getRooms().stream()
+                                    .mapToInt(Room::getRoomPrice)  // roomPrice를 int로 추출
+                                    .min()  // 최솟값 찾기
+                                    .orElse(0); // 방이 없다면 기본값 0
+
+                            // 천 단위로 콤마 추가한 문자열로 변환
+                            DecimalFormat decimalFormat = new DecimalFormat("#,###");
+                            String formattedPrice = decimalFormat.format(cheapestRoomPrice);
+
+                            // 결과를 hotelDTO에 설정
+                            hotelDTO.setCheapestRoomPrice(formattedPrice); // String으로 된 가격 설정
+
                             return likeDTO;
+
                         } catch (Exception e) {
                             System.out.println("예외 발생 (LikeHotel -> LikeDTO 변환 중): " + e.getMessage());
                             e.printStackTrace();
@@ -165,6 +138,9 @@ public class LikeService {
                         }
                     }).filter(Objects::nonNull) // null 값 제거
                     .collect(Collectors.toList());
+
+            // regDate 기준 내림차순 정렬
+            likeDTOS.sort(Comparator.comparing(LikeDTO::getRegDate).reversed());
 
             System.out.println("최종 LikeDTO 리스트: " + likeDTOS);
             return likeDTOS;
@@ -174,6 +150,7 @@ public class LikeService {
             return Collections.emptyList();
         }
     }
+
 
     //즐겨찾기만 삭제
     @Transactional

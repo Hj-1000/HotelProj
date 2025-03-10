@@ -32,8 +32,8 @@ public class HotelDTO {
     @NotBlank(message = "호텔 설명은 필수 입력값입니다.")
     private String hotelInfo;
 
-    private Double hotelRating;
-    private Integer roomReviewCount;
+    private Double hotelRating; // 호텔(동일 호텔 모든 객실)의 리뷰 평균
+    private Integer roomReviewCount; // 호텔(동일 호텔 모든 객실)의 리뷰 수를 카운트 2025-03-05 추가
 
     @NotBlank(message = "호텔 전화는 필수 입력값입니다.")
     private String hotelPhone;
@@ -54,7 +54,9 @@ public class HotelDTO {
 
     private LocalDateTime modDate;
 
-    private Integer cheapestRoomPrice; // 가장 저렴한 roomPrice (Integer로 변경) 2025-02-19 추가
+    private String cheapestRoomPrice; // 가장 저렴한 roomPrice (Integer로 변경) 2025-02-19 추가
+
+    private String memberName; // 관리자, 호텔장, 매니저용 호텔 상세보기에서 담당자이름 보이도록 하는 용도 2025-03-10 추가
 
     @Builder.Default
     private List<ImageDTO> hotelImgDTOList = new ArrayList<>(); //이미지 2025-01-21추가
@@ -69,7 +71,7 @@ public class HotelDTO {
     }
 
     // 가장 저렴한 방 가격을 보여주기 위한 생성사 추가 2025-02-19
-    public HotelDTO(Integer hotelId, String hotelName, Integer cheapestRoomPrice) {
+    public HotelDTO(Integer hotelId, String hotelName, String cheapestRoomPrice) {
         this.hotelId = hotelId;
         this.hotelName = hotelName;
         this.cheapestRoomPrice = cheapestRoomPrice;
@@ -80,11 +82,13 @@ public class HotelDTO {
         this.hotelId = hotel.getHotelId();
         this.hotelName = hotel.getHotelName();
         this.companyId = hotel.getCompany().getCompanyId(); // Company 엔티티를 DTO로 변환
-
         this.regDate = hotel.getRegDate();
         this.modDate = hotel.getModDate();
 
         // Member 정보 포함
-        this.member = hotel.getMember() != null ? new MemberDTO(hotel.getMember()) : null;
+        if (hotel.getMember() != null) {
+            this.member = new MemberDTO(hotel.getMember());
+            this.memberName = hotel.getMember().getMemberName(); // 여기서 추가
+        }
     }
 }

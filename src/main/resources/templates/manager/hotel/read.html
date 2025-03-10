@@ -16,6 +16,43 @@
         .custom-link:hover {
             color: gray; /* 마우스 올리면 회색 */
         }
+
+        /* 테이블 전체 스타일 */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        /* 테이블 헤더 스타일 */
+        .table-head th {
+            text-align: left; /* 헤더 텍스트 왼쪽 정렬 */
+            vertical-align: middle; /* 헤더 세로 중앙 정렬 */
+        }
+
+        /* 테이블 바디 스타일 */
+        .table tbody td {
+            text-align: left; /* 가로로 좌측 정렬 */
+            vertical-align: middle; /* 세로로 중앙 정렬 */
+            padding: 10px; /* 적절한 여백 추가 */
+        }
+
+        /* 이미지가 있는 첫 번째 열(td)의 정렬 */
+        .table tbody td[rowspan] {
+            text-align: center; /* 이미지 가운데 정렬 */
+            vertical-align: middle; /* 이미지 세로 중앙 정렬 */
+        }
+
+        /* 체크인-체크아웃과 상세설명 td 스타일 */
+        .table tbody td[colspan] {
+            text-align: left; /* 좌측 정렬 */
+            vertical-align: middle; /* 세로 중앙 정렬 */
+        }
+
+        /* 상세설명(td)만 상단 정렬 */
+        .table tbody tr:last-child td {
+            vertical-align: top;
+        }
+
     </style>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <!-- Bootstrap CSS -->
@@ -203,13 +240,17 @@
                         </tr>
                         <tr class="table-light">
                             <td>평점</td>
-                            <td ><span th:text="${hotelDTO.hotelRating}">평점</span>점</td>
+                            <td >
+                                <span th:if="${hotelDTO.hotelRating == null or hotelDTO.hotelRating == 0}">등록된 후기가 없습니다.</span>
+                                <span th:unless="${hotelDTO.hotelRating == null or hotelDTO.hotelRating == 0}"
+                                      th:text="| ${hotelDTO.hotelRating}점|">평점</span>
+                            </td>
                             <td>리뷰</td>
                             <td ><span th:text="${hotelDTO.roomReviewCount}">리뷰개수</span>개</td>
                         </tr>
                         <tr class="table-light">
                             <td>담당자</td>
-                            <td><span th:text="${hotelDTO.hotelEmail}">매니저 이메일</span></td>
+                            <td><span th:text="${hotelDTO.memberName}">전화번호</span> (<span th:text="${hotelDTO.hotelEmail}">매니저 이메일</span>)</td>
                             <td>전화번호</td>
                             <td><span th:text="${hotelDTO.hotelPhone}">전화번호</span></td>
                         </tr>

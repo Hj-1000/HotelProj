@@ -16,7 +16,6 @@
     <!-- 부트스트랩 아이콘 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.1/font/bootstrap-icons.css">
 
-
     <link rel="stylesheet" th:href="@{/css/user.css}">
     <link rel="stylesheet" th:href="@{/css/roomList.css}">
     <link rel="stylesheet" th:href="@{/css/hotelList.css}">
@@ -36,31 +35,66 @@
         }
 
         .hotel-img {
-            height: 230px;
-            overflow:hidden;
-            margin:0 auto 5px auto;
+            width: 100%;          /* 부모 컨테이너의 가로 크기 100%로 설정 */
+            height: 230px;        /* 세로 크기 230px로 고정 */
+            overflow: hidden;     /* 이미지가 영역을 넘을 경우 잘리도록 설정 */
+            position: relative;   /* 자식 요소의 위치를 정하기 위해 relative 설정 */
+            margin: 0 auto 5px auto;
         }
-
-        /*.image-box {*/
-        /*    width:100%;*/
-        /*    height:180px;*/
-        /*    overflow:hidden;*/
-        /*    margin:0 auto 5px auto;*/
-        /*}*/
 
         .hotelImg {
-            width:100%;
-            height:100%;
-            object-fit:cover;
+            position: absolute;   /* 이미지의 위치를 절대적으로 설정 */
+            top: 50%;             /* 상단 중앙으로 설정 (위에서 50% 지점) */
+            left: 50%;            /* 좌측 중앙으로 설정 (좌에서 50% 지점) */
+            width: 100%;          /* 가로 크기를 100%로 맞추기 */
+            height: 100%;         /* 세로 크기를 100%로 맞추기 */
+            object-fit: cover;    /* 이미지가 영역을 꽉 채우고 잘리도록 설정 */
+            transform: translate(-50%, -50%); /* 이미지 중앙 정렬 */
         }
-        /*.container1{*/
-        /*    margin: 20px auto 100px auto;*/
-        /*    width: 1000px;*/
-        /*    height: 370px;*/
-        /*    border:1px solid lightgray;*/
-        /*    border-radius: 10px;*/
-        /*    padding: 30px;*/
-        /*}*/
+
+        .image-box {
+            position: relative;  /* 이미지 박스에 상대적 위치를 설정 */
+            width: 100%;         /* 가로 크기 100% */
+            height: 100%;        /* 세로 크기 100% */
+        }
+
+        .hover-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.5); /* 어두운 반투명 배경 */
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            visibility: hidden;  /* 처음에는 오버레이 숨기기 */
+        }
+
+        .image-box:hover .hover-overlay {
+            opacity: 1;          /* 이미지 박스를 hover 할 때만 오버레이 보이게 */
+            visibility: visible; /* hover 시 오버레이 표시 */
+        }
+
+        .btn-hover {
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 10px 20px;
+            color: white; /* 버튼 텍스트 흰색 */
+            background-color: transparent; /* 투명 배경 */
+            border: 2px solid white; /* 흰색 테두리 */
+            border-radius: 5px;
+        }
+
+        .btn-hover:hover {
+            background-color: rgba(255, 255, 255, 0.7); /* hover 시 살짝 흰색 배경 */
+            border: 2px solid #f1f1f1;
+        }
+
+
         .modal-header {
             display: flex;
             justify-content: center; /* 가로 가운데 정렬 */
@@ -75,20 +109,7 @@
             width: 300px;
         }
 
-        /*.hotel-card {*/
-        /*    border:1px solid lightgray;*/
-        /*    padding: 10px;*/
-        /*    margin: 10px;*/
-        /*}*/
 
-        /*.hotel-buttons {*/
-        /*    text-align: right;*/
-        /*}*/
-
-        /*.search-div {*/
-        /*    margin: auto;*/
-        /*    text-align: center;*/
-        /*}*/
 
         .location-link {
             text-decoration: none;
@@ -170,75 +191,15 @@
                         }
                     },
                     error: function (xhr) {
-                        console.error("찜 여부 확인 AJAX 요청 실패:", xhr.status, xhr.responseText);
+                        if (xhr.status === 401) {
+                            // 비로그인 사용자일 경우
+                            console.log("비로그인 사용자입니다.");  // "비로그인 사용자" 로그 출력
+                        } else {
+                            console.error("찜 여부 확인 AJAX 요청 실패:", xhr.status, xhr.responseText);
+                        }
                     }
                 });
             });
-
-            // // 찜 여부 확인 후 버튼 상태 변경
-            // $(".hotel-card").each(function () {
-            //     var hotelId = $(this).find(".hotelId").val();
-            //
-            //     $.ajax({
-            //         url: "/like/check/" + hotelId,
-            //         type: "GET",
-            //         success: function (isLiked) {
-            //             var likeBtn = $(".likeBtn[data-hotel-id='" + hotelId + "']");
-            //             var delBtn = $(".delBtn[data-hotel-id='" + hotelId + "']");
-            //
-            //             if (isLiked) {
-            //                 likeBtn.hide();
-            //                 delBtn.show();
-            //             } else {
-            //                 likeBtn.show();
-            //                 delBtn.hide();
-            //             }
-            //         },
-            //         error: function () {
-            //             console.error("찜 여부 확인 실패 (호텔 ID: " + hotelId + ")");
-            //         }
-            //     });
-            // });
-            //
-            // // 찜 추가 (이벤트 위임 방식)
-            // $(document).on("click", ".likeBtn", function (event) {
-            //     var hotelId = $(this).data("hotel-id");
-            //
-            //     $.ajax({
-            //         url: "/like/register",
-            //         type: "POST",
-            //         contentType: "application/json; charset=utf-8",
-            //         data: JSON.stringify({ hotelId: hotelId }),
-            //         success: function () {
-            //             alert("호텔이 즐겨찾기에 추가되었습니다.");
-            //             location.reload();
-            //         },
-            //         error: function (xhr) {
-            //             console.error("찜 등록 실패:", xhr.responseText);
-            //             alert("찜 등록 실패: " + xhr.responseText);
-            //         }
-            //     });
-            // });
-            //
-            // // 찜 삭제 (이벤트 위임 방식)
-            // $(document).on("click", ".delBtn", function (event) {
-            //     var hotelId = $(this).data("hotel-id");
-            //
-            //     $.ajax({
-            //         url: "/like/delete",
-            //         type: "POST",
-            //         contentType: "application/json; charset=utf-8",
-            //         data: JSON.stringify({ hotelId: hotelId }),
-            //         success: function () {
-            //             alert("즐겨찾기에서 삭제되었습니다.");
-            //             location.reload();
-            //         },
-            //         error: function (xhr) {
-            //             console.error("삭제 실패:", xhr.responseText);
-            //             alert("삭제 실패: " + xhr.responseText);
-            //         }
-            //     });
-            // });
 
         }
 
@@ -364,8 +325,7 @@
                         <h5 style="padding-top: 10px;"><i class="bi bi-geo-alt-fill"></i> 지역 선택</h5>
                     </button>
                     <button class="btn btn-outline-success mapBtn" type="button">
-                        <!--<i class="fa-solid fa-location-arrow"></i> <br>-->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" class="size-20 pc:size-22"><path fill="currentColor" d="M18.74 4.022a.975.975 0 0 1 1.257 1.257l-6.059 16.047c-.308.816-1.45.848-1.803.052l-2.06-6.938a.98.98 0 0 0-.495-.495l-6.938-2.06c-.797-.354-.764-1.496.051-1.804z"></path><path fill="currentColor" fill-rule="evenodd" d="m11.485 13.92 1.606 5.406 5.093-13.49-13.49 5.093 5.406 1.605.088.04c.56.249 1.009.697 1.258 1.257zm-8.843-2.036c-.797-.353-.764-1.495.051-1.803l16.048-6.059a.975.975 0 0 1 1.256 1.257l-6.059 16.047c-.308.816-1.45.848-1.803.052l-2.06-6.938a.98.98 0 0 0-.495-.495z" clip-rule="evenodd"></path></svg>
+                        <i class="bi bi-map-fill"></i>
                         <br><span style="font-size: small">내 주변</span>
                     </button>
                 </div>
@@ -401,28 +361,30 @@
                 <div th:if="${hotelDTOS != null or !#lists.isEmpty(hotelDTOS)}" class="row hotel-list">
                     <div class="col-md-4" th:each="data : ${hotelDTOS}">
                         <div class="room-card">
-                            <div class="room-image">
+                            <div class="image-box">
                                 <!--등록한 사진이 있을 때-->
                                 <th:block th:if="${data.hotelImgDTOList != 0}">
-                                    <div class="room-image hotel-img">
+                                    <div class="hotel-img">
                                         <!-- 이미지 경로(path) -->
                                         <img th:if="${data.hotelImgDTOList != null and !data.hotelImgDTOList.isEmpty()}"
                                              th:src="@{'/upload/' + ${data.hotelImgDTOList[0].imagePath}}"
                                              alt="hotel Image"
-                                             class="card-img-top hotelImg" width="100%" >
+                                             class="card-img-top hotelImg" width="100%">
                                     </div>
                                 </th:block>
                                 <!--등록한 사진이 없을 때-->
                                 <th:block th:unless="${data.hotelImgDTOList.size() != 0}">
-                                    <div class="image-box">
-                                        <img src="/img/default_img.jpg" alt="noImage" class="card-img-top" style="width: 300px"/>
+                                    <div class="hotel-img">
+                                        <img src="/img/default_img.jpg" alt="noImage" class="card-img-top hotelImg" style="width: 300px"/>
                                     </div>
                                 </th:block>
 
+                                <!-- 이미지 박스 위에 오버레이 버튼 -->
                                 <div class="hover-overlay">
                                     <a th:href="@{/hotel/read(hotelId=${data.hotelId})}" class="btn btn-hover">자세히 보기</a>
                                 </div>
                             </div>
+
                             <div class="room-text">
                                 <div class="d-flex justify-content-start gap-2 mb-2">
                                     <!-- 지역버튼 -->
@@ -432,7 +394,7 @@
                                         </a>
                                     </div>
                                 </div>
-                                <h4 th:text="${data.hotelName}" class="card-title mb-2"></h4>
+                                <h4 th:text="${data.hotelName}" class="card-title mb-2" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></h4>
                                 <p th:text="'체크인-체크아웃: ' + ${data.hotelCheckIn} + '시 ~ ' + ${data.hotelCheckOut} + '시'" class="card-text"></p>
                                 <input type="hidden" class="hotelId" th:value="${data.hotelId}">
                                 <div class="room-actions" style="margin-top: -5px">
@@ -463,69 +425,6 @@
                 <div th:if="${hotelDTOS == null or #lists.isEmpty(hotelDTOS)}" class="text-center mt-4">
                     <p class="text-muted">등록 된 호텔이 없습니다.</p>
                 </div>
-
-                <!--반복문-->
-<!--
-                <th:block th:each="data : ${hotelDTOS}">
-                    &lt;!&ndash; Card &ndash;&gt;
-                    <div class="col-md-4">
-                        <a th:href="@{/hotel/read(hotelId=${data.hotelId})}">
-                            <div class="hotel-card">
-                                &lt;!&ndash;등록한 사진이 있을 때&ndash;&gt;
-                                <th:block th:if="${data.hotelImgDTOList != 0}">
-                                    <div class="image-box">
-                                        &lt;!&ndash; 이미지 경로(path) &ndash;&gt;
-                                        <img th:if="${data.hotelImgDTOList != null and !data.hotelImgDTOList.isEmpty()}"
-                                             th:src="@{'/upload/' + ${data.hotelImgDTOList[0].imagePath}}"
-                                             alt="hotel Image"
-                                             class="hotel-image" width="100%" >
-                                    </div>
-                                </th:block>
-
-                                &lt;!&ndash;등록한 사진이 없을 때&ndash;&gt;
-                                <th:block th:unless="${data.hotelImgDTOList.size() != 0}">
-                                    <div class="image-box">
-                                        <img src="/img/default_img.jpg" alt="noImage" class="hotelImg" style="width: 300px"/>
-                                    </div>
-                                </th:block>
-                                <div class="hotel-text">
-                                    <a th:href="@{'/hotel/list?searchType=location&keyword=' + ${data.hotelLocation}}" style="text-decoration: none">
-                                        <div class="badge bg-secondary" th:text="${data.hotelLocation}">지역</div>
-                                    </a>
-                                    <div class="hotel-details">
-                                        <h4 th:text="${data.hotelName}">호텔 이름</h4>
-                                        &lt;!&ndash;                                    <p th:text="${data.hotelInfo}">호텔 설명</p>&ndash;&gt;
-                                        <p> 체크인-체크아웃: <span th:text="${data.hotelCheckIn}"></span>시 - <span th:text="${data.hotelCheckOut}"></span>시</p>
-                                        <input type="hidden" class="hotelId" th:value="${data.hotelId}">
-                                        <div class="hotel-actions">
-                                            &lt;!&ndash;나중에 룸이랑 연결했을 때 사용&ndash;&gt;
-                                            <p class="hotel-price mb-0" th:text="${data.CheapestRoomPrice}+'KRW ~'"></p>
-                                            <div class="hotel-buttons">
-                                                <button class="btn btn-outline-danger likeBtn"  th:data-hotel-id="${data.hotelId}" onclick="addLike()" style="padding: 15px; border: white">
-                                                    &lt;!&ndash;<i class="fa-regular fa-heart"></i>&ndash;&gt;
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
-                                                        <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15"/>
-                                                    </svg>
-                                                </button>
-                                                <button class="btn btn-outline-danger delBtn"  th:data-hotel-id="${data.hotelId}" onclick="addLike()" style="padding: 15px; border: white">
-                                                    &lt;!&ndash;<i class="fa fa-heart" aria-hidden="true"></i>&ndash;&gt;
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
-                                                        <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"/>
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </a>
-                    </div>
-
-
-                </th:block>
--->
-
 
 
                 <!-- 페이지네이션 -->
@@ -562,9 +461,6 @@
                         </li>
                     </ul>
                 </div>
-
-
-
 
 
             </div>
@@ -744,6 +640,76 @@
             </div>
         </div>
     </div>
+
+    <!--내 위치 가져오는 스크립트 2025-03-05 추가-->
+    <script type="text/javascript"
+            src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=0cb0450151c2b892da76c0d5dcd6535a&libraries=services"></script>
+
+    <script>
+        document.querySelector('.mapBtn').addEventListener('click', function() {
+            // Geolocation API로 사용자의 위치를 받아오기
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const userLat = position.coords.latitude;
+                    const userLong = position.coords.longitude;
+
+                    // 카카오맵 Geocoder를 사용해 위도, 경도를 주소로 변환
+                    var geocoder = new daum.maps.services.Geocoder();
+                    var latlng = new daum.maps.LatLng(userLat, userLong);
+
+                    // 경도(x), 위도(y) 순서로 전달
+                    geocoder.coord2RegionCode(latlng.getLng(), latlng.getLat(), function(result, status) {
+                        console.log("API 호출 결과:", result); // 결과를 콘솔로 확인
+                        console.log("API 상태:", status); // 상태를 콘솔로 확인
+
+                        if (status === daum.maps.services.Status.OK) {
+                            // 결과가 충분한지 확인
+                            if (result && result[0] && result[0].address_name) { // result[0].address_name 사용
+                                // 첫 번째 주소만 추출 (도, 시군구)
+                                var region = result[0].address_name; // 첫 번째 지역 정보를 사용
+
+                                // 예시: 경기도 부천시 소사구 심곡본동 -> 경기도 + 부천시
+                                var regionParts = region.split(' '); // 공백을 기준으로 분리
+                                var province = regionParts[0]; // 도 (경기도)
+                                var city = regionParts[1]; // 시군구 (부천시)
+
+                                if (province === '서울특별시' || province === '부산광역시' || province === '대구광역시' || province === '인천광역시' || province === '광주광역시' || province === '대전광역시' || province === '울산광역시' || province === '세종특별자치시') {
+                                    // 서울, 특별자치도, 대도시에서는 구를 포함
+                                    var city = regionParts[1]; // 구 포함된 시군구
+                                } else {
+                                    // 그 외 지역에서는 구를 제외
+                                    var cityParts = city.split(' ');
+                                    city = cityParts[0]; // 구를 제외한 시군구
+                                }
+
+
+                                // "도"를 빼고 처리 (예: "경기도" -> "경기")
+                                if (province.endsWith('도')) {
+                                    province = province.slice(0, -1); // "도"를 잘라내기
+                                }
+
+                                // 도와 시군구를 기반으로 URL로 이동
+                                var searchKeyword = province + ' ' + city;
+                                var encodedKeyword = encodeURIComponent(searchKeyword); // 공백을 +로 변경
+
+                                // 검색 URL로 리다이렉션
+                                window.location.href = "/hotel/list?searchType=address&keyword=" + encodedKeyword;
+                            } else {
+                                alert('주소를 가져오는 데 실패했습니다. (주소 정보가 없습니다)');
+                            }
+                        } else {
+                            alert('주소를 가져오는 데 실패했습니다. 상태: ' + status);
+                        }
+                    });
+                }, function(error) {
+                    alert('위치 정보 조회에 실패했습니다.');
+                });
+            } else {
+                alert('Geolocation을 지원하지 않는 브라우저입니다.');
+            }
+        });
+    </script>
+
 
 </div>
 <div th:replace="~{fragments/footer::footer}"></div>

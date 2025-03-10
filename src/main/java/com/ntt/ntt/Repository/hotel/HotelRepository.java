@@ -1,5 +1,6 @@
 package com.ntt.ntt.Repository.hotel;
 
+import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.Member;
 import jakarta.transaction.Transactional;
@@ -78,5 +79,12 @@ public interface HotelRepository extends JpaRepository<Hotel, Integer> {
             "(SELECT COALESCE(ROUND(AVG(rr.rating), 1), 0) FROM RoomReview rr JOIN rr.room r WHERE r.hotelId.hotelId = h.hotelId) " +
             "WHERE h.hotelId = :hotelId")
     void updateHotelRating(@Param("hotelId") Integer hotelId);
+
+    //담당자 이름까지 가져오기!
+    @Query("SELECT h FROM Hotel h LEFT JOIN FETCH h.member")
+    List<Hotel> findAllWithMember();
+
+
+
 
 }
