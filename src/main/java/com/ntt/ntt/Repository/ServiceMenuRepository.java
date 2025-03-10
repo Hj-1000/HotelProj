@@ -2,6 +2,7 @@ package com.ntt.ntt.Repository;
 
 import com.ntt.ntt.Constant.ServiceMenuStatus;
 import com.ntt.ntt.Entity.Image;
+import com.ntt.ntt.Entity.ServiceCate;
 import com.ntt.ntt.Entity.ServiceMenu;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Page;
@@ -24,13 +25,10 @@ public interface ServiceMenuRepository extends JpaRepository<ServiceMenu, Intege
 
     // 메뉴 카테고리와 상태 검색
     Page<ServiceMenu> findByServiceCate_ServiceCateIdAndServiceMenuStatus(Integer serviceCateId, ServiceMenuStatus serviceMenuStatus, Pageable pageable);
-
     // 특정 카테고리에 속한 메뉴 조회
     public Page<ServiceMenu> findByServiceCate_ServiceCateId(Integer serviceCateId, Pageable pageable);
     //특정 카테고리에 속한 메뉴 조회(이름 포함)
     public Page<ServiceMenu> findByServiceCate_ServiceCateIdAndServiceMenuNameLike(Integer serviceCateId,String keyword, Pageable pageable);
-
-    public Page<ServiceMenu> findByServiceMenuIdAndServiceCate_ServiceCateName(Integer serviceCateId,String keyword, Pageable pageable);
 
     @Query("SELECT m FROM ServiceMenu m WHERE m.serviceCate.serviceCateId = :serviceCateId")
     List<ServiceMenu> findServiceMenuByServiceCate_ServiceCateId(@Param("serviceCateId") Integer serviceCateId);

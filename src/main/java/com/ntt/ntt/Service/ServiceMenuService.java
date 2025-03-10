@@ -151,8 +151,6 @@ public class ServiceMenuService {
             return serviceMenuDTO;
         });
     }
-
-
     // 메뉴가 속한 카테고리를 조회
     public List<ServiceMenuDTO> getMenusByCategory(Integer serviceCateId) {
 

@@ -60,6 +60,8 @@ public interface HotelRepository extends JpaRepository<Hotel, Integer> {
 
     @Query("SELECT h FROM Hotel h WHERE h.member.memberId = :memberId")
     Page<Hotel> findByMember_MemberId(@Param("memberId") Integer memberId, Pageable pageable);
+    List<Hotel> findByMember_MemberId(Integer memberId);
+    List<Hotel> findByCompany_Member_MemberId(Integer memberId);
 
     Page<Hotel> findByMember_MemberIdAndHotelNameLike(Integer memberId, String hotelName, Pageable pageable);
     Page<Hotel> findByMember_MemberIdAndHotelLocationLike(Integer memberId, String hotelLocation, Pageable pageable);
