@@ -33,7 +33,7 @@ public class RoomReview extends BaseEntity {
     @Column(nullable = false, updatable = false)
     private LocalDateTime reviewDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY , cascade = CascadeType.REMOVE)
     @JoinColumn(name = "roomId", nullable = false)
     @ToString.Exclude
     private Room room;

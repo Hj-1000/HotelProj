@@ -7,6 +7,7 @@ import com.ntt.ntt.DTO.RoomDTO;
 import com.ntt.ntt.Repository.ImageRepository;
 import com.ntt.ntt.Repository.ReservationRepository;
 import com.ntt.ntt.Service.ImageService;
+import com.ntt.ntt.Service.MemberService;
 import com.ntt.ntt.Service.RoomService;
 import com.ntt.ntt.Util.PaginationUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -41,17 +43,18 @@ public class RoomManagerController {
     private final ReservationRepository reservationRepository;
     private final ImageRepository imageRepository;
     private final ImageService imageService;
+    private final MemberService memberService;
 
     /* -----------관리자 페이지----------- */
 
     @Operation(summary = "객실 등록 페이지", description = "관리자가 객실을 등록할 수 있는 페이지로 이동한다.")
     @GetMapping("/register")
-    public String registerRoomForm(Model model) {
+    public String registerRoomForm(Model model, Authentication authentication) {
         //빈 RoomDTO 전달
         model.addAttribute("room", new RoomDTO());
 
         //hotelDTO hotelName 전달하기
-        List<HotelDTO> hotelDTOS = roomService.getAllHotel();
+        List<HotelDTO> hotelDTOS = roomService.getAllHotel(authentication);
         model.addAttribute("hotelDTOS", hotelDTOS);
         model.addAttribute("hotelDTO", new HotelDTO());
 
@@ -93,6 +96,7 @@ public class RoomManagerController {
             @PageableDefault(size = 5) Pageable pageable,
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "category", required = false) String category,
+            Authentication authentication,
             Model model, RedirectAttributes redirectAttributes) {
 
         if ("roomStatus".equals(category) && keyword != null) {
@@ -111,7 +115,7 @@ public class RoomManagerController {
 
         try {
             // 2. 검색 수행
-            roomDTOS = roomService.searchRooms(keyword, category, updatedPageable);
+            roomDTOS = roomService.listRooms(keyword, category, updatedPageable, authentication);
         } catch (IllegalArgumentException e) {
             log.warn(" 검색 중 오류 발생: {}", e.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", "검색 조건이 올바르지 않습니다.");
@@ -234,8 +238,8 @@ public class RoomManagerController {
                                  @ModelAttribute RoomDTO roomDTO,
                                  @RequestParam(value = "imageFile", required = false) List<MultipartFile> imageFile,
                                  @RequestParam(value = "bannerImageFile", required = false) MultipartFile bannerImageFile,
-                                 @RequestParam(value = "newImageTitles", required = false) List<String> newImageTitles,  // ✅ 추가
-                                 @RequestParam(value = "newImageDescriptions", required = false) List<String> newImageDescriptions, // ✅ 추가
+                                 @RequestParam(value = "newImageTitles", required = false) List<String> newImageTitles,
+                                 @RequestParam(value = "newImageDescriptions", required = false) List<String> newImageDescriptions,
                                  @RequestParam(value = "existingImageIds", required = false) List<Integer> existingImageIds,
                                  @RequestParam(value = "existingImageTitles", required = false) List<String> existingImageTitles,
                                  @RequestParam(value = "existingImageDescriptions", required = false) List<String> existingImageDescriptions,
@@ -312,7 +316,7 @@ public class RoomManagerController {
             for (Integer imageId : deleteImages) {
                 if (imageRepository.existsById(imageId)) {
                     try {
-                        imageService.deleteImage(imageId);
+                        imageService.delImage(imageId);
                         log.info("삭제된 이미지 ID: {}", imageId);
                     } catch (Exception e) {
                         log.warn("이미지를 삭제하는 중 오류 발생. ID: {}", imageId, e);
@@ -370,7 +374,6 @@ public class RoomManagerController {
         return "redirect:/manager/room/list";
     }
 
-
     @Operation(summary = "객실 삭제", description = "관리자가 특정 객실을 삭제한다.")
     @GetMapping("/delete/{roomId}")
     public String deleteRoomForm(@PathVariable Integer roomId, RedirectAttributes redirectAttributes) {
@@ -378,8 +381,9 @@ public class RoomManagerController {
             roomService.deleteRoom(roomId);
             redirectAttributes.addFlashAttribute("successMessage", "삭제가 완료되었습니다.");
         } catch (IllegalStateException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "객실 삭제 실패: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage",  e.getMessage());
         }
         return "redirect:/manager/room/list";
     }
+
 }

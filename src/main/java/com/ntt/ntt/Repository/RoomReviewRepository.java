@@ -1,6 +1,7 @@
 package com.ntt.ntt.Repository;
 
 import com.ntt.ntt.Entity.RoomReview;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,6 +22,12 @@ public interface RoomReviewRepository extends JpaRepository<RoomReview, Integer>
     //  특정 객실(Room)의 리뷰 개수 조회 (평점 계산 시 사용)
     long countByRoom_RoomId(Integer roomId);
 
+    @Transactional
+    void deleteByRoom_RoomId(Integer roomId);
+
+    // 특정 roomId의 리뷰가 존재하는지 확인
+    boolean existsByRoom_RoomId(Integer roomId);
+
     //  특정 객실(Room)의 평균 평점 계산
     @Query("SELECT COALESCE(AVG(r.rating), 0) FROM RoomReview r WHERE r.room.roomId = :roomId")
     Double findAverageRatingByRoom_RoomId(Integer roomId);
@@ -36,7 +43,7 @@ public interface RoomReviewRepository extends JpaRepository<RoomReview, Integer>
     @Query("SELECT rr FROM RoomReview rr JOIN rr.room r WHERE r.hotelId.hotelId = :hotelId ORDER BY rr.reviewDate DESC")
     List<RoomReview> findTop3ByHotelIdOrderByReviewDateDesc(@Param("hotelId") Integer hotelId, Pageable pageable);
 
-    // 특정 호텔의 모든 리뷰 불러오김
+    // 특정 호텔의 모든 리뷰 불러오김 (MANAGER용)
     @Query("SELECT rr FROM RoomReview rr JOIN rr.room r WHERE r.hotelId.hotelId = :hotelId ORDER BY rr.reviewDate DESC")
     Page<RoomReview> findByHotelIdOrderByReviewDateDesc(@Param("hotelId") Integer hotelId, Pageable pageable);
 
@@ -48,5 +55,12 @@ public interface RoomReviewRepository extends JpaRepository<RoomReview, Integer>
 
     // 특정 회원 이름으로 리뷰 검색
     Page<RoomReview> findByMember_MemberNameContainingIgnoreCase(String memberName, Pageable pageable);
+
+    // CHIEF가 본사에 속한 모든 호텔의 리뷰를 조회
+    @Query("SELECT rr FROM RoomReview rr " +
+            "JOIN rr.room r " +
+            "WHERE r.hotelId.hotelId IN :hotelIds " +
+            "ORDER BY rr.reviewDate DESC")
+    Page<RoomReview> findByHotelIdsOrderByReviewDateDesc(@Param("hotelIds") List<Integer> hotelIds, Pageable pageable);
 
 }

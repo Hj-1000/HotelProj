@@ -125,6 +125,14 @@
             height: 100px;
         }
 
+        .btn-wrap {
+            text-align: right;
+        }
+
+        .btn-wrap .btn {
+            width: 150px;
+        }
+
     </style>
 </head>
 <body>
@@ -256,13 +264,13 @@
                         <div class="image-details">
                             <input type="hidden" name="existingImageIds" th:value="${image.imageId}">
 
-                            <!-- 🏷️ 타이틀 라벨 -->
+                            <!--  타이틀 라벨 -->
                             <label class="image-title-label">타이틀</label>
                             <input type="text" class="form-control image-title-input"
                                    th:name="existingImageTitles"
                                    th:value="${image.imageTitle}" placeholder="타이틀을 입력하세요">
 
-                            <!-- 🏷️ 설명 라벨 -->
+                            <!--  설명 라벨 -->
                             <label class="image-description-label">설명</label>
                             <textarea class="form-control image-description-input"
                                       th:name="existingImageDescriptions"
@@ -283,12 +291,37 @@
             <!-- 추가될 이미지 제목 및 설명 입력 필드 -->
             <div id="imageDetailsContainer"></div>
 
-            <button type="submit" class="btn btn-primary"><i class="bi bi-pen"></i></button>
+            <div class="btn-wrap">
+                <button type="submit" class="btn btn-primary">수정</button>
+            </div>
         </form>
 
     </div>
 
     <script>
+
+        /* 타이틀 , 설명 예외처리 */
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.querySelector("form");
+
+            form.addEventListener("submit", function (event) {
+                // 모든 기존 이미지 제목과 설명 필드 가져오기
+                const existingTitles = document.querySelectorAll("input[name='existingImageTitles']");
+                const existingDescriptions = document.querySelectorAll("textarea[name='existingImageDescriptions']");
+
+                existingTitles.forEach(input => {
+                    if (!input.value.trim()) {  // 빈 값이면 기본값 설정
+                        input.value = "타이틀을 입력해주세요";
+                    }
+                });
+
+                existingDescriptions.forEach(textarea => {
+                    if (!textarea.value.trim()) {  // 빈 값이면 기본값 설정
+                        textarea.value = "설명을 입력해주세요";
+                    }
+                });
+            });
+        });
 
         /* 타이틀 , 설명 길이제한 */
         document.addEventListener("DOMContentLoaded", function () {

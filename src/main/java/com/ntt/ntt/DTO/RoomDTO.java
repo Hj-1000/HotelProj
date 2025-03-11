@@ -33,6 +33,8 @@ public class RoomDTO {
 
     private Hotel hotelId;
 
+    private String hotelName;
+
     private LocalDateTime regDate;
 
     private LocalDateTime modDate;
@@ -91,6 +93,7 @@ public class RoomDTO {
                 room.getRoomStatus(),
                 room.getRoomInfo(),
                 room.getHotelId(),
+                room.getHotelId() != null ? room.getHotelId().getHotelName() : "없음",
                 room.getRegDate(),
                 room.getModDate(),
                 imageDTOList, // 상세 이미지 리스트 포함

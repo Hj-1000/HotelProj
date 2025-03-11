@@ -16,8 +16,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import net.coobird.thumbnailator.Thumbnails;
-
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -356,5 +354,26 @@ public class ImageService {
 
         // 데이터베이스에서 삭제
         imageRepository.delete(image);
+    }
+
+    // 이미지 삭제
+    public void delImage(Integer imageId) {
+        Image image = imageRepository.findById(imageId)
+                .orElseThrow(() -> new RuntimeException("이미지를 찾을 수 없습니다."));
+
+        // 파일 삭제 (삭제 여부 확인 로직 제거)
+        if (image.getImagePath() != null && !image.getImagePath().isEmpty()) {
+            String filePath = IMG_LOCATION + image.getImagePath();
+            log.info("삭제할 파일 경로: {}", filePath);
+
+            fileUpload.FileDelete(IMG_LOCATION, image.getImagePath());
+            log.info("파일 삭제 요청됨: {}", filePath);
+        } else {
+            log.warn("삭제할 이미지 경로가 존재하지 않음: {}", imageId);
+        }
+
+        // 데이터베이스에서 삭제
+        imageRepository.delete(image);
+        log.info("데이터베이스에서 이미지 정보 삭제됨: Image ID {}", imageId);
     }
 }

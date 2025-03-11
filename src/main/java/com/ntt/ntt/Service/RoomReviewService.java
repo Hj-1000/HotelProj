@@ -1,6 +1,8 @@
 package com.ntt.ntt.Service;
 
+import com.ntt.ntt.Constant.Role;
 import com.ntt.ntt.DTO.RoomReviewDTO;
+import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Entity.Room;
 import com.ntt.ntt.Entity.RoomReview;
@@ -15,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +36,7 @@ public class RoomReviewService {
     private final MemberRepository memberRepository;
     private final ReservationRepository reservationRepository;
     private final HotelRepository hotelRepository;
+    private final MemberService memberService;
 
     // 1. 리뷰 등록
     public RoomReviewDTO registerReview(RoomReviewDTO reviewDTO) {
@@ -108,8 +112,52 @@ public class RoomReviewService {
     }
 
     // 4. 모든 리뷰 조회
-    public Page<RoomReviewDTO> getAllReviews(Pageable pageable) {
-        return roomReviewRepository.findAll(pageable).map(RoomReviewDTO::fromEntity);
+    public Page<RoomReviewDTO> getAllReviews(Pageable pageable, Authentication authentication) {
+        // 로그인된 사용자의 memberId 가져오기
+        Integer memberId = getLoggedInMemberId(authentication);
+
+        // 로그인된 사용자 정보 조회
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
+
+        // Enum을 사용하여 역할 가져오기
+        Role role = member.getRole();
+
+        switch (role) {
+            case ADMIN:
+                return roomReviewRepository.findAll(pageable).map(RoomReviewDTO::fromEntity);
+
+            case CHIEF:
+                //  CHIEF가 본사 소속 호텔을 관리할 때, `Company` 기준으로 hotelId 가져오기
+                List<Integer> chiefCompanyHotels = hotelRepository.findByCompanyByMemberByMemberId(memberId)
+                        .stream().map(Hotel::getHotelId)
+                        .collect(Collectors.toList());
+
+                log.info(" CHIEF의 본사 소속 호텔 목록: {}", chiefCompanyHotels);
+
+                if (chiefCompanyHotels.isEmpty()) {
+                    log.warn(" CHIEF가 관리하는 호텔이 없습니다! 리뷰 없음.");
+                    return Page.empty(pageable);
+                }
+
+                return roomReviewRepository.findByHotelIdsOrderByReviewDateDesc(chiefCompanyHotels, pageable)
+                        .map(RoomReviewDTO::fromEntity);
+
+            case MANAGER:
+                List<Integer> managerHotelIds = hotelRepository.findHotelIdsByMemberId(memberId);
+                log.info(" MANAGER의 호텔 목록: {}", managerHotelIds);
+
+                if (managerHotelIds.isEmpty()) {
+                    log.warn(" MANAGER가 관리하는 호텔이 없습니다! 리뷰 없음.");
+                    return Page.empty(pageable);
+                }
+
+                return roomReviewRepository.findByHotelIdOrderByReviewDateDesc(managerHotelIds.get(0), pageable)
+                        .map(RoomReviewDTO::fromEntity);
+
+            default:
+                return Page.empty(pageable);
+        }
     }
 
     // 5. 특정 객실의 최근 3개 리뷰 조회
@@ -174,7 +222,6 @@ public class RoomReviewService {
                 return Page.empty();
         }
     }
-
 
     // 7. 객실 평균 평점 조회
     @Transactional(readOnly = true)
@@ -255,5 +302,29 @@ public class RoomReviewService {
             log.error("ERROR: 리뷰 조회 중 예외 발생 - roomId: {}, message: {}", hotelId, e.getMessage());
             return Page.empty();
         }
+    }
+
+    private Integer getLoggedInMemberId(Authentication authentication) {
+        // authentication이 null이 아니고, 인증된 사용자가 있는지 확인
+        if (authentication == null || authentication.getPrincipal() == null) {
+            throw new RuntimeException("로그인된 사용자가 없습니다.");
+        }
+        // authentication.getName()을 memberName으로 대체
+        String memberEmail = authentication.getName();
+
+        // memberEmail이 null이거나 비어있을 경우 처리
+        if (memberEmail == null || memberEmail.isEmpty()) {
+            throw new RuntimeException("회원 정보가 존재하지 않습니다.");
+        }
+
+        // memberName을 통해 Member 조회
+        Member member = memberService.findMemberByMemberEmail(memberEmail);
+
+        // member가 null인 경우 처리
+        if (member == null) {
+            throw new RuntimeException("회원 정보가 존재하지 않습니다.");
+        }
+
+        return member.getMemberId(); // memberId 반환
     }
 }

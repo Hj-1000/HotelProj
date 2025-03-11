@@ -1,15 +1,19 @@
 package com.ntt.ntt.Service;
 
 
+import com.ntt.ntt.Constant.Role;
 import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.DTO.ImageDTO;
 import com.ntt.ntt.DTO.RoomDTO;
 import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.Image;
+import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Entity.Room;
 import com.ntt.ntt.Repository.ImageRepository;
 import com.ntt.ntt.Repository.ReservationRepository;
 import com.ntt.ntt.Repository.RoomRepository;
+import com.ntt.ntt.Repository.RoomReviewRepository;
+import com.ntt.ntt.Repository.company.CompanyRepository;
 import com.ntt.ntt.Repository.hotel.HotelRepository;
 import com.ntt.ntt.Util.FileUpload;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +21,7 @@ import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,12 +40,13 @@ public class RoomService {
 
     private final ImageRepository imageRepository;
     private final RoomRepository roomRepository;
-
+    private final RoomReviewRepository roomReviewRepository;
     private final HotelRepository hotelRepository;
-
+    private final CompanyRepository companyRepository;
     private final ModelMapper modelMapper;
 
     private final ReservationRepository reservationRepository;
+    private final MemberService memberService;
 
 
     // 이미지 등록할 ImageService 의존성 추가
@@ -140,13 +146,35 @@ public class RoomService {
     }
 
     //호텔 불러오기
-    public List<HotelDTO> getAllHotel() {
-        List<Hotel> hotels = hotelRepository.findAll();
+    public List<HotelDTO> getAllHotel(Authentication authentication) {
+        // 로그인한 사용자 ID 가져오기
+        Integer memberId = getLoggedInMemberId(authentication);
+        Member member = memberService.findById(memberId);
 
-        List<HotelDTO> hotelDTOS = hotels.stream()
-                .map(a -> new HotelDTO(a.getHotelId(), a.getHotelName())).collect(Collectors.toList());
+        if (member == null) {
+            throw new RuntimeException("회원 정보를 찾을 수 없습니다.");
+        }
 
-        return hotelDTOS;
+        List<Hotel> hotels;
+
+        // 권한별 호텔 목록 필터링
+        if (member.getRole() == Role.ADMIN) {
+            // ADMIN → 모든 호텔(지점) 조회
+            hotels = hotelRepository.findAll();
+        } else if (member.getRole() == Role.CHIEF) {
+            // CHIEF → 본인의 본사(Company)에 속한 호텔(지점)들만 조회
+            hotels = hotelRepository.findByCompanyByMemberByMemberId(memberId);
+        } else if (member.getRole() == Role.MANAGER) {
+            // MANAGER → 본인이 속한 지점 1개만 조회
+            hotels = hotelRepository.findHotelsByManagerId(memberId);
+        } else {
+            throw new RuntimeException("올바르지 않은 권한입니다.");
+        }
+
+        // Entity → DTO 변환
+        return hotels.stream()
+                .map(hotel -> new HotelDTO(hotel.getHotelId(), hotel.getHotelName()))
+                .collect(Collectors.toList());
     }
 
     /* 배너 이미지 수정 메서드 */
@@ -184,13 +212,12 @@ public class RoomService {
             if (optionalImage.isPresent()) {
                 Image image = optionalImage.get();
 
-                String title = (existingImageTitles.size() > i) ? existingImageTitles.get(i) : "";
-                String description = (existingImageDescriptions.size() > i) ? existingImageDescriptions.get(i) : "";
+                // 비어 있을경우
+                String title = (existingImageTitles.size() > i && existingImageTitles.get(i) != null && !existingImageTitles.get(i).trim().isEmpty())
+                        ? existingImageTitles.get(i) : "타이틀을 입력해주세요";
 
-                if (title.trim().isEmpty() || description.trim().isEmpty()) {
-                    log.warn("이미지 ID {}의 제목 또는 설명이 비어 있어 업데이트하지 않음", imageId);
-                    continue; // 제목이나 설명이 비어 있으면 업데이트 생략
-                }
+                String description = (existingImageDescriptions.size() > i && existingImageDescriptions.get(i) != null && !existingImageDescriptions.get(i).trim().isEmpty())
+                        ? existingImageDescriptions.get(i) : "설명을 입력해주세요";
 
                 log.info("기존 이미지 수정 - ID: {}, 기존 제목: {}, 새로운 제목: {}, 기존 설명: {}, 새로운 설명: {}",
                         imageId, image.getImageTitle(), title, image.getImageDescription(), description);
@@ -204,7 +231,6 @@ public class RoomService {
             }
         }
     }
-
 
     // 1. 등록 register
     public Integer registerRoom(RoomDTO roomDTO,
@@ -323,21 +349,82 @@ public class RoomService {
 
 
     // 3. 목록 list
-    public List<RoomDTO> listRoom() {
-        // 모든 Room 데이터 조회
-        List<Room> rooms = roomRepository.findAll();
+    @Transactional(readOnly = true)
+    public Page<RoomDTO> listRooms(String keyword, String category, Pageable pageable,Authentication authentication) {
+        log.info(" 검색 요청 - 카테고리: {}, 키워드: {}", category, keyword);
 
-        // 결과를 담을 RoomDTO 리스트 생성
-        List<RoomDTO> roomDTOs = new ArrayList<>();
+        // 로그인한 사용자 정보 가져오기
+        Integer memberId = getLoggedInMemberId(authentication);
+        Member member = memberService.findById(memberId);
 
-        // 각 Room 객체를 RoomDTO로 변환하여 리스트에 추가
-        for (Room room : rooms) {
-            RoomDTO roomDTO = modelMapper.map(room, RoomDTO.class);
-            roomDTOs.add(roomDTO);
+        if (member == null) {
+            throw new RuntimeException("회원 정보를 찾을 수 없습니다.");
         }
 
+        Page<Room> rooms;
 
-        return roomDTOs;
+        //  ADMIN(최고 관리자) → 모든 객실 조회
+        if (member.getRole() == Role.ADMIN) {
+            rooms = roomRepository.findAll(pageable);
+        }
+        //  CHIEF(본점 관리자) → 본점의 모든 지점 객실 조회
+        else if (member.getRole() == Role.CHIEF) {
+            rooms = roomRepository.findByHotel_Company_Member_MemberId(memberId, pageable);
+        }
+        //  MANAGER(지점 관리자) → 본인이 속한 지점 객실만 조회
+        else if (member.getRole() == Role.MANAGER) {
+            rooms = roomRepository.findByHotel_Member_MemberId(memberId, pageable);
+        }
+        // 예외 처리
+        else {
+            throw new RuntimeException("올바르지 않은 권한입니다.");
+        }
+
+        //  2. 검색어(keyword)가 존재하는 경우 필터링
+        if (keyword != null && !keyword.isEmpty()) {
+            switch (category) {
+                case "roomName":
+                    rooms = roomRepository.findByRoomNameContaining(keyword, pageable);
+                    break;
+                case "roomType":
+                    rooms = roomRepository.findByRoomTypeContaining(keyword.toLowerCase(), pageable);
+                    break;
+                case "roomStatus":
+                    Boolean status = null;
+                    if ("av".equalsIgnoreCase(keyword) || "available".equalsIgnoreCase(keyword)) {
+                        status = true;
+                    } else if ("un".equalsIgnoreCase(keyword) || "unavailable".equalsIgnoreCase(keyword)) {
+                        status = false;
+                    }
+                    log.info("🔍 변환된 상태 값: {}", status);
+                    if (status != null) {
+                        rooms = roomRepository.findByRoomStatus(status, pageable);
+                    } else {
+                        throw new IllegalArgumentException("유효하지 않은 상태 값입니다. 'av', 'un', 'available', 'unavailable'만 입력 가능합니다.");
+                    }
+                    break;
+                default:
+                    log.warn(" 잘못된 검색 카테고리: {}", category);
+            }
+        }
+
+        // Room Entity를 RoomDTO로 변환하면서 이미지 리스트 추가
+        return rooms.map(room -> {
+            RoomDTO roomDTO = modelMapper.map(room, RoomDTO.class);
+
+            // 이미지 리스트 매핑
+            List<ImageDTO> imageDTOList = imageRepository.findByRoom_RoomId(room.getRoomId())
+                    .stream()
+                    .map(image -> {
+                        // 이미지 경로 수정 (예: 절대 경로 -> 상대 경로)
+                        image.setImagePath(image.getImagePath().replace("c:/data/", ""));
+                        return modelMapper.map(image, ImageDTO.class);
+                    })
+                    .collect(Collectors.toList());
+
+            roomDTO.setRoomImageDTOList(imageDTOList);
+            return roomDTO;
+        });
     }
 
     // 4. 수정 update
@@ -505,78 +592,37 @@ public class RoomService {
         if (roomOptional.isPresent()) {
             Room room = roomOptional.get();
 
-            // 룸 연결된 이미지 삭제
+            // 룸 연결된 리뷰 삭제
+            try {
+                roomReviewRepository.deleteByRoom_RoomId(roomId);
+            } catch (Exception e) {
+                throw new RuntimeException("방에 연결된 리뷰 삭제 중 오류 발생: " + e.getMessage());
+            }
+
+            // 룸 연결된 이미지 삭제 (예외 발생 방지)
             List<Image> imagesToDelete = room.getRoomImageList();
             for (Image image : imagesToDelete) {
-                // 이미지 서비스에서 물리적 파일 삭제 + DB에서 삭제
-                imageService.deleteImage(image.getImageId());
-            }
-
-            roomRepository.deleteById(roomId);
-        } else {
-            throw new RuntimeException("회사를 찾을 수 없습니다.");
-        }
-    }
-
-    /* 룸 페이지 검색 메서드*/
-
-    @Transactional(readOnly = true)
-    public Page<RoomDTO> searchRooms(String keyword, String category, Pageable pageable) {
-        log.info(" 검색 요청 - 카테고리: {}, 키워드: {}", category, keyword);
-
-        Page<Room> rooms;
-
-        if (keyword == null || keyword.isEmpty()) {
-            rooms = roomRepository.findAll(pageable);
-        } else {
-            switch (category) {
-                case "roomName":
-                    rooms = roomRepository.findByRoomNameContaining(keyword, pageable);
-                    break;
-                case "roomType":
-                    rooms = roomRepository.findByRoomTypeContaining(keyword.toLowerCase(), pageable);
-                    break;
-                case "roomStatus":
-                    // 검색어 변환 (av → true, un → false)
-                    Boolean status = null;
-                    if ("av".equalsIgnoreCase(keyword) || "available".equalsIgnoreCase(keyword)) {
-                        status = true;
-                    } else if ("un".equalsIgnoreCase(keyword) || "unavailable".equalsIgnoreCase(keyword)) {
-                        status = false;
-                    }
-
-                    log.info(" 변환된 상태 값: {}", status);
-
-                    if (status != null) {
-                        rooms = roomRepository.findByRoomStatus(status, pageable);
-                        log.info(" 검색된 방 개수: {}", rooms.getTotalElements());
+                try {
+                    // 이미지 존재 여부 확인 후 삭제
+                    if (imageRepository.existsById(image.getImageId())) {
+                        imageService.delImage(image.getImageId());
                     } else {
-                        throw new IllegalArgumentException("유효하지 않은 상태 값입니다. 'av', 'un', 'available', 'unavailable'만 입력 가능합니다.");
+                        log.warn("이미지 삭제 건너뜀 (이미지 ID: {}): 해당 이미지가 존재하지 않음", image.getImageId());
                     }
-                    break;
-                default:
-                    rooms = roomRepository.findAll(pageable);
+                } catch (Exception e) {
+                    log.warn("이미지 삭제 중 오류 발생 (이미지 ID: {}): {}", image.getImageId(), e.getMessage());
+                }
             }
+
+            // 룸 삭제
+            try {
+                roomRepository.deleteById(roomId);
+            } catch (Exception e) {
+                throw new RuntimeException("방 삭제 중 오류 발생: " + e.getMessage());
+            }
+        } else {
+            throw new RuntimeException("해당 방을 찾을 수 없습니다.");
         }
-
-
-        // Room Entity를 RoomDTO로 변환하면서 이미지 리스트 추가
-        return rooms.map(room -> {
-            RoomDTO roomDTO = modelMapper.map(room, RoomDTO.class);
-
-            // 이미지 리스트 매핑
-            List<ImageDTO> imageDTOList = imageRepository.findByRoom_RoomId(room.getRoomId())
-                    .stream()
-                    .map(image -> {
-                        // 이미지 경로 수정 (예: 절대 경로 -> 상대 경로)
-                        image.setImagePath(image.getImagePath().replace("c:/data/", ""));
-                        return modelMapper.map(image, ImageDTO.class);
-                    })
-                    .collect(Collectors.toList());
-
-            roomDTO.setRoomImageDTOList(imageDTOList);
-            return roomDTO;
-        });
     }
 
     /* 예약 페이지 검색 메서드*/
@@ -721,5 +767,29 @@ public class RoomService {
         int imageCount = imageRepository.countByRoom_RoomId(roomId);
         log.info("Room ID: {} - 이미지 개수: {}", roomId, imageCount);
         return imageCount;
+    }
+
+    private Integer getLoggedInMemberId(Authentication authentication) {
+        // authentication이 null이 아니고, 인증된 사용자가 있는지 확인
+        if (authentication == null || authentication.getPrincipal() == null) {
+            throw new RuntimeException("로그인된 사용자가 없습니다.");
+        }
+        // authentication.getName()을 memberName으로 대체
+        String memberEmail = authentication.getName();
+
+        // memberEmail이 null이거나 비어있을 경우 처리
+        if (memberEmail == null || memberEmail.isEmpty()) {
+            throw new RuntimeException("회원 정보가 존재하지 않습니다.");
+        }
+
+        // memberName을 통해 Member 조회
+        Member member = memberService.findMemberByMemberEmail(memberEmail);
+
+        // member가 null인 경우 처리
+        if (member == null) {
+            throw new RuntimeException("회원 정보가 존재하지 않습니다.");
+        }
+
+        return member.getMemberId(); // memberId 반환
     }
 }
