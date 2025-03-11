@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,17 @@ public class RoomController {
         // 활성화된 배너 목록 가져오기
         List<BannerDTO> activeBanners = bannerService.getActiveBanners();
 
+        // 활성화된 배너가 없을 경우 기본 배너 이미지 리스트 생성
+        if (activeBanners == null || activeBanners.isEmpty()) {
+            List<String> defaultBanners = Arrays.asList(
+                "/img/bg_wedding.jpg",
+                "/img/bg_dining.jpg",
+                "/img/bg_membership.jpg",
+                "/img/bg_activity.jpg"
+            );
+            model.addAttribute("defaultBanners", defaultBanners);
+        }
+        
         // 로그로 확인
         log.info("Recommended hotels sent to index page: {}", recommendedHotels);
         log.info("Active banners sent to index page: {}", activeBanners);

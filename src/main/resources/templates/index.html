@@ -148,12 +148,24 @@
     <section class="text-center bg-light">
         <div id="bannerCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
             <div class="bnr_wrapper carousel-inner">
-                <div th:each="banner, stat : ${activeBanners}" 
-                     th:class="${stat.first} ? 'carousel-item active' : 'carousel-item'">
-                    <img th:src="@{'/upload/' + ${banner.bannerImageDTOList[0].imagePath}}"
-                         class="d-block w-100" alt="배너 이미지"
-                         style="object-fit: cover;">
-                </div>
+                <!-- 활성화된 배너가 있을 경우 -->
+                <th:block th:if="${not #lists.isEmpty(activeBanners)}">
+                    <div th:each="banner, stat : ${activeBanners}" 
+                         th:class="${stat.first} ? 'carousel-item active' : 'carousel-item'">
+                        <img th:src="@{'/upload/' + ${banner.bannerImageDTOList[0].imagePath}}"
+                             class="d-block w-100" alt="배너 이미지"
+                             style=" object-fit: cover;">
+                    </div>
+                </th:block>
+                <!-- 활성화된 배너가 없을 경우 기본 배너 표시 -->
+                <th:block th:if="${#lists.isEmpty(activeBanners)}">
+                    <div th:each="banner, stat : ${defaultBanners}" 
+                         th:class="${stat.first} ? 'carousel-item active' : 'carousel-item'">
+                        <img th:src="@{${banner}}"
+                             class="d-block w-100" alt="기본 배너 이미지"
+                             style=" object-fit: cover;">
+                    </div>
+                </th:block>
             </div>
             <!-- 슬라이드 버튼 -->
             <button class="carousel-control-prev" type="button" data-bs-target="#bannerCarousel" data-bs-slide="prev">
@@ -166,10 +178,15 @@
             </button>
             <!-- 슬라이드 인디케이터 -->
             <div class="carousel-indicators">
-                <button type="button" data-bs-target="#bannerCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-                <button type="button" data-bs-target="#bannerCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
-                <button type="button" data-bs-target="#bannerCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
-                <button type="button" data-bs-target="#bannerCarousel" data-bs-slide-to="3" aria-label="Slide 4"></button>
+                <th:block th:with="totalBanners=${not #lists.isEmpty(activeBanners) ? #lists.size(activeBanners) : #lists.size(defaultBanners)}">
+                    <button th:each="i : ${#numbers.sequence(0, totalBanners - 1)}"
+                            type="button" data-bs-target="#bannerCarousel"
+                            th:attr="data-bs-slide-to=${i}"
+                            th:class="${i == 0} ? 'active' : ''"
+                            th:aria-current="${i == 0} ? 'true' : 'false'"
+                            th:aria-label="'Slide ' + ${i + 1}">
+                    </button>
+                </th:block>
             </div>
         </div>
     </section>
