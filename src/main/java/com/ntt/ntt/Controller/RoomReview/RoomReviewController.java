@@ -114,8 +114,8 @@ public class RoomReviewController {
 
     @Operation(summary = "리뷰 수정", description = "유저가 자신이 작성한 리뷰를 수정한다.")
     @PutMapping("/update/{reviewId}")
-    @PreAuthorize("@roomReviewService.isReviewOwnerProc(#reviewId, authentication.principal.username)")
-    public ResponseEntity<?> updateReview(
+    @PreAuthorize("@roomReviewService.isReviewOwner(#reviewId, authentication.principal.username)")
+    public ResponseEntity<?> updateReviewProc(
             @PathVariable Integer reviewId,
             @RequestBody RoomReviewDTO reviewDTO) {
         log.info("리뷰 수정 요청: reviewId={}, reviewDTO={}", reviewId, reviewDTO);
@@ -137,8 +137,8 @@ public class RoomReviewController {
 
     @Operation(summary = "리뷰 삭제", description = "유저가 자신이 작성한 리뷰를 삭제한다.")
     @PostMapping("/delete/{reviewId}")
-    @PreAuthorize("@roomReviewService.isReviewOwnerProc(#reviewId, authentication.principal.username)")
-    public ResponseEntity<?> deleteReview(@PathVariable Integer reviewId) {
+    @PreAuthorize("@roomReviewService.isReviewOwner(#reviewId, authentication.principal.username)")
+    public ResponseEntity<?> deleteReviewProc(@PathVariable Integer reviewId) {
         log.info("리뷰 삭제 요청: reviewId={}", reviewId);
 
         try {

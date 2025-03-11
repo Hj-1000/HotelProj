@@ -1,6 +1,5 @@
 package com.ntt.ntt.Repository.hotel;
 
-import com.ntt.ntt.DTO.HotelDTO;
 import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.Member;
 import jakarta.transaction.Transactional;
@@ -86,7 +85,13 @@ public interface HotelRepository extends JpaRepository<Hotel, Integer> {
     @Query("SELECT h FROM Hotel h LEFT JOIN FETCH h.member")
     List<Hotel> findAllWithMember();
 
+    // 본사(Company) ID에 속한 모든 호텔(지점)을 조회 (CHIEF용)
+    @Query("SELECT h FROM Hotel h WHERE h.company.member.memberId = :memberId")
+    List<Hotel> findByCompanyByMemberByMemberId(@Param("memberId") Integer memberId);
 
+    // 본인이 관리하는 호텔(지점)만 조회 (MANAGER용)
+    @Query("SELECT h FROM Hotel h WHERE h.member.memberId = :memberId")
+    List<Hotel> findHotelsByManagerId(@Param("memberId") Integer memberId);
 
 
 }

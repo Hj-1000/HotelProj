@@ -1,5 +1,9 @@
 /* 유저페이지 공용 스타일 */
 
+* {
+    font-family: 'Noto Sans KR', sans-serif;
+}
+
 /* 헤더 */
 header {
     padding: 0 5rem !important;
@@ -75,7 +79,7 @@ header {
 
 h5 {
     font-size: 1.25rem;
-    margin-bottom: 1rem !important;
+    margin-bottom: 1rem;
 }
 
 .badge {

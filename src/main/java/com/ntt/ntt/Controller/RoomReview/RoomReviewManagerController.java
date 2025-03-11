@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +38,7 @@ public class RoomReviewManagerController {
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
+            Authentication authentication,
             Model model) {
 
         log.info(" 객실 리뷰 목록 요청 - category: {}, keyword: {}", category, keyword);
@@ -46,9 +48,10 @@ public class RoomReviewManagerController {
         if (category != null && keyword != null && !keyword.trim().isEmpty()) {
             reviews = roomReviewService.searchReviews(category, keyword, Pageable.ofSize(size).withPage(page));
         } else {
-            // 검색 조건이 없을 경우 전체 목록 반환
-            reviews = roomReviewService.getAllReviews(Pageable.ofSize(size).withPage(page));
+            // 역할별로 필터링하여 리뷰 조회
+            reviews = roomReviewService.getAllReviews(Pageable.ofSize(size).withPage(page), authentication);
         }
+
         model.addAttribute("reviews", reviews);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", reviews.getTotalPages());
@@ -60,9 +63,11 @@ public class RoomReviewManagerController {
 
     @Operation(summary = "모든 리뷰 목록 데이터 반환", description = "관리자가 모든 객실 리뷰를 JSON 형식으로 조회한다.")
     @GetMapping("/list/data")
-    public ResponseEntity<Page<RoomReviewDTO>> getReviewListDataForm(Pageable pageable) {
+    public ResponseEntity<Page<RoomReviewDTO>> getReviewListDataForm(Pageable pageable,Authentication authentication) {
         log.info("🔍 객실 리뷰 목록 JSON 요청");
-        Page<RoomReviewDTO> reviews = roomReviewService.getAllReviews(pageable);
+
+        // 로그인한 사용자의 역할(Role) 가져오기
+        Page<RoomReviewDTO> reviews = roomReviewService.getAllReviews(pageable, authentication);
         return ResponseEntity.ok(reviews);
     }
 

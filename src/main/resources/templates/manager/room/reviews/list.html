@@ -52,6 +52,7 @@
                 <tr>
                     <th>리뷰 ID</th>
                     <th>객실 ID</th>
+                    <th>객실 이름</th>
                     <th>회원 ID</th>
                     <th>회원 이름</th>
                     <th>평점</th>
@@ -69,6 +70,7 @@
                 <tr th:each="review : ${reviews.content}" th:unless="${reviews.isEmpty()}">
                     <td th:text="${review.reviewId}"></td>
                     <td th:text="${review.roomId}"></td>
+                    <td th:text="${review.roomName}"></td>
                     <td th:text="${review.memberId}"></td>
                     <td th:text="${review.memberName}"></td>
                     <td th:text="${'★'.repeat(review.rating) + '☆'.repeat(5 - review.rating)}"></td>
@@ -79,10 +81,10 @@
                                 th:data-id="${review.reviewId}"
                                 th:data-text="${review.reviewText}"
                                 th:data-rating="${review.rating}">
-                            수정
+                            <i class="bi bi-pen"></i>
                         </button>
                         <button class="btn btn-danger btn-sm delete-review-btn" th:data-id="${review.reviewId}">
-                            삭제
+                            <i class="bi bi-trash"></i>
                         </button>
                     </td>
                 </tr>

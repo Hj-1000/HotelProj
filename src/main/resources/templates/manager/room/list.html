@@ -180,6 +180,7 @@
                         <tr>
                             <th scope="col">이미지</th>
                             <th scope="col">객실 ID</th>
+                            <th scope="col">지사명</th>
                             <th scope="col">객실 이름</th>
                             <th scope="col">객실 타입</th>
                             <th scope="col">가격</th>
@@ -202,6 +203,7 @@
 
                             <!-- 나머지 -->
                             <td class="align-middle text-center" th:text="${room.roomId}"></td>
+                            <td class="align-middle text-center" th:text="${room.hotelName} ?: '없음'"></td>
                             <td class="align-middle text-center" th:text="${room.roomName}"></td>
                             <td class="align-middle text-center" th:text="${room.roomType}"></td>
                             <td class="align-middle text-center" th:text="${room.formattedRoomPrice} + ' KRW'"></td>

@@ -87,6 +87,14 @@
             height: 100px;
         }
 
+        .btn-wrap {
+            text-align: right;
+        }
+
+        .btn-wrap .btn {
+            width: 150px;
+        }
+
     </style>
 </head>
 <body>
@@ -99,11 +107,13 @@
             <div class="mb-3 mt-3">
                 <label for="hotelId" class="form-label">지사명:</label>
                 <select id="hotelId" name="hotelId" class="form-select">
-                    <th:block th:each="hotelDTOS : ${hotelDTOS}">
-                        <option th:value="${hotelDTOS.hotelId}" th:text="${hotelDTOS.hotelName}">뒤에바</option>
+                    <option value="" disabled selected>지사를 선택하세요</option>
+                    <th:block th:each="hotel : ${hotelDTOS}">
+                        <option th:value="${hotel.hotelId}" th:text="${hotel.hotelName}">지사명</option>
                     </th:block>
                 </select>
             </div>
+
             <!-- 객실 이름 -->
             <div class="mb-3">
                 <label for="roomName" class="form-label">객실 이름</label>
@@ -198,7 +208,9 @@
             <div id="imageDetailsContainer"></div>
 
             <!-- Submit Button -->
-            <button type="submit" class="btn btn-primary">등록</button>
+            <div class="btn-wrap">
+                <button type="submit" class="btn btn-primary">등록</button>
+            </div>
         </form>
     </div>
     <script>

@@ -29,8 +29,17 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
     @Query("SELECT r FROM Room r WHERE r.roomStatus = :roomStatus")
     Page<Room> findByRoomStatus(@Param("roomStatus") Boolean roomStatus, Pageable pageable);
 
-    /* 모든 방 목록을 페이징 처리하여 조회*/
+    /* 모든 객실 조회 (ADMIN) */
     Page<Room> findAll(Pageable pageable);
+
+    /*  CHIEF 본점의 모든 지점 객실 조회 */
+    @Query("SELECT r FROM Room r WHERE r.hotelId.hotelId IN " +
+            "(SELECT h.hotelId FROM Hotel h WHERE h.company.member.memberId = :memberId)")
+    Page<Room> findByHotel_Company_Member_MemberId(@Param("memberId") Integer memberId, Pageable pageable);
+
+    /*  MANAGER 본인이 관리하는 호텔의 객실만 조회 */
+    @Query("SELECT r FROM Room r WHERE r.hotelId.member.memberId = :memberId")
+    Page<Room> findByHotel_Member_MemberId(@Param("memberId") Integer memberId, Pageable pageable);
 
     /* 방 목록을 조회하면서 각 방과 연결된 이미지 리스트를 함께 가져오기 */
     @Query("SELECT r FROM Room r LEFT JOIN FETCH r.roomImageList")
@@ -55,5 +64,4 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
 
     @Query("SELECT r.roomId FROM Room r WHERE r.hotelId.hotelId IN :hotelIds")
     List<Integer> findRoomIdsByHotelIds(@Param("hotelIds") List<Integer> hotelIds);
-
 }

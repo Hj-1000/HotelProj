@@ -1,5 +1,9 @@
 /* 관리자 페이지 공용 스타일 */
 
+* {
+    font-family: 'Noto Sans KR', sans-serif;
+}
+
 #wrapper {
     background: #f5f5f5;
 }
