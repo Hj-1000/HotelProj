@@ -17,6 +17,24 @@
         .custom-link:hover {
             color: gray; /* 마우스 올리면 회색 */
         }
+        .table {
+            vertical-align: middle;
+        }
+        .table td {
+            vertical-align: middle;
+            text-align: center;
+        }
+        .banner-image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .banner-image-container img {
+            max-width: 300px;
+            height: 200px;
+            object-fit: cover;
+        }
     </style>
     <!--반응형웹-->
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -35,21 +53,23 @@
             <table class="table table-bordered text-center">
                 <thead>
                 <tr>
-                    <th style="width: 15%">배너제목</th>
-                    <th style="width: 15%">활성화</th>
+                    <th style="width: 25%">배너제목</th>
+<!--                    <th style="width: 15%">활성화</th>-->
                     <!--      <th style="width: 15%">배너랭크</th>-->
-                    <th style="width: 40%">배너보기</th>
+                    <th style="width: 60%">배너보기</th>
                     <th style="width: 15%">삭제여부</th>
                 </tr>
                 </thead>
-                <tbody th:if="${bannerDTOList != null}">
-                <tr th:each="data, stat : ${bannerDTOList}">
+                <tbody>
+                <tr th:if="${bannerDTOList == null or #lists.isEmpty(bannerDTOList)}">
+                    <td colspan="4" class="text-center">배너 이미지가 없습니다</td>
+                </tr>
+                <tr th:each="data : ${bannerDTOList}" th:if="${bannerDTOList != null and not #lists.isEmpty(bannerDTOList)}">
                     <td th:text="${data.bannerTitle}"></td>
-                    <td th:text="${data.bannerStatus ? '활성' : '비활성'}"></td>
+<!--                    <td th:text="${data.bannerStatus ? '활성' : '비활성'}"></td>-->
                     <td>
-                        <div th:if="${data.bannerImageDTOList != null}" th:each="img : ${data.bannerImageDTOList}">
-                            <!--                  <img th:src="@{'/upload/' + ${data.bannerImageDTOList.imagePath}}" width="300px" height="200px">-->
-                            <img th:src="@{'/upload/' + ${img.imagePath}}" width="300px" height="200px">
+                        <div th:if="${data.bannerImageDTOList != null}" th:each="img : ${data.bannerImageDTOList}" class="banner-image-container">
+                            <img th:src="@{'/upload/' + ${img.imagePath}}" style="width: 400px; height:150px;"  alt="배너 이미지">
                         </div>
                     </td>
                     <td>
@@ -60,48 +80,6 @@
                     </td>
                 </tr>
                 </tbody>
-                <tr th:if="${bannerDTOList == null or #lists.isEmpty(bannerDTOList)}">
-                    <td colspan="4" class="text-center">배너 이미지가 없습니다</td>
-                </tr>
-
-
-                <!--  <tbody th:if="${bannerDTOList != null}">-->
-                <!--&lt;!&ndash;  <tr th:if="${lists.isEmpty(bannerDTOList)}">&ndash;&gt;-->
-                <!--&lt;!&ndash;      <td class="text-center">배너이미지가 없습니다</td>&ndash;&gt;-->
-                <!--&lt;!&ndash;  </tr>&ndash;&gt;-->
-                <!--  <tr th:each="data, stat : ${bannerDTOList}">-->
-                <!--&lt;!&ndash;  <tr th:each="banner : ${banners}">&ndash;&gt;-->
-                <!--&lt;!&ndash;    <td th:text="${banner.bannerId}"></td>&ndash;&gt;-->
-                <!--    <td th:text="${data.bannerTitle}"></td>-->
-                <!--    <td th:text="${data.bannerStatus ? '활성' : '비활성'}"></td>-->
-                <!--&lt;!&ndash;    <td th:text="${banner.bannerRank}"></td>&ndash;&gt;-->
-                <!--    <td>-->
-                <!--        <div th:if="${data.bannerImageDTOList != null}" th:each="img : ${data.bannerImageDTOList}">-->
-
-                <!--        &lt;!&ndash;        <div th:each="img : ${data.bannerImageDTOList}">&lt;!&ndash;그림파일이 존재하면&ndash;&gt;&ndash;&gt;-->
-                <!--            <img th:src="@{'/upload/' + ${img.imagePath}}" width="300px" height="200px">-->
-                <!--        </div>-->
-                <!--&lt;!&ndash;        <a th:href="@{/banner/{bannerId}(bannerId=${banner.bannerId})}">이미지</a>&ndash;&gt;-->
-
-                <!--    </td>-->
-                <!--    <td>-->
-                <!--&lt;!&ndash;            <a th:href="@{banner/delete(bannerId=${data.bannerId})}" class="delete-link"><i class="bi bi-trash"></i></a>&ndash;&gt;-->
-
-                <!--        <form th:action="@{/banner/delete}" method="post" onsubmit="return confirm('정말로 삭제하시겠습니까?');">-->
-
-                <!--            <input type="hidden" name="bannerId" th:value="${data.bannerId}">-->
-                <!--            <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i></button>-->
-                <!--        </form>-->
-
-
-                <!--    </td>-->
-                <!--  </tr>-->
-                <!--  <tr th:if="${#lists.isEmpty(bannerDTOList)}">-->
-                <!--      <td colspan="4" class="text-center">배너 이미지가 없습니다</td>-->
-                <!--  </tr>-->
-
-
-                <!--  </tbody>-->
             </table>
             <div class="row mt-5">
                 <div class="col-2">
@@ -109,8 +87,6 @@
                 </div>
                 <div class="col-10"></div>
             </div>
-            <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
-
         </div>
     </div>
 </div>
