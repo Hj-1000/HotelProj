@@ -350,272 +350,274 @@
                         <div class="map_wrap" style="width: 100%; height: 100%;">
                             <div id="map" style="width:100%;height:100%;position:relative;overflow:hidden;"></div>
                         </div>
+                    </div>
+
+                    <script type="text/javascript"
+                            src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=0cb0450151c2b892da76c0d5dcd6535a&libraries=services"></script>
+
+                    <script>
+                        var mapContainer = document.getElementById('map'), // 지도를 표시할 div
+                            mapOption = {
+                                center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
+                                level: 3 // 지도의 확대 레벨
+                            };
+
+                        // 지도를 생성합니다
+                        var map = new kakao.maps.Map(mapContainer, mapOption);
+
+                        // 지도 타입 변경 컨트롤을 생성한다
+                        var mapTypeControl = new kakao.maps.MapTypeControl();
+
+                        // 지도의 상단 우측에 지도 타입 변경 컨트롤을 추가한다
+                        map.addControl(mapTypeControl, kakao.maps.ControlPosition.TOPRIGHT);
+
+                        // 지도에 확대 축소 컨트롤을 생성한다
+                        var zoomControl = new kakao.maps.ZoomControl();
+
+                        // 지도의 우측에 확대 축소 컨트롤을 추가한다
+                        map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
+
+                        // 주소-좌표 변환 객체를 생성합니다
+                        var geocoder = new kakao.maps.services.Geocoder();
+
+                        // Thymeleaf에서 호텔 주소와 이름 값을 가져옴
+                        var hotelAddress = "[[${hotelDTO.hotelAddress}]]";  // 호텔 주소
+                        var hotelName = "[[${hotelDTO.hotelName}]]";  // 호텔 이름
+
+                        // 주소로 좌표를 검색합니다
+                        geocoder.addressSearch(hotelAddress, function(result, status) {
+
+                            // 정상적으로 검색이 완료됐으면
+                            if (status === kakao.maps.services.Status.OK) {
+
+                                var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+
+                                // 결과값으로 받은 위치를 마커로 표시합니다
+                                var marker = new kakao.maps.Marker({
+                                    map: map,
+                                    position: coords
+                                });
+
+                                // 인포윈도우로 장소에 대한 설명을 표시합니다
+                                var infowindow = new kakao.maps.InfoWindow({
+                                    content: '<div style="width:200px;text-align:center;padding:10px;font-size:14px;color:black;">' + hotelName + '</div>'  // 호텔 이름 표시
+                                });
+                                infowindow.open(map, marker);
+
+                                // 지도의 중심을 결과값으로 받은 위치로 이동시킵니다
+                                map.setCenter(coords);
+                            }
+                        });
+
+                        // 지도 열기/닫기 토글 함수
+                        function toggleMap1() {
+                            var mapContainer = document.getElementById("mapContainer");
+                            var mapBtn1 = document.getElementById("mapToggleBtn1");
+
+                            // 현재 지도 영역의 높이가 0이면 펼쳐지고, 아니면 접히도록 설정
+                            if (mapContainer.style.height === "0px") {
+                                mapContainer.style.height = "500px";  // 펼쳤을 때 높이 설정
+                                mapBtn1.innerHTML = '지도 닫기 <i class="bi bi-map-fill"></i>';
+                                mapBtn1.classList.remove("btn-outline-primary");
+                                mapBtn1.classList.add("btn-primary");
+                            } else {
+                                mapContainer.style.height = "0px";  // 접었을 때 높이 설정
+                                mapBtn1.innerHTML = '지도 열기 <i class="bi bi-map"></i>';
+                                mapBtn1.classList.remove("btn-primary");
+                                mapBtn1.classList.add("btn-outline-primary");
+                            }
+                        }
+
+                        // 지도 열기/닫기 토글 함수
+                        function toggleMap2() {
+                            var mapContainer = document.getElementById("mapContainer");
+                            var mapBtn2 = document.getElementById("mapToggleBtn2");
+
+                            // 현재 지도 영역의 높이가 0이면 펼쳐지고, 아니면 접히도록 설정
+                            if (mapContainer.style.height === "0px") {
+                                mapContainer.style.height = "500px";  // 펼쳤을 때 높이 설정
+                                mapBtn2.innerHTML = '지도 닫기 <i class="bi bi-map-fill"></i>';
+                                mapBtn2.classList.remove("btn-outline-primary");
+                                mapBtn2.classList.add("btn-primary");
+                            } else {
+                                mapContainer.style.height = "0px";  // 접었을 때 높이 설정
+                                mapBtn2.innerHTML = '지도 열기 <i class="bi bi-map"></i>';
+                                mapBtn2.classList.remove("btn-primary");
+                                mapBtn2.classList.add("btn-outline-primary");
+                            }
+                        }
+                    </script>
                 </div>
 
-                <script type="text/javascript"
-                        src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=0cb0450151c2b892da76c0d5dcd6535a&libraries=services"></script>
-
-                <script>
-                    var mapContainer = document.getElementById('map'), // 지도를 표시할 div
-                        mapOption = {
-                            center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
-                            level: 3 // 지도의 확대 레벨
-                        };
-
-                    // 지도 확대
-                    function zoomIn() {
-                        map.setLevel(map.getLevel() - 1);
-                    }
-
-                    // 지도 축소
-                    function zoomOut() {
-                        map.setLevel(map.getLevel() + 1);
-                    }
-
-                    // 지도를 생성합니다
-                    var map = new kakao.maps.Map(mapContainer, mapOption);
-
-                    // 주소-좌표 변환 객체를 생성합니다
-                    var geocoder = new kakao.maps.services.Geocoder();
-
-                    // Thymeleaf에서 호텔 주소와 이름 값을 가져옴
-                    var hotelAddress = "[[${hotelDTO.hotelAddress}]]";  // 호텔 주소
-                    var hotelName = "[[${hotelDTO.hotelName}]]";  // 호텔 이름
-
-                    // 주소로 좌표를 검색합니다
-                    geocoder.addressSearch(hotelAddress, function(result, status) {
-
-                        // 정상적으로 검색이 완료됐으면
-                        if (status === kakao.maps.services.Status.OK) {
-
-                            var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
-
-                            // 결과값으로 받은 위치를 마커로 표시합니다
-                            var marker = new kakao.maps.Marker({
-                                map: map,
-                                position: coords
-                            });
-
-                            // 인포윈도우로 장소에 대한 설명을 표시합니다
-                            var infowindow = new kakao.maps.InfoWindow({
-                                content: '<div style="width:200px;text-align:center;padding:10px;font-size:14px;color:black;">' + hotelName + '</div>'  // 호텔 이름 표시
-                            });
-                            infowindow.open(map, marker);
-
-                            // 지도의 중심을 결과값으로 받은 위치로 이동시킵니다
-                            map.setCenter(coords);
-                        }
-                    });
-
-                    // 지도 열기/닫기 토글 함수
-                    function toggleMap1() {
-                        var mapContainer = document.getElementById("mapContainer");
-                        var mapBtn1 = document.getElementById("mapToggleBtn1");
-
-                        // 현재 지도 영역의 높이가 0이면 펼쳐지고, 아니면 접히도록 설정
-                        if (mapContainer.style.height === "0px") {
-                            mapContainer.style.height = "500px";  // 펼쳤을 때 높이 설정
-                            mapBtn1.innerHTML = '지도 닫기 <i class="bi bi-map-fill"></i>';
-                            mapBtn1.classList.remove("btn-outline-primary");
-                            mapBtn1.classList.add("btn-primary");
-                        } else {
-                            mapContainer.style.height = "0px";  // 접었을 때 높이 설정
-                            mapBtn1.innerHTML = '지도 열기 <i class="bi bi-map"></i>';
-                            mapBtn1.classList.remove("btn-primary");
-                            mapBtn1.classList.add("btn-outline-primary");
-                        }
-                    }
-
-                    // 지도 열기/닫기 토글 함수
-                    function toggleMap2() {
-                        var mapContainer = document.getElementById("mapContainer");
-                        var mapBtn2 = document.getElementById("mapToggleBtn2");
-
-                        // 현재 지도 영역의 높이가 0이면 펼쳐지고, 아니면 접히도록 설정
-                        if (mapContainer.style.height === "0px") {
-                            mapContainer.style.height = "500px";  // 펼쳤을 때 높이 설정
-                            mapBtn2.innerHTML = '지도 닫기 <i class="bi bi-map-fill"></i>';
-                            mapBtn2.classList.remove("btn-outline-primary");
-                            mapBtn2.classList.add("btn-primary");
-                        } else {
-                            mapContainer.style.height = "0px";  // 접었을 때 높이 설정
-                            mapBtn2.innerHTML = '지도 열기 <i class="bi bi-map"></i>';
-                            mapBtn2.classList.remove("btn-primary");
-                            mapBtn2.classList.add("btn-outline-primary");
-                        }
-                    }
-                </script>
-            </div>
-
-            <!-- 객실 리뷰부분 -->
-            <div class="card border" style="width: 940px; margin: auto; padding-top: 17px; padding-bottom: 20px;">
-                <div style="width: 950px; margin: auto;">
-                    <div style="margin-bottom: -20px">
-                        <h4 style="margin-bottom: -24px; margin-left: 13px">&ensp;객실 리뷰</h4>
-                        <span>
+                <!-- 객실 리뷰부분 -->
+                <div class="card border" style="width: 940px; margin: auto; padding-top: 17px; padding-bottom: 20px;">
+                    <div style="width: 950px; margin: auto;">
+                        <div style="margin-bottom: -20px">
+                            <h4 style="margin-bottom: -24px; margin-left: 13px">&ensp;객실 리뷰</h4>
+                            <span>
                             &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;(<span th:text="${hotelDTO.roomReviewCount}" class="roomReview">2,298</span>)&ensp;
                             <i class="bi bi-star-fill" th:classappend="'rating-' + ${#numbers.formatDecimal(hotelDTO.hotelRating, 0, 0)}"></i>
                             <span th:if="${hotelDTO.hotelRating != null and hotelDTO.hotelRating != ''}" th:text="${hotelDTO.hotelRating}+'점'" class="hotelRating">평점</span>
                             <span th:if="${hotelDTO.hotelRating == null and hotelDTO.hotelRating == ''}" class="hotelRating">작성된 리뷰가 없습니다!</span>
                         </span>
-                    </div>
-                    <div style="text-align: right; margin-bottom: 15px; margin-top: -10px; margin-right: 15px; font-size: small">
-                        <a th:href="@{/hotel/reviewAll(hotelId=${hotelDTO.hotelId})}" style="text-decoration: none; color: black;">
-                            전체보기
-                            <i class="bi bi-chevron-right"></i>
-                        </a>&emsp;
-                    </div>
-                    <div class="row" style="width: 920px; margin: auto; padding-right: 13px">
-                        <!--등록된 리뷰가 있을 때-->
-                        <th:block th:unless="${latestReviews == null or #lists.isEmpty(latestReviews)}">
-                            <div class="col-4" th:each="review : ${latestReviews}" >
-                                <div class="card border-light review-card" style="margin: -5px; padding: 15px; height: 150px; background-color: #f3f4f7">
-                                    <!-- 별점 표시 -->
-                                    <p class="star-rating" th:classappend="'rating-' + ${review.rating}">
-                                        <i class="bi bi-star-fill" th:if="${review.rating >= 1}" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star-fill" th:if="${review.rating >= 2}" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star-fill" th:if="${review.rating >= 3}" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star-fill" th:if="${review.rating >= 4}" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star-fill" th:if="${review.rating >= 5}" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star" th:if="${review.rating <= 4}" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star" th:if="${review.rating <= 3}" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star" th:if="${review.rating <= 2}" style="margin-right: -3px"></i>
-                                        <i class="bi bi-star" th:if="${review.rating <= 1}" style="margin-right: -3px"></i>
-                                    </p>
-                                    <p th:text="${review.reviewText}">리뷰 내용</p>
+                        </div>
+                        <div style="text-align: right; margin-bottom: 15px; margin-top: -10px; margin-right: 15px; font-size: small">
+                            <a th:href="@{/hotel/reviewAll(hotelId=${hotelDTO.hotelId})}" style="text-decoration: none; color: black;">
+                                전체보기
+                                <i class="bi bi-chevron-right"></i>
+                            </a>&emsp;
+                        </div>
+                        <div class="row" style="width: 920px; margin: auto; padding-right: 13px">
+                            <!--등록된 리뷰가 있을 때-->
+                            <th:block th:unless="${latestReviews == null or #lists.isEmpty(latestReviews)}">
+                                <div class="col-4" th:each="review : ${latestReviews}" >
+                                    <div class="card border-light review-card" style="margin: -5px; padding: 15px; height: 150px; background-color: #f3f4f7">
+                                        <!-- 별점 표시 -->
+                                        <p class="star-rating" th:classappend="'rating-' + ${review.rating}">
+                                            <i class="bi bi-star-fill" th:if="${review.rating >= 1}" style="margin-right: -3px"></i>
+                                            <i class="bi bi-star-fill" th:if="${review.rating >= 2}" style="margin-right: -3px"></i>
+                                            <i class="bi bi-star-fill" th:if="${review.rating >= 3}" style="margin-right: -3px"></i>
+                                            <i class="bi bi-star-fill" th:if="${review.rating >= 4}" style="margin-right: -3px"></i>
+                                            <i class="bi bi-star-fill" th:if="${review.rating >= 5}" style="margin-right: -3px"></i>
+                                            <i class="bi bi-star" th:if="${review.rating <= 4}" style="margin-right: -3px"></i>
+                                            <i class="bi bi-star" th:if="${review.rating <= 3}" style="margin-right: -3px"></i>
+                                            <i class="bi bi-star" th:if="${review.rating <= 2}" style="margin-right: -3px"></i>
+                                            <i class="bi bi-star" th:if="${review.rating <= 1}" style="margin-right: -3px"></i>
+                                        </p>
+                                        <p th:text="${review.reviewText}">리뷰 내용</p>
+                                    </div>
                                 </div>
+                            </th:block>
+                            <!-- 등록 된 리뷰가 없을 경우 -->
+                            <div th:if="${latestReviews == null or #lists.isEmpty(latestReviews)}" class="text-center mt-4">
+                                <p class="text-muted">등록 된 후기가 없습니다.</p>
                             </div>
-                        </th:block>
-                        <!-- 등록 된 리뷰가 없을 경우 -->
-                        <div th:if="${latestReviews == null or #lists.isEmpty(latestReviews)}" class="text-center mt-4">
-                            <p class="text-muted">등록 된 후기가 없습니다.</p>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!--배너-->
+                <!--배너-->
                 <div>
 
                 </div>
 
-            <!--예약 날짜 선택--> <!--일단 허전해서 냅둠-->
-            <div style="margin: auto">
-                <div style="margin-top: 50px; width: 930px">
-                    <h4> 날짜 선택</h4>
-                    <div class="row">
-                        <div class="col-6">
-                            <input type="date" class="form-control" id="checkInDate" name="checkInDate" required>
-                        </div>
-                        <div class="col-6">
-                            <input type="date" class="form-control" id="checkOutDate" name="checkOutDate" required>
+                <!--예약 날짜 선택--> <!--일단 허전해서 냅둠-->
+                <div style="margin: auto">
+                    <div style="margin-top: 50px; width: 930px">
+                        <h4> 날짜 선택</h4>
+                        <div class="row">
+                            <div class="col-6">
+                                <input type="date" class="form-control" id="checkInDate" name="checkInDate" required>
+                            </div>
+                            <div class="col-6">
+                                <input type="date" class="form-control" id="checkOutDate" name="checkOutDate" required>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- 객실 목록 -->
-            <div class="col ">
-                <div >
+                <!-- 객실 목록 -->
+                <div class="col ">
+                    <div >
 
-                    <!-- Room List Section -->
-                    <section class="py-5">
-                        <div class="" style="width: 950px; margin: auto; padding: 15px">
-                            <h4 class="mb-3">객실 선택</h4>
+                        <!-- Room List Section -->
+                        <section class="py-5">
+                            <div class="" style="width: 950px; margin: auto; padding: 15px">
+                                <h4 class="mb-3">객실 선택</h4>
 
-                            <th:block th:if="${rooms == null || #lists.isEmpty(rooms)}">
-                                <div style="text-align: center">
-                                    <img src="/img/empty.png" alt="No likes available" width="400px">
-                                    <p>목록이 비어있습니다!</p>
-                                </div>
-                            </th:block>
-
-                            <th:block th:unless="${rooms == null || #lists.isEmpty(rooms)}" >
-                                <div th:each="room : ${rooms}">
-
-                                    <div class="room"
-                                         th:classappend="${!room.roomStatus} ? 'sold-out' : ''"
-                                         th:data-room-id="${room.roomId}"
-                                         th:data-stay-start="${room.stayStart}"
-                                         th:data-stay-end="${room.stayEnd}">
-
-                                        <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 h-md-250 position-relative card-hover">
-                                            <!--이미지-->
-                                            <div class="col-5 d-none d-lg-block">
-                                                <div class="image-box">
-                                                    <img th:if="${!#lists.isEmpty(room.roomImageDTOList)}"
-                                                         th:src="@{'/upload/' + ${room.roomImageDTOList[0].imagePath}}"
-                                                         class="bd-placeholder-img rooms-img"
-                                                         th:alt="${room.roomName}" height="100%">
-                                                    <img th:if="${#lists.isEmpty(room.roomImageDTOList)}"
-                                                         src="/img/default_img.jpg"
-                                                         class="bd-placeholder-img"
-                                                         alt="Default Room Image">
-                                                    <!-- 예약 종료-->
-                                                    <!--<div class="sold-out-overlay" th:if="${!room.roomStatus}">
-                                                        예약 종료
-                                                    </div>-->
-                                                </div>
-                                            </div>
-                                            <!--방 설명-->
-                                            <div class="col-7 p-4 d-flex flex-column position-static" style="padding-bottom: -15px">
-                                                <div class="d-flex justify-content-start gap-2 mb-1">
-                                                    <!-- 예약 가능 여부 -->
-                                                    <!--<span th:text="(${room.roomStatus} ? '예약 가능' : '예약 불가')"
-                                                          class="badge"
-                                                          th:classappend="${room.roomStatus} ? 'bg-success text-white' : 'bg-danger text-white'">
-                                                    </span>-->
-                                                    <span th:text="${room.roomType}" class="badge bg-dark text-white"></span>
-                                                </div>
-                                                <h3 th:text="${room.roomName}" class="mb-2">객실명</h3>
-                                                <p th:text="'예약 기간 : ' + ${room.reservationStart} + ' ~ ' + ${room.reservationEnd}" class="card-text" style="margin-bottom: 1px"></p>
-                                                <p th:text="'숙박 기간 : ' + ${room.stayStart} + ' ~ ' + ${room.stayEnd}" class="card-text"></p>
-                                                <div class="room-actions" style="margin-top: -5px; ">
-                                                    <p class="room-price mb-0"
-                                                       th:text="${room.formattedRoomPrice != null ? room.formattedRoomPrice + ' ' + 'KRW' : '가격 미정'}"></p>
-                                                    <button class="btn btn-book btn-dark" style="width: 110px"
-                                                            th:data-room-id="${room.roomId}"
-                                                            onclick="goToRoomDetail(this)">
-                                                        자세히보기
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-
+                                <th:block th:if="${rooms == null || #lists.isEmpty(rooms)}">
+                                    <div style="text-align: center">
+                                        <img src="/img/empty.png" alt="No likes available" width="400px">
+                                        <p>목록이 비어있습니다!</p>
                                     </div>
-                                </div>
-                            </th:block>
+                                </th:block>
 
-                        </div>
-                    </section>
+                                <th:block th:unless="${rooms == null || #lists.isEmpty(rooms)}" >
+                                    <div th:each="room : ${rooms}">
+
+                                        <div class="room"
+                                             th:classappend="${!room.roomStatus} ? 'sold-out' : ''"
+                                             th:data-room-id="${room.roomId}"
+                                             th:data-stay-start="${room.stayStart}"
+                                             th:data-stay-end="${room.stayEnd}">
+
+                                            <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 h-md-250 position-relative card-hover">
+                                                <!--이미지-->
+                                                <div class="col-5 d-none d-lg-block">
+                                                    <div class="image-box">
+                                                        <img th:if="${!#lists.isEmpty(room.roomImageDTOList)}"
+                                                             th:src="@{'/upload/' + ${room.roomImageDTOList[0].imagePath}}"
+                                                             class="bd-placeholder-img rooms-img"
+                                                             th:alt="${room.roomName}" height="100%">
+                                                        <img th:if="${#lists.isEmpty(room.roomImageDTOList)}"
+                                                             src="/img/default_img.jpg"
+                                                             class="bd-placeholder-img"
+                                                             alt="Default Room Image">
+                                                        <!-- 예약 종료-->
+                                                        <!--<div class="sold-out-overlay" th:if="${!room.roomStatus}">
+                                                            예약 종료
+                                                        </div>-->
+                                                    </div>
+                                                </div>
+                                                <!--방 설명-->
+                                                <div class="col-7 p-4 d-flex flex-column position-static" style="padding-bottom: -15px">
+                                                    <div class="d-flex justify-content-start gap-2 mb-1">
+                                                        <!-- 예약 가능 여부 -->
+                                                        <!--<span th:text="(${room.roomStatus} ? '예약 가능' : '예약 불가')"
+                                                              class="badge"
+                                                              th:classappend="${room.roomStatus} ? 'bg-success text-white' : 'bg-danger text-white'">
+                                                        </span>-->
+                                                        <span th:text="${room.roomType}" class="badge bg-dark text-white"></span>
+                                                    </div>
+                                                    <h3 th:text="${room.roomName}" class="mb-2">객실명</h3>
+                                                    <p th:text="'예약 기간 : ' + ${room.reservationStart} + ' ~ ' + ${room.reservationEnd}" class="card-text" style="margin-bottom: 1px"></p>
+                                                    <p th:text="'숙박 기간 : ' + ${room.stayStart} + ' ~ ' + ${room.stayEnd}" class="card-text"></p>
+                                                    <div class="room-actions" style="margin-top: -5px; ">
+                                                        <p class="room-price mb-0"
+                                                           th:text="${room.formattedRoomPrice != null ? room.formattedRoomPrice + ' ' + 'KRW' : '가격 미정'}"></p>
+                                                        <button class="btn btn-book btn-dark" style="width: 110px"
+                                                                th:data-room-id="${room.roomId}"
+                                                                onclick="goToRoomDetail(this)">
+                                                            자세히보기
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </th:block>
+
+                            </div>
+                        </section>
 
 
 
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
         <!-- 버튼 -->
         <div class="text-end mt-3 mb-3">
             <a class="btn btn-dark" href="/hotel/list">목록</a>
         </div>
-</div>
+    </div>
 
-<!-- 로그인된 상태 -->
-<div sec:authorize="isAuthenticated()">
-    <script th:inline="javascript">
-        var isLoggedIn = true;
-        console.log("isLoggedIn:", isLoggedIn);
-    </script>
-</div>
+    <!-- 로그인된 상태 -->
+    <div sec:authorize="isAuthenticated()">
+        <script th:inline="javascript">
+            var isLoggedIn = true;
+            console.log("isLoggedIn:", isLoggedIn);
+        </script>
+    </div>
 
-<!-- 로그인되지 않은 상태 -->
-<div sec:authorize="!isAuthenticated()">
-    <script th:inline="javascript">
-        var isLoggedIn = false;
-        console.log("isLoggedIn:", isLoggedIn);
-    </script>
-</div>
+    <!-- 로그인되지 않은 상태 -->
+    <div sec:authorize="!isAuthenticated()">
+        <script th:inline="javascript">
+            var isLoggedIn = false;
+            console.log("isLoggedIn:", isLoggedIn);
+        </script>
+    </div>
 
 </div>
 
