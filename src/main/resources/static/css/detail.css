@@ -1,7 +1,6 @@
 /* 객실 상세보기 페이지 CSS */
 
 .container {
-    max-width: 1200px;
     margin: 0 auto;
     padding: 1.25rem 0;
 }
@@ -221,7 +220,6 @@
 }
 
 .room-details {
-    max-width: 1200px;
     margin: 0 auto;
 }
 
