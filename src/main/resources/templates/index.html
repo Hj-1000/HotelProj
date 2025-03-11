@@ -273,16 +273,6 @@
             <div class="bg-secondary text-white d-flex justify-content-center" style="height: 500px;">
                 <div class="map_wrap">
                     <div id="map" style="width:100%;height:100%;position:relative;overflow:hidden;"></div>
-                    <!-- 지도타입 컨트롤 div 입니다 -->
-                    <div class="custom_typecontrol radius_border">
-                        <span id="btnRoadmap" class="selected_btn" onclick="setMapType('roadmap')">지도</span>
-                        <span id="btnSkyview" class="btn" onclick="setMapType('skyview')">스카이뷰</span>
-                    </div>
-                    <!-- 지도 확대, 축소 컨트롤 div 입니다 -->
-                    <div class="custom_zoomcontrol radius_border">
-                        <span onclick="zoomIn()"><img src="https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/ico_plus.png" alt="확대"></span>
-                        <span onclick="zoomOut()"><img src="https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/ico_minus.png" alt="축소"></span>
-                    </div>
                 </div>
                 <script type="text/javascript"
                         src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=0cb0450151c2b892da76c0d5dcd6535a&libraries=services"></script>
@@ -298,30 +288,17 @@
                     var ps = new kakao.maps.services.Places();
                     var myLocationMarker = null;
 
-                    // 지도 타입 일반지도, 스카이뷰 선택 기능
-                    function setMapType(maptype) {
-                        var roadmapControl = document.getElementById('btnRoadmap');
-                        var skyviewControl = document.getElementById('btnSkyview');
-                        if (maptype === 'roadmap') {
-                            map.setMapTypeId(kakao.maps.MapTypeId.ROADMAP);
-                            roadmapControl.className = 'selected_btn';
-                            skyviewControl.className = 'btn';
-                        } else {
-                            map.setMapTypeId(kakao.maps.MapTypeId.HYBRID);
-                            skyviewControl.className = 'selected_btn';
-                            roadmapControl.className = 'btn';
-                        }
-                    }
+                    // 지도 타입 변경 컨트롤을 생성한다
+                    var mapTypeControl = new kakao.maps.MapTypeControl();
 
-                    // 지도 확대 기능
-                    function zoomIn() {
-                        map.setLevel(map.getLevel() - 1);
-                    }
+                    // 지도의 상단 우측에 지도 타입 변경 컨트롤을 추가한다
+                    map.addControl(mapTypeControl, kakao.maps.ControlPosition.TOPRIGHT);
 
-                    // 지도 축소 기능
-                    function zoomOut() {
-                        map.setLevel(map.getLevel() + 1);
-                    }
+                    // 지도에 확대 축소 컨트롤을 생성한다
+                    var zoomControl = new kakao.maps.ZoomControl();
+
+                    // 지도의 우측에 확대 축소 컨트롤을 추가한다
+                    map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
 
                     // 검색 결과 마커 표시 기능
                     function displayMarker(place) {

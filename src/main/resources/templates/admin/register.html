@@ -16,8 +16,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-top: 20px;
-            margin-bottom: 20px;
+            margin-top: 10px;
+            margin-bottom: 10px;
             min-height: calc(100vh - 249px); /* 100vh = 화면 전체 높이를 차지하도록 (-209px 는 헤더와 푸터의 높이) */
         }
 
@@ -37,9 +37,9 @@
 <!--본문-->
 <div layout:fragment="content" class="register-container">
     <div class="card register-card">
-        <h5 class="card-title text-center mb-4 fw-bold">관리자 회원가입</h5>
+        <h4 class="card-title text-center mb-3 fw-bold">관리자 회원가입</h4>
         <form action="/admin/register" method="post" onsubmit="return registerCheck();">
-            <div class="mb-3 mt-3">
+            <div class="mb-3">
                 <label for="memberName" class="form-label fw-bold">*관리자 이름 :</label>
                 <input type="text" class="form-control" id="memberName" name="memberName" required>
             </div>
@@ -101,7 +101,7 @@
                         </div>
                         <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
                             <h6>제 1 조 (목적)</h6>
-                            <p>본 약관은 [서비스명] (이하 "회사")가 제공하는 서비스 이용과 관련하여 회사와 이용자의 권리, 의무 및 책임 사항을 규정함을 목적으로 합니다.</p>
+                            <p>본 약관은 [NTT호텔] (이하 "회사")가 제공하는 서비스 이용과 관련하여 회사와 이용자의 권리, 의무 및 책임 사항을 규정함을 목적으로 합니다.</p>
 
                             <h6>제 2 조 (용어의 정의)</h6>
                             <ul>
@@ -181,7 +181,7 @@
                         </div>
                         <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
                             <h5>제 1 조 (목적)</h5>
-                            <p>[서비스명] (이하 "회사")는 이용자의 개인정보를 보호하고, 관련 법령을 준수하기 위해 본 개인정보 처리방침을 수립합니다.</p>
+                            <p>[NTT호텔] (이하 "회사")는 이용자의 개인정보를 보호하고, 관련 법령을 준수하기 위해 본 개인정보 처리방침을 수립합니다.</p>
 
                             <h5>제 2 조 (수집하는 개인정보 항목 및 수집 방법)</h5>
                             <p><strong>1. 수집하는 개인정보 항목</strong><br>
