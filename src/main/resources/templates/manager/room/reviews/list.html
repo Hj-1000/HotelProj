@@ -80,7 +80,9 @@
                     <td th:text="${review.memberId}"></td>
                     <td th:text="${review.memberName}"></td>
                     <td th:text="${'★'.repeat(review.rating) + '☆'.repeat(5 - review.rating)}"></td>
-                    <td th:text="${review.reviewText}"></td>
+                    <td class="review-text" th:data-full-text="${review.reviewText}"
+                        th:title="${review.reviewText}"
+                        th:text="${review.reviewText}"></td>
                     <td th:text="${#temporals.format(review.reviewDate, 'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td>
                         <button class="btn btn-warning btn-sm edit-review-btn"
@@ -139,6 +141,31 @@
         </div>
     </div>
     <script>
+        /* 리뷰 텍스트 함수 */
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".review-text").forEach(item => {
+                let fullText = item.getAttribute("data-full-text");
+                let truncatedText = fullText.length > 30 ? fullText.substring(0, 30) + "..." : fullText;
+
+                item.textContent = truncatedText;
+
+                item.addEventListener("mouseenter", function () {
+                    console.log("마우스 오버! 전체 텍스트 표시");
+                    this.textContent = fullText;
+                    this.style.whiteSpace = "normal";
+                    this.style.overflow = "visible";
+                    this.style.textOverflow = "clip";
+                });
+
+                item.addEventListener("mouseleave", function () {
+                    console.log("마우스 아웃! 줄인 텍스트로 변경");
+                    this.textContent = truncatedText;
+                    this.style.whiteSpace = "nowrap";
+                    this.style.overflow = "hidden";
+                    this.style.textOverflow = "ellipsis";
+                });
+            });
+        });
 
         $(document).ready(function () {
             // 검색 조건이 있으면 새로고침 시 검색 조건 초기화 후 이동

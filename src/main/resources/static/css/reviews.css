@@ -19,6 +19,15 @@
     margin-bottom: 0;
 }
 
+.review-text {
+    max-width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
 /* 리뷰 수정 모달창 스타일 */
 .modal-header {
     position: relative;

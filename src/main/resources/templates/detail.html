@@ -166,7 +166,7 @@
             <ul class="list-unstyled">
                 <li class="mb-2">
                     <i class="fas fa-check-circle text-primary me-2"></i>
-                    체크인 시간은 예약 당일 <strong>오전 11:00 AM</strong>부터이며, 체크아웃 시간은 마지막 날 <strong>오전 10:00 AM</strong>까지입니다.
+                    체크인 시간은 예약 당일 <strong>11:00 a.m.</strong>부터이며, 체크아웃 시간은 마지막 날 <strong>10:00 a.m.</strong>까지입니다.
                 </li>
                 <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> 본 상품의 판매 기간 종료 후 예약 조건 변경 시 동일 혜택 적용이 불가합니다.</li>
                 <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> 본 상품은 사전 예약에 한하여 이용 가능하며, 혜택 및 가격은 호텔 사정에 따라 변경 될 수 있습니다.</li>
@@ -197,7 +197,7 @@
                         <input type="hidden" id="editReviewId">
                         <div class="mb-3">
                             <label for="editReviewText" class="form-label">리뷰 내용</label>
-                            <textarea id="editReviewText" class="form-control"></textarea>
+                            <textarea id="editReviewText" name="reviewText" class="form-control" rows="3" required maxlength="255"></textarea>
                         </div>
                         <div class="mb-3">
                             <label for="editRating" class="form-label">평점</label>
@@ -289,6 +289,29 @@
 
     <script>
 
+        /* 리뷰 텍스트 최대글자 제한 함수*/
+        document.addEventListener("DOMContentLoaded", function () {
+            const reviewTextArea = document.getElementById("reviewText");
+
+            reviewTextArea.addEventListener("input", function () {
+                if (this.value.length > 255) {
+                    alert("리뷰는 최대 255자까지만 입력 가능합니다.");
+                    this.value = this.value.substring(0, 255);
+                }
+            });
+        });
+
+        /* 리뷰 수정 모달창 최대글자 제한 함수 */
+        document.addEventListener("DOMContentLoaded", function () {
+            const editReviewTextArea = document.getElementById("editReviewText");
+
+            editReviewTextArea.addEventListener("input", function () {
+                if (this.value.length > 255) {
+                    alert("리뷰는 최대 255자까지만 입력 가능합니다.");
+                    this.value = this.value.substring(0, 255);
+                }
+            });
+        });
 
         /* 공유하기 모달 함수 */
         document.addEventListener("DOMContentLoaded", function () {
