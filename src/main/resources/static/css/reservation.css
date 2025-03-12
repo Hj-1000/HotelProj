@@ -41,11 +41,13 @@ h2 {
     align-items: center;
     justify-content: center;
     border: 2px solid #ddd;
-    font-size: 18px;
+    font-size: 1rem;
     font-weight: bold;
     cursor: pointer;
     text-align: center;
     border-radius: 10px;
+    padding: 0 .5rem;
+
 }
 .available {
     background-color: #90EE90; /* 초록색: 예약 가능 */

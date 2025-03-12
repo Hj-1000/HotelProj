@@ -7,6 +7,25 @@
     <meta charset="UTF-8">
     <title>객실 등록</title>
     <style>
+        .location-wrapper {
+            position: relative;
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+
+        .location-wrap {
+            position: absolute;
+            top: 1rem;
+            left: 0;
+        }
+
+        .page-title {
+            flex: 1;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 0;
+        }
+
         .date-container {
             display: flex;
             justify-content: space-between;
@@ -25,7 +44,7 @@
         .date-fields {
             display: flex;
             align-items: center;
-            gap: 10px; /* 날짜 필드 사이의 간격 */
+            gap: 10px;
         }
 
         .form-label {
@@ -99,8 +118,15 @@
 </head>
 <body>
 <div layout:fragment="content">
-    <div class="container py-4">
-        <h1 class="text-center mb-5">객실 등록</h1>
+    <div class="container">
+        <div class="location-wrapper">
+            <div class="location-wrap">
+                <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
+                <a href="#" class="custom-link"><span>객실 서비스 관리</span></a> /
+                <a href="/manager/room/register" class="custom-link"><span>객실등록</span></a>
+            </div>
+            <h1 class="page-title">객실 등록</h1>
+        </div>
         <!-- Room Registration Form -->
         <form th:action="@{/manager/room/register}" th:object="${room}" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
             <!-- 지사(호텔) -->
