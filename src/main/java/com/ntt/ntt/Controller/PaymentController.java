@@ -11,6 +11,7 @@ import com.ntt.ntt.Repository.hotel.HotelRepository;
 import com.ntt.ntt.Service.PaymentService;
 import com.ntt.ntt.Service.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
+@Tag(name = "paymentController", description = "결제, 매출 관리 컨트롤러")
 public class PaymentController {
 
     private final PaymentService paymentService;
@@ -39,6 +41,7 @@ public class PaymentController {
 
     // 결제 정보를 저장
     @PostMapping("/payment")
+    @Operation(summary = "결제 처리", description = "결제 정보를 데이터에 저장한다.")
     public ResponseEntity<String> registerProc(@RequestBody PaymentDTO paymentDTO) {
         try {
             paymentService.savePayment(paymentDTO);
