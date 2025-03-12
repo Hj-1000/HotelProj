@@ -8,6 +8,24 @@
     <title>객실 세부사항</title>
 
     <style>
+        .location-wrapper {
+            position: relative;
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+
+        .location-wrap {
+            position: absolute;
+            top: 1rem;
+            left: 0;
+        }
+
+        .page-title {
+            flex: 1;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 0;
+        }
         .room-details-container {
             position: relative;
             border: 1px solid #ddd;
@@ -15,14 +33,6 @@
             padding: 1rem;
             overflow: hidden;
             background: #ffffff;
-        }
-
-        h1 {
-            font-weight: bold;
-        }
-
-        .text-wrap {
-
         }
 
         .image-section {
@@ -117,10 +127,18 @@
 </head>
 <body>
 <div layout:fragment="content">
-    <div class="container py-4">
-        <h1 class="text-center mb-4">객실 세부사항</h1>
+    <div class="container">
+        <div class="location-wrapper">
+            <div class="location-wrap">
+                <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
+                <a href="#" class="custom-link"><span>객실 서비스 관리</span></a> /
+                <a th:href="@{/manager/room/{roomId}(roomId=${room.roomId})}" class="custom-link">
+                    <span>객실등록</span>
+                </a>
+            </div>
+            <h1 class="page-title">객실 세부사항</h1>
+        </div>
         <div class="room-details-container">
-
             <!-- 상세 정보 영역 -->
             <div class="details-section">
                 <h3 th:text="${room.roomName}">Room Name</h3>

@@ -13,8 +13,14 @@
 </head>
 <body>
 <div layout:fragment="content" class="container">
-    <h1 class="text-center">객실 리뷰 관리</h1>
-
+    <div class="location-wrapper">
+        <div class="location-wrap">
+            <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
+            <a href="#" class="custom-link"><span>객실 서비스 관리</span></a> /
+            <a href="/manager/room/reviews/list" class="custom-link"><span>객실 리뷰관리</span></a>
+        </div>
+        <h1 class="page-title">객실 리뷰</h1>
+    </div>
     <!-- 리뷰 수정 모달 -->
     <div id="editReviewModal" class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">

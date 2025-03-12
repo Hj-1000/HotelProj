@@ -1,5 +1,23 @@
 /* 객실 리뷰 관리자페이지 CSS */
 
+.location-wrapper {
+    position: relative;
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+.location-wrap {
+    position: absolute;
+    top: 1rem;
+    left: 0;
+}
+
+.page-title {
+    flex: 1;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 0;
+}
 
 /* 리뷰 수정 모달창 스타일 */
 .modal-header {
