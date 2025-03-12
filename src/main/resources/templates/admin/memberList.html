@@ -16,15 +16,37 @@
         .custom-link:hover {
             color: gray; /* 마우스 올리면 회색 */
         }
+        .location-wrapper {
+            position: relative;
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+
+        .location-wrap {
+            position: absolute;
+            top: 1rem;
+            left: 0;
+        }
+
+        .page-title {
+            flex: 1;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 0;
+        }
     </style>
 </head>
 <body>
 <div layout:fragment="content">
     <div class="container-fluid mt-4">
-        <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
-        <a href="#" class="custom-link"><span>회원관리</span></a> /
-        <a href="/admin/memberList" class="custom-link"><span>전체회원관리</span></a>
-        <h2 class="mb-3">전체회원관리</h2>
+        <div class="location-wrapper">
+            <div class="location-wrap">
+                <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
+                <a href="#" class="custom-link"><span>회원관리</span></a> /
+                <a href="/admin/memberList" class="custom-link"><span>전체회원관리</span></a>
+            </div>
+            <h1 class="page-title">전체회원관리</h1>
+        </div>
         <div class="card p-4">
             <form th:action="@{/admin/memberList}" method="get">
                 <div class="row">
