@@ -66,8 +66,8 @@ public class RoomManagerController {
 
     @Operation(summary = "객실 등록", description = "관리자가 새로운 객실을 등록한다. 객실 이미지와 배너 이미지는 필수이다.")
     @PostMapping("/register")
-    public String registerRoomProc(@Valid BindingResult bindingResult,
-                                   @ModelAttribute RoomDTO roomDTO,
+    public String registerRoomProc(@ModelAttribute RoomDTO roomDTO,
+                                   @Valid BindingResult bindingResult,
                                    @RequestParam("imageFile") List<MultipartFile> imageFile,
                                    @RequestParam("bannerImageFile") MultipartFile bannerImageFile,
                                    @RequestParam("imageTitles") List<String> imageTitles,

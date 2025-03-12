@@ -273,15 +273,13 @@
 
                                     </div>
                                 </th:block>
-
-
                                 <!-- 수정 , 등록 버튼 -->
                                 <th:block th:if="${room.isExpired or reservation == null}">
                                     <button th:classappend="${room.isExpired ? 'btn-danger' : 'btn-primary'}"
                                             th:text="${room.isExpired ? '수정' : '등록'}"
                                             th:attr="data-room-id=${room.roomId},
                                                      data-reservation-id=${reservation != null ? reservation.reservationId : '-1'},
-                                                     data-member-id=${reservation != null and reservation.memberId != null ? reservation.memberId : '-1'},
+                                                     data-member-id=${reservation != null and reservation.memberId != null ? reservation.memberId : ''},
                                                      data-checkin=${reservation != null ? reservation.checkInDate : ''},
                                                      data-checkout=${reservation != null ? reservation.checkOutDate : ''},
                                                      data-reservationEnd=${room.reservationEnd},
@@ -1011,6 +1009,11 @@
             function formatDateTimeForInput(dateTime) {
                 if (!dateTime) return "";
                 return dateTime.replace(" ", "T");
+            }
+
+            if (!memberId || memberId === "-1" || memberId === "null") {
+                console.warn("예약 정보가 없는 방입니다. memberId를 빈 값으로 설정합니다.");
+                memberId = "";
             }
 
             if (!reservationId || reservationId === "-1" || reservationId === "null") {

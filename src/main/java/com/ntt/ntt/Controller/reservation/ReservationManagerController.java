@@ -192,7 +192,7 @@ public class ReservationManagerController {
             @RequestParam(value = "checkInDate", required = false) String checkInDate,
             @RequestParam(value = "checkOutDate", required = false) String checkOutDate,
             @RequestParam(value = "count", required = false) Integer count,
-            @RequestParam(value = "memberId", required = true) Integer memberId,
+            @RequestParam(value = "memberId", required = false) Integer memberId,
             @ModelAttribute ReservationDTO reservationDTO,
             RedirectAttributes redirectAttributes) {
 
@@ -215,6 +215,13 @@ public class ReservationManagerController {
                 redirectAttributes.addFlashAttribute("successMessage", "예약 마감 날짜가 성공적으로 수정되었습니다.");
                 return "redirect:/manager/room/reservation/list";
             }
+
+            if (memberId == null) {
+                log.error("[updateReservationProc] 예약이 존재하는데 memberId가 없음!");
+                redirectAttributes.addFlashAttribute("errorMessage", "예약 정보를 수정하려면 memberId가 필요합니다.");
+                return "redirect:/manager/room/reservation/list";
+            }
+
 
             // 예약이 존재하는 경우, 날짜 변환 후 예약 정보 수정
             LocalDateTime checkIn = checkInDate != null ? LocalDateTime.parse(checkInDate) : null;
