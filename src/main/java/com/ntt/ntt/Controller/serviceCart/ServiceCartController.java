@@ -8,6 +8,8 @@ import com.ntt.ntt.Service.ReservationService;
 import com.ntt.ntt.Service.RoomService;
 import com.ntt.ntt.Service.ServiceCartItemService;
 import com.ntt.ntt.Service.ServiceCartService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -27,6 +29,7 @@ import java.util.Map;
 @Controller
 @RequiredArgsConstructor
 @Log4j2
+@Tag(name = "ServiceCartController", description = "장바구니 기능 컨트롤러")
 public class ServiceCartController {
     private final ServiceCartService serviceCartService;
     private final ServiceCartItemService serviceCartItemService;
@@ -35,6 +38,7 @@ public class ServiceCartController {
 
     //카트 컨트롤러 역시 데이터를받아 동적으로 만들것
     // 장바구니 조회
+    @Operation(summary = "장바구니 조회", description = "유저의 장바구니를 조회한다.")
     @GetMapping("/api/cart")
     public ResponseEntity<List<ServiceCartDetailDTO>> getCart(Principal principal) {
         String memberEmail = principal.getName();
@@ -43,6 +47,7 @@ public class ServiceCartController {
     }
 
     // 장바구니 등록
+    @Operation(summary = "장바구니 등록", description = "장바구니가 없다면 등록한다.")
     @PostMapping("/api/cart")
     public ResponseEntity<?> registerCart(@RequestBody @Valid ServiceCartItemDTO serviceCartItemDTO,
                                           BindingResult bindingResult,
@@ -103,6 +108,7 @@ public class ServiceCartController {
 //        return "myPage/cart/history";
 //    }
     // 장바구니에 담긴 수량을 변경하는 기능
+    @Operation(summary = "장바구니 수량 변경", description = "장바구니에 담긴 메뉴의 수량을 수정한다.")
     @PutMapping("/api/updateCartItem")
     public ResponseEntity<?> updateCartItem(@RequestBody @Valid ServiceCartItemDTO serviceCartItemDTO,
                                             BindingResult bindingResult, Principal principal) {
@@ -139,6 +145,7 @@ public class ServiceCartController {
     }
 
     //장바구니에 담긴 아이템을 삭제하는 기능
+    @Operation(summary = "장바구니 메뉴 삭제", description = "장바구니에 담긴 메뉴를 삭제한다.")
     @DeleteMapping("/api/cartItem/{serviceCartItemId}")
     public ResponseEntity deleteCartItem(@PathVariable("serviceCartItemId") Integer serviceCartItemId,
                                          Principal principal) {
@@ -154,6 +161,7 @@ public class ServiceCartController {
     }
 
     //장바구니에 담긴 아이템을 주문내역 페이지로 보내는 주문기능을 담당
+    @Operation(summary = "장바구니 주문", description = "장바구니에 담긴 정보를 주문 API로 넘겨준다.")
     @PostMapping("/api/cart/orders")
     public ResponseEntity<?> orderServiceCartItem(@RequestBody ServiceCartOrderDTO serviceCartOrderDTO,
                                                BindingResult bindingResult,

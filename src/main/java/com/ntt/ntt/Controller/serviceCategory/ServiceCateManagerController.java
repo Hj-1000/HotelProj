@@ -33,7 +33,7 @@ import java.util.Map;
 @Log4j2
 @RequiredArgsConstructor
 @RequestMapping("manager/roomService/category") //url roomService아래에
-@Tag(name = "ServiceCateManagerController", description = "룸서비스 카테고리 정보")
+@Tag(name = "ServiceCateManagerController", description = "매니저가 보는 룸서비스 카테고리 정보")
 public class ServiceCateManagerController {
     private final ServiceCateService serviceCateService;
     private final MemberService memberService;
