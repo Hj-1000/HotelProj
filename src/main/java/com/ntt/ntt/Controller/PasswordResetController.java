@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Controller
-@Tag(name = "passwordResetController", description = "비밀번호 재설정 컨트롤러")
+@Tag(name = "PasswordResetController", description = "비밀번호 재설정 컨트롤러")
 public class PasswordResetController {
 
     @Autowired

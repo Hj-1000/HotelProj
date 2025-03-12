@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
-@Tag(name = "paymentController", description = "결제, 매출 관리 컨트롤러")
+@Tag(name = "PaymentController", description = "결제, 매출 관리 컨트롤러")
 public class PaymentController {
 
     private final PaymentService paymentService;

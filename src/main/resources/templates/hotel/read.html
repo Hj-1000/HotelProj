@@ -459,6 +459,29 @@
                     </script>
                 </div>
 
+                <!-- OpenAI부분 -->
+                <div class="card border" style="width: 940px; margin: auto; padding-top: 17px; padding-bottom: 20px;">
+                    <div style="width: 950px; margin: auto;">
+                        <div style="margin-bottom: -20px">
+                            <div class="form-section">
+                                <h2>AI에게 질문하세요</h2>
+                                이런 질문은 어떠신가요?
+                                <button class="queryButton btn btn-primary" data-query="관광지">주변 관광지를 알려줘!</button>
+                                <button class="queryButton btn btn-primary" data-query="맛집">주변 맛집을 알려줘!</button>
+                                <form id="generalQueryForm">
+                                    <label for="generalQuery">직접 질문해보세요 :</label>
+                                    <input type="hidden" id="hotelAddress" th:value="${hotelDTO.hotelAddress}">
+                                    <input type="text" id="generalQuery" name="query" placeholder="근처 편의시설을 알려줘" required>
+                                    <button type="submit">제출</button>
+                                </form>
+
+                                <!-- AI의 응답이 출력될 곳 -->
+                                <div id="generalResponse"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 객실 리뷰부분 -->
                 <div class="card border" style="width: 940px; margin: auto; padding-top: 17px; padding-bottom: 20px;">
                     <div style="width: 950px; margin: auto;">
@@ -1027,6 +1050,45 @@
 
 </script>-->
 <script>
+    //  OpenAI 답변 처리
+    function sendQuery(modifiedQuery) {
+        $.ajax({
+            url: '/ai/query',  // 서버의 일반 쿼리 API endpoint
+            type: 'POST',
+            data: { query: modifiedQuery }, // 수정된 query 전송
+            success: function(response) {
+                if (response && response.results && response.results.length > 0) {
+                    var resultMessage = response.results[0].output.content || "응답 내용이 없습니다.";
+                    $('#generalResponse').html('<strong>일반 응답:</strong><p>' + resultMessage + '</p>');
+                } else {
+                    $('#generalResponse').html('<strong>오류:</strong> 예상하지 못한 응답 형식입니다.');
+                }
+            },
+            error: function(xhr, status, error) {
+                $('#generalResponse').html('<strong>오류 발생:</strong> ' + error);
+            }
+        });
+    }
+
+    // 사용자가 직접 입력한 질문을 제출할 때
+    $('#generalQueryForm').on('submit', function(event) {
+        event.preventDefault(); // 폼 제출 방지
+
+        var query = $('#generalQuery').val(); // 사용자가 입력한 질문
+        var hotelAddress = $('#hotelAddress').val(); // 주소 값
+        var modifiedQuery = hotelAddress + " " + query; // 주소 + 질문
+
+        sendQuery(modifiedQuery);
+    });
+
+    // '관광지', '맛집' 버튼 클릭 이벤트
+    $('.queryButton').on('click', function() {
+        var hotelAddress = $('#hotelAddress').val(); // 주소 값
+        var queryType = $(this).data('query'); // 버튼에 설정된 query 값 (관광지 or 맛집)
+        var modifiedQuery = hotelAddress + " " + queryType; // 주소 + 선택한 질문
+
+        sendQuery(modifiedQuery);
+    });
     function goToRoomDetail(button) {
         let roomId = button.getAttribute("data-room-id");
         if (roomId) {

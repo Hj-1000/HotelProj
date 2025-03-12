@@ -30,7 +30,7 @@ import java.util.*;
 
 @Controller
 @RequiredArgsConstructor
-@Tag(name = "adminController", description = "사이트 관리, 회원 관리 컨트롤러")
+@Tag(name = "AdminController", description = "사이트 관리, 회원 관리 컨트롤러")
 public class AdminController {
 
     private final HotelService hotelService;

@@ -22,6 +22,11 @@ configurations {
 
 repositories {
     mavenCentral()
+    maven { url 'https://repo.spring.io/milestone' }
+}
+
+ext {
+    set('springAiVersion', "1.0.0-M3")
 }
 
 //보안 적용해서 프로그램 시작(회원가입->로그인->개발프로그램)
@@ -71,7 +76,15 @@ dependencies {
     //이미지 썸네일
     implementation group: 'net.coobird', name: 'thumbnailator', version: '0.4.20'
 
+    // OpenAI
+    implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
+    implementation 'org.springframework.ai:spring-ai-openai'
+}
 
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
+    }
 }
 
 tasks.named('test') {

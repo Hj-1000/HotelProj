@@ -18,7 +18,7 @@ import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
-@Tag(name = "memberController", description = "유저 정보 관리 컨트롤러")
+@Tag(name = "MemberController", description = "유저 정보 관리 컨트롤러")
 public class MemberController {
 
     private final MemberService memberService;
