@@ -21,7 +21,7 @@ public class ServiceMenuRestController {
 
     private final ServiceMenuService serviceMenuService;
 
-    @Operation(summary = "유저 주문페이지 메뉴 목록", description = "유저의 주문페이지에 메뉴 목록을 불러온다.")
+    @Operation(summary = "유저 주문페이지 메뉴 목록", description = "해당 카테고리에 속하는 메뉴목록을 불러온다.")
     @GetMapping
     public ResponseEntity<List<ServiceMenuDTO>> getMenusByCategory(@RequestParam Integer serviceCateId) {
 

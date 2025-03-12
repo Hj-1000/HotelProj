@@ -26,7 +26,7 @@ public class ServiceCateRestController {
 //        return ResponseEntity.ok(categories);
 //    }
 
-    @Operation(summary = "유저 주문페이지 카테고리 목록", description = "유저의 주문페이지에 카테고리 목록을 불러온다.")
+    @Operation(summary = "유저 주문페이지 카테고리 목록", description = "예약한 지사에 속하는 카테고리 목록을 불러온다.")
     @GetMapping
     public ResponseEntity<List<ServiceCateDTO>> getCategoriesByHotel(@RequestParam Integer hotelId) {
         List<ServiceCateDTO> categories = serviceCateService.listByHotel(hotelId);

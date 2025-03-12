@@ -28,7 +28,7 @@ import java.util.Map;
 @Log4j2
 @RequiredArgsConstructor
 @RequestMapping("manager/roomService/menu") //url roomService아래에
-@Tag(name = "serviceMenuManagerController", description = "룸서비스 메뉴 정보")
+@Tag(name = "serviceMenuManagerController", description = "관리자의 룸서비스 메뉴 정보")
 public class ServiceMenuManagerController {
     private final ServiceMenuService serviceMenuService;
     private final ServiceCateService serviceCateService;
@@ -62,55 +62,6 @@ public class ServiceMenuManagerController {
         return "redirect:/manager/roomService/menu/list?serviceCateId=" + serviceCateId;
     }
 
-
-
-//    @Operation(summary = "전체목록", description = "전체목록을 조회한다.")
-//    @GetMapping("/list")
-//    public String list(@RequestParam(required = false) Integer serviceCateId,
-//                       @RequestParam(required = false) Integer hotelId,
-//                       @RequestParam(required = false) String keyword,
-//                       @RequestParam(required = false) String searchType,
-//                       @RequestParam(required = false) String status, // 상태값 추가
-//                       @PageableDefault(page = 1) Pageable page,
-//                       Model model) {
-//
-//        // 메뉴 목록 조회
-//        Page<ServiceMenuDTO> serviceMenuDTOS;
-//        if (serviceCateId != null) {
-//            // 카테고리 ID가 있을 경우
-//            serviceMenuDTOS = serviceMenuService.list(page, keyword, searchType, serviceCateId, status);
-//        } else {
-//            // 카테고리 ID가 없을 경우 (전체 조회)
-//            serviceMenuDTOS = serviceMenuService.list(page, keyword, searchType, null, status);
-//        }
-//
-//        // 페이지 정보 계산
-//        Map<String, Integer> pageInfo = paginationUtil.pagination(serviceMenuDTOS);
-//
-//        // 페이지가 하나뿐일 경우, startPage와 endPage를 1로 설정
-//        if (serviceMenuDTOS.getTotalPages() <= 1) {
-//            pageInfo.put("startPage", 1);
-//            pageInfo.put("endPage", 1);
-//        }
-//
-//
-//
-//        // 모든 카테고리와 상태값 추가
-//        Page<ServiceCateDTO> serviceCateDTOS = serviceCateService.list(page, keyword, searchType, hotelId);
-//
-//        model.addAttribute("serviceCateDTOS", serviceCateDTOS);
-//        model.addAttribute("serviceMenuDTOS", serviceMenuDTOS);
-//        model.addAttribute("serviceMenuStatus", ServiceMenuStatus.values()); // 상태값 enum 전달
-//        model.addAttribute("pageInfo", pageInfo);
-//
-//        // 검색 관련 정보 전달
-//        model.addAttribute("keyword", keyword);
-//        model.addAttribute("searchType", searchType);
-//        model.addAttribute("status", status); // 선택한 상태값 전달
-//        model.addAttribute("serviceCateId", serviceCateId);
-//
-//        return "/manager/roomservice/menu/list";
-//    }
 
     @Operation(summary = "특정지사의 서비스 메뉴", description = "특정 지사에 등록된 카테고리의 메뉴 목록을 조회한다.")
     @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF', 'MANAGER')")
@@ -174,7 +125,6 @@ public class ServiceMenuManagerController {
 
         return "/manager/roomService/menu/list";
     }
-
 
     @Operation(summary = "개별조회", description = "해당번호의 데이터를 조회한다.")
     @GetMapping("/read")

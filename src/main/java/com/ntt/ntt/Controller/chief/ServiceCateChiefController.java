@@ -8,6 +8,7 @@ import com.ntt.ntt.Service.ServiceCateService;
 import com.ntt.ntt.Service.hotel.HotelService;
 import com.ntt.ntt.Util.PaginationUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -32,13 +33,14 @@ import java.util.Map;
 @RequestMapping("chief/roomService/category")
 @AllArgsConstructor
 @Log4j2
-public class ChiefServiceCateController {
+@Tag(name = "ServiceCateChiefController", description = "호텔장이 보는 룸서비스 카테고리 정보")
+public class ServiceCateChiefController {
     private final ServiceCateService serviceCateService;
     private final HotelService hotelService;
     private final PaginationUtil paginationUtil;
     private final MemberService memberService;
 
-    @Operation(summary = "등록폼", description = "등록폼 페이지로 이동한다.")
+    @Operation(summary = "호텔장 등록폼", description = "호텔장 등록폼 페이지로 이동한다.")
     @GetMapping("/register")
     public String registerForm(@RequestParam(required = false) Integer hotelId, Authentication authentication, Model model){
         //검증처리가 필요하면 빈 CateDTO를 생성해서 전달한다.
@@ -56,7 +58,7 @@ public class ChiefServiceCateController {
         return "/manager/roomService/category/register";
     }
 
-    @Operation(summary = "등록창", description = "데이터 등록 후 목록페이지로 이동한다.")
+    @Operation(summary = "호텔장 등록창", description = "데이터 등록 후 호텔장의 목록페이지로 이동한다.")
     @PostMapping("/register")
     public String registerProc(ServiceCateDTO serviceCateDTO,
                                @RequestParam("imageFiles") List<MultipartFile> imageFiles,
@@ -161,7 +163,7 @@ public class ChiefServiceCateController {
         }
     }
 
-    @Operation(summary = "수정폼", description = "해당 데이터를 조회 후 수정폼페이지로 이동한다.")
+    @Operation(summary = "호텔장 수정폼", description = "해당 데이터를 조회 후 수정폼페이지로 이동한다.")
     @GetMapping("/update")
     public String updateForm(Integer serviceCateId, Model model) {
         ServiceCateDTO serviceCateDTO =
@@ -172,7 +174,7 @@ public class ChiefServiceCateController {
         return "/manager/roomService/category/update";
     }
 
-    @Operation(summary = "수정창", description = "수정할 내용을 데이터베이스에 저장 후 목록페이지로 이동한다.")
+    @Operation(summary = "호텔장 수정창", description = "수정할 내용을 데이터베이스에 저장 후 호텔장 목록페이지로 이동한다.")
     @PostMapping("/update")
     public String updateProc(ServiceCateDTO serviceCateDTO,
                              @RequestParam("imageFiles") List<MultipartFile> imageFiles,
@@ -186,7 +188,7 @@ public class ChiefServiceCateController {
         return "redirect:/chief/roomService/category/list?page=1&memberId=" + memberId;
     }
 
-    @Operation(summary = "삭제처리", description = "해당 데이터를 삭제 후 목록페이지로 이동한다.")
+    @Operation(summary = "호텔장 삭제처리", description = "해당 데이터를 삭제 후 호텔장 목록페이지로 이동한다.")
     @GetMapping("/delete")
     public String deleteForm(Integer serviceCateId, RedirectAttributes redirectAttributes) {
         ServiceCateDTO serviceCateDTO = serviceCateService.read(serviceCateId);

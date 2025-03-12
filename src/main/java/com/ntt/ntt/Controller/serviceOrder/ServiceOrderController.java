@@ -77,6 +77,7 @@ public class ServiceOrderController {
 
     //이건 유저가 볼 유저의 주문내역 페이지 호출함수
     @GetMapping("/myPage/order/history")
+    @Operation(summary = "유저의 주문내역 페이지", description = "현재 로그인한 유저의 주문내역 페이지를 불러온다.")
     public String orderHistory(@PageableDefault(page = 1, size = 5) Pageable pageable, Principal principal, Model model) {
         if (principal == null) {
             log.info("로그인을 하지않은 접속오류");
@@ -115,6 +116,7 @@ public class ServiceOrderController {
 
 
     //주문취소 api
+    @Operation(summary = "주문취소", description = "해당 주문을 취소한다.")
     @PostMapping("/api/order/{serviceOrderId}/cancel")
     public ResponseEntity cnacelOrder(
             @PathVariable("serviceOrderId") Integer serviceOrderId, Principal principal) {

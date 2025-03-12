@@ -6,6 +6,8 @@ import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Service.MemberService;
 import com.ntt.ntt.Service.ServiceOrderService;
 import com.ntt.ntt.Util.PaginationUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -23,11 +25,13 @@ import java.util.Map;
 @Log4j2
 @RequiredArgsConstructor
 @RequestMapping("manager/order") //url roomService아래에
+@Tag(name = "ServiceOrderManagerController", description = "매니저가 보는 주문 정보")
 public class ServiceOrderManagerController {
     private final ServiceOrderService serviceOrderService;
     private final MemberService memberService;
     private final PaginationUtil paginationUtil;
 
+    @Operation(summary = "매니저의 주문목록페이지", description = "매니저가 속한 지사의 주문목록을 불러온다.")
     @GetMapping("/list")
     public String orderListSearch(@RequestParam(required = false) String keyword,
                                   @RequestParam(required = false) String searchType,
@@ -87,6 +91,7 @@ public class ServiceOrderManagerController {
         return member.getMemberId(); // memberId 반환
     }
 
+    @Operation(summary = "해당 주문 상세보기페이지", description = "특정 주문의 정보를 불러온다.")
     @GetMapping("/read")
     public String orderRead(@RequestParam("serviceOrderId") Integer serviceOrderId, Model model) {
         // 주문 정보 가져오기
@@ -96,6 +101,7 @@ public class ServiceOrderManagerController {
     }
 
     // 주문 수정 페이지
+    @Operation(summary = "주문 수정페이지", description = "해당 주문을 조회하고 수정페이지를 불러온다.")
     @GetMapping("/update")
     public String orderEdit(@RequestParam("serviceOrderId") Integer serviceOrderId, Model model) {
         ServiceOrderHistoryDTO serviceOrderHistoryDTO = serviceOrderService.getOrderDetail(serviceOrderId);
@@ -104,6 +110,7 @@ public class ServiceOrderManagerController {
     }
 
     // 주문 수정 처리
+    @Operation(summary = "주문 수정폼", description = "해당 주문의 수량을 수정한다.")
     @PostMapping("/update")
     public String orderUpdate(@ModelAttribute ServiceOrderUpdateDTO updateDTO, RedirectAttributes redirectAttributes) {
         serviceOrderService.updateOrder(updateDTO);
@@ -112,6 +119,7 @@ public class ServiceOrderManagerController {
     }
 
     // 주문 삭제
+    @Operation(summary = "주문 삭제폼", description = "해당 주문을 삭제한다.")
     @GetMapping("/delete")
     public String orderDelete(@RequestParam("serviceOrderId") Integer serviceOrderId, RedirectAttributes redirectAttributes) {
         serviceOrderService.deleteOrder(serviceOrderId);
