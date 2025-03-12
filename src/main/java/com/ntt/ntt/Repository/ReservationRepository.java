@@ -54,6 +54,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
     // 페이징 처리
     Page<Reservation> findAll(Pageable pageable);
 
+    // 취소 예약 검색
     @Query("SELECT r FROM Reservation r WHERE r.reservationStatus <> '취소 완료'")
     Page<Reservation> findNonCancelledReservations(Pageable pageable);
 

@@ -216,13 +216,6 @@ public class ReservationManagerController {
                 return "redirect:/manager/room/reservation/list";
             }
 
-            if (memberId == null) {
-                log.error("[updateReservationProc] 예약이 존재하는데 memberId가 없음!");
-                redirectAttributes.addFlashAttribute("errorMessage", "예약 정보를 수정하려면 memberId가 필요합니다.");
-                return "redirect:/manager/room/reservation/list";
-            }
-
-
             // 예약이 존재하는 경우, 날짜 변환 후 예약 정보 수정
             LocalDateTime checkIn = checkInDate != null ? LocalDateTime.parse(checkInDate) : null;
             LocalDateTime checkOut = checkOutDate != null ? LocalDateTime.parse(checkOutDate) : null;

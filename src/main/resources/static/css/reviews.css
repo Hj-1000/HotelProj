@@ -19,6 +19,13 @@
     margin-bottom: 0;
 }
 
+.custom-link {
+    color: black;
+    text-decoration: none;
+    margin-bottom: 10px;
+    display: inline-block;
+}
+
 .review-text {
     max-width: 300px;
     white-space: nowrap;
