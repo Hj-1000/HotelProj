@@ -243,18 +243,18 @@
                                             <img th:src="@{'/upload/' + ${data.serviceCateImageDTOList[0].imagePath}}" class="card-img-top" alt="카테고리 이미지">
                                         </a>
                                         <div th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="card-body" style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                                            <h4> 지사명 : <a class="card-title" th:text="${data.hotelName}">지사명</a></h4>
-                                            <h5>카테고리명 : <a class="card-title"  th:text="${data.serviceCateName}">한식</a></h5>
+                                            <h4> 지사명 : <span class="card-title" th:text="${data.hotelName}">지사명</span></h4>
+                                            <h5>카테고리명 : <span class="card-title"  th:text="${data.serviceCateName}">한식</span></h5>
                                             <a th:href="@{/admin/roomService/category/delete(serviceCateId=${data.serviceCateId})}" class="badge bg-danger delBtn" style="width: 30px;"><i class="bi bi-trash"></i></a>
                                         </div>
                                         <div th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="card-body" style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                                            <h4> 지사명 : <a class="card-title" th:text="${data.hotelName}">지사명</a></h4>
-                                            <h5>카테고리명 : <a class="card-title" th:text="${data.serviceCateName}">한식</a></h5>
+                                            <h4> 지사명 : <span class="card-title" th:text="${data.hotelName}">지사명</span></h4>
+                                            <h5>카테고리명 : <span class="card-title" th:text="${data.serviceCateName}">한식</span></h5>
                                             <a th:href="@{/chief/roomService/category/delete(serviceCateId=${data.serviceCateId})}" class="badge bg-danger delBtn" style="width: 30px;"><i class="bi bi-trash"></i></a>
                                         </div>
                                         <div th:if="${#authorization.expression('hasRole(''MANAGER'')')}"  class="card-body" style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                                            <h4> 지사명 : <a class="card-title" th:text="${data.hotelName}">지사명</a></h4>
-                                            <h5>카테고리명 : <a class="card-title" th:text="${data.serviceCateName}">한식</a></h5>
+                                            <h4> 지사명 : <span class="card-title" th:text="${data.hotelName}">지사명</span></h4>
+                                            <h5>카테고리명 : <span class="card-title" th:text="${data.serviceCateName}">한식</span></h5>
                                             <a th:href="@{/manager/roomService/category/delete(serviceCateId=${data.serviceCateId})}" class="badge bg-danger delBtn" style="width: 30px;"><i class="bi bi-trash"></i></a>
                                         </div>
 
