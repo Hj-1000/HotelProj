@@ -6,17 +6,9 @@
 <head>
     <meta charset="UTF-8">
     <title>NTT호텔 - 본사관리</title>
-    <style>
-        .custom-link {
-            color: black;
-            text-decoration: none;
-            margin-bottom: 10px;
-            display: inline-block;
-        }
-        .custom-link:hover {
-            color: gray; /* 마우스 올리면 회색 */
-        }
-    </style>
+
+    <link rel="stylesheet" th:href="@{/css/pagination.css}">
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script th:src="@{/js/company.js}"></script>
 
@@ -77,12 +69,15 @@
 
 <div id="wrapper" layout:fragment="content">
     <div class="container-fluid mt-4">
-        <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
-        <a href="#" class="custom-link"><span>호텔관리</span></a> /
-        <a href="/admin/company/list" class="custom-link"><span>호텔본사관리</span></a>
-        <a href="/chief/company/list" class="custom-link"><span>호텔본사관리</span></a>
-        <h2 class="mb-3">호텔 본사 관리</h2>
-        <!-- 검색 영역 -->
+        <div class="location-wrapper">
+            <div class="location-wrap">
+                <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
+                <a href="#" class="custom-link"><span>호텔관리</span></a> /
+                <a href="/admin/company/list" class="custom-link"><span>호텔본사관리</span></a>
+                <a href="/chief/company/list" class="custom-link"><span>호텔본사관리</span></a>
+            </div>
+            <h1 class="page-title">본사 관리</h1>
+        </div>        <!-- 검색 영역 -->
         <div class="card p-4 mb-4">
             <form th:if="${#authorization.expression('hasRole(''ADMIN'')')}" action="/admin/company/list" method="get">
                 <div class="row g-3 align-items-center">
@@ -167,11 +162,11 @@
                                 <!--admin-->
                                 <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/company/read(companyId=${data.companyId})}" class="btn btn-info btn-sm"><i class="bi bi-eye"></i></a>
                                 <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/company/update(companyId=${data.companyId})}"  class="btn btn-warning btn-sm"><i class="bi bi-pen"></i></a>
-                                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/company/delete(companyId=${data.companyId})}" style="text-decoration: none; color: black" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')"><i class="bi bi-trash"></i></a>
+                                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/company/delete(companyId=${data.companyId})}" style="text-decoration: none; color: black" class="btn btn-danger btn-sm" onclick="return confirm('해당 본사를 삭제하시겠습니까?')"><i class="bi bi-trash"></i></a>
                                 <!--chief-->
                                 <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/company/read(companyId=${data.companyId})}" class="btn btn-info btn-sm"><i class="bi bi-eye"></i></a>
                                 <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/company/update(companyId=${data.companyId})}"  class="btn btn-warning btn-sm"><i class="bi bi-pen"></i></a>
-                                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/company/delete(companyId=${data.companyId})}" style="text-decoration: none; color: black" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')"><i class="bi bi-trash"></i></a>
+                                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/company/delete(companyId=${data.companyId})}" style="text-decoration: none; color: black" class="btn btn-danger btn-sm" onclick="return confirm('해당 본사를 삭제하시겠습니까?')"><i class="bi bi-trash"></i></a>
                             </td>
                         </tr>
                     </th:block>
@@ -188,7 +183,7 @@
                 <!-- 추가 버튼 -->
                 <div class="text-end mt-3">
                     <button th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="btn btn-success" onclick="location.href='/admin/company/register' ">등록</button>
-                    <button th:if="${#authorization.expression('hasRole(''ADMIN'')')}" type="button" class="btn btn-dark modalBtn">간편 등록</button>
+                    <!--<button th:if="${#authorization.expression('hasRole(''ADMIN'')')}" type="button" class="btn btn-dark modalBtn">간편 등록</button>-->
                 </div>
 
 

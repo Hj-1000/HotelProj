@@ -20,6 +20,7 @@ public interface HotelRepository extends JpaRepository<Hotel, Integer> {
     @Query("SELECT h FROM Hotel h JOIN h.company c WHERE c.companyName LIKE %:companyName%")
     Page<Hotel> findByCompany_CompanyNameLike(@Param("companyName") String companyName, Pageable pageable);
 
+    // 특정회사 O
 
     // 특정회사 X
     Page<Hotel> findByHotelNameLike (String keyword, Pageable pageable); //호텔이름검색
@@ -43,7 +44,7 @@ public interface HotelRepository extends JpaRepository<Hotel, Integer> {
     Page<Hotel> findByCompany_CompanyIdAndHotelAddressLike(Integer companyId, String keyword, Pageable pageable);
 
     // 회사 ID에 해당하는 호텔 조회 (별점 포함)
-    Page<Hotel> findByCompany_CompanyIdAndHotelRating(Integer companyId, Integer rating, Pageable pageable);
+    Page<Hotel> findByCompany_CompanyIdAndHotelRatingLike(Integer companyId, Integer rating, Pageable pageable);
 
     Page<Hotel> findByCompany_CompanyId(Integer companyId, Pageable pageable);
 
@@ -56,16 +57,10 @@ public interface HotelRepository extends JpaRepository<Hotel, Integer> {
 
     void deleteByMember(Member member);
 
-
     @Query("SELECT h FROM Hotel h WHERE h.member.memberId = :memberId")
     Page<Hotel> findByMember_MemberId(@Param("memberId") Integer memberId, Pageable pageable);
     List<Hotel> findByMember_MemberId(Integer memberId);
     List<Hotel> findByCompany_Member_MemberId(Integer memberId);
-
-    Page<Hotel> findByMember_MemberIdAndHotelNameLike(Integer memberId, String hotelName, Pageable pageable);
-    Page<Hotel> findByMember_MemberIdAndHotelLocationLike(Integer memberId, String hotelLocation, Pageable pageable);
-    Page<Hotel> findByMember_MemberIdAndHotelAddressLike(Integer memberId, String hotelAddress, Pageable pageable);
-    Page<Hotel> findByMember_MemberIdAndHotelRating(Integer memberId, Integer hotelRating, Pageable pageable);
 
     @Query("SELECT h.hotelId FROM Hotel h WHERE h.member.memberId = :memberId")
     List<Integer> findHotelIdsByMemberId(@Param("memberId") Integer memberId);

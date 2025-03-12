@@ -19,6 +19,7 @@
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pagination.css}">
     <script th:src="@{/js/company.js}"></script>
 
 
@@ -39,6 +40,14 @@
             })
 
             $(".newImageFiles").hide()
+
+            // 기존 이미지 개수를 확인
+            let oldImages = document.querySelectorAll(".oldImageFiles img");
+
+            if (oldImages.length === 0) {
+                console.log("출력할 이미지가 없습니다. 새 이미지 업로드 영역을 표시합니다.");
+                $(".newImageFiles").show();
+            }
 
         })
 
@@ -128,21 +137,25 @@
 <body>
 <div id="wrapper" layout:fragment="content">
     <div class="container-fluid mt-4">
-        <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
-        <a href="#" class="custom-link"><span>호텔관리</span></a> /
-        <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}"  href="/admin/company/list" class="custom-link"><span>호텔본사관리</span></a>
-        <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="/chief/company/list" class="custom-link"><span>호텔본사관리</span></a> /
-        <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/company/update(companyId=${companyDTO.companyId})}" class="custom-link">
-            <span>본사수정</span>
-        </a>>
-        <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/company/update(companyId=${companyDTO.companyId})}" class="custom-link">
-            <span>본사수정</span>
-        </a>
+        <div class="location-wrapper">
+            <div class="location-wrap">
+                <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
+                <a href="#" class="custom-link"><span>호텔관리</span></a> /
+                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}"  href="/admin/company/list" class="custom-link"><span>호텔본사관리</span></a>
+                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="/chief/company/list" class="custom-link"><span>호텔본사관리</span></a> /
+                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/company/update(companyId=${companyDTO.companyId})}" class="custom-link">
+                    <span>본사수정</span>
+                </a>
+                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/company/update(companyId=${companyDTO.companyId})}" class="custom-link">
+                    <span>본사수정</span>
+                </a>
+            </div>
+            <h1 class="page-title">본사 수정</h1>
+        </div>
+
 
         <!-- 폼 -->
         <div th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="card p-4 mb-4">
-
-            <h2 >본사 수정</h2>
 
             <div class="row g-3 align-items-center">
                 <form action="/admin/company/update" method="post" enctype="multipart/form-data" th:object="${companyDTO}">
@@ -186,7 +199,7 @@
                         <div>
                             <img th:src="@{'/upload/' + ${img.imagePath}}" alt="old" width="100" id="image-{{iterStat.index}}">
                             <!-- 이미지 삭제 버튼, 이미지 아이디를 전달 -->
-                            <button type="button" class="imgDelBtn" th:onclick="'deleteOldImage(' + ${img.imageId} + ')'" ><i class="bi bi-trash"></i></button>
+                            <button type="button" class="btn btn-light imgDelBtn" th:onclick="'deleteOldImage(' + ${img.imageId} + ')'"><i class="bi bi-trash"></i></button>
                         </div>
                     </div>
 
@@ -204,8 +217,9 @@
                     </div>
 
                     <div style="text-align: right">
-                        <a class="btn btn-danger" th:href="@{/chief/company/delete(companyId=${companyDTO.companyId})}"><i class="bi bi-trash"></i></a>
-                        <button type="submit" class="btn btn-primary">등록</button>
+                        <a class="btn btn-light" th:href="@{/admin/company/read(companyId=${companyDTO.companyId})}">취소</a>
+                        <a class="btn btn-danger" onclick="return confirm('해당 본사를 삭제하시겠습니까?')" th:href="@{/admin/company/delete(companyId=${companyDTO.companyId})}">삭제</a>
+                        <button type="submit" class="btn btn-primary">수정완료</button>
                     </div>
                 </form>
 
@@ -214,8 +228,6 @@
 
         <!-- 폼 -->
         <div th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="card p-4 mb-4">
-
-            <h2 >본사 수정</h2>
 
             <div class="row g-3 align-items-center">
                 <form action="/chief/company/update" method="post" enctype="multipart/form-data" th:object="${companyDTO}">
@@ -259,7 +271,7 @@
                         <div>
                             <img th:src="@{'/upload/' + ${img.imagePath}}" alt="old" width="100" id="image-{{iterStat.index}}">
                             <!-- 이미지 삭제 버튼, 이미지 아이디를 전달 -->
-                            <button type="button" class="imgDelBtn" th:onclick="'deleteOldImage(' + ${img.imageId} + ')'" ><i class="bi bi-trash"></i></button>
+                            <button type="button" class="btn btn-light imgDelBtn" th:onclick="'deleteOldImage(' + ${img.imageId} + ')'" ><i class="bi bi-trash"></i></button>
                         </div>
                     </div>
 
@@ -277,8 +289,9 @@
                     </div>
 
                     <div style="text-align: right">
-                        <a class="btn btn-danger" th:href="@{/chief/company/delete(companyId=${companyDTO.companyId})}"><i class="bi bi-trash"></i></a>
-                        <button type="submit" class="btn btn-primary">등록</button>
+                        <a class="btn btn-light" th:href="@{/chief/company/read.html(companyId=${companyDTO.companyId})}">취소</a>
+                        <a class="btn btn-danger" onclick="return confirm('해당 본사를 삭제하시겠습니까?')" th:href="@{/chief/company/delete(companyId=${companyDTO.companyId})}">삭제</a>
+                        <button type="submit" class="btn btn-primary">수정완료</button>
                     </div>
                 </form>
 

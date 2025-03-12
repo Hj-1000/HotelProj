@@ -297,13 +297,14 @@ public class AdminCompanyHotelController {
     //관리자 호텔 목록
     @Operation(summary = "관리자용 호텔 목록", description = "전체 호텔 목록 페이지로 이동한다.")
     @GetMapping("/hotel/list")
-    public String hotelList(@RequestParam(required = false) String keyword,
-                       @RequestParam(required = false) String searchType,
-                       @RequestParam(required = false) Integer keyword1,  // 별점 검색용
-                       @RequestParam(defaultValue = "1") int page, // 기본값을 1로 설정 (1-based)
-                       @PageableDefault(size = 10) Pageable pageable, // 한 페이지에 10개씩
-                       Model model, HttpServletRequest request,
-                       RedirectAttributes redirectAttributes
+    public String hotelList(@RequestParam(required = false) Integer companyId, // ★ companyId 추가
+                            @RequestParam(required = false) String keyword,
+                            @RequestParam(required = false) String searchType,
+                            @RequestParam(required = false) Integer keyword1,  // 별점 검색용
+                            @RequestParam(defaultValue = "1") int page, // 기본값을 1로 설정 (1-based)
+                            @PageableDefault(size = 10) Pageable pageable, // 한 페이지에 10개씩
+                            Model model, HttpServletRequest request,
+                            RedirectAttributes redirectAttributes
     ) {
 
         try {
@@ -319,7 +320,7 @@ public class AdminCompanyHotelController {
             Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize());
 
             Page<HotelDTO> hotelDTOS;
-            hotelDTOS = hotelService.listByAdmin(adjustedPageable, keyword, keyword1, searchType);
+            hotelDTOS = hotelService.listByAdmin(adjustedPageable, keyword, keyword1, searchType, companyId);
 
             // 페이지 정보 계산
             Map<String, Integer> pageInfo = paginationUtil.pagination(hotelDTOS);
@@ -413,9 +414,8 @@ public class AdminCompanyHotelController {
     @GetMapping("/hotel/update")
     public String updateForm(Integer hotelId, Model model) {
         HotelDTO hotelDTO = hotelService.read(hotelId);
-        List<CompanyDTO> companyDTOS = hotelService.getMyCompany();
+        List<CompanyDTO> companyDTOS = hotelService.getAllCompany();
         model.addAttribute("companyDTOS", companyDTOS);
-        model.addAttribute("companyDTO", new CompanyDTO());
         model.addAttribute("hotelDTO", hotelDTO);
         return "/manager/hotel/update";
     }
