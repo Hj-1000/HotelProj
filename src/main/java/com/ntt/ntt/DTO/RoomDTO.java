@@ -3,6 +3,7 @@ package com.ntt.ntt.DTO;
 import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.Image;
 import com.ntt.ntt.Entity.Room;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -31,6 +32,7 @@ public class RoomDTO {
 
     private String roomInfo;
 
+    @NotNull(message = "지사를 선택해야 합니다.")
     private Hotel hotelId;
 
     private String hotelName;

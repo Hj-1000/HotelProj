@@ -15,6 +15,8 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <!-- Flatpickr 한국어 로케일 추가 -->
     <script src="https://npmcdn.com/flatpickr/dist/l10n/ko.js"></script>
+    <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
+
     <link rel="stylesheet" th:href="@{/css/user.css}">
     <link rel="stylesheet" th:href="@{/css/detail.css}">
 </head>
@@ -27,12 +29,15 @@
         <div class="modal-dialog share-modal-dialog">
             <div class="modal-content share-modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">공유하기</h5>
+                    <h4 class="modal-title">공유하기</h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body text-center">
+                    <button id="kakao-share-btn" class="btn btn-outline-dark mx-2">
+                        <i class="fas fa-comment"></i> 카카오톡
+                    </button>
                     <button id="shareEmail" class="btn btn-outline-dark mx-2">
-                        <i class="fas fa-envelope"></i> 이메일 공유
+                        <i class="fas fa-envelope"></i> 이메일
                     </button>
                     <button id="copyURL" class="btn btn-outline-dark mx-2">
                         <i class="fas fa-link"></i> URL 복사
@@ -64,7 +69,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="reservationDates" class="form-label">숙박 기간</label>
+                            <label for="reservationDates" class="form-label">숙박 기간 <span class="time-text">(체크인 10:00 a.m. ~ 체크아웃 11:00 a.m.)</span></label>
                             <input type="text" class="form-control" id="reservationDates" placeholder="체크인 - 체크아웃" readonly>
 
                             <!-- 실제 체크인, 체크아웃 날짜를 저장할 hidden input -->
@@ -278,6 +283,7 @@
     </button>
 
     <script>
+
 
         /* 공유하기 모달 함수 */
         document.addEventListener("DOMContentLoaded", function () {
@@ -1253,6 +1259,37 @@
             });
         });
 
+
+        /* 카카오톡 공유하기 */
+
+        /* 자바스크립트 키 */
+        Kakao.init('8f6c2047eb041d548257190640a47054');
+
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("kakao-share-btn").addEventListener("click", function () {
+                Kakao.Share.sendDefault({
+                    objectType: 'feed',
+                    content: {
+                        title: document.title, // 현재 페이지 제목
+                        description: "이 호텔을 추천합니다! 지금 확인해보세요!", // 설명 문구
+                        imageUrl: window.location.origin + "/upload/default-image.jpg", // 대표 이미지 (변경 가능)
+                        link: {
+                            mobileWebUrl: window.location.href,
+                            webUrl: window.location.href
+                        }
+                    },
+                    buttons: [
+                        {
+                            title: '웹으로 보기',
+                            link: {
+                                mobileWebUrl: window.location.href,
+                                webUrl: window.location.href
+                            }
+                        }
+                    ]
+                });
+            });
+        });
     </script>
 </div>
 <div th:replace="~{fragments/footer::footer}"></div>
