@@ -70,11 +70,4 @@ public class Room extends BaseEntity {
             this.roomStatus = reservationEndDate.isAfter(today) || reservationEndDate.isEqual(today);
         }
     }
-
-    @OneToMany(mappedBy = "room", cascade = CascadeType.REMOVE)
-    private List<Payment> payments;
-
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RoomReview> reviews;
-
 }
