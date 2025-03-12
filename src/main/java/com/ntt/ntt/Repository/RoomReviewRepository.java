@@ -1,5 +1,6 @@
 package com.ntt.ntt.Repository;
 
+import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Entity.RoomReview;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
@@ -63,4 +64,5 @@ public interface RoomReviewRepository extends JpaRepository<RoomReview, Integer>
             "ORDER BY rr.reviewDate DESC")
     Page<RoomReview> findByHotelIdsOrderByReviewDateDesc(@Param("hotelIds") List<Integer> hotelIds, Pageable pageable);
 
+    void deleteByMember(Member member);
 }

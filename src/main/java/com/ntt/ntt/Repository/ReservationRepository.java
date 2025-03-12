@@ -82,4 +82,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
 
     // 특정 회원이 특정 객실을 예약한 적이 있는지 확인
     boolean existsByMemberAndRoom(Member member, Room room);
+
+    void deleteByMember(Member member);
 }
