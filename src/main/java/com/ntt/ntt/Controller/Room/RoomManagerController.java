@@ -175,7 +175,6 @@ public class RoomManagerController {
         pageInfo.put("startPage", startPage);
         pageInfo.put("endPage", endPage);
 
-
         // 모델에 데이터 추가
         model.addAttribute("currentPage", page);
         model.addAttribute("list", roomDTOS); // 페이징된 RoomDTO 리스트

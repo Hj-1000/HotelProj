@@ -38,6 +38,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final MemberRepository memberRepository;
     private final ServiceOrderRepository serviceOrderRepository;
+    private final MemberService memberService;
 
     @PersistenceContext
     private EntityManager entityManager;

@@ -3,6 +3,7 @@ package com.ntt.ntt.Repository;
 import com.ntt.ntt.Entity.Room;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -42,7 +43,8 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
     Page<Room> findByHotel_Member_MemberId(@Param("memberId") Integer memberId, Pageable pageable);
 
     /* 방 목록을 조회하면서 각 방과 연결된 이미지 리스트를 함께 가져오기 */
-    @Query("SELECT r FROM Room r LEFT JOIN FETCH r.roomImageList")
+    @EntityGraph(attributePaths = {"roomImageList"})
+    @Query("SELECT r FROM Room r")
     Page<Room> findAllWithImages(Pageable pageable);
 
     /* 빈방 조회 (현재 예약이 존재하지 않는 방만 조회) */
@@ -64,4 +66,5 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
 
     @Query("SELECT r.roomId FROM Room r WHERE r.hotelId.hotelId IN :hotelIds")
     List<Integer> findRoomIdsByHotelIds(@Param("hotelIds") List<Integer> hotelIds);
+
 }

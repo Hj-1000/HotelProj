@@ -275,7 +275,7 @@
     font-weight: bold;
     font-size: 3rem;
     text-align: center;
-    margin-bottom: 3rem;
+    margin-bottom: 4rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -341,7 +341,7 @@
 /* 유의사항 */
 .notice {
     background-color: #f8f9fa;
-    padding: 20px;
+    margin-bottom: 4rem;
 }
 
 .notice h2 {

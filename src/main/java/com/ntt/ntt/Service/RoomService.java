@@ -97,6 +97,8 @@ public class RoomService {
         // Room 데이터와 이미지를 함께 가져오기 위해 fetch join 사용
         Page<Room> roomEntities = roomRepository.findAllWithImages(pageable);
 
+        log.info(" 총 객실 개수: {}", roomEntities.getTotalElements());
+        log.info(" 총 페이지 개수: {}", roomEntities.getTotalPages());
 
         // Room Entity를 DTO로 변환
         return roomEntities.map(room -> {
