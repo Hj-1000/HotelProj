@@ -214,96 +214,137 @@ public class ServiceOrderService {
     }
 
     //------------------------------------관리자용-----------------------------------
-    //관리자의 주문내역관리 페이지
-
-    public Page<ServiceOrderHistoryDTO> managerOrderList(Pageable page, String keyword, String searchType, Integer reservationId) {
+    //ADMIN의 주문내역관리 페이지
+    public Page<ServiceOrderHistoryDTO> adminOrderList(Pageable page, String keyword, String searchType) {
         int currentPage = page.getPageNumber() - 1;
         int pageSize = 10;
         Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.DESC, "serviceOrderId"));
         Page<ServiceOrder> serviceOrders = null;
 
-        // 검색 조건에 따라 다른 쿼리 실행
-        if (keyword != null && !keyword.isEmpty()) {
-            String keywordLike = "%" + keyword + "%";
+        String keywordLike = (keyword != null && !keyword.isEmpty()) ? "%" + keyword + "%" : null;
 
-            if ("memberName".equals(searchType)) {
-                if (reservationId != null) {
-                    serviceOrders = serviceOrderRepository.findByReservation_ReservationIdAndMember_MemberNameLike(reservationId, keywordLike, pageable);
-                } else {
+        if (keywordLike != null) {
+            switch (searchType) {
+                case "memberName":
                     serviceOrders = serviceOrderRepository.findByMember_MemberNameLike(keywordLike, pageable);
-                }
-            } else if ("memberEmail".equals(searchType)) {
-                if (reservationId != null) {
-                    serviceOrders = serviceOrderRepository.findByReservation_ReservationIdAndMember_MemberEmailLike(reservationId, keywordLike, pageable);
-                } else {
+                    break;
+                case "memberEmail":
                     serviceOrders = serviceOrderRepository.findByMember_MemberEmailLike(keywordLike, pageable);
-                }
-            } else if ("roomName".equals(searchType)) {
-                if (reservationId != null) {
-                    serviceOrders = serviceOrderRepository.findByReservation_ReservationIdAndReservation_Room_RoomNameLike(reservationId, keywordLike, pageable);
-                } else {
+                    break;
+                case "roomName":
                     serviceOrders = serviceOrderRepository.findByReservation_Room_RoomNameLike(keywordLike, pageable);
-                }
-            } else if ("orderDate".equals(searchType)) {
-                try {
-                    LocalDateTime orderDate = LocalDateTime.parse(keyword);
-                    if (reservationId != null) {
-                        serviceOrders = serviceOrderRepository.findByReservation_ReservationIdAndRegDateLike(reservationId, orderDate, pageable);
-                    } else {
-                        serviceOrders = serviceOrderRepository.findByRegDateLike(orderDate, pageable);
+                    break;
+                case "orderDate":
+                    try {
+                        LocalDateTime orderDate = LocalDateTime.parse(keyword);
+                        serviceOrders = serviceOrderRepository.findByRegDate(orderDate, pageable);
+                    } catch (Exception e) {
+                        serviceOrders = Page.empty();
                     }
-                } catch (Exception e) {
-                    // 날짜 형식이 잘못된 경우 빈 페이지 반환
-                    serviceOrders = Page.empty();
-                }
-            } else {
-                serviceOrders = serviceOrderRepository.findByReservation_ReservationId(reservationId, pageable);
+                    break;
             }
         } else {
-            // keyword가 null인 경우, 단순히 reservationId로 검색
-            if (reservationId != null) {
-                serviceOrders = serviceOrderRepository.findByReservation_ReservationId(reservationId, pageable);
-            } else {
-                serviceOrders = serviceOrderRepository.findAll(pageable);
-            }
+            serviceOrders = serviceOrderRepository.findAll(pageable);
         }
 
-        // DTO 변환 및 페이징 처리
-        List<ServiceOrderHistoryDTO> serviceOrderHistoryDTOList = new ArrayList<>();
+        return convertToDTOPage(serviceOrders, pageable);
+    }
+//     CHIEF용 주문 내역 조회
+    public Page<ServiceOrderHistoryDTO> chiefOrderList(Pageable page, String keyword, String searchType, Integer memberId) {
+        int currentPage = page.getPageNumber() - 1;
+        int pageSize = 10;
+        Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.DESC, "serviceOrderId"));
+        Page<ServiceOrder> serviceOrders = null;
 
-        for (ServiceOrder serviceOrder : serviceOrders) {
+        String keywordLike = (keyword != null && !keyword.isEmpty()) ? "%" + keyword + "%" : null;
+
+        if (keywordLike != null) {
+            switch (searchType) {
+                case "memberName":
+                    serviceOrders = serviceOrderRepository.findByReservation_Room_HotelId_Company_Member_MemberIdAndMember_MemberNameLike(memberId, keywordLike, pageable);
+                    break;
+                case "memberEmail":
+                    serviceOrders = serviceOrderRepository.findByReservation_Room_HotelId_Company_Member_MemberIdAndMember_MemberEmailLike(memberId, keywordLike, pageable);
+                    break;
+                case "roomName":
+                    serviceOrders = serviceOrderRepository.findByReservation_Room_HotelId_Company_Member_MemberIdAndReservation_Room_RoomNameLike(memberId,keywordLike, pageable);
+                    break;
+                case "orderDate":
+                    try {
+                        LocalDateTime orderDate = LocalDateTime.parse(keyword);
+                        serviceOrders = serviceOrderRepository.findByReservation_Room_HotelId_Company_Member_MemberIdAndRegDate(memberId, orderDate, pageable);
+                    } catch (Exception e) {
+                        serviceOrders = Page.empty();
+                    }
+                    break;
+            }
+        } else {
+            serviceOrders = serviceOrderRepository.findByReservation_Room_HotelId_Company_Member_MemberId(memberId, pageable);
+        }
+
+        return convertToDTOPage(serviceOrders, pageable);
+    }
+
+    // MANAGER용 주문 내역 조회
+    public Page<ServiceOrderHistoryDTO> managerOrderList(Pageable page, String keyword, String searchType, Integer memberId) {
+        int currentPage = page.getPageNumber() - 1;
+        int pageSize = 10;
+        Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.DESC, "serviceOrderId"));
+        Page<ServiceOrder> serviceOrders = null;
+
+        String keywordLike = (keyword != null && !keyword.isEmpty()) ? "%" + keyword + "%" : null;
+
+        if (keywordLike != null) {
+            switch (searchType) {
+                case "memberName":
+                    serviceOrders = serviceOrderRepository.findByReservation_Room_HotelId_Member_MemberIdAndMember_MemberNameLike(memberId, keywordLike, pageable);
+                    break;
+                case "memberEmail":
+                    serviceOrders = serviceOrderRepository.findByReservation_Room_HotelId_Member_MemberIdAndMember_MemberEmailLike( memberId, keywordLike, pageable);
+                    break;
+                case "roomName":
+                    serviceOrders = serviceOrderRepository.findByReservation_Room_HotelId_Member_MemberIdAndReservation_Room_RoomNameLike(memberId, keywordLike, pageable);
+                    break;
+                case "orderDate":
+                    try {
+                        LocalDateTime orderDate = LocalDateTime.parse(keyword);
+                        serviceOrders = serviceOrderRepository.findByReservation_Room_HotelId_Member_MemberIdAndRegDate(memberId, orderDate,  pageable);
+                    } catch (Exception e) {
+                        serviceOrders = Page.empty();
+                    }
+                    break;
+            }
+        } else {
+            serviceOrders = serviceOrderRepository.findByReservation_Room_HotelId_Member_MemberId(memberId, pageable);
+        }
+
+        return convertToDTOPage(serviceOrders, pageable);
+    }
+
+    private Page<ServiceOrderHistoryDTO> convertToDTOPage(Page<ServiceOrder> serviceOrders, Pageable pageable) {
+        List<ServiceOrderHistoryDTO> serviceOrderHistoryDTOList = serviceOrders.stream().map(serviceOrder -> {
             ServiceOrderHistoryDTO serviceOrderHistoryDTO = new ServiceOrderHistoryDTO();
-
-            // ServiceOrder -> ServiceOrderHistoryDTO 변환
             serviceOrderHistoryDTO.setServiceOrderId(serviceOrder.getServiceOrderId());
             serviceOrderHistoryDTO.setRegDate(serviceOrder.getRegDate());
             serviceOrderHistoryDTO.setServiceOrderStatus(serviceOrder.getServiceOrderStatus());
             serviceOrderHistoryDTO.setReservationDTO(modelMapper.map(serviceOrder.getReservation(), ReservationDTO.class));
             serviceOrderHistoryDTO.setMemberDTO(modelMapper.map(serviceOrder.getMember(), MemberDTO.class));
+            serviceOrderHistoryDTO.setServiceOrderItemDtoList(serviceOrder.getServiceOrderItemList().stream().map(item -> {
+                ServiceOrderItemDTO itemDTO = new ServiceOrderItemDTO();
+                itemDTO.setServiceOrderItemId(item.getServiceOrderItemId());
+                itemDTO.setServiceMenuName(item.getServiceMenu().getServiceMenuName());
+                itemDTO.setOrderPrice(item.getOrderPrice());
+                itemDTO.setCount(item.getCount());
+                itemDTO.setImagePath(item.getServiceMenu().getServiceMenuImageList().stream().findFirst().map(Image::getImagePath).orElse(null));
+                return itemDTO;
+            }).collect(Collectors.toList()));
+            return serviceOrderHistoryDTO;
+        }).collect(Collectors.toList());
 
-            // 서비스 주문 아이템 변환
-            List<ServiceOrderItem> serviceOrderItemList = serviceOrder.getServiceOrderItemList();
-            for (ServiceOrderItem serviceOrderItem : serviceOrderItemList) {
-                ServiceOrderItemDTO serviceOrderItemDTO = new ServiceOrderItemDTO();
-                serviceOrderItemDTO.setServiceOrderItemId(serviceOrderItem.getServiceOrderItemId());
-                serviceOrderItemDTO.setServiceMenuName(serviceOrderItem.getServiceMenu().getServiceMenuName());
-                serviceOrderItemDTO.setOrderPrice(serviceOrderItem.getOrderPrice());
-                serviceOrderItemDTO.setCount(serviceOrderItem.getCount());
-
-                // 서비스 메뉴 이미지 처리
-                List<Image> serviceMenuImageList = serviceOrderItem.getServiceMenu().getServiceMenuImageList();
-                for (Image image : serviceMenuImageList) {
-                    serviceOrderItemDTO.setImagePath(image.getImagePath());
-                }
-                serviceOrderHistoryDTO.addServiceOrderItemDTO(serviceOrderItemDTO);
-            }
-
-            serviceOrderHistoryDTOList.add(serviceOrderHistoryDTO);
-        }
-
-        // PageImpl을 사용하여 DTO 목록을 반환
         return new PageImpl<>(serviceOrderHistoryDTOList, pageable, serviceOrders.getTotalElements());
     }
+
+
 
     //주문 상세보기
     public ServiceOrderHistoryDTO getOrderDetail(Integer serviceOrderId) {

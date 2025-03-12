@@ -8,6 +8,24 @@
     <meta charset="UTF-8">
     <title>NTT호텔 - 메뉴 등록</title>
     <style>
+        .location-wrapper {
+            position: relative;
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+
+        .location-wrap {
+            position: absolute;
+            top: 1rem;
+            left: 0;
+        }
+
+        .page-title {
+            flex: 1;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 0;
+        }
         .custom-link {
             color: black;
             text-decoration: none;
@@ -77,11 +95,17 @@
 <div id="wrapper" layout:fragment="content">
 
     <div class="container-fluid mt-4">
-        <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
-        <a href="#" class="custom-link"><span>룸서비스관리</span></a> /
-        <a th:href="@{/manager/roomService/menu/list(serviceCateId=${serviceMenuDTO.serviceCateId.serviceCateId})}" class="custom-link"><span>서비스메뉴관리</span></a> /
-        <a href="/manager/roomService/menu/register" class="custom-link"><span>메뉴등록</span></a>
-        <h2 class="mb-3">메뉴 등록</h2>
+        <div class="location-wrapper">
+            <div class="location-wrap">
+                <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
+                <a href="#" class="custom-link"><span>룸서비스관리</span></a> /
+                <a th:href="@{/manager/roomService/menu/list(serviceCateId=${selectServiceCateId})}" class="custom-link"><span>서비스메뉴관리</span></a> /
+                <a href="/manager/roomService/menu/register" class="custom-link"><span>메뉴등록</span></a>
+            </div>
+            <h2 class="page-title">메뉴 등록</h2>
+
+        </div>
+
 
         <!-- 폼 -->
         <div class="card p-4 mb-4">
@@ -143,7 +167,7 @@
 
                     <div style="text-align: right">
                         <button type="submit" class="btn btn-success mx-2">등록</button>
-                        <a class="btn btn-primary" style="background-color: black" th:href="@{/manager/roomService/menu/list(serviceCateId=${serviceMenuDTO.serviceCateId.serviceCateId})}">목록</a>
+                        <a class="btn btn-primary" style="background-color: black" th:href="@{/manager/roomService/menu/list(serviceCateId=${selectServiceCateId})}">목록</a>
                         <button type="reset" class="btn btn-secondary mx-2">초기화</button>
                     </div>
 

@@ -7,6 +7,24 @@
     <meta charset="UTF-8">
     <title>NTT호텔 - 서비스 메뉴 관리</title>
     <style>
+        .location-wrapper {
+            position: relative;
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+
+        .location-wrap {
+            position: absolute;
+            top: 1rem;
+            left: 0;
+        }
+
+        .page-title {
+            flex: 1;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 0;
+        }
         .custom-link {
             color: black;
             text-decoration: none;
@@ -145,10 +163,15 @@
 <body>
 <div id="wrapper" layout:fragment="content">
     <div class="container-fluid mt-4">
-        <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
-        <a href="#" class="custom-link"><span>룸서비스관리</span></a> /
-        <a th:href="@{/manager/roomService/menu/list(serviceCateId=${serviceCateId})}" class="custom-link"><span>서비스메뉴관리</span></a>
-        <h2 class="mb-3">서비스 메뉴 관리</h2>
+        <div class="location-wrapper">
+            <div class="location-wrap">
+                <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
+                <a href="#" class="custom-link"><span>룸서비스관리</span></a> /
+                <a th:href="@{/manager/roomService/menu/list(serviceCateId=${serviceCateId})}" class="custom-link"><span>서비스메뉴관리</span></a>
+            </div>
+            <h2 class="page-title">서비스 메뉴 관리</h2>
+        </div>
+
         <!-- 검색 영역 -->
         <div class="card p-4 mb-4">
             <form action="/manager/roomService/menu/list" method="get">
@@ -263,7 +286,9 @@
 
                 <!-- 추가 버튼 -->
                 <div class="text-end mt-3">
-                    <a class="btn btn-primary" style="background-color: purple" th:href="@{/manager/roomService/category/list}">카테고리 관리</a>
+                    <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="btn btn-primary" style="background-color: purple" th:href="@{/admin/roomService/category/list}">카테고리 관리</a>
+                    <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="btn btn-primary" style="background-color: purple" th:href="@{/chief/roomService/category/list}">카테고리 관리</a>
+                    <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" class="btn btn-primary" style="background-color: purple" th:href="@{/manager/roomService/category/list}">카테고리 관리</a>
                     <a th:href="@{/manager/roomService/menu/register(serviceCateId=${serviceCateId})}" class="btn btn-success">등록</a>
                     <button type="button" class="btn btn-primary modalBtn">간편 등록</button>
                 </div>

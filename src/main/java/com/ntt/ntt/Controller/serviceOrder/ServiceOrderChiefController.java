@@ -22,8 +22,8 @@ import java.util.Map;
 @Controller
 @Log4j2
 @RequiredArgsConstructor
-@RequestMapping("manager/order") //url roomService아래에
-public class ServiceOrderManagerController {
+@RequestMapping("chief/order") //url roomService아래에
+public class ServiceOrderChiefController {
     private final ServiceOrderService serviceOrderService;
     private final MemberService memberService;
     private final PaginationUtil paginationUtil;
@@ -35,7 +35,7 @@ public class ServiceOrderManagerController {
 
         Integer memberId = getLoggedInMemberId(authentication);
         Page<ServiceOrderHistoryDTO> serviceOrderHistoryDTOS =
-                serviceOrderService.managerOrderList(page, keyword,searchType, memberId);
+                serviceOrderService.chiefOrderList(page, keyword,searchType, memberId);
 
         Map<String, Integer> pageInfo = paginationUtil.pagination(serviceOrderHistoryDTOS);
 
@@ -108,7 +108,7 @@ public class ServiceOrderManagerController {
     public String orderUpdate(@ModelAttribute ServiceOrderUpdateDTO updateDTO, RedirectAttributes redirectAttributes) {
         serviceOrderService.updateOrder(updateDTO);
         redirectAttributes.addFlashAttribute("message", "주문이 성공적으로 수정되었습니다.");
-        return "redirect:/manager/order/list";
+        return "redirect:/chief/order/list";
     }
 
     // 주문 삭제
@@ -116,7 +116,7 @@ public class ServiceOrderManagerController {
     public String orderDelete(@RequestParam("serviceOrderId") Integer serviceOrderId, RedirectAttributes redirectAttributes) {
         serviceOrderService.deleteOrder(serviceOrderId);
         redirectAttributes.addFlashAttribute("message", "주문이 삭제되었습니다.");
-        return "redirect:/manager/order/list";
+        return "redirect:/chief/order/list";
     }
 
 }
