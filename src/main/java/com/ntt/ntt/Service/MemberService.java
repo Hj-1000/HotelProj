@@ -4,10 +4,7 @@ import com.ntt.ntt.Constant.Role;
 import com.ntt.ntt.DTO.MemberDTO;
 import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.Member;
-import com.ntt.ntt.Repository.MemberRepository;
-import com.ntt.ntt.Repository.NotificationRepository;
-import com.ntt.ntt.Repository.QnaRepository;
-import com.ntt.ntt.Repository.ReplyRepository;
+import com.ntt.ntt.Repository.*;
 import com.ntt.ntt.Repository.company.CompanyRepository;
 import com.ntt.ntt.Repository.hotel.HotelRepository;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +40,9 @@ public class MemberService implements UserDetailsService {
     private final NotificationRepository notificationRepository;
     private final HotelRepository hotelRepository;
     private final CompanyRepository companyRepository;
+    private final PaymentRepository paymentRepository;
+    private final ReservationRepository reservationRepository;
+    private final RoomReviewRepository roomReviewRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -254,6 +254,15 @@ public class MemberService implements UserDetailsService {
 
         // 비밀번호가 일치하면 회원에게 온 알림 데이터를 먼저 삭제
         notificationRepository.deleteByMember(member);
+
+        // 비밀번호가 일치하면 회원의 결제 내역을 먼저 삭제
+        paymentRepository.deleteByMember(member);
+
+        // 비밀번호가 일치하면 회원의 예약 내역을 먼저 삭제
+        reservationRepository.deleteByMember(member);
+
+        // 비밀번호가 일치하면 회원의 리뷰 내역을 먼저 삭제
+        roomReviewRepository.deleteByMember(member);
 
         // 비밀번호가 일치하면 호텔장 회원이라면 해당 호텔 레코드를 삭제
         List<Hotel> hotels = hotelRepository.findByMember(member);
