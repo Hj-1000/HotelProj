@@ -2,40 +2,38 @@ package com.ntt.ntt.Controller.serviceOrder;
 
 import com.ntt.ntt.DTO.ServiceOrderHistoryDTO;
 import com.ntt.ntt.DTO.ServiceOrderUpdateDTO;
-import com.ntt.ntt.Entity.Member;
-import com.ntt.ntt.Service.MemberService;
 import com.ntt.ntt.Service.ServiceOrderService;
 import com.ntt.ntt.Util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 
 import java.util.Map;
 
 @Controller
 @Log4j2
 @RequiredArgsConstructor
-@RequestMapping("manager/order") //url roomService아래에
-public class ServiceOrderManagerController {
+@RequestMapping("admin/order") //url roomService아래에
+public class ServiceOrderAdminController {
     private final ServiceOrderService serviceOrderService;
-    private final MemberService memberService;
     private final PaginationUtil paginationUtil;
 
     @GetMapping("/list")
     public String orderListSearch(@RequestParam(required = false) String keyword,
-                                  @RequestParam(required = false) String searchType,
-                                  @PageableDefault(page = 1) Pageable page, Authentication authentication, Model model) {
+                             @RequestParam(required = false) String searchType,
+                             @PageableDefault(page = 1) Pageable page, Model model) {
 
-        Integer memberId = getLoggedInMemberId(authentication);
+
         Page<ServiceOrderHistoryDTO> serviceOrderHistoryDTOS =
-                serviceOrderService.managerOrderList(page, keyword,searchType, memberId);
+                serviceOrderService.adminOrderList(page, keyword,searchType);
 
         Map<String, Integer> pageInfo = paginationUtil.pagination(serviceOrderHistoryDTOS);
 
@@ -62,31 +60,6 @@ public class ServiceOrderManagerController {
         return "/manager/roomService/order/list";
     }
 
-    private Integer getLoggedInMemberId(Authentication authentication) {
-        // authentication이 null이 아니고, 인증된 사용자가 있는지 확인
-        if (authentication == null || authentication.getPrincipal() == null) {
-            throw new RuntimeException("로그인된 사용자가 없습니다.");
-        }
-
-        // authentication.getName()을 memberName으로 대체
-        String memberEmail = authentication.getName();
-
-        // memberEmail이 null이거나 비어있을 경우 처리
-        if (memberEmail == null || memberEmail.isEmpty()) {
-            throw new RuntimeException("회원 정보가 존재하지 않습니다.");
-        }
-
-        // memberName을 통해 Member 조회
-        Member member = memberService.findMemberByMemberEmail(memberEmail);
-
-        // member가 null인 경우 처리
-        if (member == null) {
-            throw new RuntimeException("회원 정보가 존재하지 않습니다.");
-        }
-
-        return member.getMemberId(); // memberId 반환
-    }
-
     @GetMapping("/read")
     public String orderRead(@RequestParam("serviceOrderId") Integer serviceOrderId, Model model) {
         // 주문 정보 가져오기
@@ -108,7 +81,7 @@ public class ServiceOrderManagerController {
     public String orderUpdate(@ModelAttribute ServiceOrderUpdateDTO updateDTO, RedirectAttributes redirectAttributes) {
         serviceOrderService.updateOrder(updateDTO);
         redirectAttributes.addFlashAttribute("message", "주문이 성공적으로 수정되었습니다.");
-        return "redirect:/manager/order/list";
+        return "redirect:/admin/order/list";
     }
 
     // 주문 삭제
@@ -116,7 +89,7 @@ public class ServiceOrderManagerController {
     public String orderDelete(@RequestParam("serviceOrderId") Integer serviceOrderId, RedirectAttributes redirectAttributes) {
         serviceOrderService.deleteOrder(serviceOrderId);
         redirectAttributes.addFlashAttribute("message", "주문이 삭제되었습니다.");
-        return "redirect:/manager/order/list";
+        return "redirect:/admin/order/list";
     }
 
 }

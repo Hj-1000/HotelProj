@@ -87,7 +87,9 @@
                             <li><a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/admin/roomService/category/list" class="nav-link text-white">카테고리 관리</a></li>
                             <li><a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="/chief/roomService/category/list" class="nav-link text-white">카테고리 관리</a></li>
                             <li><a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" href="/manager/roomService/category/list" class="nav-link text-white">카테고리 관리</a></li>
-                            <li><a href="/manager/order/list" class="nav-link text-white">주문 관리</a></li>
+                            <li><a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/admin/order/list" class="nav-link text-white">주문 관리</a></li>
+                            <li><a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="/chief/order/list" class="nav-link text-white">주문 관리</a></li>
+                            <li><a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" href="/manager/order/list" class="nav-link text-white">주문 관리</a></li>
                         </ul>
                     </li>
                     <li><a href="/manager/sales" class="nav-link text-white"><i class="bi bi-cash-coin"></i> 매출관리</a></li>

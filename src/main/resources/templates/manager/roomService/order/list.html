@@ -7,6 +7,35 @@
     <meta charset="UTF-8">
     <title>NTT호텔 - 서비스 오더 관리</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .location-wrapper {
+            position: relative;
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+
+        .location-wrap {
+            position: absolute;
+            top: 1rem;
+            left: 0;
+        }
+
+        .page-title {
+            flex: 1;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 0;
+        }
+        .custom-link {
+            color: black;
+            text-decoration: none;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+        .custom-link:hover {
+            color: gray; /* 마우스 올리면 회색 */
+        }
+    </style>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script th:inline="javascript">
         $(document).ready(function () {
@@ -23,8 +52,20 @@
                 var confirmed = confirm("정말로 삭제하시겠습니까?");
 
                 if (confirmed) {
+                    var role = [[${#authorization.expression('hasRole(''ADMIN'')') ? 'ADMIN' :
+                        #authorization.expression('hasRole(''CHIEF'')') ? 'CHIEF' : 'MANAGER'}]]; // 사용자 권한 가져오기
+
+                    var deleteUrl = '';
+                    if (role === 'ADMIN') {
+                        deleteUrl = '/admin/order/delete?serviceOrderId=' + serviceOrderId;
+                    } else if (role === 'CHIEF') {
+                        deleteUrl = '/chief/order/delete?serviceOrderId=' + serviceOrderId;
+                    } else if (role === 'MANAGER') {
+                        deleteUrl = '/manager/order/delete?serviceOrderId=' + serviceOrderId;
+                    }
+
                     // 확인을 누르면 삭제 URL로 이동
-                    window.location.href = '/manager/order/delete?serviceOrderId=' + serviceOrderId;
+                    window.location.href = deleteUrl;
                 } else {
                     event.preventDefault(); // 취소 시 아무 작업도 하지 않음
                 }
@@ -37,28 +78,44 @@
 <body>
 <div id="wrapper" layout:fragment="content">
     <div class="container-fluid mt-4">
+        <div class="location-wrapper">
+            <div class="location-wrap">
+                <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
+                <a href="#" class="custom-link"><span>룸서비스관리</span></a> /
+                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/admin/order/list" class="custom-link"><span>주문관리</span></a>
+                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="/chief/order/list" class="custom-link"><span>주문관리</span></a>
+                <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" href="/manager/order/list" class="custom-link"><span>주문관리</span></a>
+            </div>
+            <h2 class="page-title">관리자 주문 관리</h2>
+        </div>
+
         <!--검색영역-->
         <div class="card p-4 mb-4">
-            <form action="/manager/order/list" method="get">
+            <form th:if="${#authorization.expression('hasRole(''ADMIN'') or hasRole(''CHIEF'') or hasRole(''MANAGER'')')}"
+                  th:action="@{${#authorization.expression('hasRole(''ADMIN'')') ? '/admin/order/list' : ( #authorization.expression('hasRole(''CHIEF'')') ? '/chief/order/list' : '/manager/order/list') }}"
+                  method="get">
 
                 <div class="row g-3 align-items-center">
                     <h5 class="card-title">예약 찾기</h5>
-                    <!--검색창-->
+                    <!-- 검색창 -->
                     <div class="col-md-12">
                         <select name="searchType" class="form-select">
                             <option value="memberName" th:selected="${searchType == 'memberName'}">회원명</option>
                             <option value="memberEmail" th:selected="${searchType == 'memberEmail'}">회원이메일</option>
                             <option value="roomName" th:selected="${searchType == 'roomName'}">방이름</option>
-                            <option value="orderDate" th:selected="${searchType == 'orderDate'}">예약날짜</option>
                         </select>
                     </div>
                     <div class="col-md-6">
                         <input type="text" name="keyword" class="form-control" placeholder="검색어를 입력하세요">
                     </div>
                 </div>
-                <!--조회 버튼-->
+
+                <!-- 조회 버튼 -->
                 <div class="text-center mt-4">
-                    <button type="submit" class="btn btn-dark w-25" th:formaction="@{/manager/order/list(reservationId=${reservationId}, searchType=${searchType}, keyword = ${keyword})}">조회</button>
+                    <button type="submit" class="btn btn-dark w-25"
+                            th:formaction="@{${#authorization.expression('hasRole(''ADMIN'')') ? '/admin/order/list' : ( #authorization.expression('hasRole(''CHIEF'')') ? '/chief/order/list' : '/manager/order/list') }(reservationId=${reservationId}, searchType=${searchType}, keyword=${keyword})}">
+                        조회
+                    </button>
                 </div>
             </form>
         </div>
@@ -85,17 +142,56 @@
                         <td th:text="${data.memberDTO.memberEmail}"></td>
                         <td th:text="${data.reservationDTO.room.roomName}"></td>
                         <td th:text="${#temporals.format(data.regDate, 'yyyy-MM-dd')}"></td>
-                        <td th:text="${data.serviceOrderStatus}"></td>
+                        <td>
+    <span th:classappend="${data.serviceOrderStatus.name() == 'COMPLETED' ? 'badge bg-success' :
+                          (data.serviceOrderStatus.name() == 'PENDING' ? 'badge bg-warning text-dark' :
+                          (data.serviceOrderStatus.name() == 'CANCELED' ? 'badge bg-danger' : 'badge bg-secondary'))}"
+          th:text="${data.serviceOrderStatus}">
+    </span>
+                        </td>
+
                         <td>
                             <!-- 보기 버튼 -->
-                            <button type="button" class="btn btn-info btn-sm"
-                                    th:onclick="|location.href='/manager/order/read?serviceOrderId=' + ${data.serviceOrderId}|">
+                            <button th:if="${#authorization.expression('hasRole(''ADMIN'')')}"
+                                    type="button" class="btn btn-info btn-sm"
+                                    th:onclick="|location.href='@{/admin/order/read(serviceOrderId=${data.serviceOrderId})}'|">
                                 <i class="bi bi-eye"></i>
                             </button>
+
+                            <button th:if="${#authorization.expression('hasRole(''CHIEF'')')}"
+                                    type="button" class="btn btn-info btn-sm"
+                                    th:onclick="|location.href='@{/chief/order/read(serviceOrderId=${data.serviceOrderId})}'|">
+                                <i class="bi bi-eye"></i>
+                            </button>
+
+                            <button th:if="${#authorization.expression('hasRole(''MANAGER'')')}"
+                                    type="button" class="btn btn-info btn-sm"
+                                    th:onclick="|location.href='@{/manager/order/read(serviceOrderId=${data.serviceOrderId})}'|">
+                                <i class="bi bi-eye"></i>
+                            </button>
+
                             <!-- 수정 버튼 -->
-                            <button type="button" class="btn btn-warning btn-sm" th:onclick="|location.href='/manager/order/update?serviceOrderId=' + ${data.serviceOrderId}|"><i class="bi bi-pen"></i></button>
+                            <button th:if="${data.serviceOrderStatus.name() == 'PENDING' and #authorization.expression('hasRole(''ADMIN'')')}"
+                                    type="button" class="btn btn-warning btn-sm"
+                                    th:onclick="|location.href='@{/admin/order/update(serviceOrderId=${data.serviceOrderId})}'|">
+                                <i class="bi bi-pen"></i>
+                            </button>
+
+                            <button th:if="${data.serviceOrderStatus.name() == 'PENDING' and #authorization.expression('hasRole(''CHIEF'')')}"
+                                    type="button" class="btn btn-warning btn-sm"
+                                    th:onclick="|location.href='@{/chief/order/update(serviceOrderId=${data.serviceOrderId})}'|">
+                                <i class="bi bi-pen"></i>
+                            </button>
+
+                            <button th:if="${data.serviceOrderStatus.name() == 'PENDING' and #authorization.expression('hasRole(''MANAGER'')')}"
+                                    type="button" class="btn btn-warning btn-sm"
+                                    th:onclick="|location.href='@{/manager/order/update(serviceOrderId=${data.serviceOrderId})}'|">
+                                <i class="bi bi-pen"></i>
+                            </button>
                             <!-- 삭제 버튼 -->
-                            <button type="button" class="btn btn-danger btn-sm delBtn" th:data-id="${data.serviceOrderId}">
+                            <button th:if="${data.serviceOrderStatus.name() != 'COMPLETED'}"
+                                    type="button" class="btn btn-danger btn-sm delBtn"
+                                    th:data-id="${data.serviceOrderId}">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </td>
@@ -106,24 +202,34 @@
                 <div class="d-flex justify-content-center">
                     <ul class="pagination">
                         <li class="page-item" th:unless="${pageInfo.startPage == 1}">
-                            <a class="page-link" th:href="@{/manager/order/list(page=1)}">시작</a>
+                            <a class="page-link" th:href="@{${#authorization.expression('hasRole(''ADMIN'')') ? '/admin/order/list' : ( #authorization.expression('hasRole(''CHIEF'')') ? '/chief/order/list' : '/manager/order/list') }(page=1, reservationId=${reservationId}, searchType=${searchType}, keyword=${keyword})}">
+                                시작
+                            </a>
                         </li>
                         <li class="page-item" th:unless="${pageInfo.currentPage == 1}">
-                            <a class="page-link" th:href="@{/manager/order/list(page=${pageInfo.prevPage})}">이전</a>
+                            <a class="page-link" th:href="@{${#authorization.expression('hasRole(''ADMIN'')') ? '/admin/order/list' : ( #authorization.expression('hasRole(''CHIEF'')') ? '/chief/order/list' : '/manager/order/list') }(page=${pageInfo.prevPage}, reservationId=${reservationId}, searchType=${searchType}, keyword=${keyword})}">
+                                이전
+                            </a>
                         </li>
                         <th:block th:each="num : ${#numbers.sequence(pageInfo.startPage, pageInfo.endPage, 1)}">
                             <li class="page-item" th:unless="${num == pageInfo.currentPage}">
-                                <a class="page-link" th:href="@{/manager/order/list(page=${num})}" th:text="${num}">1</a>
+                                <a class="page-link" th:href="@{${#authorization.expression('hasRole(''ADMIN'')') ? '/admin/order/list' : ( #authorization.expression('hasRole(''CHIEF'')') ? '/chief/order/list' : '/manager/order/list') }(page=${num}, reservationId=${reservationId}, searchType=${searchType}, keyword=${keyword})}"
+                                   th:text="${num}">1</a>
                             </li>
                             <li class="page-item active" th:if="${num == pageInfo.currentPage}">
-                                <a class="page-link" th:href="@{/manager/order/list(page=${num})}" th:text="${num}">[[${num}]]</a>
+                                <a class="page-link" th:href="@{${#authorization.expression('hasRole(''ADMIN'')') ? '/admin/order/list' : ( #authorization.expression('hasRole(''CHIEF'')') ? '/chief/order/list' : '/manager/order/list') }(page=${num}, reservationId=${reservationId}, searchType=${searchType}, keyword=${keyword})}"
+                                   th:text="${num}">[[${num}]]</a>
                             </li>
                         </th:block>
                         <li class="page-item" th:unless="${pageInfo.currentPage >= pageInfo.lastPage}">
-                            <a class="page-link" th:href="@{/manager/order/list(page=${pageInfo.nextPage})}">다음</a>
+                            <a class="page-link" th:href="@{${#authorization.expression('hasRole(''ADMIN'')') ? '/admin/order/list' : ( #authorization.expression('hasRole(''CHIEF'')') ? '/chief/order/list' : '/manager/order/list') }(page=${pageInfo.nextPage}, reservationId=${reservationId}, searchType=${searchType}, keyword=${keyword})}">
+                                다음
+                            </a>
                         </li>
                         <li class="page-item" th:unless="${pageInfo.endPage == pageInfo.lastPage}">
-                            <a class="page-link" th:href="@{/manager/order/list(page=${pageInfo.lastPage})}">끝</a>
+                            <a class="page-link" th:href="@{${#authorization.expression('hasRole(''ADMIN'')') ? '/admin/order/list' : ( #authorization.expression('hasRole(''CHIEF'')') ? '/chief/order/list' : '/manager/order/list') }(page=${pageInfo.lastPage}, reservationId=${reservationId}, searchType=${searchType}, keyword=${keyword})}">
+                                끝
+                            </a>
                         </li>
                     </ul>
                 </div>

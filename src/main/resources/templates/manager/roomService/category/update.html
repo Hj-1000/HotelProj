@@ -7,6 +7,24 @@
     <meta charset="UTF-8">
     <title>NTT호텔 - 카테고리 수정</title>
     <style>
+        .location-wrapper {
+            position: relative;
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+
+        .location-wrap {
+            position: absolute;
+            top: 1rem;
+            left: 0;
+        }
+
+        .page-title {
+            flex: 1;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 0;
+        }
         .custom-link {
             color: black;
             text-decoration: none;
@@ -56,19 +74,25 @@
 <div id="wrapper" layout:fragment="content">
 
     <div class="container-fluid mt-4">
-        <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
-        <a href="#" class="custom-link"><span>룸서비스관리</span></a> /
-        <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/admin/roomService/category/list" class="custom-link"><span>카테고리관리</span></a>
-        <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="/chief/roomService/category/list" class="custom-link"><span>카테고리관리</span></a>
-        <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" href="/manager/roomService/category/list" class="custom-link"><span>카테고리관리</span></a> /
-        <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/roomService/category/read(serviceCateId=${serviceCateDTO.serviceCateId})}" class="custom-link"><span>카테고리상세보기 </span></a>
-        <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/roomService/category/read(serviceCateId=${serviceCateDTO.serviceCateId})}" class="custom-link"><span>카테고리상세보기 </span></a>
-        <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" th:href="@{/manager/roomService/category/read(serviceCateId=${serviceCateDTO.serviceCateId})}" class="custom-link"><span>카테고리상세보기 </span></a> /
-        <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/roomService/category/update(serviceCateId=${serviceCateDTO.serviceCateId})}" class="custom-link"><span>카테고리수정</span></a>
-        <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/roomService/category/update(serviceCateId=${serviceCateDTO.serviceCateId})}" class="custom-link"><span>카테고리수정</span></a>
-        <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" th:href="@{/manager/roomService/category/update(serviceCateId=${serviceCateDTO.serviceCateId})}" class="custom-link"><span>카테고리수정</span></a>
+        <div class="location-wrapper">
+            <div class="location-wrap">
+                <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
+                <a href="#" class="custom-link"><span>룸서비스관리</span></a> /
+                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/admin/roomService/category/list" class="custom-link"><span>카테고리관리</span></a>
+                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="/chief/roomService/category/list" class="custom-link"><span>카테고리관리</span></a>
+                <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" href="/manager/roomService/category/list" class="custom-link"><span>카테고리관리</span></a> /
+                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/roomService/category/read(serviceCateId=${serviceCateDTO.serviceCateId})}" class="custom-link"><span>카테고리상세보기 </span></a>
+                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/roomService/category/read(serviceCateId=${serviceCateDTO.serviceCateId})}" class="custom-link"><span>카테고리상세보기 </span></a>
+                <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" th:href="@{/manager/roomService/category/read(serviceCateId=${serviceCateDTO.serviceCateId})}" class="custom-link"><span>카테고리상세보기 </span></a> /
+                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/roomService/category/update(serviceCateId=${serviceCateDTO.serviceCateId})}" class="custom-link"><span>카테고리수정</span></a>
+                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/roomService/category/update(serviceCateId=${serviceCateDTO.serviceCateId})}" class="custom-link"><span>카테고리수정</span></a>
+                <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" th:href="@{/manager/roomService/category/update(serviceCateId=${serviceCateDTO.serviceCateId})}" class="custom-link"><span>카테고리수정</span></a>
+            </div>
+            <h2 class="page-title">카테고리 수정</h2>
+        </div>
+
+
         <div class="col-12">
-            <h2 class="mb-3">카테고리 수정</h2>
             <div class="card">
                 <div class="card-body">
                     <form th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:action="@{/admin/roomService/category/update}" method="post" enctype="multipart/form-data"

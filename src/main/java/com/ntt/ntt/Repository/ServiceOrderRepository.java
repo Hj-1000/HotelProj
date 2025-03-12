@@ -17,12 +17,8 @@ import java.util.List;
 @Repository
 public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Integer> {
     //검색쿼리
+    //ADMIN용
     // 회원 이름으로 검색
-    Page<ServiceOrder> findByMember_MemberNameLike(String keyword, Pageable pageable);
-    // 회원 이메일로 검색
-    Page<ServiceOrder> findByMember_MemberEmailLike(String keyword, Pageable pageable);
-    // 예약 방으로 검색
-    Page<ServiceOrder> findByReservation_Room_RoomNameLike(String keyword, Pageable pageable);
     // 주문 날짜로 검색
     Page<ServiceOrder> findByRegDateLike(LocalDateTime regDate, Pageable pageable);
 
@@ -36,6 +32,53 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Inte
     Page<ServiceOrder> findByReservation_ReservationIdAndRegDateLike(Integer reservationId, LocalDateTime regDate, Pageable pageable);
     //검색어 없을 때 사용할 조회
     Page<ServiceOrder> findByReservation_ReservationId(Integer reservationId, Pageable pageable);
+
+    // ADMIN: 전체 조회
+    Page<ServiceOrder> findAll(Pageable pageable);
+
+    Page<ServiceOrder> findByMember_MemberNameLike(String keyword, Pageable pageable);
+    Page<ServiceOrder> findByMember_MemberEmailLike(String keyword, Pageable pageable);
+    Page<ServiceOrder> findByReservation_Room_RoomNameLike(String keyword, Pageable pageable);
+    Page<ServiceOrder> findByRegDate(LocalDateTime startDate, Pageable pageable);
+
+    // CHIEF: COMPANY의 MEMBER로 필터링
+    Page<ServiceOrder> findByReservation_Room_HotelId_Company_Member_MemberId(Integer memberId, Pageable pageable);
+
+    // CHIEF - 검색
+    Page<ServiceOrder> findByReservation_Room_HotelId_Company_Member_MemberIdAndMember_MemberNameLike(Integer memberId, String keyword, Pageable pageable);
+    Page<ServiceOrder> findByReservation_Room_HotelId_Company_Member_MemberIdAndMember_MemberEmailLike(Integer memberId, String keyword, Pageable pageable);
+    Page<ServiceOrder> findByReservation_Room_HotelId_Company_Member_MemberIdAndReservation_Room_RoomNameLike(Integer memberId, String keyword, Pageable pageable);
+    Page<ServiceOrder> findByReservation_Room_HotelId_Company_Member_MemberIdAndRegDate(Integer memberId, LocalDateTime startDate, Pageable pageable);
+
+    // MANAGER: HOTEL의 MEMBER로 필터링
+    Page<ServiceOrder> findByReservation_Room_HotelId_Member_MemberId(Integer memberId, Pageable pageable);
+
+    // MANAGER - 검색
+    Page<ServiceOrder> findByReservation_Room_HotelId_Member_MemberIdAndMember_MemberNameLike(Integer memberId, String keyword, Pageable pageable);
+    Page<ServiceOrder> findByReservation_Room_HotelId_Member_MemberIdAndMember_MemberEmailLike(Integer memberId, String keyword, Pageable pageable);
+    Page<ServiceOrder> findByReservation_Room_HotelId_Member_MemberIdAndReservation_Room_RoomNameLike(Integer memberId, String keyword, Pageable pageable);
+    Page<ServiceOrder> findByReservation_Room_HotelId_Member_MemberIdAndRegDate(Integer memberId, LocalDateTime startDate, Pageable pageable);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     //특정 회원의 구매 이력으로 모두 불러오기
     //serviceOrderId를 오름차순으로 정렬하되 STATUS를 CANCELED, COMPLETED, PENDING 순으로 밀기
