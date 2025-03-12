@@ -11,6 +11,7 @@ import com.ntt.ntt.Service.company.CompanyService;
 import com.ntt.ntt.Service.hotel.HotelService;
 import com.ntt.ntt.Util.PaginationUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -40,6 +41,7 @@ import java.util.Map;
 @RequestMapping("/admin")
 @AllArgsConstructor
 @Log4j2
+@Tag(name = "AdminCompanyHotelController", description = "관리자가 보는 호텔 본사, 지사 페이지")
 public class AdminCompanyHotelController {
 
     private final CompanyService companyService;
@@ -268,7 +270,7 @@ public class AdminCompanyHotelController {
     }
 
     //등록처리
-    @Operation(summary = "관리자용 호텔 등록 처리", description = "호텔을 등록 처리한다.")
+    @Operation(summary = "관리자용 호텔 등록 처리", description = "호텔을 등록 처리한 후 호텔 목록으로 이동한다.")
     @PostMapping("/hotel/register")
     public String registerProc(@ModelAttribute HotelDTO hotelDTO,
                                List<MultipartFile> imageFiles,

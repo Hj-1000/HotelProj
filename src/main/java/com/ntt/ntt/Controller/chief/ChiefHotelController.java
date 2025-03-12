@@ -10,6 +10,7 @@ import com.ntt.ntt.Service.ImageService;
 import com.ntt.ntt.Service.hotel.HotelService;
 import com.ntt.ntt.Util.PaginationUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ import java.util.Map;
 @RequestMapping("/chief/hotel")
 @RequiredArgsConstructor
 @Log4j2
+@Tag(name = "ChiefHotelController", description = "호텔장이 보는 호텔 지사 페이지")
 public class ChiefHotelController {
 
     private final HotelService hotelService;
@@ -45,7 +47,7 @@ public class ChiefHotelController {
 
 
     //등록폼
-    @Operation(summary = "관리자용 호텔 등록 폼", description = "호텔 등록 페이지로 이동한다.")
+    @Operation(summary = "호텔장 호텔 등록 폼", description = "호텔 등록 페이지로 이동한다.")
     @GetMapping("/register")
     public String registerForm(Model model) {
         //검증처리가 필요하면 빈 companyDTO를 생성해서 전달한다.
@@ -56,7 +58,7 @@ public class ChiefHotelController {
         return "/manager/hotel/register";
     }
     //등록처리
-    @Operation(summary = "관리자용 호텔 등록 처리", description = "호텔을 등록 처리한다.")
+    @Operation(summary = "호텔장 호텔 등록 처리", description = "호텔을 등록 처리 후 목록으로 이동한다.")
     @PostMapping("/register")
     public String registerProc(@ModelAttribute HotelDTO hotelDTO,
                                List<MultipartFile> imageFiles,
@@ -83,6 +85,7 @@ public class ChiefHotelController {
 
 
     //호텔장 호텔 목록
+    @Operation(summary = "호텔장 호텔 목록", description = "호텔장이 속한 본사의 호텔 목록을 조회한다.")
     @GetMapping("/list")
     public String list(@RequestParam(required = false) String keyword,
                        @RequestParam(required = false) String searchType,
@@ -134,7 +137,7 @@ public class ChiefHotelController {
     }
 
     //읽기
-    @Operation(summary = "관리자용 호텔 상세", description = "hotelId에 맞는 호텔 상세 페이지로 이동한다.")
+    @Operation(summary = "호텔장 호텔 상세", description = "hotelId에 맞는 호텔 상세 페이지로 이동한다.")
     @GetMapping("/read")
     public String read(@RequestParam Integer hotelId,
                        @RequestParam(defaultValue = "0") int page,
@@ -192,7 +195,7 @@ public class ChiefHotelController {
         return "/manager/hotel/update";
     }
     //수정처리
-    @Operation(summary = "관리자용 호텔 수정 처리", description = "hotelId에 맞는 호텔 수정 처리한다.")
+    @Operation(summary = "관리자용 호텔 수정 처리", description = "hotelId에 맞는 호텔 수정 처리한 후 수정한 호텔 상세로 이동한다.")
     @PostMapping("/update")
     public String updateProc(HotelDTO hotelDTO, List<MultipartFile> newImageFiles, RedirectAttributes redirectAttributes) {
         hotelService.update(hotelDTO, newImageFiles);
@@ -232,7 +235,7 @@ public class ChiefHotelController {
 
 
     //삭제
-    @Operation(summary = "관리자용 호텔 삭제", description = "hotelId에 맞는 호텔을 삭제한다.")
+    @Operation(summary = "호텔장 호텔 삭제", description = "hotelId에 맞는 호텔을 삭제한다.")
     @GetMapping("/delete")
     public String delete(Integer hotelId, RedirectAttributes redirectAttributes) {
 

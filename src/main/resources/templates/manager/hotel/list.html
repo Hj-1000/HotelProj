@@ -158,7 +158,7 @@
                     </thead>
                     <tbody>
 
-                    <th:block th:unless="${#lists.isEmpty(hotelDTOS)}"><!--값이 없으면이 아니면(있으면)-->
+                    <th:block th:unless="${hotelDTOS == null or hotelDTOS.totalElements == 0}"><!--값이 없으면이 아니면(있으면)-->
                         <tr th:each="data:${hotelDTOS}">
                             <!--                            <td th:text="${data.hotelId}">호텔번호</td>-->
                             <td class="align-middle text-center" style="height: 80px">
@@ -203,9 +203,9 @@
 
                 </table>
 
-                <th:block th:if="${#lists.isEmpty(hotelDTOS)}"><!--받아온 값이 없으면-->
-                    <div style="text-align: center">
-                        <p>등록된 호텔이 없습니다.</p>
+                <th:block th:if="${hotelDTOS == null or hotelDTOS.totalElements == 0}"><!--받아온 값이 없으면-->
+                    <div class="mt-5 mb-5" style="text-align: center">
+                        <p>등록된 지사가 없습니다.</p>
                     </div>
                 </th:block>
 

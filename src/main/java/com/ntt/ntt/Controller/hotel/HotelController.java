@@ -9,6 +9,7 @@ import com.ntt.ntt.Service.RoomService;
 import com.ntt.ntt.Service.hotel.HotelService;
 import com.ntt.ntt.Util.PaginationUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/hotel")
 @RequiredArgsConstructor
 @Log4j2
+@Tag(name = "HotelController", description = "유저가 보는 호텔 페이지")
 public class HotelController {
 
     private final HotelService hotelService;
@@ -142,7 +144,7 @@ public class HotelController {
     }
 
     // 해당 호텔 전체 리뷰
-    @Operation(summary = "사용자용 호텔 상세", description = "hotelId에 맞는 호텔 리뷰 목록 페이지로 이동한다.")
+    @Operation(summary = "사용자용 호텔 리뷰목록", description = "hotelId에 맞는 호텔 리뷰 목록 페이지로 이동한다.")
     @GetMapping("/reviewAll")
     public String reviewList(@RequestParam Integer hotelId, Model model,
                              RedirectAttributes redirectAttributes) {
