@@ -19,6 +19,7 @@
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pagination.css}">
     <script th:src="@{/js/setHotelLocation.js}"></script>
     <script th:src="@{/js/hotel.js}"></script>
 
@@ -40,19 +41,23 @@
 <div id="wrapper" layout:fragment="content">
 
     <div class="container-fluid mt-4">
-        <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
-        <a href="#" class="custom-link"><span>호텔관리</span></a> /
-        <a href="/company/list" class="custom-link"><span>호텔본사관리</span></a> /
-        <a th:href="@{/company/read(companyId=${companyDTO.companyId})}" class="custom-link">
-            <span>본사상세보기</span>
-        </a> /
-        <a href="/chief/hotel/list" class="custom-link">
-            <span>호텔지사관리</span>
-        </a> /
-        <a href="/chief/hotel/register" class="custom-link">
-            <span>지사등록</span>
-        </a>
-        <h2 class="mb-3">지사 등록</h2>
+        <div class="location-wrapper">
+            <div class="location-wrap">
+                <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
+                <a href="#" class="custom-link"><span>호텔관리</span></a> /
+                <a href="/company/list" class="custom-link"><span>호텔본사관리</span></a> /
+                <a th:href="@{/company/read(companyId=${companyDTO.companyId})}" class="custom-link">
+                    <span>본사상세보기</span>
+                </a> /
+                <a href="/chief/hotel/list" class="custom-link">
+                    <span>호텔지사관리</span>
+                </a> /
+                <a href="/chief/hotel/register" class="custom-link">
+                    <span>지사등록</span>
+                </a>
+            </div>
+            <h1 class="page-title">지사 등록</h1>
+        </div>
 
         <!-- 관리자 폼 -->
         <div th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="card p-4 mb-4">

@@ -95,27 +95,6 @@ public class HotelService {
     }
 
 
-
-    //회원목록 불러오는
-    /*public List<MemberDTO> getAllManagers() {
-        // 1. 모든 CHIEF 역할을 가진 회원 목록 조회
-        List<Member> members = memberRepository.findByRole(Role.MANAGER);
-
-        // 2. 이미 company 테이블에 등록된 memberId 목록 가져오기
-        List<Integer> hotelMembersIds = hotelRepository.findAll().stream()
-                .map(hotel -> hotel.getMember().getMemberId()) // hotel에 해당하는 memberId 추출
-                .collect(Collectors.toList());
-
-        // 3. hotel에 등록되지 않은 회원만 필터링
-        List<MemberDTO> memberDTOS = members.stream()
-                .filter(member -> !hotelMembersIds.contains(member.getMemberId())) // company에 없는 memberId만 필터링
-                .map(a -> new MemberDTO(a.getMemberId(), a.getMemberEmail(), a.getMemberName()))
-                .collect(Collectors.toList());
-
-        return memberDTOS;
-    }*/
-
-
     //등록
     public void register(HotelDTO hotelDTO, List<MultipartFile> imageFiles, String memberEmail) {
 
@@ -135,97 +114,81 @@ public class HotelService {
         hotelRepository.flush(); // ✅ 즉시 DB 반영
     }
 
-//    public void register(HotelDTO hotelDTO, List<MultipartFile> imageFiles, String memberEmail) {
-//
-//        /* Company company = companyRepository.findById(companyId)
-//                .orElseThrow(() -> new IllegalStateException("본사가 존재하지 않습니다.")); */
-//        // 로그인한 회원 정보 조회
-//        Member member = memberRepository.findByMemberEmail(memberEmail)
-//                .orElseThrow(() -> new RuntimeException("Member not found"));
-//
-//        // modelMapper가 null이 아닌지 확인
-//        if (modelMapper == null) {
-//            throw new IllegalStateException("ModelMapper가 초기화되지 않았습니다.");
-//        }
-//
-//        Hotel hotel = modelMapper.map(hotelDTO, Hotel.class);
-//
-//        // 이메일 로그인된 회원의 이메일로 설정
-//        hotel.setHotelEmail(member.getMemberEmail());
-//
-//        // 🔹 회원 정보 설정 -> memberId 추가를 위해
-//        hotel.setMember(member);
-//
-//        // 1. Hotel 먼저 저장
-//        hotelRepository.save(hotel);
-//
-//        // 2. imageFiles를 ImageService를 통해 저장
-//        imageService.registerHotelImage(hotel.getHotelId(), imageFiles);
-//
-//        hotelRepository.flush(); // ✅ 즉시 DB 반영
-//    }
 
 
     //관리자용 호텔목록
-    public Page<HotelDTO> listByAdmin(Pageable page, String keyword, Integer keyword1, String searchType) {
+    public Page<HotelDTO> listByAdmin(Pageable page, String keyword, Integer keyword1, String searchType, Integer companyId) {
         // 1. 페이지 정보 재가공
-        int currentPage = page.getPageNumber(); // 기존 페이지 번호 그대로 사용
-        int pageSize = page.getPageSize(); // 페이지 사이즈 그대로 사용
-        Pageable pageable = PageRequest.of(
-                currentPage, pageSize,
-                Sort.by(Sort.Direction.ASC, "hotelId") // 최신순으로 정렬
-        );
+        int currentPage = page.getPageNumber();
+        int pageSize = page.getPageSize();
+        Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.ASC, "hotelId"));
 
         // 2. 검색타입에 따른 호텔 조회
-        Page<Hotel> hotels = null;
+        Page<Hotel> hotels;
 
-
-        // companyId가 있을 경우 해당 회사의 호텔만 조회
-        if (keyword != null && !keyword.isEmpty()) {
-            String keywordLike = "%" + keyword + "%";  // LIKE 조건을 위한 검색어 처리
-
-            // 검색 타입에 따라 조건을 추가
-            if ("company".equals(searchType)) {
-                // 본사명 검색
-                hotels = hotelRepository.findByCompany_CompanyNameLike(keywordLike, pageable);
-            } else if ("name".equals(searchType)) {
-                // 호텔명 검색
-                hotels = hotelRepository.findByHotelNameLike(keywordLike, pageable);
-            } else if ("location".equals(searchType)) {
-                // 지역 검색
-                hotels = hotelRepository.findByHotelLocationLike(keywordLike, pageable);
-            } else if ("address".equals(searchType)) {
-                // 주소 검색
-                hotels = hotelRepository.findByHotelAddressLike(keywordLike, pageable);
-            } else if ("rating".equals(searchType)) {
-                // 별점 검색
-                hotels = hotelRepository.findByHotelRating(keyword1, pageable);
-            }
-
+        if (companyId != null) { // companyId가 있을 때만 실행
+            hotels = searchHotelsByCompanyId(companyId, keyword, keyword1, searchType, pageable);
         } else {
-            // 검색어가 없으면 모든 호텔 조회
-            hotels = hotelRepository.findAll(pageable);
+            hotels = searchHotelsWithoutCompanyId(keyword, keyword1, searchType, pageable);
         }
 
         // 3. Hotel -> HotelDTO 변환
-        // Hotel -> HotelDTO 변환
-        Page<HotelDTO> hotelDTOS = hotels.map(entity -> {
+        return hotels.map(entity -> {
             HotelDTO hotelDTO = modelMapper.map(entity, HotelDTO.class);
 
-            // 호텔에 대한 이미지 리스트 가져오기
+            // 호텔 이미지 리스트 변환
             List<ImageDTO> imgDTOList = imageRepository.findByHotel_HotelId(entity.getHotelId())
                     .stream()
                     .map(imagefile -> {
-                        imagefile.setImagePath(imagefile.getImagePath().replace("c:/data/", "")); // 경로 수정
+                        imagefile.setImagePath(imagefile.getImagePath().replace("c:/data/", ""));
                         return modelMapper.map(imagefile, ImageDTO.class);
                     })
                     .collect(Collectors.toList());
 
-            hotelDTO.setHotelImgDTOList(imgDTOList); // 이미지 DTO 리스트 설정
+            hotelDTO.setHotelImgDTOList(imgDTOList);
             return hotelDTO;
         });
+    }
 
-        return hotelDTOS;
+
+    // CompanyId 포함 목록
+    private Page<Hotel> searchHotelsByCompanyId(Integer companyId, String keyword, Integer keyword1, String searchType, Pageable pageable) {
+        if (keyword != null && !keyword.isEmpty()) {
+            String keywordLike = "%" + keyword + "%";
+
+            switch (searchType) {
+                case "name":
+                    return hotelRepository.findByCompany_CompanyIdAndHotelNameLike(companyId, keywordLike, pageable);
+                case "location":
+                    return hotelRepository.findByCompany_CompanyIdAndHotelLocationLike(companyId, keywordLike, pageable);
+                case "address":
+                    return hotelRepository.findByCompany_CompanyIdAndHotelAddressLike(companyId, keywordLike, pageable);
+                case "rating":
+                    return hotelRepository.findByCompany_CompanyIdAndHotelRatingLike(companyId, keyword1, pageable);
+            }
+        }
+        return hotelRepository.findByCompany_CompanyId(companyId, pageable);
+    }
+
+    // CompanyId 미포함
+    private Page<Hotel> searchHotelsWithoutCompanyId(String keyword, Integer keyword1, String searchType, Pageable pageable) {
+        if (keyword != null && !keyword.isEmpty()) {
+            String keywordLike = "%" + keyword + "%";
+
+            switch (searchType) {
+                case "company":
+                    return hotelRepository.findByCompany_CompanyNameLike(keywordLike, pageable);
+                case "name":
+                    return hotelRepository.findByHotelNameLike(keywordLike, pageable);
+                case "location":
+                    return hotelRepository.findByHotelLocationLike(keywordLike, pageable);
+                case "address":
+                    return hotelRepository.findByHotelAddressLike(keywordLike, pageable);
+                case "rating":
+                    return hotelRepository.findByHotelRating(keyword1, pageable);
+            }
+        }
+        return hotelRepository.findAll(pageable);
     }
 
 
@@ -261,7 +224,7 @@ public class HotelService {
                 hotels = hotelRepository.findByCompany_CompanyIdAndHotelAddressLike(companyId, keywordLike, pageable);
             } else if ("rating".equals(searchType)) {
                 // 별점 검색
-                hotels = hotelRepository.findByCompany_CompanyIdAndHotelRating(companyId, keyword1, pageable);
+                hotels = hotelRepository.findByCompany_CompanyIdAndHotelRatingLike(companyId, keyword1, pageable);
             } else {
                 // 검색어가 없으면 companyId에 해당하는 모든 호텔 조회
                 hotels = hotelRepository.findByCompany_CompanyId(companyId, pageable);

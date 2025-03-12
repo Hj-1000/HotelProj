@@ -60,6 +60,16 @@
             /*border:1px solid orange;*/
         }
 
+        .banner-img123-box {
+            margin-top: 50px;
+            width: 930px;
+            height: auto;
+            margin-bottom: -5px;
+        }
+        .banner-img123 {
+            width: 100%;
+        }
+
         .hotel-images img:first-child {
             grid-row: span 2;
         }
@@ -496,34 +506,22 @@
                     </div>
                 </div>
 
-                <!--배너-->
-                <div>
 
+            <!--배너-->
+            <div style="margin: auto">
+                <div class="banner-img123-box">
+                    <img src="/img/NTT_GRAND_OPENING.png" class="banner-img123" width="100%">
                 </div>
+            </div>
 
-                <!--예약 날짜 선택--> <!--일단 허전해서 냅둠-->
-                <div style="margin: auto">
-                    <div style="margin-top: 50px; width: 930px">
-                        <h4> 날짜 선택</h4>
-                        <div class="row">
-                            <div class="col-6">
-                                <input type="date" class="form-control" id="checkInDate" name="checkInDate" required>
-                            </div>
-                            <div class="col-6">
-                                <input type="date" class="form-control" id="checkOutDate" name="checkOutDate" required>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- 객실 목록 -->
-                <div class="col ">
-                    <div >
-
-                        <!-- Room List Section -->
-                        <section class="py-5">
-                            <div class="" style="width: 950px; margin: auto; padding: 15px">
-                                <h4 class="mb-3">객실 선택</h4>
+            <!-- 객실 목록 -->
+            <div class="col ">
+                <div >
+                    <!-- Room List Section -->
+                    <section class="py-5">
+                        <div class="" style="width: 950px; margin: auto; padding: 15px">
+                            <h4 class="mb-3">객실 선택</h4>
 
                                 <th:block th:if="${rooms == null || #lists.isEmpty(rooms)}">
                                     <div style="text-align: center">

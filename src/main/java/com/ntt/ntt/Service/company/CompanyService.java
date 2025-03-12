@@ -116,7 +116,7 @@ public class CompanyService {
 
 
 
-    //목록
+    //관리자목록
     public Page<CompanyDTO> listByAdmin(Pageable page, String keyword, String searchType) {
 
         // 1. 페이지 정보 재가공
@@ -176,7 +176,7 @@ public class CompanyService {
     }
 
 
-    //목록
+    //호텔장목록
     public Page<CompanyDTO> listByChief(Pageable pageable, String keyword, String searchType, Integer memberId) {
         int currentPage = pageable.getPageNumber() - 1;
         int pageSize = 10;
@@ -304,6 +304,7 @@ public class CompanyService {
             // 본사 정보 수정
             company.setCompanyName(companyDTO.getCompanyName());
             company.setCompanyManager(companyDTO.getCompanyManager());
+            company.setMember(companyDTO.getMemberId());
 
             // 본사 정보 저장
             companyRepository.save(company);

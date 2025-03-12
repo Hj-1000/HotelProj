@@ -22,6 +22,8 @@
 
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/roomList.css}">
+    <link rel="stylesheet" th:href="@{/css/pagination.css}">
+
     <script th:src="@{/js/setHotelLocation.js}"></script>
     <script th:src="@{/js/hotel.js}"></script>
 
@@ -69,12 +71,16 @@
 
 <div id="wrapper" layout:fragment="content">
     <div class="container-fluid mt-4">
-        <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
-        <a href="#" class="custom-link"><span>호텔관리</span></a> /
-        <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/admin/hotel/list" class="custom-link"><span>호텔지사관리</span></a>
-        <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="/chief/hotel/list" class="custom-link"><span>호텔지사관리</span></a>
-        <h2 class="mb-3">호텔 지사 관리</h2>
-
+        <div class="location-wrapper">
+            <div class="location-wrap">
+                <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
+                <a href="#" class="custom-link"><span>호텔관리</span></a> /
+                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/admin/hotel/list" class="custom-link"><span>호텔지사관리</span></a>
+                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="/chief/hotel/list" class="custom-link"><span>호텔지사관리</span></a>
+                <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" href="/manager/hotel/list" class="custom-link"><span>호텔지사관리</span></a>
+            </div>
+            <h1 class="page-title">지사 관리</h1>
+        </div>
         <!-- 검색 영역 -->
         <div th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="card p-4 mb-4">
             <form action="/admin/hotel/list" method="get">
@@ -135,7 +141,7 @@
         </div>
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">지사 목록</h5>
+                <!--<h5 class="card-title">지사 목록</h5>-->
                 <table class="table table-bordered text-center table-hover">
                     <thead class="table-dark">
                     <tr>
@@ -145,8 +151,8 @@
                         <th style="width: 20%">주소</th>
                         <th style="width: 10%">담당자이메일</th>
                         <th style="width: 10%">전화번호</th>
-                        <th style="width: 8%">체크인-체크아웃</th>
-                        <th style="width: 5%">평점</th>
+                        <th style="width: 9%">체크인-체크아웃</th>
+                        <th style="width: 4%">평점</th>
                         <th style="width: 10%">관리</th>
                     </tr>
                     </thead>
@@ -180,11 +186,11 @@
                             <td class="align-middle text-center">
                                 <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/hotel/read(hotelId=${data.hotelId})}" class="btn btn-info btn-sm"><i class="bi bi-eye"></i></a>
                                 <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/hotel/update(hotelId=${data.hotelId})}"  class="btn btn-warning btn-sm"><i class="bi bi-pen"></i></a>
-                                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/hotel/delete(hotelId=${data.hotelId})}" style="text-decoration: none; color: black" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')"><i class="bi bi-trash"></i></a>
+                                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/hotel/delete(hotelId=${data.hotelId})}" style="text-decoration: none; color: black" class="btn btn-danger btn-sm" onclick="return confirm('해당 지사를 삭제하시겠습니까?')"><i class="bi bi-trash"></i></a>
 
                                 <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/hotel/read(hotelId=${data.hotelId})}" class="btn btn-info btn-sm"><i class="bi bi-eye"></i></a>
                                 <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/hotel/update(hotelId=${data.hotelId})}"  class="btn btn-warning btn-sm"><i class="bi bi-pen"></i></a>
-                                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/hotel/delete(hotelId=${data.hotelId})}" style="text-decoration: none; color: black" class="btn btn-danger btn-sm" onclick="return confirm('진짜로 삭제하시겠습니까?')"><i class="bi bi-trash"></i></a>
+                                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/hotel/delete(hotelId=${data.hotelId})}" style="text-decoration: none; color: black" class="btn btn-danger btn-sm" onclick="return confirm('해당 지사를 삭제하시겠습니까?')"><i class="bi bi-trash"></i></a>
 
                                 <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" th:href="@{/manager/hotel/read(hotelId=${data.hotelId})}" class="btn btn-info btn-sm"><i class="bi bi-eye"></i></a>
                             </td>
