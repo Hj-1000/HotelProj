@@ -13,6 +13,7 @@ import com.ntt.ntt.Repository.hotel.LikeRepository;
 import com.ntt.ntt.Service.hotel.LikeService;
 import com.ntt.ntt.Util.PaginationUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -35,6 +36,7 @@ import java.util.NoSuchElementException;
 @Log4j2
 @RequiredArgsConstructor
 @RequestMapping("/like")
+@Tag(name = "LikeController", description = "유저가 보는 호텔 스크랩")
 public class LikeController {
 
     private final LikeService likeService;

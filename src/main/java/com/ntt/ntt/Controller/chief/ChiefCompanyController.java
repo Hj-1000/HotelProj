@@ -12,6 +12,7 @@ import com.ntt.ntt.Service.company.CompanyService;
 import com.ntt.ntt.Service.hotel.HotelService;
 import com.ntt.ntt.Util.PaginationUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -39,6 +40,7 @@ import java.util.Map;
 @RequestMapping("/chief/company")
 @AllArgsConstructor
 @Log4j2
+@Tag(name = "ChiefCompanyController", description = "호텔장이 보는 호텔 본사 페이지")
 public class ChiefCompanyController {
 
     private final CompanyService companyService;
@@ -49,7 +51,7 @@ public class ChiefCompanyController {
 
 
     //목록
-    @Operation(summary = "호텔장 용 본사 목록", description = "본사 목록 페이지로 이동한다.")
+    @Operation(summary = "호텔장 용 본사 목록", description = "호텔장이 속한 본사 목록 페이지로 이동한다.")
     @GetMapping("/list")
     public String list(@RequestParam(required = false) String keyword,
                        @RequestParam(required = false) String searchType,
@@ -126,7 +128,7 @@ public class ChiefCompanyController {
 
 
     //읽기
-    @Operation(summary = "관리자용 본사 상세", description = "companyId에 맞는 본사 상세 페이지로 이동한다.")
+    @Operation(summary = "호텔장 본사 상세", description = "companyId에 맞는 본사 상세 페이지로 이동한다.")
     @GetMapping("/read")
     public String read(@RequestParam Integer companyId,
                        @RequestParam(defaultValue = "0") int page,
@@ -173,7 +175,7 @@ public class ChiefCompanyController {
     }
 
     //수정폼
-    @Operation(summary = "관리자용 본사 수정 처리", description = "본사를 수정 처리 한다.")
+    @Operation(summary = "호텔장 본사 수정 처리", description = "본사를 수정 처리 한다.")
     @GetMapping("/update")
     public String updateHTML(Integer companyId, Model model) {
         CompanyDTO companyDTO = companyService.read(companyId);
@@ -181,7 +183,7 @@ public class ChiefCompanyController {
         return "/chief/company/update";
     }
     //수정처리
-    @Operation(summary = "관리자용 본사 수정 처리", description = "본사를 수정 처리 한다.")
+    @Operation(summary = "호텔장 본사 수정 처리", description = "본사를 수정 처리 한 후 해당 본사 상세페이지로 이동한다.")
     @PostMapping("/update")
     public String updateProc(CompanyDTO companyDTO, List<MultipartFile> newImageFiles, RedirectAttributes redirectAttributes) {
 
@@ -195,6 +197,7 @@ public class ChiefCompanyController {
     }
 
     // 이미지 삭제 (REST API 형식으로 처리)
+    @Operation(summary = "호텔 이미지 삭제", description = "본사 이미지를 삭제 처리한다.")
     @RequestMapping(value = "/image/delete/{imageId}", method = RequestMethod.DELETE)
     @ResponseBody
     public Map<String, String> deleteImage(@PathVariable Integer imageId) {
@@ -216,6 +219,14 @@ public class ChiefCompanyController {
             response.put("message", "Error deleting image");
         }
         return response;
+    }
+
+    @Operation(summary = "관리자용 본사 삭제 처리", description = "본사를 삭제 처리 한다.")
+    @GetMapping("/delete")
+    public String delete(Integer companyId, RedirectAttributes redirectAttributes) {
+        companyService.delete(companyId);
+        redirectAttributes.addFlashAttribute("message", "해당 본사 삭제가 완료되었습니다.");
+        return "redirect:/chief/company/list";
     }
 
 
