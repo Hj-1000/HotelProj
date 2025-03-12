@@ -116,11 +116,11 @@
           <td>
             <button type="button"
                     class="btn btn-primary btn-sm"
-                    th:disabled="${reservation.reservationStatus != '예약'}"
+                    th:disabled="${reservation.reservationStatus != '예약' or reservation.totalPrice + reservation.totalServiceOrderPrice - reservation.paymentTotalPrice <= 0}"
                     onclick="requestPay(event)">결제</button>
           </td>
-          <td class="paymenttest1" th:text="${reservation.paymentTotalPrice}"></td>
-          <td class="paymenttest2" th:text="${reservation.totalPrice + reservation.totalServiceOrderPrice - reservation.paymentTotalPrice}"></td>
+          <td class="paymenttest1" th:text="${reservation.paymentTotalPrice}">결제완료금액</td>
+          <td class="paymenttest2" th:text="${reservation.totalPrice + reservation.totalServiceOrderPrice - reservation.paymentTotalPrice}">결제필요금액</td>
           <!-- 삭제 아이콘 -->
           <td class="text-center">
             <i class="bi bi-trash-fill delete-icon"
