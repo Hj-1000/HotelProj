@@ -46,7 +46,6 @@ public class AdminCompanyHotelController {
 
     private final CompanyService companyService;
     private final HotelService hotelService;
-    private final ImageService imageService;
     private final MemberService memberService;
     private final PaginationUtil paginationUtil;
 
@@ -415,10 +414,17 @@ public class AdminCompanyHotelController {
     @Operation(summary = "관리자용 호텔 수정폼", description = "hotelId에 맞는 호텔 수정폼 페이지로 이동한다.")
     @GetMapping("/hotel/update")
     public String updateForm(Integer hotelId, Model model) {
+
         HotelDTO hotelDTO = hotelService.read(hotelId);
         List<CompanyDTO> companyDTOS = hotelService.getAllCompany();
         model.addAttribute("companyDTOS", companyDTOS);
         model.addAttribute("hotelDTO", hotelDTO);
+
+        // 매니저 목록 가져오기
+        List<MemberDTO> memberDTOS = hotelService.getAllManagers();
+        model.addAttribute("memberDTOS", memberDTOS);
+        model.addAttribute("memberDTO", new MemberDTO());
+
         return "/manager/hotel/update";
     }
     //수정처리

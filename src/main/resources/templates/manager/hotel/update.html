@@ -41,6 +41,114 @@
 
         })
 
+        document.addEventListener('DOMContentLoaded', function() {
+            // toggleManagerSelect 함수 정의
+            function toggleManagerSelect() {
+                let isManagerChanged = false;
+                let hotelEmailInput = document.getElementById("hotelEmail");
+                let memberIdInput = document.getElementById("memberId");
+
+                document.addEventListener('DOMContentLoaded', function() {
+                    let isManagerChanged = false;
+                    let hotelEmailInput = document.getElementById("hotelEmail");
+                    let memberIdInput = document.getElementById("memberId");
+
+                    // 페이지 로드 시 초기값 저장
+                    let initialManagerValue = hotelEmailInput.value;
+                    let initialMemberId = memberIdInput.value;
+
+                    // 매니저 선택을 토글하는 함수
+                    function toggleManagerSelect() {
+                        let selectBox = document.getElementById("hotelEmailSel");
+                        let changeButton = document.getElementById("changeManagerBtn");
+                        let saveManagerBtn = document.querySelector(".saveManagerBtn");
+
+                        if (!isManagerChanged) {
+                            // 셀렉트 박스를 보이게 하고, 입력 필드는 숨깁니다.
+                            selectBox.style.display = "block";
+                            hotelEmailInput.style.display = "none";
+                            changeButton.classList.remove("btn-light");
+                            changeButton.classList.add("btn-danger");
+                            changeButton.textContent = "취소"; // 버튼 텍스트를 "취소"로 변경
+                            saveManagerBtn.style.display = "inline-block";
+                            isManagerChanged = true;
+                        } else {
+                            // 셀렉트 박스를 숨기고, 입력 필드를 다시 보이게 하며 초기값으로 복원합니다.
+                            selectBox.style.display = "none";
+                            hotelEmailInput.style.display = "block";
+                            changeButton.classList.remove("btn-danger");
+                            changeButton.classList.add("btn-light");
+                            changeButton.textContent = "변경"; // 버튼 텍스트를 "변경"으로 복원
+                            saveManagerBtn.style.display = "none";
+
+                            // 초기값 복원 (memberId도 함께)
+                            hotelEmailInput.value = initialManagerValue;
+                            memberIdInput.value = initialMemberId;
+                            isManagerChanged = false;
+                        }
+                    }
+                    window.toggleManagerSelect = toggleManagerSelect;
+
+                    // 매니저 저장 함수
+                    function saveManager() {
+                        let selectBox = document.getElementById("hotelEmailSel");
+                        let selectedOption = selectBox.options[selectBox.selectedIndex];
+                        let selectedMemberName = selectedOption.value;
+                        let selectedMemberId = selectedOption.getAttribute("data-id");
+
+                        // 선택한 값을 입력 필드와 hidden input에 반영
+                        hotelEmailInput.value = selectedMemberName;
+                        memberIdInput.value = selectedMemberId;
+
+                        // 셀렉트 박스를 숨기고, 입력 필드를 다시 보이게 합니다.
+                        selectBox.style.display = "none";
+                        hotelEmailInput.style.display = "block";
+
+                        // 변경 완료 후 버튼 텍스트를 "초기"로 변경
+                        let changeButton = document.getElementById("changeManagerBtn");
+                        changeButton.classList.remove("btn-danger");
+                        changeButton.classList.add("btn-light");
+                        changeButton.textContent = "변경";  // 변경 완료 후 버튼을 "변경"으로 변경
+
+                        let saveManagerBtn = document.querySelector(".saveManagerBtn");
+                        saveManagerBtn.style.display = "none";
+                    }
+                    window.saveManager = saveManager;
+
+                    // "초기" 버튼 클릭 시 다시 "변경" 버튼으로 돌아가게 하기
+                    document.getElementById("changeManagerBtn").addEventListener("click", function() {
+                        let changeButton = document.getElementById("changeManagerBtn");
+                        if (changeButton.textContent === "초기") {
+                            // "초기" 버튼을 클릭하면 다시 "변경" 버튼으로 바꿔줍니다.
+                            changeButton.textContent = "변경";
+                            // 버튼 클릭 시 초기값 복원
+                            hotelEmailInput.value = initialManagerValue;
+                            memberIdInput.value = initialMemberId;
+                        }
+                    });
+
+                    // 페이지 로드 시 자동으로 셀렉트박스의 값이 하나일 경우 자동으로 input에 값 설정
+                    $(document).ready(function() {
+                        var selectBox = $('#hotelEmailSel');  // 셀렉트박스 선택
+
+                        // 셀렉트박스에 옵션이 하나만 있을 때
+                        if (selectBox.find('option').length === 1) {
+                            // 첫 번째 옵션을 자동으로 선택
+                            selectBox.prop('selectedIndex', 0);
+
+                            // 첫 번째 option에서 data-id 값을 찾아서 input에 설정
+                            var selectedOption = selectBox.find('option').first();  // 첫 번째 option 선택
+                            var memberId = selectedOption.attr('data-id');  // data-id 속성 값 가져오기
+                            $('#memberId').val(memberId);  // 숨겨진 input에 memberId 값 설정
+                        }
+                    });
+                });
+            }
+
+            // global로 함수를 노출시키기
+            window.toggleManagerSelect = toggleManagerSelect;
+        });
+
     </script>
 </head>
 <body>
@@ -95,9 +203,35 @@
                         <input type="text" class="form-control" id="hotelPhone" name="hotelPhone" th:field="*{hotelPhone}">
                     </div>
                     <div class="mb-3 mt-3">
-                        <label for="hotelPhone" class="form-label">담당자 이메일:</label>
-                        <input type="hidden" class="form-control" id="hotelEmail" name="hotelEmail" th:field="*{hotelEmail}">
+                        <label for="hotelPhone" class="form-label">담당자 이메일: (담당자 변경 원할 시 새로 매니저 등록 해주세요.)</label>
+                        <input type="text" class="form-control" id="hotelEmail" name="hotelEmail" th:field="*{hotelEmail}" readonly>
                     </div>
+                   <!-- <div class="mb-3 mt-3">
+                        <label for="hotelEmail" class="form-label">담당자: </label>
+
+                        &lt;!&ndash; 변경 버튼 (id 추가) &ndash;&gt;
+                        <button id="changeManagerBtn" type="button" class="btn btn-sm btn-light" onclick="toggleManagerSelect()">변경</button>
+
+                        &lt;!&ndash; 변경 완료 버튼 (초기에 숨김) &ndash;&gt;
+                        <button type="button" class="btn btn-sm btn-success saveManagerBtn" style="display: none;" onclick="saveManager()">변경 완료</button>
+
+                        &lt;!&ndash; 초기에 보이는 현재 관리자명 &ndash;&gt;
+                        <input type="text" class="form-control" id="hotelEmail" name="hotelEmail" th:field="*{hotelEmail}" readonly>
+
+                        &lt;!&ndash; 호텔 이메일 선택 드롭다운 (초기에 숨김) &ndash;&gt;
+                        <select id="hotelEmailSel" name="hotelEmailSel" class="form-select" style="display: none;">
+                            <th:block th:each="memberDTO : ${memberDTOS}">
+                                <option th:value="${memberDTO.memberEmail}" th:text="${memberDTO.memberName}" th:data-id="${memberDTO.memberId}">김매니저</option>
+                            </th:block>
+                            <th:block th:if="${#lists.isEmpty(memberDTOS)}">
+                                <option value="">표시할 매니저가 없습니다. 먼저 매니저 등록 후 수정해주세요.</option>
+                            </th:block>
+                        </select>
+
+                        &lt;!&ndash; 선택된 담당자의 memberId를 저장할 숨겨진 input &ndash;&gt;
+                        <input type="text" id="memberId" name="memberId" th:field="*{memberId}" required>
+
+                    </div>-->
                     <div class="mb-3 mt-3">
                         <label for="hotelCheckIn" class="form-label">호텔 체크인:</label>
                         <select id="hotelCheckIn" name="hotelCheckIn" class="form-select" th:field="*{hotelCheckIn}">
@@ -185,31 +319,6 @@
                         <button type="submit" class="btn btn-primary">등록</button>
                     </div>
                 </form>
-
-                <!--daum지도 API를 연동-->
-                <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-                <script>
-                    //우편번호찾기를 클릭시 처리되는 메소드
-                    //daum에서 제공하는 기본 메소드
-                    function execDaumPostcode() {
-                        new daum.Postcode({
-                            oncomplete: function(data) {
-                                var addr = '';
-
-                                if (data.userSelectedType === 'R') {
-                                    addr = data.roadAddress;
-                                } else {
-                                    addr = data.jibunAddress;
-                                }
-                                // 조회한 주소를 html에 id명이 hotelAddress인 곳에 적용
-                                document.getElementById("hotelAddress").value = addr;
-
-                                // 주소 변경 시 setHotelLocationBasedOnAddress 호출
-                                setHotelLocationBasedOnAddress(addr);
-                            }
-                        }).open(); // 주소검색창 열기
-                    }
-                </script>
 
             </div>
         </div>
@@ -340,35 +449,36 @@
                     </div>
                 </form>
 
-                <!--daum지도 API를 연동-->
-                <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-                <script>
-                    //우편번호찾기를 클릭시 처리되는 메소드
-                    //daum에서 제공하는 기본 메소드
-                    function execDaumPostcode() {
-                        new daum.Postcode({
-                            oncomplete: function(data) {
-                                var addr = '';
-
-                                if (data.userSelectedType === 'R') {
-                                    addr = data.roadAddress;
-                                } else {
-                                    addr = data.jibunAddress;
-                                }
-                                // 조회한 주소를 html에 id명이 hotelAddress인 곳에 적용
-                                document.getElementById("hotelAddress").value = addr;
-
-                                // 주소 변경 시 setHotelLocationBasedOnAddress 호출
-                                setHotelLocationBasedOnAddress(addr);
-                            }
-                        }).open(); // 주소검색창 열기
-                    }
-                </script>
-
             </div>
         </div>
 
     </div>
+
+    <!--daum지도 API를 연동-->
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script>
+        //우편번호찾기를 클릭시 처리되는 메소드
+        //daum에서 제공하는 기본 메소드
+        function execDaumPostcode() {
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    var addr = '';
+
+                    if (data.userSelectedType === 'R') {
+                        addr = data.roadAddress;
+                    } else {
+                        addr = data.jibunAddress;
+                    }
+                    // 조회한 주소를 html에 id명이 hotelAddress인 곳에 적용
+                    document.getElementById("hotelAddress").value = addr;
+
+                    // 주소 변경 시 setHotelLocationBasedOnAddress 호출
+                    setHotelLocationBasedOnAddress(addr);
+                }
+            }).open(); // 주소검색창 열기
+        }
+    </script>
+
 </div>
 
 </body>

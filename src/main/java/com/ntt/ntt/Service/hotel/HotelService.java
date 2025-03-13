@@ -1,5 +1,6 @@
 package com.ntt.ntt.Service.hotel;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ntt.ntt.Constant.Role;
 import com.ntt.ntt.DTO.*;
 import com.ntt.ntt.Entity.*;
@@ -24,6 +25,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.text.DecimalFormat;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -52,6 +55,27 @@ public class HotelService {
 
     //호텔 레포지토리
     private final HotelRepository hotelRepository;
+
+
+    //회원목록 불러오는
+    public List<MemberDTO> getAllManagers() {
+        // 1. 모든 manager 역할을 가진 회원 목록 조회
+        List<Member> members = memberRepository.findByRole(Role.MANAGER);
+
+        // 2. 이미 hotel 테이블에 등록된 memberId 목록 가져오기
+        List<Integer> hotelMembers = hotelRepository.findAll().stream()
+                .filter(hotel -> hotel.getMember() != null) // hotel에 member가 null이 아닌 경우만 처리
+                .map(hotel -> hotel.getMember().getMemberId()) // hotel에 해당하는 memberId 추출
+                .collect(Collectors.toList());
+
+        // 3. hotel에 등록되지 않은 회원만 필터링
+        List<MemberDTO> memberDTOS = members.stream()
+                .filter(member -> !hotelMembers.contains(member.getMemberId())) // hotel에 없는 memberId만 필터링
+                .map(a -> new MemberDTO(a.getMemberId(), a.getMemberEmail(), a.getMemberName()))
+                .collect(Collectors.toList());
+
+        return memberDTOS;
+    }
 
 
     //호텔 본사 전부(관리자용)
@@ -429,19 +453,13 @@ public class HotelService {
     // hotelId에 맞는 방들을 가져오는 메서드
     public Page<RoomDTO> roomListByHotel(Integer hotelId, Pageable page) {
 
-        // 1. 페이지 정보 재가공
-        int currentPage = page.getPageNumber(); // 기존 페이지 번호 그대로 사용
-        int pageSize = page.getPageSize(); // 페이지 사이즈 그대로 사용
-        Pageable pageable = PageRequest.of(
-                currentPage, pageSize,
-                Sort.by(Sort.Direction.ASC, "hotelId") // 등록순 정렬
-        );
+        // 1. 페이지 정보 그대로 사용
+        Pageable pageable = PageRequest.of(page.getPageNumber(), 10, Sort.by(Sort.Direction.ASC, "hotelId"));
 
-        // 2. 검색타입에 따른 호텔 조회
-        Page<Room> rooms = null;
-        rooms = roomRepository.findByHotelId_HotelId(hotelId, pageable);
+        // 2. 호텔 데이터 페이징 처리
+        Page<Room> rooms = roomRepository.findByHotelId_HotelId(hotelId, pageable);
 
-        // 3. Hotel -> HotelDTO 변환
+        // 3. Room -> RoomDTO 변환
         Page<RoomDTO> roomDTOS = rooms.map(entity -> {
             RoomDTO roomDTO = modelMapper.map(entity, RoomDTO.class);
 
@@ -460,6 +478,39 @@ public class HotelService {
 
         return roomDTOS;
     }
+
+    //hotelId에 맞는 방을 가져오는 메서드2(사용자용)
+    public List<RoomDTO> getRoomsByHotel(Integer hotelId) {
+        // 페이징 없이 모든 방 데이터를 가져오기
+        List<Room> rooms = roomRepository.findByHotelId_HotelId(hotelId);
+
+        // Room -> RoomDTO 변환 후 반환
+        return rooms.stream().map(entity -> {
+            RoomDTO roomDTO = modelMapper.map(entity, RoomDTO.class);
+
+            // 이미지 처리, null 방지 등 추가 처리
+            if (roomDTO.getRoomImageDTOList() == null) {
+                roomDTO.setRoomImageDTOList(new ArrayList<>()); // null 방지
+            }
+
+            List<ImageDTO> imgDTOList = Optional.ofNullable(imageRepository.findByRoom_RoomId(entity.getRoomId()))
+                    .orElse(Collections.emptyList())
+                    .stream()
+                    .map(imagefile -> {
+                        if (imagefile.getImagePath() != null) {
+                            imagefile.setImagePath(imagefile.getImagePath().replace("c:/data/", ""));
+                        }
+                        return modelMapper.map(imagefile, ImageDTO.class);
+                    })
+                    .collect(Collectors.toList());
+
+            roomDTO.setRoomImageDTOList(imgDTOList); // 이미지 DTO 리스트 설정
+
+            return roomDTO;
+        }).collect(Collectors.toList());
+    }
+
+
 
 
 
