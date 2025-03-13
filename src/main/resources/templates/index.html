@@ -148,22 +148,23 @@
     <section class="text-center bg-light">
         <div id="bannerCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
             <div class="bnr_wrapper carousel-inner">
-                <!-- 활성화된 배너가 있을 경우 -->
+                <!-- 배너가 있을 경우 -->
                 <th:block th:if="${not #lists.isEmpty(activeBanners)}">
-                    <div th:each="banner, stat : ${activeBanners}" 
-                         th:class="${stat.first} ? 'carousel-item active' : 'carousel-item'">
+                    <div th:each="banner, stat : ${activeBanners}"
+                         th:class="${stat.first} ? 'carousel-item active' : 'carousel-item'"
+                         th:if="${not #lists.isEmpty(banner.bannerImageDTOList)}">
                         <img th:src="@{'/upload/' + ${banner.bannerImageDTOList[0].imagePath}}"
                              class="d-block w-100" alt="배너 이미지"
-                             style=" object-fit: cover;">
+                             style="object-fit: cover;">
                     </div>
                 </th:block>
-                <!-- 활성화된 배너가 없을 경우 기본 배너 표시 -->
+                <!-- 배너가 없을 경우 기본 배너 표시 -->
                 <th:block th:if="${#lists.isEmpty(activeBanners)}">
-                    <div th:each="banner, stat : ${defaultBanners}" 
+                    <div th:each="banner, stat : ${defaultBanners}"
                          th:class="${stat.first} ? 'carousel-item active' : 'carousel-item'">
                         <img th:src="@{${banner}}"
                              class="d-block w-100" alt="기본 배너 이미지"
-                             style=" object-fit: cover;">
+                             style="object-fit: cover;">
                     </div>
                 </th:block>
             </div>
@@ -426,12 +427,12 @@
 
     /*배너 테스트*/
 
-    const bannerImages = [
-        '/img/bg_wedding.jpg',
-        '/img/bg_dining.jpg',
-        '/img/bg_membership.jpg',
-        '/img/bg_activity.jpg'
-    ];
+    // const bannerImages = [
+    //     '/img/bg_wedding.jpg',
+    //     '/img/bg_dining.jpg',
+    //     '/img/bg_membership.jpg',
+    //     '/img/bg_activity.jpg'
+    // ];
     let currentIndex = 0;
 
     function changeBannerImage() {

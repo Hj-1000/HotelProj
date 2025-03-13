@@ -43,9 +43,9 @@ public class BannerService {
 
     public void register(BannerDTO bannerDTO, List<MultipartFile> multipartFile) {
         Banner banner = modelMapper.map(bannerDTO, Banner.class);
-    bannerRepository.save(banner);
-    if(multipartFile != null && !multipartFile.isEmpty()) {
-    imageService.registerBannerImage(banner.getBannerId(), multipartFile);}
+        bannerRepository.save(banner);
+        if(multipartFile != null && !multipartFile.isEmpty()) {
+            imageService.registerBannerImage(banner.getBannerId(), multipartFile);}
     }
 
     public void update(BannerDTO bannerDTO, List<MultipartFile> multipartFile) {
@@ -84,7 +84,7 @@ public class BannerService {
     public void delete(Integer bannerId) {
         // 배너에 연결된 이미지 정보 조회
         List<Image> images = imageRepository.findByBanner_BannerId(bannerId);
-        
+
         // 실제 이미지 파일 삭제
         for (Image image : images) {
             String imagePath = IMG_LOCATION + image.getImagePath();
@@ -94,8 +94,9 @@ public class BannerService {
                 log.error("이미지 파일 삭제 실패: " + imagePath, e);
             }
         }
-        
+
         // DB에서 배너 삭제 (연결된 이미지도 cascade로 자동 삭제)
+
         bannerRepository.deleteById(bannerId);
     }
 
@@ -142,6 +143,7 @@ public class BannerService {
                 .collect(Collectors.toList());
         return bannerDTOList;
     }
+
 
 }
 
