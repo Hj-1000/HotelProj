@@ -34,7 +34,7 @@ import java.util.Map;
 @Controller
 @RequiredArgsConstructor
 @Log4j2
-@Tag(name = "qnaController", description = "Q&A페이지")
+@Tag(name = "QnaController", description = "Q&A페이지")
 public class QnaController {
 
     private final MemberService memberService;

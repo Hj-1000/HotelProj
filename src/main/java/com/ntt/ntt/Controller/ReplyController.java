@@ -26,7 +26,7 @@ import java.util.List;
 @Log4j2
 @AllArgsConstructor
 @RequestMapping("/reply")
-@Tag(name = "replyController", description = "Q&A페이지에 댓글")
+@Tag(name = "ReplyController", description = "Q&A페이지에 댓글")
 public class ReplyController {
 
     private final ReplyService replyService;

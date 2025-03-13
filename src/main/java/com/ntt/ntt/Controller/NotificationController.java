@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/notifications")
 @RequiredArgsConstructor
 @Log4j2
-@Tag(name = "notificationController", description = "Q&A , 댓글 알림페이지")
+@Tag(name = "NotificationController", description = "Q&A , 댓글 알림페이지")
 public class NotificationController {
 
     private final NotificationService notificationService;
