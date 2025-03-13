@@ -219,11 +219,11 @@
                         <tbody>
                         <tr th:each="room : ${list.content}">
                             <!-- 이미지 -->
-                            <td class="align-middle text-center">
+                            <td class="align-middle text-center" style="height: 90px">
                                 <img th:if="${room.roomImageDTOList != null and !room.roomImageDTOList.isEmpty()}"
                                      th:src="@{'/upload/' + ${room.roomImageDTOList[0].imagePath}}"
                                      alt="Room Image"
-                                     class="room-image">
+                                     class="roomImage" height="90px">
                                 <span th:if="${room.roomImageDTOList == null or room.roomImageDTOList.isEmpty()}">이미지 없음</span>
                             </td>
 
