@@ -29,6 +29,8 @@ public interface ServiceMenuRepository extends JpaRepository<ServiceMenu, Intege
     public Page<ServiceMenu> findByServiceCate_ServiceCateId(Integer serviceCateId, Pageable pageable);
     //특정 카테고리에 속한 메뉴 조회(이름 포함)
     public Page<ServiceMenu> findByServiceCate_ServiceCateIdAndServiceMenuNameLike(Integer serviceCateId,String keyword, Pageable pageable);
+    // 카테고리 이름으로 메뉴 검색
+    Page<ServiceMenu> findByServiceCate_ServiceCateNameLike(String serviceCateName, Pageable pageable);
 
     @Query("SELECT m FROM ServiceMenu m WHERE m.serviceCate.serviceCateId = :serviceCateId")
     List<ServiceMenu> findServiceMenuByServiceCate_ServiceCateId(@Param("serviceCateId") Integer serviceCateId);

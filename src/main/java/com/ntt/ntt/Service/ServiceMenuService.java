@@ -102,7 +102,11 @@ public class ServiceMenuService {
 
         Page<ServiceMenu> serviceMenu = null;
 
-        if (serviceCateId != null) {
+        if ("categoryName".equals(searchType) && keyword != null && !keyword.isEmpty()) {
+            // 카테고리 이름으로 검색
+            String keywordLike = "%" + keyword + "%";
+            serviceMenu = serviceMenuRepository.findByServiceCate_ServiceCateNameLike(keywordLike, pageable);
+        } else if (serviceCateId != null) {
             // 카테고리 ID 기반 검색
             if ("name".equals(searchType) && keyword != null && !keyword.isEmpty()) {
                 String keywordLike = "%" + keyword + "%";
@@ -140,7 +144,7 @@ public class ServiceMenuService {
             // 이미지 추가 (serviceMenuId를 기준으로 이미지 리스트를 조회)
             List<ImageDTO> imageDTOList = imageRepository.findByServiceMenu_ServiceMenuId(serviceMenuDTO.getServiceMenuId())
                     .stream().map(imagefile -> {
-                        imagefile.setImagePath(imagefile.getImagePath().replace("c:/data/", ""));  // 이미지 경로 수정
+                        imagefile.setImagePath(imagefile.getImagePath().replace("c:/data/", ""));
                         return modelMapper.map(imagefile, ImageDTO.class);
                     })
                     .collect(Collectors.toList());
