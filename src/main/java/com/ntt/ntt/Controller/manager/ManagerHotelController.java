@@ -19,6 +19,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 @Controller
@@ -82,7 +83,7 @@ public class ManagerHotelController {
     @GetMapping("/read")
     public String read(@RequestParam Integer hotelId,
                        @RequestParam(defaultValue = "0") int page,
-                       Model model,
+                       Model model, Pageable pageable,
                        RedirectAttributes redirectAttributes) {
         try {
             HotelDTO hotelDTO = hotelService.read(hotelId);
@@ -91,20 +92,64 @@ public class ManagerHotelController {
                 return "redirect:/manager/hotel/list";
             }
 
-            // Pageable 객체 생성
-            Pageable pageable = PageRequest.of(page, 10);  // 10개씩 표시
+            //객실 가져오기
+            // 현재 페이지 정보를 Pageable에 반영
+            Pageable updatedPageable = PageRequest.of(page, pageable.getPageSize());
 
-            // 호텔 ID에 맞는 방 목록을 페이징 처리하여 가져옵니다.
-            Page<RoomDTO> roomsForHotel = hotelService.roomListByHotel(hotelId, pageable);
+            // 검색 조건과 페이징 정보를 이용하여 데이터 가져오기
+            Page<RoomDTO> roomDTOS;
 
-            // 방 목록에 관련된 이미지와 가격 포맷팅 처리
-            for (RoomDTO room : roomsForHotel) {
+            try {
+                // 2. 검색 수행
+                roomDTOS = hotelService.roomListByHotel(hotelId, updatedPageable);
+            } catch (IllegalArgumentException e) {
+                log.warn(" 검색 중 오류 발생: {}", e.getMessage());
+                redirectAttributes.addFlashAttribute("errorMessage", "검색 조건이 올바르지 않습니다.");
+                return "redirect:/manager/room/list";
+            }
+
+            // 상태 자동 업데이트: 예약 마감일이 지난 경우 예약 불가 처리
+            LocalDate today = LocalDate.now();
+            roomDTOS.forEach(room -> {
+                if (room.getReservationEnd() != null) {
+                    LocalDate reservationEndDate = LocalDate.parse(room.getReservationEnd());
+                    room.setRoomStatus(!reservationEndDate.isBefore(today));
+                }
+            });
+
+            // 로그로 이미지 확인
+            for (RoomDTO room : roomDTOS) {
                 if (room.getRoomImageDTOList() != null && !room.getRoomImageDTOList().isEmpty()) {
                     log.info("Room ID: {} - 이미지 개수: {}", room.getRoomId(), room.getRoomImageDTOList().size());
                 } else {
                     log.info("Room ID: {} - 이미지 없음", room.getRoomId());
                 }
-                // 가격 포맷팅
+            }
+
+            // 페이지네이션 정보 생성
+            Map<String, Integer> pageInfo = PaginationUtil.pagination(roomDTOS);
+
+            // 전체 페이지 수
+            int totalPages = roomDTOS.getTotalPages();
+
+            // 현재 페이지 번호
+            int currentPage = pageInfo.get("currentPage");
+
+            // 시작 페이지와 끝 페이지 계산 (현재 페이지를 기준으로 최대 10페이지까지)
+            int startPage = Math.max(1, currentPage - 4); // 10개씩 끊어서 시작 페이지 계산
+            int endPage = Math.min(startPage + 9, totalPages); // 최대 10페이지까지, 전체 페이지 수를 넘지 않도록
+
+            // 페이지 정보 업데이트
+            pageInfo.put("startPage", startPage);
+            pageInfo.put("endPage", endPage);
+
+            // 모델에 데이터 추가
+            model.addAttribute("currentPage", page);
+            model.addAttribute("list", roomDTOS); // 페이징된 RoomDTO 리스트
+            model.addAllAttributes(pageInfo); // 페이지 정보 추가
+
+            // 가격 포맷팅
+            for (RoomDTO room : roomDTOS) {
                 if (room.getFormattedRoomPrice() == null) {
                     String formattedPrice = String.format("%,d", room.getRoomPrice());
                     room.setFormattedRoomPrice(formattedPrice);
@@ -112,9 +157,6 @@ public class ManagerHotelController {
             }
 
             model.addAttribute("hotelDTO", hotelDTO);
-            model.addAttribute("rooms", roomsForHotel.getContent());  // 현재 페이지의 객실 목록
-            model.addAttribute("totalPages", roomsForHotel.getTotalPages());  // 총 페이지 수
-            model.addAttribute("currentPage", page);  // 현재 페이지
 
             return "/manager/hotel/read";
         } catch (Exception e) {
