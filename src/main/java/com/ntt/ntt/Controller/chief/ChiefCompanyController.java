@@ -144,27 +144,29 @@ public class ChiefCompanyController {
 
             // Pageable 객체 생성
             Pageable pageable = PageRequest.of(page, 10);  // 10개씩 표시
-
             // 본사 ID에 맞는 호텔(지사) 목록을 페이징 처리하여 가져옵니다.
             Page<HotelDTO> hotelDTOS = companyService.hotelListBycompany(companyId, pageable);
 
-            // 호텔(지사) 목록에 관련된 이미지 포맷팅 처리
-            for (HotelDTO hotelDTO : hotelDTOS) {
-                if (hotelDTO.getHotelImgDTOList() != null && !hotelDTO.getHotelImgDTOList().isEmpty()) {
-                    log.info("Room ID: {} - 이미지 개수: {}", hotelDTO.getHotelId(), hotelDTO.getHotelImgDTOList().size());
-                } else {
-                    log.info("Room ID: {} - 이미지 없음", hotelDTO.getHotelId());
-                }
-            }
+            Map<String, Integer> pageInfo = paginationUtil.pagination(hotelDTOS);
 
-            /*List<MemberDTO> memberDTOS = hotelService.getAllManagers();
-            model.addAttribute("memberDTOS", memberDTOS);
-            model.addAttribute("memberDTO", new MemberDTO());*/
+            int totalPages = hotelDTOS.getTotalPages();
+            int currentPage = pageInfo.get("currentPage");
+            int startPage = Math.max(1, currentPage - 4);
+            int endPage = Math.min(startPage + 9, totalPages);
+            int prevPage = Math.max(1, currentPage - 1);
+            int nextPage = Math.min(totalPages, currentPage + 1);
+            int lastPage = totalPages;
+
+            pageInfo.put("startPage", startPage);
+            pageInfo.put("endPage", endPage);
+            pageInfo.put("prevPage", prevPage);
+            pageInfo.put("nextPage", nextPage);
+            pageInfo.put("lastPage", lastPage);
+
+            model.addAttribute("pageInfo", pageInfo);
 
             model.addAttribute("companyDTO", companyDTO);
             model.addAttribute("hotelDTOS", hotelDTOS.getContent());  // 현재 페이지의 객실 목록
-            model.addAttribute("totalPages", hotelDTOS.getTotalPages());  // 총 페이지 수
-            model.addAttribute("currentPage", page);  // 현재 페이지
 
             return "/chief/company/read";
 

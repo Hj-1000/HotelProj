@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +38,7 @@ public class HotelController {
     private final HotelService hotelService;
     private final RoomReviewService roomReviewService;
     private final PaginationUtil paginationUtil;
+    private final RoomService roomService;
 
     //호텔목록
     @Operation(summary = "사용자용 호텔 목록", description = "전체 호텔 목록 페이지로 이동한다.")
@@ -110,11 +112,8 @@ public class HotelController {
             // 최신 리뷰 조회
             List<RoomReviewDTO> latestReviews = roomReviewService.getLatestReviewsByHotelId(hotelId);
 
-            // Pageable 객체 생성
-            Pageable pageable = PageRequest.of(page, 10);  // 10개씩 표시
-
             // 호텔 ID에 맞는 방 목록을 페이징 처리하여 가져옵니다.
-            Page<RoomDTO> roomsForHotel = hotelService.roomListByHotel(hotelId, pageable);
+            List<RoomDTO> roomsForHotel = hotelService.getRoomsByHotel(hotelId);
 
             // 방 목록에 관련된 이미지와 가격 포맷팅 처리
             for (RoomDTO room : roomsForHotel) {
@@ -130,9 +129,10 @@ public class HotelController {
                 }
             }
 
+            model.addAttribute("rooms", roomsForHotel);  // 현재 페이지의 객실 목록
+
             // 모델에 데이터 추가
             model.addAttribute("hotelDTO", hotelDTO);
-            model.addAttribute("rooms", roomsForHotel);  // 현재 페이지의 객실 목록
             model.addAttribute("currentPage", page);  // 현재 페이지
             model.addAttribute("latestReviews", latestReviews); // 최신 리뷰 3개 추가
 
@@ -142,6 +142,22 @@ public class HotelController {
             return "redirect:/hotel/list";
         }
     }
+
+    // 해당 호텔 전체 객실
+
+    /*@GetMapping("/read/rooms")
+    @ResponseBody
+    public Page<RoomDTO> getRoomsByHotel(
+            @RequestParam Integer hotelId,
+            @RequestParam int page,
+            @RequestParam int size) {
+
+        // Pageable 객체 생성
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "roomId"));
+
+        // 호텔 서비스에서 방 데이터 가져오기
+        return hotelService.getRoomsByHotel(hotelId, pageable);
+    }*/
 
     // 해당 호텔 전체 리뷰
     @Operation(summary = "사용자용 호텔 리뷰목록", description = "hotelId에 맞는 호텔 리뷰 목록 페이지로 이동한다.")

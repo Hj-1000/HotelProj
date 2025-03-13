@@ -108,9 +108,9 @@
                 <!--<a class="btn btn-dark" th:href="@{/manager/hotel/list(companyId=${companyDTO.companyId})}">지사 관리</a>-->
                 <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="btn btn-dark" th:href="@{/admin/hotel/list(companyId=${companyDTO.companyId})}">지사 관리</a>
                 <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="btn btn-dark" href="/chief/hotel/list">지사 관리</a>
-                <!--<button type="button" class="btn btn-success modalBtn">지사 등록</button>-->
                 <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/admin/hotel/register" class="btn btn-success">지사 등록</a>
                 <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="/chief/hotel/register" class="btn btn-success">지사 등록</a>
+                <button type="button" class="btn btn-success modalBtn">간편 등록</button>
                 <!--수정-->
                 <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="btn btn-warning" th:href="@{/admin/company/update(companyId=${companyDTO.companyId})}">수정</a>
                 <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="btn btn-warning" th:href="@{/chief/company/update(companyId=${companyDTO.companyId})}">수정</a>
@@ -126,30 +126,6 @@
     <!-- 본사에 속한 지사 목록 -->
     <div class="container-fluid mt-4">
         <h2 class="mb-3">호텔 지사 관리</h2>
-
-        <!-- 검색 영역 -->
-        <!--<div class="card p-4 mb-4">
-            <form action="/chief/hotel/list" method="get" id="searchForm">
-                <div class="row g-3 align-items-center">
-                    <h5 class="card-title">지사 찾기</h5>
-                    <div class="col-md-6">
-                        <select name="searchType" id="searchType" class="form-select">
-                            <option value="name">지사명</option>
-                            <option value="location">지역</option>
-                            <option value="address">주소</option>
-                            <option value="rating">별점</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <input type="text" id="keyword" class="form-control" placeholder="검색어를 입력하세요">
-                    </div>
-                </div>
-                &lt;!&ndash; 조회 버튼 &ndash;&gt;
-                <div class="text-center mt-4">
-                    <button type="button" id="searchBtn" class="btn btn-dark w-25">조회</button>
-                </div>
-            </form>
-        </div>-->
 
         <!-- 목록 영역 -->
         <div class="card">
@@ -182,7 +158,7 @@
                                     <img src="/img/default_img.jpg" width="50px">
                                 </span>
                             </td>
-<!--                            <td></td> th:text="${data.hotelId}">호텔번호</td>-->
+                            <!--<td></td> th:text="${data.hotelId}">호텔번호</td>-->
                             <td th:text="${data.companyName}" class="align-middle text-center">본사명</td>
                             <td th:text="${data.hotelName}" class="align-middle text-center">지사명</td>
                             <td th:text="${data.hotelAddress}" class="align-middle text-center">주소</td>
@@ -227,108 +203,215 @@
 
                 <div class="modal-body">
 
-                    <form action="/chief/hotel/register" method="post" enctype="multipart/form-data">
+                    <div th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+                        <form action="/admin/hotel/register" method="post" enctype="multipart/form-data">
 
-                        <input type="hidden" class="form-control" id="companyId" name="companyId" th:value="${companyDTO.companyId}">
+                            <input type="hidden" class="form-control" id="companyId" name="companyId" th:value="${companyDTO.companyId}">
 
-                        <div class="mb-3 mt-3">
-                            <label for="hotelName" class="form-label">호텔명:</label>
-                            <input type="text" class="form-control" id="hotelName" name="hotelName" required>
-                        </div>
-                        <div class="mb-3">
-                            <!--<label for="hotelLocation" class="form-label">호텔지역:</label>-->
-                            <input type="hidden" class="form-control" id="hotelLocation" name="hotelLocation" required>
-                        </div>
-                        <div class="mb-3 mt-3">
-                            <label for="hotelAddress" class="form-label">호텔주소:</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="hotelAddress" name="hotelAddress" oninput="setHotelLocationBasedOnAddress(this.value)" required>
-                                <button type="button" class="btn btn-secondary" onclick="execDaumPostcode()">주소찾기</button>
+                            <div class="mb-3 mt-3">
+                                <label for="hotelName" class="form-label">호텔명:</label>
+                                <input type="text" class="form-control" id="hotelName" name="hotelName" required>
                             </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="hotelInfo" class="form-label">호텔상세:</label>
-                            <textarea class="form-control" id="hotelInfo" name="hotelInfo" required></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="hotelPhone" class="form-label">호텔전화:</label>
-                            <input type="text" class="form-control" id="hotelPhone" name="hotelPhone" required>
-                        </div>
-                        <div class="mb-3 mt-3">
-                            <label for="hotelCheckIn" class="form-label">호텔 체크인:</label>
-                            <select id="hotelCheckIn" name="hotelCheckIn" class="form-select">
-                                <option value="00">00:00</option>
-                                <option value="01">01:00</option>
-                                <option value="02">02:00</option>
-                                <option value="03">03:00</option>
-                                <option value="04">04:00</option>
-                                <option value="05">05:00</option>
-                                <option value="06">06:00</option>
-                                <option value="07">07:00</option>
-                                <option value="08">08:00</option>
-                                <option value="09">09:00</option>
-                                <option value="10">10:00</option>
-                                <option value="11">11:00</option>
-                                <option value="12">12:00</option>
-                                <option value="13">13:00</option>
-                                <option value="14">14:00</option>
-                                <option value="15">15:00</option>
-                                <option value="16">16:00</option>
-                                <option value="17">17:00</option>
-                                <option value="18">18:00</option>
-                                <option value="19">19:00</option>
-                                <option value="20">20:00</option>
-                                <option value="21">21:00</option>
-                                <option value="22">22:00</option>
-                                <option value="23">23:00</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="hotelCheckOut" class="form-label">호텔 체크아웃:</label>
-                            <select id="hotelCheckOut" name="hotelCheckOut" class="form-select">
-                                <option value="00">00:00</option>
-                                <option value="01">01:00</option>
-                                <option value="02">02:00</option>
-                                <option value="03">03:00</option>
-                                <option value="04">04:00</option>
-                                <option value="05">05:00</option>
-                                <option value="06">06:00</option>
-                                <option value="07">07:00</option>
-                                <option value="08">08:00</option>
-                                <option value="09">09:00</option>
-                                <option value="10">10:00</option>
-                                <option value="11">11:00</option>
-                                <option value="12">12:00</option>
-                                <option value="13">13:00</option>
-                                <option value="14">14:00</option>
-                                <option value="15">15:00</option>
-                                <option value="16">16:00</option>
-                                <option value="17">17:00</option>
-                                <option value="18">18:00</option>
-                                <option value="19">19:00</option>
-                                <option value="20">20:00</option>
-                                <option value="21">21:00</option>
-                                <option value="22">22:00</option>
-                                <option value="23">23:00</option>
-                            </select>
-                        </div>
-                        <!-- 새 이미지 업로드 및 미리보기 -->
-                        <div>
-                            <label for="newImageFiles">본사이미지:</label>
-                            <input type="file" id="newImageFiles" name="imageFiles" multiple accept="image/*" onchange="validateImage(event)" required>
-                            <small>PNG, JPG, GIF, BMP, JFIF, WEBP만 업로드 가능합니다. 최대 5장까지 선택할 수 있습니다.</small>
-                        </div>
+                            <div class="mb-3">
+                                <!--<label for="hotelLocation" class="form-label">호텔지역:</label>-->
+                                <input type="hidden" class="form-control" id="hotelLocation" name="hotelLocation" required>
+                            </div>
+                            <div class="mb-3 mt-3">
+                                <label for="hotelAddress" class="form-label">호텔주소:</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="hotelAddress" name="hotelAddress" oninput="setHotelLocationBasedOnAddress(this.value)" required>
+                                    <button type="button" class="btn btn-secondary" onclick="execDaumPostcode()">주소찾기</button>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="hotelInfo" class="form-label">호텔상세:</label>
+                                <textarea class="form-control" id="hotelInfo" name="hotelInfo" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="hotelPhone" class="form-label">호텔전화:</label>
+                                <input type="text" class="form-control" id="hotelPhone" name="hotelPhone" required>
+                            </div>
+                            <div class="mb-3 mt-3">
+                                <label for="hotelCheckIn" class="form-label">호텔 체크인:</label>
+                                <select id="hotelCheckIn" name="hotelCheckIn" class="form-select">
+                                    <option value="00">00:00</option>
+                                    <option value="01">01:00</option>
+                                    <option value="02">02:00</option>
+                                    <option value="03">03:00</option>
+                                    <option value="04">04:00</option>
+                                    <option value="05">05:00</option>
+                                    <option value="06">06:00</option>
+                                    <option value="07">07:00</option>
+                                    <option value="08">08:00</option>
+                                    <option value="09">09:00</option>
+                                    <option value="10">10:00</option>
+                                    <option value="11">11:00</option>
+                                    <option value="12">12:00</option>
+                                    <option value="13">13:00</option>
+                                    <option value="14">14:00</option>
+                                    <option value="15">15:00</option>
+                                    <option value="16">16:00</option>
+                                    <option value="17">17:00</option>
+                                    <option value="18">18:00</option>
+                                    <option value="19">19:00</option>
+                                    <option value="20">20:00</option>
+                                    <option value="21">21:00</option>
+                                    <option value="22">22:00</option>
+                                    <option value="23">23:00</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="hotelCheckOut" class="form-label">호텔 체크아웃:</label>
+                                <select id="hotelCheckOut" name="hotelCheckOut" class="form-select">
+                                    <option value="00">00:00</option>
+                                    <option value="01">01:00</option>
+                                    <option value="02">02:00</option>
+                                    <option value="03">03:00</option>
+                                    <option value="04">04:00</option>
+                                    <option value="05">05:00</option>
+                                    <option value="06">06:00</option>
+                                    <option value="07">07:00</option>
+                                    <option value="08">08:00</option>
+                                    <option value="09">09:00</option>
+                                    <option value="10">10:00</option>
+                                    <option value="11">11:00</option>
+                                    <option value="12">12:00</option>
+                                    <option value="13">13:00</option>
+                                    <option value="14">14:00</option>
+                                    <option value="15">15:00</option>
+                                    <option value="16">16:00</option>
+                                    <option value="17">17:00</option>
+                                    <option value="18">18:00</option>
+                                    <option value="19">19:00</option>
+                                    <option value="20">20:00</option>
+                                    <option value="21">21:00</option>
+                                    <option value="22">22:00</option>
+                                    <option value="23">23:00</option>
+                                </select>
+                            </div>
+                            <!-- 새 이미지 업로드 및 미리보기 -->
+                            <div>
+                                <label for="newImageFiles">본사이미지:</label>
+                                <input type="file" id="newImageFiles" name="imageFiles" multiple accept="image/*" onchange="validateImage(event)" required>
+                                <small>PNG, JPG, GIF, BMP, JFIF, WEBP만 업로드 가능합니다. 최대 5장까지 선택할 수 있습니다.</small>
+                            </div>
 
-                        <!-- 미리보기 이미지 표시 -->
-                        <div id="imagePreviewContainer">
-                            <!-- 미리보기가 여기 나타날 것입니다 -->
-                        </div>
+                            <!-- 미리보기 이미지 표시 -->
+                            <div id="imagePreviewContainer">
+                                <!-- 미리보기가 여기 나타날 것입니다 -->
+                            </div>
 
-                        <div style="text-align: right">
-                            <button type="submit" class="btn btn-primary">등록</button>
-                        </div>
+                            <div style="text-align: right">
+                                <button type="submit" class="btn btn-primary">등록</button>
+                            </div>
 
-                    </form>
+                        </form>
+                    </div>
+
+                    <div th:if="${#authorization.expression('hasRole(''CHIEF'')')}">
+                        <form action="/chief/hotel/register" method="post" enctype="multipart/form-data">
+
+                            <input type="hidden" class="form-control" id="companyId" name="companyId" th:value="${companyDTO.companyId}">
+
+                            <div class="mb-3 mt-3">
+                                <label for="hotelName" class="form-label">호텔명:</label>
+                                <input type="text" class="form-control" id="hotelName" name="hotelName" required>
+                            </div>
+                            <div class="mb-3">
+                                <!--<label for="hotelLocation" class="form-label">호텔지역:</label>-->
+                                <input type="hidden" class="form-control" id="hotelLocation" name="hotelLocation" required>
+                            </div>
+                            <div class="mb-3 mt-3">
+                                <label for="hotelAddress" class="form-label">호텔주소:</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="hotelAddress" name="hotelAddress" oninput="setHotelLocationBasedOnAddress(this.value)" required>
+                                    <button type="button" class="btn btn-secondary" onclick="execDaumPostcode()">주소찾기</button>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="hotelInfo" class="form-label">호텔상세:</label>
+                                <textarea class="form-control" id="hotelInfo" name="hotelInfo" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="hotelPhone" class="form-label">호텔전화:</label>
+                                <input type="text" class="form-control" id="hotelPhone" name="hotelPhone" required>
+                            </div>
+                            <div class="mb-3 mt-3">
+                                <label for="hotelCheckIn" class="form-label">호텔 체크인:</label>
+                                <select id="hotelCheckIn" name="hotelCheckIn" class="form-select">
+                                    <option value="00">00:00</option>
+                                    <option value="01">01:00</option>
+                                    <option value="02">02:00</option>
+                                    <option value="03">03:00</option>
+                                    <option value="04">04:00</option>
+                                    <option value="05">05:00</option>
+                                    <option value="06">06:00</option>
+                                    <option value="07">07:00</option>
+                                    <option value="08">08:00</option>
+                                    <option value="09">09:00</option>
+                                    <option value="10">10:00</option>
+                                    <option value="11">11:00</option>
+                                    <option value="12">12:00</option>
+                                    <option value="13">13:00</option>
+                                    <option value="14">14:00</option>
+                                    <option value="15">15:00</option>
+                                    <option value="16">16:00</option>
+                                    <option value="17">17:00</option>
+                                    <option value="18">18:00</option>
+                                    <option value="19">19:00</option>
+                                    <option value="20">20:00</option>
+                                    <option value="21">21:00</option>
+                                    <option value="22">22:00</option>
+                                    <option value="23">23:00</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="hotelCheckOut" class="form-label">호텔 체크아웃:</label>
+                                <select id="hotelCheckOut" name="hotelCheckOut" class="form-select">
+                                    <option value="00">00:00</option>
+                                    <option value="01">01:00</option>
+                                    <option value="02">02:00</option>
+                                    <option value="03">03:00</option>
+                                    <option value="04">04:00</option>
+                                    <option value="05">05:00</option>
+                                    <option value="06">06:00</option>
+                                    <option value="07">07:00</option>
+                                    <option value="08">08:00</option>
+                                    <option value="09">09:00</option>
+                                    <option value="10">10:00</option>
+                                    <option value="11">11:00</option>
+                                    <option value="12">12:00</option>
+                                    <option value="13">13:00</option>
+                                    <option value="14">14:00</option>
+                                    <option value="15">15:00</option>
+                                    <option value="16">16:00</option>
+                                    <option value="17">17:00</option>
+                                    <option value="18">18:00</option>
+                                    <option value="19">19:00</option>
+                                    <option value="20">20:00</option>
+                                    <option value="21">21:00</option>
+                                    <option value="22">22:00</option>
+                                    <option value="23">23:00</option>
+                                </select>
+                            </div>
+                            <!-- 새 이미지 업로드 및 미리보기 -->
+                            <div>
+                                <label for="newImageFiles">본사이미지:</label>
+                                <input type="file" id="newImageFiles" name="imageFiles" multiple accept="image/*" onchange="validateImage(event)" required>
+                                <small>PNG, JPG, GIF, BMP, JFIF, WEBP만 업로드 가능합니다. 최대 5장까지 선택할 수 있습니다.</small>
+                            </div>
+
+                            <!-- 미리보기 이미지 표시 -->
+                            <div id="imagePreviewContainer">
+                                <!-- 미리보기가 여기 나타날 것입니다 -->
+                            </div>
+
+                            <div style="text-align: right">
+                                <button type="submit" class="btn btn-primary">등록</button>
+                            </div>
+
+                        </form>
+                    </div>
 
                     <!--daum지도 API를 연동-->
                     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>

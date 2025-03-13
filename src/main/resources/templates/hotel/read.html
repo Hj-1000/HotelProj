@@ -316,7 +316,7 @@
                             <div class="text-end mb-3" style="margin-top: -50px; padding-right: -10px">
                                 <div>
                                     <!-- 지도 열기/닫기 버튼 -->
-                                    <button class="btn btn-outline-primary" id="mapToggleBtn1" onclick="toggleMap1()" th:if="${#authentication.name != 'anonymousUser'}" style="width: 120px; margin-right: 10px">
+                                    <button class="btn btn-outline-success" id="mapToggleBtn1" onclick="toggleMap1()" th:if="${#authentication.name != 'anonymousUser'}" style="width: 120px; margin-right: 10px">
                                         지도 열기
                                         <i class="bi bi-map"></i>
                                     </button>
@@ -337,7 +337,7 @@
                             <div class="text-end mb-3 me-3" th:if="${#authentication.name == 'anonymousUser'}" style="margin-top: -50px;">
                                 <div>
                                     <!-- 지도 열기/닫기 버튼 (비회원용) -->
-                                    <button class="btn btn-outline-primary" id="mapToggleBtn2" onclick="toggleMap2()" style="width: 120px;">
+                                    <button class="btn btn-outline-success" id="mapToggleBtn2" onclick="toggleMap2()" style="width: 120px;">
                                         지도 열기
                                         <i class="bi bi-map"></i>
                                     </button>
@@ -434,13 +434,13 @@
                             if (mapContainer.style.height === "0px") {
                                 mapContainer.style.height = "500px";  // 펼쳤을 때 높이 설정
                                 mapBtn1.innerHTML = '지도 닫기 <i class="bi bi-map-fill"></i>';
-                                mapBtn1.classList.remove("btn-outline-primary");
-                                mapBtn1.classList.add("btn-primary");
+                                mapBtn1.classList.remove("btn-outline-success");
+                                mapBtn1.classList.add("btn-success");
                             } else {
                                 mapContainer.style.height = "0px";  // 접었을 때 높이 설정
                                 mapBtn1.innerHTML = '지도 열기 <i class="bi bi-map"></i>';
-                                mapBtn1.classList.remove("btn-primary");
-                                mapBtn1.classList.add("btn-outline-primary");
+                                mapBtn1.classList.remove("btn-success");
+                                mapBtn1.classList.add("btn-outline-success");
                             }
                         }
 
@@ -470,10 +470,12 @@
                     <div style="width: 950px; margin: auto;">
                         <div style="margin-bottom: -20px">
                             <div class="form-section">
-                                <h4 style="margin-left: 24px">Q. AI 에게 물어보세요.</h4>
-                                <span style="margin-left: 24px">이런 질문은 어떠신가요?</span>
-                                <button class="queryButton btn btn-outline-primary btn-sm" data-query="관광지">주변 관광지를 알려줘!</button>
-                                <button class="queryButton btn btn-outline-primary btn-sm" data-query="맛집">주변 맛집을 알려줘!</button><br><br>
+                                <h4 style="margin-left: 24px">AI 에게 물어보세요 <i class="bi bi-robot"></i></h4>
+                                <div class="mb-2 mt-2">
+                                    <span style="margin-left: 24px;">이런 질문은 어떠신가요?</span>
+                                    <button class="queryButton btn btn-outline-primary btn-sm" data-query="관광지">주변 관광지를 알려줘!</button>
+                                    <button class="queryButton btn btn-outline-primary btn-sm" data-query="맛집">주변 맛집을 알려줘!</button>
+                                </div>
                                 <form id="generalQueryForm" style="display: flex; align-items: center; gap: 10px; margin-left: 24px;">
                                     <label for="generalQuery">직접 질문해보세요 :</label>
                                     <input type="hidden" id="hotelAddress" th:value="${hotelDTO.hotelAddress}">
@@ -546,13 +548,13 @@
             </div>
 
 
-            <!-- 객실 목록 -->
-            <div class="col ">
-                <div >
-                    <!-- Room List Section -->
-                    <section class="py-5">
-                        <div class="" style="width: 950px; margin: auto; padding: 15px">
-                            <h4 class="mb-3">객실 선택</h4>
+                <!-- 객실 목록 -->
+                <div class="col ">
+                    <div>
+                        <!-- Room List Section -->
+                        <section class="py-5">
+                            <div class="" style="width: 950px; margin: auto; padding: 15px">
+                                <h4 class="mb-3">객실 선택</h4>
 
                                 <th:block th:if="${rooms == null || #lists.isEmpty(rooms)}">
                                     <div style="text-align: center">
@@ -561,9 +563,8 @@
                                     </div>
                                 </th:block>
 
-                                <th:block th:unless="${rooms == null || #lists.isEmpty(rooms)}" >
+                                <th:block th:unless="${rooms == null || #lists.isEmpty(rooms)}">
                                     <div th:each="room : ${rooms}">
-
                                         <div class="room"
                                              th:classappend="${!room.roomStatus} ? 'sold-out' : ''"
                                              th:data-room-id="${room.roomId}"
@@ -571,7 +572,7 @@
                                              th:data-stay-end="${room.stayEnd}">
 
                                             <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 h-md-250 position-relative card-hover">
-                                                <!--이미지-->
+                                                <!-- 이미지 -->
                                                 <div class="col-5 d-none d-lg-block">
                                                     <div class="image-box">
                                                         <img th:if="${!#lists.isEmpty(room.roomImageDTOList)}"
@@ -582,26 +583,17 @@
                                                              src="/img/default_img.jpg"
                                                              class="bd-placeholder-img"
                                                              alt="Default Room Image">
-                                                        <!-- 예약 종료-->
-                                                        <!--<div class="sold-out-overlay" th:if="${!room.roomStatus}">
-                                                            예약 종료
-                                                        </div>-->
                                                     </div>
                                                 </div>
-                                                <!--방 설명-->
+                                                <!-- 방 설명 -->
                                                 <div class="col-7 p-4 d-flex flex-column position-static" style="padding-bottom: -15px">
                                                     <div class="d-flex justify-content-start gap-2 mb-1">
-                                                        <!-- 예약 가능 여부 -->
-                                                        <!--<span th:text="(${room.roomStatus} ? '예약 가능' : '예약 불가')"
-                                                              class="badge"
-                                                              th:classappend="${room.roomStatus} ? 'bg-success text-white' : 'bg-danger text-white'">
-                                                        </span>-->
                                                         <span th:text="${room.roomType}" class="badge bg-dark text-white"></span>
                                                     </div>
                                                     <h3 th:text="${room.roomName}" class="mb-2">객실명</h3>
                                                     <p th:text="'예약 기간 : ' + ${room.reservationStart} + ' ~ ' + ${room.reservationEnd}" class="card-text" style="margin-bottom: 1px"></p>
                                                     <p th:text="'숙박 기간 : ' + ${room.stayStart} + ' ~ ' + ${room.stayEnd}" class="card-text"></p>
-                                                    <div class="room-actions" style="margin-top: -5px; ">
+                                                    <div class="room-actions" style="margin-top: -5px;">
                                                         <p class="room-price mb-0"
                                                            th:text="${room.formattedRoomPrice != null ? room.formattedRoomPrice + ' ' + 'KRW' : '가격 미정'}"></p>
                                                         <button class="btn btn-book btn-dark" style="width: 110px"
@@ -617,11 +609,9 @@
                                     </div>
                                 </th:block>
 
+
                             </div>
                         </section>
-
-
-
                     </div>
                 </div>
             </div>
@@ -652,411 +642,6 @@
 
 
 <!-- JavaScript -->
-<!--<script>
-
-    /* 나중에 삭제하기 */
-    function showDetailAlert() {
-        alert("아직 준비중인 서비스입니다.");
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
-        function getFormattedDateTime(offsetDays = 0) {
-            let now = new Date();
-            now.setDate(now.getDate() + offsetDays);
-            now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); // 시간대 보정
-            return now.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:mm" 형식
-        }
-
-        let checkInInput = document.getElementById("checkInDate");
-        let checkOutInput = document.getElementById("checkOutDate");
-
-        if (checkInInput) {
-            checkInInput.value = getFormattedDateTime();
-        }
-        if (checkOutInput) {
-            checkOutInput.value = getFormattedDateTime(1); // 하루 뒤 기본값
-        }
-
-        checkInInput.addEventListener("change", function () {
-            let checkInDate = new Date(checkInInput.value);
-            let minCheckOutDate = new Date(checkInDate);
-            minCheckOutDate.setDate(minCheckOutDate.getDate() + 1);
-            checkOutInput.min = minCheckOutDate.toISOString().slice(0, 16);
-        });
-    });
-
-    let reservationModal = $("#reservationModal");
-
-    document.addEventListener("DOMContentLoaded", function () {
-        reservationModal = new bootstrap.Modal(document.getElementById('reservationModal')); // 모달 초기화
-        addReservationButtonEvent(); // 예약 버튼 이벤트 추가
-        updateRoomReservationStatus(); // 방 예약 상태 업데이트
-
-        // 체크인 & 체크아웃 날짜 변경 시 숙박일과 총 비용 계산
-        const checkInInput = document.getElementById("checkInDate");
-        const checkOutInput = document.getElementById("checkOutDate");
-
-        checkInInput.addEventListener("change", updateCheckOutMinDate);
-        checkOutInput.addEventListener("change", calculateStayAndPrice);
-    });
-
-    function goToRoomDetail(button) {
-        let roomId = button.getAttribute("data-room-id");
-        if (roomId) {
-            window.location.href = `/room/${roomId}`;
-        }
-    }
-
-    /* 비로그인 , 로그인 예외처리 */
-    /*function addReservationButtonEvent(parentElement = document) {
-        parentElement.querySelectorAll('.btn-book').forEach(button => {
-            if (!button.hasAttribute("data-event-added")) { // 중복 방지
-                button.setAttribute("data-event-added", "true");
-
-                button.addEventListener("click", function (e) {
-                    if (!isLoggedIn) {
-                        alert("로그인이 필요합니다.");
-                        window.location.href = "/login";
-                        return;
-                    }
-
-                    const roomCard = button.closest(".room-card");
-                    if (!roomCard) {
-                        console.error(" Error: Room card element not found.");
-                        return;
-                    }
-
-                    const roomId = roomCard.dataset.roomId;
-                    if (!roomId) {
-                        console.error("Error: Room ID not found.");
-                        return;
-                    }
-
-                    console.log("예약 버튼 클릭됨 - Room ID:", roomId);
-
-                    const roomPriceElement = roomCard.querySelector(".room-price");
-                    if (!roomPriceElement) {
-                        console.error(" Error: Room price element not found.");
-                        return;
-                    }
-
-                    const roomPrice = roomPriceElement.innerText;
-                    const stayStart = roomCard.dataset.stayStart;
-                    const stayEnd = roomCard.dataset.stayEnd;
-
-                    //  디버깅 추가
-                    console.log(" 예약 버튼 클릭됨");
-                    console.log("Room ID:", roomId);
-                    console.log("Room Price:", roomPrice);
-                    console.log("체크인 가능 날짜:", stayStart);
-                    console.log("체크아웃 가능 날짜:", stayEnd);
-
-                    document.getElementById("roomId").value = roomId;
-                    document.getElementById("totalPrice").value = roomPrice;
-
-                    const checkInInput = document.getElementById("checkInDate");
-                    const checkOutInput = document.getElementById("checkOutDate");
-                    const reservationCount = document.getElementById("reservationCount");
-                    const recommendedText = document.getElementById("recommendedCountText");
-
-                    checkInInput.min = stayStart;
-                    checkInInput.max = stayEnd;
-                    checkOutInput.min = stayStart;
-                    checkOutInput.max = stayEnd;
-
-                    checkInInput.removeEventListener("change", updateCheckOutMinDate);
-                    checkInInput.addEventListener("change", updateCheckOutMinDate);
-
-                    const roomType = roomCard.querySelector(".badge.bg-dark").innerText.trim();
-
-                    // 객실 유형별 최대 인원 및 추천 인원 표시
-                    let maxPeople = getMaxPeopleByRoomType(roomType);
-                    let recommendedTextValue = getRecommendedTextByRoomType(roomType);
-
-                    // 기존 옵션 제거
-                    reservationCount.innerHTML = "";
-
-                    // 새로운 옵션 추가
-                    for (let i = 1; i <= maxPeople; i++) {
-                        let option = document.createElement("option");
-                        option.value = i;
-                        option.text = `${i}명`;
-                        reservationCount.appendChild(option);
-                    }
-
-                    // 추천 인원 텍스트 업데이트
-                    recommendedText.innerText = recommendedTextValue;
-
-                    //  모달이 제대로 열리는지 확인
-                    console.log(" 예약 모달 열기");
-                    reservationModal.show();
-                });
-            }
-        });
-    }*/
-
-    function getMaxPeopleByRoomType(roomType) {
-        const roomCapacity = {
-            "Single": 1,
-            "Double": 2,
-            "Suite": 4,
-            "Deluxe": 5,
-            "Family": 6
-        };
-        return roomCapacity[roomType] || 1;
-    }
-
-    function getRecommendedTextByRoomType(roomType) {
-        const recommendedTextMap = {
-            "Single": "(추천 인원 : 1명)",
-            "Double": "(추천 인원 : 1~2명)",
-            "Suite": "(추천 인원 : 2~4명)",
-            "Deluxe": "(추천 인원 : 4~5명)",
-            "Family": "(추천 인원 : 4~6명)"
-        };
-        return recommendedTextMap[roomType] || "";
-    }
-
-    // 체크인 날짜 변경 시 체크아웃 최소 날짜 설정
-    function updateCheckOutMinDate() {
-        const checkInInput = document.getElementById("checkInDate");
-        const checkOutInput = document.getElementById("checkOutDate");
-
-        let checkInDate = new Date(checkInInput.value);
-        if (!isNaN(checkInDate.getTime())) {
-            let minCheckOutDate = new Date(checkInDate);
-            minCheckOutDate.setDate(minCheckOutDate.getDate() + 1); // 최소 1박 이후 가능
-            let minCheckOutStr = minCheckOutDate.toISOString().slice(0, 16); // YYYY-MM-DDTHH:mm 형식
-
-            checkOutInput.min = minCheckOutStr;
-
-            // 체크아웃 날짜가 체크인 날짜보다 이전이면 자동 변경
-            let selectedCheckOutDate = new Date(checkOutInput.value);
-            if (selectedCheckOutDate < minCheckOutDate) {
-                checkOutInput.value = minCheckOutStr;
-            }
-        }
-
-        calculateStayAndPrice(); // 숙박일 및 총 비용 계산
-    }
-
-    // 체크아웃 날짜 선택 시 체크인 이후인지 검증
-    function validateCheckOutDate() {
-        const checkInInput = document.getElementById("checkInDate");
-        const checkOutInput = document.getElementById("checkOutDate");
-
-        let checkInDate = new Date(checkInInput.value);
-        let checkOutDate = new Date(checkOutInput.value);
-
-        if (!isNaN(checkInDate.getTime()) && !isNaN(checkOutDate.getTime()) && checkOutDate <= checkInDate) {
-            let minCheckOutDate = new Date(checkInDate);
-            minCheckOutDate.setDate(minCheckOutDate.getDate() + 1);
-            checkOutInput.value = minCheckOutDate.toISOString().slice(0, 16);
-        }
-
-        calculateStayAndPrice(); // 숙박일 및 총 비용 계산
-    }
-
-    document.getElementById("checkInDate").addEventListener("change", updateCheckOutMinDate);
-    document.getElementById("checkOutDate").addEventListener("change", validateCheckOutDate);
-
-    // 페이지 로드 시 체크아웃 최소값 설정
-    updateCheckOutMinDate();
-
-    /* 체크인 & 체크아웃 날짜 변경 시 자동으로 숙박일과 총 금액 계산*/
-
-    function calculateStayAndPrice() {
-        const checkInInput = document.getElementById("checkInDate");
-        const checkOutInput = document.getElementById("checkOutDate");
-        const totalPriceInput = document.getElementById("totalPrice");
-        const dayCountInput = document.getElementById("dayCount");
-
-        const checkInDate = new Date(checkInInput.value);
-        const checkOutDate = new Date(checkOutInput.value);
-
-        if (!isNaN(checkInDate.getTime()) && !isNaN(checkOutDate.getTime()) && checkOutDate > checkInDate) {
-            // 총 숙박 일수 계산
-            const stayDays = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
-
-            // 몇 박 몇 일 계산
-            const nights = stayDays;  // 박 수
-            const days = stayDays + 1;  // 실제 숙박일은 박 + 1일
-
-            // 몇 박 몇 일 형식으로 출력
-            dayCountInput.value = `${nights}박 ${days}일`;
-
-            // 객실 가격 가져오기
-            const roomPriceElement = document.querySelector(".room-card[data-room-id='" + document.getElementById("roomId").value + "'] .room-price");
-
-            if (roomPriceElement) {
-                const roomPriceText = roomPriceElement.innerText.replace(/[^\d]/g, ""); // 숫자만 추출
-                const roomPrice = parseInt(roomPriceText, 10);
-
-                if (!isNaN(roomPrice)) {
-                    const totalPrice = roomPrice * nights; // 1박 기준 가격 * 박 수
-                    totalPriceInput.value = totalPrice.toLocaleString() + " KRW";
-                } else {
-                    totalPriceInput.value = "가격 오류";
-                }
-            } else {
-                totalPriceInput.value = "객실 가격 정보 없음";
-            }
-        } else {
-            dayCountInput.value = "";
-            totalPriceInput.value = "";
-        }
-    }
-
-
-    document.addEventListener("DOMContentLoaded", function () {
-        document.getElementById("confirmReservation").addEventListener("click", function () {
-            let roomId = parseInt(document.getElementById("roomId").value, 10);
-            let checkInDate = document.getElementById("checkInDate").value;
-            let checkOutDate = document.getElementById("checkOutDate").value;
-            let count = parseInt(document.getElementById("reservationCount").value, 10);
-
-            if (!roomId || !checkInDate || !checkOutDate || !count) {
-                alert("예약 정보를 모두 입력해주세요.");
-                return;
-            }
-
-            fetch("/reservation/register", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    roomId: roomId,
-                    checkInDate: checkInDate,
-                    checkOutDate: checkOutDate,
-                    count: count
-                })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert("예약이 완료되었습니다!");
-                        location.reload();
-                    } else {
-                        alert("예약 실패: " + data.message);
-                    }
-                })
-                .catch(error => console.error("예약 요청 중 오류 발생:", error));
-        });
-    });
-
-    // 예약 상태 업데이트 함수
-    function updateRoomReservationStatus(parentElement = document) {
-        const today = new Date();
-
-        parentElement.querySelectorAll('.room-card').forEach(roomCard => {
-            const stayEnd = roomCard.dataset.stayEnd;
-
-            // stayEnd 값이 유효한지 확인
-            if (!stayEnd) {
-                console.warn(`Invalid stayEnd for roomCard:`, roomCard);
-                return;
-            }
-
-            const reservationEndDate = new Date(stayEnd);
-
-            // 예약기간이 지난 경우에만 표시
-            if (reservationEndDate < today) {
-                const overlay = roomCard.querySelector('.sold-out-overlay');
-                if (overlay) {
-                    overlay.style.display = 'flex';
-                }
-
-                // 예약 불가 버튼 처리
-                const button = roomCard.querySelector('.btn-book');
-                button.textContent = '예약 불가';
-                button.disabled = true;
-                button.classList.remove('btn-dark');
-                button.classList.add('btn-danger', 'text-bold');
-            }
-        });
-    }
-
-    // 모달 닫힐 때 강제 초기화
-    document.getElementById('reservationModal').addEventListener('hidden.bs.modal', function () {
-        const backdrop = document.querySelector('.modal-backdrop');
-        if (backdrop) {
-            backdrop.remove();
-        }
-        document.body.classList.remove('modal-open');
-        document.body.style.removeProperty('overflow');
-        document.body.style.removeProperty('padding-right');
-    });
-
-    // 'More' 버튼과 현재 페이지 변수
-    const moreButton = document.getElementById('more-btn');
-    let currentPage = 0;
-
-    // 'More' 버튼 클릭 이벤트 리스너 추가
-    moreButton.addEventListener('click', function () {
-        currentPage++;
-        // 서버로 AJAX 요청
-        fetch(`/roomList/data?page=${currentPage}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Fetched data:', data); // 받아온 데이터를 확인
-
-                const roomList = document.getElementById('room-list');
-
-                data.rooms.forEach(room => {
-                    if (document.querySelector(`.room-card[data-room-id="${room.roomId}"]`)) {
-                        console.warn(`Room with ID ${room.roomId} is already added. Skipping.`);
-                        return;
-                    }
-
-                    const roomCard = `
-                <div class="col-md-4">
-                    <div class="room-card" data-room-id="${room.roomId}" data-stay-start="${room.stayStart}" data-stay-end="${room.stayEnd}">
-                        <div class="room-image">
-                            <img src="${room.roomImageDTOList.length > 0 ? '/upload/' + room.roomImageDTOList[0].imagePath : '/img/default_img.jpg'}" class="card-img-top" alt="Room Image">
-                            <div class="sold-out-overlay" style="display: ${room.roomStatus ? 'none' : 'flex'}">
-                                예약 종료
-                            </div>
-                        </div>
-                        <div class="room-text">
-                            <div class="d-flex justify-content-start gap-2 mb-3">
-                                <span class="badge ${room.roomStatus ? 'bg-success text-white' : 'bg-danger text-white'}">
-                                    ${room.roomStatus ? '예약 가능' : '예약 불가'}
-                                </span>
-                                <span class="badge bg-dark text-white">${room.roomType}</span>
-                            </div>
-                            <h5 class="card-title">${room.roomName}</h5>
-                            <p class="card-text">예약 기간 : ${room.reservationStart} ~ ${room.reservationEnd}</p>
-                            <p class="card-text">숙박 기간 : ${room.stayStart} ~ ${room.stayEnd}</p>
-                            <div class="room-actions">
-                                <p class="room-price mb-0">${room.formattedRoomPrice ? room.formattedRoomPrice +  ' ' + '~' : '가격 미정'}</p>
-                                <button class="btn btn-book ${room.roomStatus ? 'btn-dark' : 'btn-danger'}" ${!room.roomStatus ? 'disabled' : ''}>
-                                    ${room.roomStatus ? '예약하기' : '예약 불가'}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
-                    roomList.insertAdjacentHTML('beforeend', roomCard);
-                });
-
-                if (data.isLastPage) {
-                    moreButton.style.display = 'none';
-                }
-
-                addReservationButtonEvent(roomList);
-            })
-            .catch(error => {
-                console.error('Error fetching more rooms:', error);
-                moreButton.textContent = 'Error';
-                moreButton.disabled = true;
-            });
-    });
-
-</script>-->
 <script>
     // OpenAI 답변 처리
     function sendQuery(modifiedQuery) {
@@ -1238,82 +823,7 @@
         });
     });
 
-
-    // 'More' 버튼과 현재 페이지 변수
-    const moreButton = document.getElementById('more-btn');
-    let currentPage = 0;
-
-    // 'More' 버튼 클릭 이벤트 리스너 추가
-    moreButton.addEventListener('click', function () {
-        currentPage++;
-        // 서버로 AJAX 요청
-        fetch(`/roomList/data?page=${currentPage}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Fetched data:', data); // 받아온 데이터를 확인
-
-                const roomList = document.getElementById('room-list');
-
-                data.rooms.forEach(room => {
-                    if (document.querySelector(`.room-card[data-room-id="${room.roomId}"]`)) {
-                        console.warn(`Room with ID ${room.roomId} is already added. Skipping.`);
-                        return;
-                    }
-
-                    const roomCard = `
-                <div class="col-md-4">
-                    <div class="room-card" data-room-id="${room.roomId}" data-stay-start="${room.stayStart}" data-stay-end="${room.stayEnd}">
-                        <div class="room-image">
-                            <img src="${room.roomImageDTOList.length > 0 ? '/upload/' + room.roomImageDTOList[0].imagePath : '/img/default_img.jpg'}" class="card-img-top" alt="Room Image">
-                            <div class="sold-out-overlay" style="display: ${room.roomStatus ? 'none' : 'flex'}">
-                                예약 종료
-                            </div>
-                        </div>
-                        <div class="room-text">
-                            <div class="d-flex justify-content-start gap-2 mb-3">
-                                <span class="badge ${room.roomStatus ? 'bg-success text-white' : 'bg-danger text-white'}">
-                                    ${room.roomStatus ? '예약 가능' : '예약 불가'}
-                                </span>
-                                <span class="badge bg-dark text-white">${room.roomType}</span>
-                            </div>
-                            <h5 class="card-title">${room.roomName}</h5>
-                            <p class="card-text">예약 기간 : ${room.reservationStart} ~ ${room.reservationEnd}</p>
-                            <p class="card-text">숙박 기간 : ${room.stayStart} ~ ${room.stayEnd}</p>
-                            <div class="room-actions">
-                                <p class="room-price mb-0">${room.formattedRoomPrice ? room.formattedRoomPrice +  ' ' + '~' : '가격 미정'}</p>
-                                <button class="btn btn-book ${room.roomStatus ? 'btn-dark' : 'btn-danger'}" ${!room.roomStatus ? 'disabled' : ''}>
-                                    ${room.roomStatus ? '예약하기' : '예약 불가'}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
-                    roomList.insertAdjacentHTML('beforeend', roomCard);
-                });
-
-                if (data.isLastPage) {
-                    moreButton.style.display = 'none';
-                }
-
-                addReservationButtonEvent(roomList);
-            })
-            .catch(error => {
-                console.error('Error fetching more rooms:', error);
-                moreButton.textContent = 'Error';
-                moreButton.disabled = true;
-            });
-    });
-
 </script>
-
-
-
-
 
 </div>
 <div th:replace="~{fragments/footer::footer}"></div>

@@ -10,8 +10,22 @@ document.addEventListener("DOMContentLoaded", function () {
     form.addEventListener("submit", function () {
         hotelLocationInput.removeAttribute("disabled");
     });
-
 })
+
+//담당자 변경 못하도록 막아두는 코드
+document.addEventListener("DOMContentLoaded", function () {
+    const hotelLocationInput = document.getElementById("hotelEmail");
+    const form = document.querySelector("form");
+
+    // 사용자가 직접 변경하지 못하도록 비활성화
+    hotelLocationInput.disabled = true;
+
+    // 폼 제출 시 roomStatus 값이 서버로 정상적으로 전송되도록 disabled 해제
+    form.addEventListener("submit", function () {
+        hotelLocationInput.removeAttribute("disabled");
+    });
+})
+
 
 document.addEventListener('keydown', function(event) {
     if ((event.keyCode || event.which) === 13) {

@@ -304,63 +304,166 @@
             <!-- 목록 영역 -->
             <div class="card">
                 <div class="card-body">
-                    <table class="table table-bordered text-center" id="hotelTable">
-                        <thead class="table-dark">
-                        <tr>
-                            <th scope="col">이미지</th>
-                            <th scope="col">객실 ID</th>
-                            <th scope="col">객실 이름</th>
-                            <th scope="col">객실 타입</th>
-                            <th scope="col">가격</th>
-                            <th scope="col">상태</th>
-                            <th scope="col">예약 기간</th>
-                            <th scope="col">숙박 기간</th>
-                            <th scope="col">기능</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="room : ${rooms}">
-                            <!-- 이미지 -->
-                            <td class="align-middle text-center">
-                                <img th:if="${room.roomImageDTOList != null and !room.roomImageDTOList.isEmpty()}"
-                                     th:src="@{'/upload/' + ${room.roomImageDTOList[0].imagePath}}"
-                                     alt="Room Image"
-                                     class="room-image" width="100px">
-                                <span th:if="${room.roomImageDTOList == null or room.roomImageDTOList.isEmpty()}">
-                                    <img src="/img/default_img.jpg" width="100px">
-                                </span>
-                            </td>
 
-
-                            <!-- 나머지 -->
-                            <td class="align-middle text-center" th:text="${room.roomId}"></td>
-                            <td class="align-middle text-center" th:text="${room.roomName}"></td>
-                            <td class="align-middle text-center" th:text="${room.roomType}"></td>
-                            <td class="align-middle text-center" th:text="${room.roomPrice} + ' KRW'"></td>
-                            <td class="align-middle text-center">
-                                <span th:if="${room.roomStatus != null and room.roomStatus}" class="badge bg-success">Available</span>
-                                <span th:if="${room.roomStatus == null or !room.roomStatus}" class="badge bg-danger">Unavailable</span>
-                            </td>
-                            <td class="align-middle text-center" th:text="${room.reservationStart} + ' ~ ' + ${room.reservationEnd}">예약 기간 없음</td>
-                            <td class="align-middle text-center" th:text="${room.stayStart} + ' ~ ' + ${room.stayEnd}">숙박 기간 없음</td>
-                            <td class="align-middle text-center">
-                                <div class="button-group">
-                                    <a th:href="@{/manager/room/{roomId}(roomId=${room.roomId})}" class="btn btn-info btn-sm"><i class="bi bi-eye"></i></a>
-                                    <a th:href="@{/manager/room/update/{roomId}(roomId=${room.roomId})}" class="btn btn-warning btn-sm"><i class="bi bi-pen"></i></a>
-                                    <a th:href="@{/manager/room/delete/{roomId}(roomId=${room.roomId})}"
-                                       onclick="return confirm('진짜로 삭제하시겠습니까?')"
-                                       class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></a>
-                                </div>
-                            </td>
-                        </tr>
-                        </tbody>
-
-                    </table>
-
-                    <th:block th:if="${#lists.isEmpty(rooms)}">
-                        <div style="text-align: center">
-                            <p>등록된 객실이 없습니다.</p>
+                    <!-- 객실 목록이 없을 때 표시 -->
+                    <th:block th:if="${list.totalElements == 0}">
+                        <div class="alert alert-warning text-center no-room-message">
+                            현재 만들어진 객실이 없습니다.
                         </div>
+                    </th:block>
+
+                    <!-- 객실 목록 테이블 -->
+                    <th:block th:unless="${list.totalElements == 0}">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-dark">
+                            <tr>
+                                <th scope="col">이미지</th>
+                                <th scope="col">객실 ID</th>
+                                <th scope="col">지사명</th>
+                                <th scope="col">객실 이름</th>
+                                <th scope="col">객실 타입</th>
+                                <th scope="col">가격</th>
+                                <th scope="col">상태</th>
+                                <th scope="col">예약 기간</th>
+                                <th scope="col">숙박 기간</th>
+                                <th scope="col">기능</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="room : ${list.content}">
+                                <!-- 이미지 -->
+                                <td class="align-middle text-center">
+                                    <img th:if="${room.roomImageDTOList != null and !room.roomImageDTOList.isEmpty()}"
+                                         th:src="@{'/upload/' + ${room.roomImageDTOList[0].imagePath}}"
+                                         alt="Room Image"
+                                         class="room-image" width="100px">
+                                    <span th:if="${room.roomImageDTOList == null or room.roomImageDTOList.isEmpty()}" width="100px">이미지 없음</span>
+                                </td>
+
+                                <!-- 나머지 -->
+                                <td class="align-middle text-center" th:text="${room.roomId}"></td>
+                                <td class="align-middle text-center" th:text="${room.hotelName} ?: '없음'"></td>
+                                <td class="align-middle text-center" th:text="${room.roomName}"></td>
+                                <td class="align-middle text-center" th:text="${room.roomType}"></td>
+                                <td class="align-middle text-center" th:text="${room.formattedRoomPrice} + ' KRW'"></td>
+                                <td class="align-middle text-center">
+                                    <span th:if="${room.roomStatus != null and room.roomStatus}" class="badge bg-success">Available</span>
+                                    <span th:if="${room.roomStatus == null or !room.roomStatus}" class="badge bg-danger">Unavailable</span>
+                                </td>
+                                <td class="align-middle text-center" th:text="${room.reservationStart} + ' ~ ' + ${room.reservationEnd}">예약 기간 없음</td>
+                                <td class="align-middle text-center" th:text="${room.stayStart} + ' ~ ' + ${room.stayEnd}">숙박 기간 없음</td>
+                                <td class="align-middle text-center">
+                                    <div class="button-group">
+                                        <a th:href="@{/manager/room/{roomId}(roomId=${room.roomId})}" class="btn btn-info btn-sm"><i class="bi bi-eye"></i></a>
+                                        <a th:href="@{/manager/room/update/{roomId}(roomId=${room.roomId})}" class="btn btn-warning btn-sm"><i class="bi bi-pen"></i></a>
+                                        <a th:href="@{/manager/room/delete/{roomId}(roomId=${room.roomId})}"
+                                           onclick="return confirm('정말로 삭제하시겠습니까?')"
+                                           class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </th:block>
+
+                    <th:block th:unless="${list.totalElements == 0}">
+                        <!-- 페이지네이션 -->
+                        <!-- 관리자용 -->
+                        <div th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="d-flex justify-content-center">
+                            <ul class="pagination">
+                                <!-- 처음 페이지 -->
+                                <li class="page-item" th:if="${currentPage > 1}">
+                                    <a class="page-link" th:href="@{/admin/hotel/read(hotelId=${hotelDTO.hotelId}, page=${startPage - 1})}">처음</a>
+                                </li>
+
+                                <!-- 이전 페이지 -->
+                                <li class="page-item" th:if="${currentPage > 1}">
+                                    <a class="page-link" th:href="@{/admin/hotel/read(hotelId=${hotelDTO.hotelId}, page=${currentPage - 1})}">이전</a>
+                                </li>
+
+                                <!-- 페이지 번호 -->
+                                <th:block th:each="page : ${#numbers.sequence(startPage, endPage)}">
+                                    <li class="page-item" th:classappend="${currentPage == page} ? 'active'">
+                                        <a class="page-link" th:href="@{/admin/hotel/read(hotelId=${hotelDTO.hotelId}, page=${page - 1})}" th:text="${page}"></a>
+                                    </li>
+                                </th:block>
+
+                                <!-- 다음 페이지 -->
+                                <li class="page-item" th:if="${currentPage < lastPage}">
+                                    <a class="page-link" th:href="@{/admin/hotel/read(hotelId=${hotelDTO.hotelId}, page=${currentPage + 1})}">다음</a>
+                                </li>
+
+                                <!-- 마지막 페이지 -->
+                                <li class="page-item" th:if="${currentPage < lastPage}">
+                                    <a class="page-link" th:href="@{/admin/hotel/read(hotelId=${hotelDTO.hotelId}, page=${endPage - 1})}">마지막</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- 호텔장용 -->
+                        <div th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="d-flex justify-content-center">
+                            <ul class="pagination">
+                                <!-- 처음 페이지 -->
+                                <li class="page-item" th:if="${currentPage > 1}">
+                                    <a class="page-link" th:href="@{/chief/hotel/read(hotelId=${hotelDTO.hotelId}, page=${startPage - 1})}">처음</a>
+                                </li>
+
+                                <!-- 이전 페이지 -->
+                                <li class="page-item" th:if="${currentPage > 1}">
+                                    <a class="page-link" th:href="@{/chief/hotel/read(hotelId=${hotelDTO.hotelId}, page=${currentPage - 1})}">이전</a>
+                                </li>
+
+                                <!-- 페이지 번호 -->
+                                <th:block th:each="page : ${#numbers.sequence(startPage, endPage)}">
+                                    <li class="page-item" th:classappend="${currentPage == page} ? 'active'">
+                                        <a class="page-link" th:href="@{/chief/hotel/read(hotelId=${hotelDTO.hotelId}, page=${page - 1})}" th:text="${page}"></a>
+                                    </li>
+                                </th:block>
+
+                                <!-- 다음 페이지 -->
+                                <li class="page-item" th:if="${currentPage < lastPage}">
+                                    <a class="page-link" th:href="@{/chief/hotel/read(hotelId=${hotelDTO.hotelId}, page=${currentPage + 1})}">다음</a>
+                                </li>
+
+                                <!-- 마지막 페이지 -->
+                                <li class="page-item" th:if="${currentPage < lastPage}">
+                                    <a class="page-link" th:href="@{/chief/hotel/read(hotelId=${hotelDTO.hotelId}, page=${endPage - 1})}">마지막</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- 매니저용 -->
+                        <div th:if="${#authorization.expression('hasRole(''MANAGER'')')}" class="d-flex justify-content-center">
+                            <ul class="pagination">
+                                <!-- 처음 페이지 -->
+                                <li class="page-item" th:if="${currentPage > 1}">
+                                    <a class="page-link" th:href="@{/manager/hotel/read(hotelId=${hotelDTO.hotelId}, page=${startPage - 1})}">처음</a>
+                                </li>
+
+                                <!-- 이전 페이지 -->
+                                <li class="page-item" th:if="${currentPage > 1}">
+                                    <a class="page-link" th:href="@{/manager/hotel/read(hotelId=${hotelDTO.hotelId}, page=${currentPage - 1})}">이전</a>
+                                </li>
+
+                                <!-- 페이지 번호 -->
+                                <th:block th:each="page : ${#numbers.sequence(startPage, endPage)}">
+                                    <li class="page-item" th:classappend="${currentPage == page} ? 'active'">
+                                        <a class="page-link" th:href="@{/manager/hotel/read(hotelId=${hotelDTO.hotelId}, page=${page - 1})}" th:text="${page}"></a>
+                                    </li>
+                                </th:block>
+
+                                <!-- 다음 페이지 -->
+                                <li class="page-item" th:if="${currentPage < lastPage}">
+                                    <a class="page-link" th:href="@{/manager/hotel/read(hotelId=${hotelDTO.hotelId}, page=${currentPage + 1})}">다음</a>
+                                </li>
+
+                                <!-- 마지막 페이지 -->
+                                <li class="page-item" th:if="${currentPage < lastPage}">
+                                    <a class="page-link" th:href="@{/manager/hotel/read(hotelId=${hotelDTO.hotelId}, page=${endPage - 1})}">마지막</a>
+                                </li>
+                            </ul>
+                        </div>
+
                     </th:block>
 
 

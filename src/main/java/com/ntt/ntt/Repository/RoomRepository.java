@@ -63,6 +63,8 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
 
     /* 특정 호텔 ID에 속한 방들을 페이징 처리후 조회*/
     Page<Room> findByHotelId_HotelId (Integer hotelId, Pageable pageable);
+    /* 페이징 없이 전체 데이터 가져오는 방식 2025-03-13 추가 */
+    List<Room> findByHotelId_HotelId(Integer hotelId);
 
     @Query("SELECT r.roomId FROM Room r WHERE r.hotelId.hotelId IN :hotelIds")
     List<Integer> findRoomIdsByHotelIds(@Param("hotelIds") List<Integer> hotelIds);
