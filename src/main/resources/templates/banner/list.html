@@ -53,23 +53,21 @@
             <table class="table table-bordered text-center">
                 <thead>
                 <tr>
-                    <th style="width: 25%">배너제목</th>
-<!--                    <th style="width: 15%">활성화</th>-->
-                    <!--      <th style="width: 15%">배너랭크</th>-->
-                    <th style="width: 60%">배너보기</th>
+                    <th style="width: 20%">배너제목</th>
+                    <th style="width: 15%">활성화</th>
+<!--                          <th style="width: 15%">배너랭크</th>-->
+                    <th style="width: 50%">배너보기</th>
                     <th style="width: 15%">삭제여부</th>
                 </tr>
                 </thead>
-                <tbody>
-                <tr th:if="${bannerDTOList == null or #lists.isEmpty(bannerDTOList)}">
-                    <td colspan="4" class="text-center">배너 이미지가 없습니다</td>
-                </tr>
-                <tr th:each="data : ${bannerDTOList}" th:if="${bannerDTOList != null and not #lists.isEmpty(bannerDTOList)}">
+                <tbody th:if="${bannerDTOList != null}">
+                <tr th:each="data, stat : ${bannerDTOList}">
                     <td th:text="${data.bannerTitle}"></td>
-<!--                    <td th:text="${data.bannerStatus ? '활성' : '비활성'}"></td>-->
+                    <td th:text="${data.bannerStatus ? '활성' : '비활성'}"></td>
                     <td>
-                        <div th:if="${data.bannerImageDTOList != null}" th:each="img : ${data.bannerImageDTOList}" class="banner-image-container">
-                            <img th:src="@{'/upload/' + ${img.imagePath}}" style="width: 400px; height:150px;"  alt="배너 이미지">
+                        <div th:if="${data.bannerImageDTOList != null}" th:each="img : ${data.bannerImageDTOList}">
+                            <!--                  <img th:src="@{'/upload/' + ${data.bannerImageDTOList.imagePath}}" width="300px" height="200px">-->
+                            <img th:src="@{'/upload/' + ${img.imagePath}}" width="300px" height="200px">
                         </div>
                     </td>
                     <td>
@@ -80,6 +78,29 @@
                     </td>
                 </tr>
                 </tbody>
+                <tr th:if="${bannerDTOList == null or #lists.isEmpty(bannerDTOList)}">
+                    <td colspan="4" class="text-center">배너 이미지가 없습니다</td>
+                </tr>
+<!--                <tbody>-->
+<!--                <tr th:if="${bannerDTOList == null or #lists.isEmpty(bannerDTOList)}">-->
+<!--                    <td colspan="4" class="text-center">배너 이미지가 없습니다</td>-->
+<!--                </tr>-->
+<!--                <tr th:each="data : ${bannerDTOList}" th:if="${bannerDTOList != null and not #lists.isEmpty(bannerDTOList)}">-->
+<!--                    <td th:text="${data.bannerTitle}"></td>-->
+<!--                    <td th:text="${data.bannerStatus ? '활성' : '비활성'}"></td>-->
+<!--                    <td>-->
+<!--                        <div th:if="${data.bannerImageDTOList != null}" th:each="img : ${data.bannerImageDTOList}" class="banner-image-container">-->
+<!--                            <img th:src="@{'/upload/' + ${img.imagePath}}" style="width: 400px; height:150px;"  alt="배너 이미지">-->
+<!--                        </div>-->
+<!--                    </td>-->
+<!--                    <td>-->
+<!--                        <form th:action="@{/banner/delete}" method="post" onsubmit="return confirm('정말로 삭제하시겠습니까?');">-->
+<!--                            <input type="hidden" name="bannerId" th:value="${data.bannerId}">-->
+<!--                            <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i></button>-->
+<!--                        </form>-->
+<!--                    </td>-->
+<!--                </tr>-->
+<!--                </tbody>-->
             </table>
             <div class="row mt-5">
                 <div class="col-2">
