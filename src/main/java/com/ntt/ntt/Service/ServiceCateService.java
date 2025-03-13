@@ -116,7 +116,15 @@ public class ServiceCateService{
         log.info("ServiceCate object after mapping: {}", serviceCate);
 
     }
+    //서비스 카테고리 목록
+    //ADMIN 사용할 카테고리의 전체목록
+    /*--------------------------------
+    함수명 : Page<ServiceCateDTO> list(Pageable page, String keyword, String searchType, Integer hotelId)
+    인수 : 조회할 페이지 정보
+    출력 : 해당 데이터들(list)과 page 정보를 전달
+    설명 : 요청한 페이지번호에 해당하는 데이터를 조회해서 전달
 
+    --------------------------------- */
 
     public Page<ServiceCateDTO> listByAdmin(Pageable page, String keyword, String searchType, Integer hotelId) {
         int currentPage = page.getPageNumber() - 1; // 0-based index
@@ -168,7 +176,7 @@ public class ServiceCateService{
     //서비스 카테고리 목록
     //MANAGER가 사용할 카테고리의 전체목록
     /*--------------------------------
-    함수명 : Page<ServiceCateDTO> list(Pageable page, String keyword, String searchType, Integer hotelId)
+    함수명 : Page<ServiceCateDTO> list(Pageable page, String keyword, String searchType, Integer hotelId, Integer memberId)
     인수 : 조회할 페이지 정보
     출력 : 해당 데이터들(list)과 page 정보를 전달
     설명 : 요청한 페이지번호에 해당하는 데이터를 조회해서 전달
@@ -221,7 +229,7 @@ public class ServiceCateService{
     //서비스 카테고리 목록
     //CHIEF 사용할 카테고리의 전체목록
     /*--------------------------------
-    함수명 : Page<ServiceCateDTO> list(Pageable page, String keyword, String searchType, Integer hotelId)
+    함수명 : Page<ServiceCateDTO> list(Pageable page, String keyword, String searchType, Integer hotelId, Integer memberId)
     인수 : 조회할 페이지 정보
     출력 : 해당 데이터들(list)과 page 정보를 전달
     설명 : 요청한 페이지번호에 해당하는 데이터를 조회해서 전달

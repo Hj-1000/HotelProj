@@ -380,6 +380,7 @@ public class ServiceOrderService {
 
 
     // 주문 정보를 수정
+    // 주문 정보를 수정
     public void updateOrder(ServiceOrderUpdateDTO updateDTO) {
         ServiceOrder serviceOrder = serviceOrderRepository.findById(updateDTO.getServiceOrderId())
                 .orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다. ID: " + updateDTO.getServiceOrderId()));
@@ -392,13 +393,19 @@ public class ServiceOrderService {
             ServiceOrderItem item = serviceOrderItemRepository.findById(itemDTO.getServiceOrderItemId())
                     .orElseThrow(() -> new IllegalArgumentException("주문 아이템을 찾을 수 없습니다. ID: " + itemDTO.getServiceOrderItemId()));
 
-            // 수량 업데이트
-            item.setCount(itemDTO.getCount());
+            // 상태가 CANCELED면 가격을 0원으로 설정
+            if (updateDTO.getServiceOrderStatus() == ServiceOrderStatus.CANCELED) {
+                item.setOrderPrice(0);
+            } else {
+                // 수량 업데이트
+                item.setCount(itemDTO.getCount());
 
-            // 가격 재계산
-            item.setOrderPrice(item.getServiceMenu().getServiceMenuPrice());
+                // 가격 재계산
+                item.setOrderPrice(item.getServiceMenu().getServiceMenuPrice() * item.getCount());
+            }
         }
     }
+
     // 주문 삭제
     public void deleteOrder(Integer serviceOrderId) {
         log.info("삭제하려고 서비스까지 들어온 serviceOrderId: " + serviceOrderId);
