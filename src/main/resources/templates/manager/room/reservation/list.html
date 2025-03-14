@@ -461,7 +461,7 @@
                 <label>예약마감 날짜:</label>
                 <input type="date" id="editReservationEnd" name="reservationEnd">
 
-                <button type="submit" class="btn btn-primary"><i class="bi bi-pen"></i></button>
+                <button type="submit" class="btn btn-primary">수정</button>
             </form>
         </div>
 
@@ -537,7 +537,7 @@
                 .then(data => {
                     alert(data);
 
-                    //  취소된 예약을 목록에서 즉시 제거 (tr 삭제)
+                    //  취소된 예약을 목록에서 즉시 제거
                     let targetButton = document.querySelector(`.cancel-approval-btn[data-reservation-id='${reservationId}']`);
                     if (targetButton) {
                         let targetRow = targetButton.closest("tr"); // 버튼이 속한 <tr> 찾기
@@ -983,7 +983,6 @@
         });
 
         /* 수정 모달 열기 */
-
         function openEditModal(roomId, reservationId, memberId, checkIn, checkOut, reservationEnd, isExpired, count) {
             console.log("모달 열기 함수 실행됨!", { roomId, reservationId, memberId, checkIn, checkOut, reservationEnd, isExpired, count });
 
@@ -1005,6 +1004,22 @@
             let editCount = document.getElementById("editCount");
             let editCountLabel = document.getElementById("editCountLabel");
             let editButton = document.querySelector(".btn-primary");
+
+            editReservationId.removeAttribute("disabled");
+            editMemberId.removeAttribute("disabled");
+            editMemberName.removeAttribute("disabled");
+            editMemberEmail.removeAttribute("disabled");
+            editCheckIn.removeAttribute("disabled");
+            editCheckOut.removeAttribute("disabled");
+            editCount.removeAttribute("disabled");
+            editReservationEnd.setAttribute("disabled", "true");
+
+            editCount.style.display = "block";  // 숨겨졌던 총 인원 선택 다시 보이기
+            editCountLabel.style.display = "block"; // 총 인원 선택 라벨 다시 보이기
+            editCount.setAttribute("required", "true"); // 필수 입력 복구
+
+            let hiddenInput = document.getElementById("editCountHidden");
+            if (hiddenInput) hiddenInput.remove(); // 기존 숨겨진 입력 필드 제거
 
             function formatDateTimeForInput(dateTime) {
                 if (!dateTime) return "";
@@ -1195,7 +1210,6 @@
         }
 
         /* 수정 모달 닫기 */
-
         function closeModal() {
             let modal = document.getElementById("editModal");
             if (modal) {
@@ -1205,7 +1219,6 @@
         }
 
         // 예약자 ID 변경 시 자동으로 이름 & 이메일 업데이트
-
         document.addEventListener("DOMContentLoaded", function () {
             document.getElementById("editMemberId").addEventListener("change", function () {
                 fetchMemberDetails(this.value, "edit");
@@ -1289,7 +1302,6 @@
         }
 
         /* 예약 등록 모달 열기 */
-
         function openRegisterModal(roomId, memberId = null) {
             let modal = document.getElementById("registerModal");
             if (!modal) {
@@ -1426,7 +1438,6 @@
         }
 
         /* 예약 등록 모달 닫기 */
-
         function closeRegisterModal() {
             let modal = document.getElementById("registerModal");
             if (modal) {
@@ -1436,7 +1447,6 @@
         }
 
         /* 검색기능 예외처리 alert */
-
         document.addEventListener("DOMContentLoaded", function () {
             document.getElementById("allRoomSearchForm").addEventListener("submit", function (event) {
                 let category = this.querySelector("select[name='category']").value;

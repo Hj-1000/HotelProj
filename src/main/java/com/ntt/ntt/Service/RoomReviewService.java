@@ -38,7 +38,7 @@ public class RoomReviewService {
     private final HotelRepository hotelRepository;
     private final MemberService memberService;
 
-    // 1. 리뷰 등록
+    // 리뷰 등록
     public RoomReviewDTO registerReview(RoomReviewDTO reviewDTO) {
         log.info("리뷰 등록 요청: {}", reviewDTO);
 
@@ -72,7 +72,7 @@ public class RoomReviewService {
         return RoomReviewDTO.fromEntity(savedReview);
     }
 
-    // 2. 특정 리뷰 조회
+    // 특정 리뷰 조회
     @Transactional(readOnly = true)
     public RoomReviewDTO getReviewById(Integer reviewId) {
         log.info("리뷰 조회 요청: reviewId={}", reviewId);
@@ -88,7 +88,7 @@ public class RoomReviewService {
         return RoomReviewDTO.fromEntity(roomReview);
     }
 
-    // 3. 특정 객실의 모든 리뷰 조회
+    // 특정 객실의 모든 리뷰 조회
     @Transactional(readOnly = true)
     public Page<RoomReviewDTO> getReviewsByRoomId(Integer roomId, int page, int size) {
         log.info(" getReviewsByRoomId 호출 - roomId: {}, page: {}, size: {}", roomId, page, size);
@@ -111,7 +111,7 @@ public class RoomReviewService {
         }
     }
 
-    // 4. 모든 리뷰 조회
+    // 모든 리뷰 조회
     public Page<RoomReviewDTO> getAllReviews(Pageable pageable, Authentication authentication) {
         // 로그인된 사용자의 memberId 가져오기
         Integer memberId = getLoggedInMemberId(authentication);
@@ -160,7 +160,7 @@ public class RoomReviewService {
         }
     }
 
-    // 5. 특정 객실의 최근 3개 리뷰 조회
+    // 특정 객실의 최근 3개 리뷰 조회
     @Transactional(readOnly = true)
     public List<RoomReviewDTO> getRecentReviewsByRoomId(Integer roomId) {
         log.info("객실 최근 리뷰 조회: roomId={}", roomId);
@@ -169,7 +169,7 @@ public class RoomReviewService {
                 .collect(Collectors.toList());
     }
 
-    // 6. 특정 회원이 작성한 리뷰 조회
+    // 특정 회원이 작성한 리뷰 조회
     @Transactional(readOnly = true)
     public List<RoomReviewDTO> getReviewsByMemberId(Integer memberId) {
         log.info("회원 리뷰 목록 조회: memberId={}", memberId);
@@ -223,14 +223,14 @@ public class RoomReviewService {
         }
     }
 
-    // 7. 객실 평균 평점 조회
+    // 객실 평균 평점 조회
     @Transactional(readOnly = true)
     public Double getAverageRatingByRoomId(Integer roomId) {
         log.info("객실 평균 평점 조회: roomId={}", roomId);
         return roomReviewRepository.findAverageRatingByRoom_RoomId(roomId);
     }
 
-    // 8. 특정 리뷰 수정
+    // 특정 리뷰 수정
     public RoomReviewDTO updateReview(Integer reviewId, RoomReviewDTO reviewDTO) {
         log.info("리뷰 수정 요청: reviewId={}, reviewDTO={}", reviewId, reviewDTO);
 
@@ -252,7 +252,7 @@ public class RoomReviewService {
         return RoomReviewDTO.fromEntity(savedReview);
     }
 
-    // 9. 특정 리뷰 삭제
+    // 특정 리뷰 삭제
     public void deleteReview(Integer reviewId) {
         log.info("리뷰 삭제 요청: reviewId={}", reviewId);
         RoomReview roomReview = roomReviewRepository.findById(reviewId)
@@ -262,7 +262,7 @@ public class RoomReviewService {
         log.info(" 리뷰 삭제 완료: reviewId={}", reviewId);
     }
 
-    // 10. 본인 리뷰인지 확인
+    // 본인 리뷰인지 확인
     public boolean isReviewOwner(Integer reviewId, String username) {
         RoomReview review = roomReviewRepository.findById(reviewId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 리뷰가 존재하지 않습니다."));
@@ -271,7 +271,7 @@ public class RoomReviewService {
     }
 
 
-    // 11. 호텔ID를 통하여 최신 리뷰 3개 가져오는 메서드
+    // 호텔ID를 통하여 최신 리뷰 3개 가져오는 메서드
     @Transactional(readOnly = true)
     public List<RoomReviewDTO> getLatestReviewsByHotelId(Integer hotelId) {
         log.info("객실 최근 리뷰 조회: roomId={}", hotelId);
@@ -281,7 +281,7 @@ public class RoomReviewService {
                 .collect(Collectors.toList());
     }
 
-    // 12. 호텔ID를 통하여 최신 리뷰 전부 가져오는 메서드
+    // 호텔ID를 통하여 최신 리뷰 전부 가져오는 메서드
     @Transactional(readOnly = true)
     public Page<RoomReviewDTO> getReviewsByHotelId(Integer hotelId, int page, int size) {
         log.info("DEBUG: getReviewsByHotelId 호출 - hotelId: {}, page: {}, size: {}", hotelId, page, size);
@@ -304,6 +304,7 @@ public class RoomReviewService {
         }
     }
 
+    // 로그인한 유저의 memberId를 조회
     private Integer getLoggedInMemberId(Authentication authentication) {
         // authentication이 null이 아니고, 인증된 사용자가 있는지 확인
         if (authentication == null || authentication.getPrincipal() == null) {

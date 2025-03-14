@@ -1,6 +1,8 @@
 package com.ntt.ntt.DTO;
 
 import com.ntt.ntt.Entity.RoomReview;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -16,6 +18,7 @@ public class RoomReviewDTO {
 
     private Integer rating;
 
+    @Size(max = 255, message = "리뷰 내용은 최대 255자까지 입력 가능합니다.")
     private String reviewText;
 
     private Integer roomId;

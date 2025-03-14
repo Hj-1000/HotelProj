@@ -317,8 +317,8 @@
         document.addEventListener("DOMContentLoaded", function () {
             // 이메일 공유 버튼 클릭 시 실행
             document.getElementById("shareEmail").addEventListener("click", function () {
-                let pageTitle = document.title; // 현재 페이지 제목 가져오기
-                let pageURL = window.location.href; // 현재 페이지 URL 가져오기
+                let pageTitle = document.title;
+                let pageURL = window.location.href;
                 let mailtoLink = `mailto:?subject=${encodeURIComponent(pageTitle)}&body=${encodeURIComponent(pageURL)}`;
 
                 // 사용자의 이메일 클라이언트 실행
@@ -327,7 +327,7 @@
 
             // URL 복사 버튼 클릭 시 실행
             document.getElementById("copyURL").addEventListener("click", function () {
-                let pageURL = window.location.href; // 현재 페이지의 URL 가져오기
+                let pageURL = window.location.href;
 
                 navigator.clipboard.writeText(pageURL).then(function () {
                     alert("URL이 복사되었습니다!");
