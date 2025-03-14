@@ -453,13 +453,13 @@
                             if (mapContainer.style.height === "0px") {
                                 mapContainer.style.height = "500px";  // 펼쳤을 때 높이 설정
                                 mapBtn2.innerHTML = '지도 닫기 <i class="bi bi-map-fill"></i>';
-                                mapBtn2.classList.remove("btn-outline-primary");
-                                mapBtn2.classList.add("btn-primary");
+                                mapBtn2.classList.remove("btn-outline-success");
+                                mapBtn2.classList.add("btn-success");
                             } else {
                                 mapContainer.style.height = "0px";  // 접었을 때 높이 설정
                                 mapBtn2.innerHTML = '지도 열기 <i class="bi bi-map"></i>';
-                                mapBtn2.classList.remove("btn-primary");
-                                mapBtn2.classList.add("btn-outline-primary");
+                                mapBtn2.classList.remove("btn-success");
+                                mapBtn2.classList.add("btn-outline-success");
                             }
                         }
                     </script>
@@ -540,12 +540,12 @@
                 </div>
 
 
-            <!--배너-->
-            <div style="margin: auto">
-                <div class="banner-img123-box">
-                    <img src="/img/NTT_GRAND_OPENING.png" class="banner-img123" width="100%">
+                <!--배너-->
+                <div style="margin: auto">
+                    <div class="banner-img123-box">
+                        <img src="/img/NTT_GRAND_OPENING.png" class="banner-img123" width="100%">
+                    </div>
                 </div>
-            </div>
 
 
                 <!-- 객실 목록 -->
@@ -644,6 +644,9 @@
 <!-- JavaScript -->
 <script>
     // OpenAI 답변 처리
+    var markers = [];      // 마커 배열
+    var infowindows = [];  // 인포윈도우 배열
+
     function sendQuery(modifiedQuery) {
         $('#generalResponse').html(`<hr><br>
     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-weight: bold;">
@@ -654,7 +657,7 @@
     </div>
     `);
 
-        // 기존 마커 제거
+        // 기존 마커 & 인포윈도우 제거
         removeAllMarkers();
 
         $.ajax({
@@ -668,9 +671,10 @@
                         .replace(/\n/g, "<br>")
                         .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
 
-                    $('#generalResponse').html('<hr><br><h4>A. 답변 :</h4><p><br>' + formattedMessage + '<br><br></p>');
+                    $('#generalResponse').html('<hr><br><h4>답변 <i class="bi bi-stars"></i></h4><p><br>' + formattedMessage + '<br><br></p>');
 
-                    // 지도에 새로운 지역을 추가
+                    // 기존 마커 & 인포윈도우 제거한 후 새로운 마커 추가
+                    removeAllMarkers();
                     extractLocationsAndMarkOnMap(resultMessage);
                 } else {
                     $('#generalResponse').html('<strong>오류:</strong> 예상하지 못한 응답 형식입니다.');
@@ -683,7 +687,9 @@
     }
 
     function extractLocationsAndMarkOnMap(responseText) {
-        // 정규식을 이용하여 **지역명** 패턴을 찾음
+        // 기존 마커 & 인포윈도우 제거
+        removeAllMarkers();
+
         var locationPattern = /\*\*(.*?)\*\*/g;
         var locations = [];
         var match;
@@ -692,7 +698,7 @@
             locations.push(match[1]);  // 지역명만 추출
         }
 
-        console.log("추출된 지역명:", locations); // 디버깅용 로그 추가
+        console.log("추출된 지역명:", locations);
 
         if (locations.length > 0) {
             locations.forEach(location => {
@@ -703,13 +709,10 @@
         }
     }
 
-    var markers = []; // 마커 배열 추가
-
     function searchLocationOnMap(locationName) {
         var geocoder = new kakao.maps.services.Geocoder();
-        var places = new kakao.maps.services.Places(); // 장소 검색 객체
+        var places = new kakao.maps.services.Places();
 
-        // 🔹 1. 주소로 검색 시도
         geocoder.addressSearch(locationName, function(result, status) {
             if (status === kakao.maps.services.Status.OK) {
                 var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
@@ -717,7 +720,6 @@
             } else {
                 console.warn("주소 검색 실패:", locationName, "키워드 검색 시도");
 
-                // 🔹 2. 주소 검색 실패 시, 키워드 검색 시도
                 places.keywordSearch(locationName, function(data, status) {
                     if (status === kakao.maps.services.Status.OK) {
                         var coords = new kakao.maps.LatLng(data[0].y, data[0].x);
@@ -730,7 +732,7 @@
         });
     }
 
-    // 🔹 마커 & 인포윈도우 추가하는 함수 분리 (중복 제거)
+    // 마커 & 인포윈도우 추가 함수
     function addMarkerAndInfo(coords, locationName) {
         var marker = new kakao.maps.Marker({
             map: map,
@@ -744,16 +746,18 @@
         infowindow.open(map, marker);
         map.setCenter(coords);
 
-        // 마커 배열에 추가
+        // 배열에 추가하여 나중에 삭제 가능하게 함
         markers.push(marker);
+        infowindows.push(infowindow);
     }
 
-    // 기존에 추가된 모든 마커를 제거하는 함수
+    // 기존에 추가된 모든 마커 & 인포윈도우 제거
     function removeAllMarkers() {
-        markers.forEach(function(marker) {
-            marker.setMap(null);  // 지도에서 마커 제거
-        });
-        markers = [];  // 마커 배열 초기화
+        markers.forEach(marker => marker.setMap(null));  // 지도에서 마커 제거
+        infowindows.forEach(infowindow => infowindow.close()); // 인포윈도우 닫기
+
+        markers = [];     // 마커 배열 초기화
+        infowindows = []; // 인포윈도우 배열 초기화
     }
 
     // 사용자가 직접 입력한 질문을 제출할 때
@@ -762,7 +766,7 @@
 
         var query = $('#generalQuery').val(); // 사용자가 입력한 질문
         var hotelAddress = $('#hotelAddress').val(); // 주소 값
-        var modifiedQuery = extractRegionFromAddress(hotelAddress) + " " + query; // 주소에서 지역명만 추출 후 질문 추가
+        var modifiedQuery = extractRegionFromAddress(hotelAddress) + " " + query + "그리고 대답할때 강조표시는 정확한 건물명이나 가게명, 장소명인 경우에만 해줘"; // 주소에서 지역명만 추출 후 질문 추가
 
         sendQuery(modifiedQuery);
     });
@@ -771,7 +775,7 @@
     $('.queryButton').on('click', function() {
         var hotelAddress = $('#hotelAddress').val(); // 주소 값
         var queryType = $(this).data('query'); // 버튼에 설정된 query 값 (관광지 or 맛집)
-        var modifiedQuery = extractRegionFromAddress(hotelAddress) + " " + queryType; // 주소에서 지역명만 추출 후 선택한 질문 추가
+        var modifiedQuery = extractRegionFromAddress(hotelAddress) + " " + queryType + "그리고 대답할때 강조표시는 정확한 건물명이나 가게명, 장소명인 경우에만 해줘"; // 주소에서 지역명만 추출 후 선택한 질문 추가
 
         sendQuery(modifiedQuery);
     });
