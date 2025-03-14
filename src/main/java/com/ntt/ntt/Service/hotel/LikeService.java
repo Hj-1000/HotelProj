@@ -94,7 +94,7 @@ public class LikeService {
                         try {
                             if (likehotel.getHotel() == null) {
                                 System.out.println("likehotel의 getHotel()이 null입니다: " + likehotel);
-                                return null;
+                                return null; // null 값 처리 (필요하면 Optional 사용 가능)
                             }
 
                             HotelDTO hotelDTO = modelMapper.map(likehotel.getHotel(), HotelDTO.class);
@@ -102,11 +102,10 @@ public class LikeService {
                             LikeDTO likeDTO = LikeDTO.builder()
                                     .likeHotelId(likehotel.getLikeHotelId())
                                     .hotelDTO(hotelDTO)
-                                    .regDate(likehotel.getRegDate())
+                                    .regDate(likehotel.getRegDate())  // regDate 필드 추가
                                     .build();
 
-                            List<ImageDTO> hotelImageDTOList = Optional.ofNullable(imageRepository.findByHotel_HotelId(likehotel.getHotel().getHotelId()))
-                                    .orElse(Collections.emptyList())
+                            List<ImageDTO> hotelImageDTOList = imageRepository.findByHotel_HotelId(likehotel.getHotel().getHotelId())
                                     .stream()
                                     .map(hotelImg -> modelMapper.map(hotelImg, ImageDTO.class))
                                     .collect(Collectors.toList());
@@ -114,32 +113,30 @@ public class LikeService {
                             if (likeDTO.getHotelDTO() != null) {
                                 likeDTO.getHotelDTO().setHotelImgDTOList(hotelImageDTOList);
                             } else {
-                                System.out.println("likeDTO의 getHotelDTO()가 null입니다! " + likeDTO);
+                                System.out.println("likeDTO의 getHotelDTO()가 null입니다!");
                             }
 
                             // 가장 저렴한 roomPrice 찾기
-                            Integer cheapestRoomPrice = Optional.ofNullable(likehotel.getHotel().getRooms())
-                                    .orElse(Collections.emptyList())
-                                    .stream()
-                                    .mapToInt(Room::getRoomPrice)
-                                    .min()
-                                    .orElse(0);
+                            Integer cheapestRoomPrice = likehotel.getHotel().getRooms().stream()
+                                    .mapToInt(Room::getRoomPrice)  // roomPrice를 int로 추출
+                                    .min()  // 최솟값 찾기
+                                    .orElse(0); // 방이 없다면 기본값 0
 
                             // 천 단위로 콤마 추가한 문자열로 변환
                             DecimalFormat decimalFormat = new DecimalFormat("#,###");
                             String formattedPrice = decimalFormat.format(cheapestRoomPrice);
 
                             // 결과를 hotelDTO에 설정
-                            hotelDTO.setCheapestRoomPrice(formattedPrice);
+                            hotelDTO.setCheapestRoomPrice(formattedPrice); // String으로 된 가격 설정
 
                             return likeDTO;
 
                         } catch (Exception e) {
                             System.out.println("예외 발생 (LikeHotel -> LikeDTO 변환 중): " + e.getMessage());
                             e.printStackTrace();
-                            return null;
+                            return null; // 예외 발생 시 해당 요소를 무시하고 계속 진행
                         }
-                    }).filter(Objects::nonNull)
+                    }).filter(Objects::nonNull) // null 값 제거
                     .collect(Collectors.toList());
 
             // regDate 기준 내림차순 정렬
@@ -153,7 +150,6 @@ public class LikeService {
             return Collections.emptyList();
         }
     }
-
 
 
     //즐겨찾기만 삭제
