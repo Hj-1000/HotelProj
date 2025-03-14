@@ -49,7 +49,6 @@ public class ReservationService {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 방을 찾을 수 없습니다. roomId: " + roomId));
 
-
         // 중복 예약 검사 (날짜 기준으로 검사)
         boolean alreadyBooked = reservationRepository.isRoomAlreadyBooked(roomId, checkInDate, checkOutDate, null);
         if (alreadyBooked) {
