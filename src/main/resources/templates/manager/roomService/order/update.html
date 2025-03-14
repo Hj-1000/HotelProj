@@ -55,7 +55,7 @@
         <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" th:href="@{/chief/order/update(serviceOrderId=${serviceOrderHistoryDTO.serviceOrderId})}" class="custom-link"><span>주문수정</span></a>
         <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" th:href="@{/manager/order/update(serviceOrderId=${serviceOrderHistoryDTO.serviceOrderId})}" class="custom-link"><span>주문수정</span></a>
       </div>
-      <h2 class="page-title">주문수정</h2>
+      <h2 class="page-title">주문 수정</h2>
     </div>
 
     <form th:if="${#authorization.expression('hasRole(''ADMIN'') or hasRole(''CHIEF'') or hasRole(''MANAGER'')')}"
@@ -67,7 +67,6 @@
       <div class="mb-3">
         <label for="serviceOrderStatus" class="form-label">주문 상태</label>
         <select id="serviceOrderStatus" name="serviceOrderStatus" class="form-select">
-          <option value="COMPLETED" th:selected="${serviceOrderHistoryDTO.serviceOrderStatus.name() == 'COMPLETED'}">완료</option>
           <option value="PENDING" th:selected="${serviceOrderHistoryDTO.serviceOrderStatus.name() == 'PENDING'}">대기</option>
           <option value="CANCELED" th:selected="${serviceOrderHistoryDTO.serviceOrderStatus.name() == 'CANCELED'}">취소</option>
         </select>

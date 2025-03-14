@@ -122,7 +122,7 @@
             <div class="location-wrapper">
                 <div class="location-wrap">
                     <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
-                    <a href="#" class="custom-link"><span>룸서비스 관리</span></a> /
+                    <a href="#" class="custom-link"><span>룸서비스관리</span></a> /
                     <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/admin/roomService/category/list" class="custom-link"><span>카테고리관리</span></a>
                     <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="/chief/roomService/category/list" class="custom-link"><span>카테고리관리</span></a>
                     <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" href="/manager/roomService/category/list" class="custom-link"><span>카테고리관리</span></a> /
