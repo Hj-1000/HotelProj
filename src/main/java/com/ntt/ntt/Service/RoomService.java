@@ -132,9 +132,58 @@ public class RoomService {
         });
     }
 
+    // 권한별 페이징 처리된 모든 방 목록 가져오기 (상단 객실 목록)
+    public List<RoomDTO> getRoomListWithReservations(Integer memberId, Role role) {
+        List<Room> rooms;
 
-    // 모든 방 목록 가져오기 (예약 여부 포함)
-    public List<RoomDTO> getRoomListWithReservations() {
+        if (role == Role.ADMIN) {
+            rooms = roomRepository.findAll(); // 모든 객실 조회
+        } else if (role == Role.CHIEF) {
+            rooms = roomRepository.findRoomsByChief(memberId); // 본사 전체 지점 객실 조회
+        } else if (role == Role.MANAGER) {
+            rooms = roomRepository.findRoomsByManager(memberId); // 특정 지점 객실 조회
+        } else {
+            throw new IllegalArgumentException("잘못된 접근입니다.");
+        }
+
+        return rooms.stream()
+                .map(room -> {
+                    RoomDTO dto = modelMapper.map(room, RoomDTO.class);
+                    // 예약 여부 설정
+                    dto.setRoomStatus(reservationRepository.existsByRoom_RoomId(room.getRoomId()));
+                    // 기간 만료 여부 설정
+                    dto.setExpired(room.getReservationEnd() != null &&
+                            LocalDate.parse(room.getReservationEnd()).isBefore(LocalDate.now()));
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    // 권한별 페이징 처리된 모든 방 목록 가져오기 (하단 모든 객실 관리현황)
+    public Page<RoomDTO> getPaginatedRoomsWithReservations(Integer memberId, Role role, Pageable pageable) {
+        Page<Room> rooms;
+
+        if (role == Role.ADMIN) {
+            rooms = roomRepository.findAll(pageable);
+        } else if (role == Role.CHIEF) {
+            rooms = roomRepository.findByHotel_Company_Member_MemberId(memberId, pageable);
+        } else if (role == Role.MANAGER) {
+            rooms = roomRepository.findByHotel_Member_MemberId(memberId, pageable);
+        } else {
+            throw new IllegalArgumentException("잘못된 권한입니다.");
+        }
+
+        return rooms.map(room -> {
+            RoomDTO dto = modelMapper.map(room, RoomDTO.class);
+            dto.setRoomStatus(reservationRepository.existsByRoom_RoomId(room.getRoomId()));
+            dto.setExpired(room.getReservationEnd() != null &&
+                    LocalDate.parse(room.getReservationEnd()).isBefore(LocalDate.now()));
+            return dto;
+        });
+    }
+
+    // 모든 방 목록 조회 전체 객실 목록 조회
+    public List<RoomDTO> getAllRoomsWithReservations() {
         List<Room> rooms = roomRepository.findAll();
         return rooms.stream()
                 .map(room -> {

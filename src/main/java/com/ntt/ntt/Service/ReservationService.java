@@ -1,6 +1,7 @@
 package com.ntt.ntt.Service;
 
 
+import com.ntt.ntt.Constant.Role;
 import com.ntt.ntt.DTO.ReservationDTO;
 import com.ntt.ntt.Entity.Member;
 import com.ntt.ntt.Entity.Reservation;
@@ -43,7 +44,7 @@ public class ReservationService {
     @PersistenceContext
     private EntityManager entityManager;
 
-    // 1. 방 예약 추가
+    // 방 예약 추가
     public ReservationDTO registerReservation(Integer roomId, Integer memberId, LocalDateTime checkInDate, LocalDateTime checkOutDate, Integer count) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 방을 찾을 수 없습니다. roomId: " + roomId));
@@ -125,7 +126,7 @@ public class ReservationService {
         return ReservationDTO.fromEntity(reservation);
     }
 
-    // 2. 모든 예약 목록 가져오기
+    //  모든 예약 목록 가져오기
     public Page<ReservationDTO> getAllReservations(Pageable pageable) {
         Page<Reservation> reservationsPage = reservationRepository.findNonCancelledReservations(pageable);
 
@@ -139,17 +140,38 @@ public class ReservationService {
 
             return dto;
         });
-
     }
 
-    // 3. 특정 방의 예약 정보 조회
+    // 권한별 예약 목록 페이징 처리
+    public Page<ReservationDTO> getPaginatedReservationsWithRole(Integer memberId, Role role, Pageable pageable) {
+        Page<Reservation> reservationsPage;
+
+        if (role == Role.ADMIN) {
+            reservationsPage = reservationRepository.findNonCancelledReservations(pageable);
+        } else if (role == Role.CHIEF) {
+            reservationsPage = reservationRepository.findByCompany_MemberId(memberId, pageable);
+        } else if (role == Role.MANAGER) {
+            reservationsPage = reservationRepository.findByHotel_MemberId(memberId, pageable);
+        } else {
+            throw new IllegalArgumentException("잘못된 권한입니다.");
+        }
+
+        return reservationsPage.map(reservation -> {
+            ReservationDTO dto = ReservationDTO.fromEntity(reservation);
+            Integer totalServiceOrderPrice = serviceOrderRepository.getTotalOrderPriceByReservation(reservation.getReservationId());
+            dto.setTotalServiceOrderPrice(totalServiceOrderPrice != null ? totalServiceOrderPrice : 0);
+            return dto;
+        });
+    }
+
+    // 특정 방의 예약 정보 조회
     public ReservationDTO getReservationByRoomId(Integer roomId) {
         Reservation reservation = reservationRepository.findFirstByRoom_RoomId(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 방의 예약 정보가 없습니다."));
         return ReservationDTO.fromEntity(reservation); // DTO 변환 적용
     }
 
-    /* 모든 방 예약객실 보기 메서드*/
+    // 모든 방 예약객실 보기 메서드
     public List<ReservationDTO> getReservationsByRoomId(Integer roomId) {
         List<Reservation> reservations = reservationRepository.findAllByRoom_RoomId(roomId);
         return reservations.stream()
@@ -157,7 +179,7 @@ public class ReservationService {
                 .collect(Collectors.toList());
     }
 
-    // 4. 방 예약 수정
+    // 방 예약 수정
     public void updateReservation(Integer reservationId, ReservationDTO reservationDTO, Integer memberId) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 예약을 찾을 수 없습니다."));
@@ -170,7 +192,6 @@ public class ReservationService {
                     .orElseThrow(() -> new IllegalArgumentException("해당 회원 정보를 찾을 수 없습니다. memberId: " + memberId));
             reservation.setMember(newMember);
         }
-
 
         // 체크인/체크아웃 날짜 가져오기
         LocalDateTime checkInDateTime = reservationDTO.getCheckInDate();
@@ -231,7 +252,7 @@ public class ReservationService {
         reservationRepository.save(reservation);
     }
 
-    // 5. 방 예약 삭제 (유저가 "취소 완료" 상태의 예약을 직접 삭제하는 메서드)
+    // 방 예약 삭제 (유저가 "취소 완료" 상태의 예약을 직접 삭제하는 메서드)
     public boolean deleteReservation(Integer reservationId, Integer memberId) {
         Optional<Reservation> optionalReservation = reservationRepository.findById(reservationId);
         if (optionalReservation.isEmpty()) {
@@ -284,7 +305,7 @@ public class ReservationService {
         }
     }
 
-    /* 키워드 검색 메서드 */
+    // 키워드 검색 메서드
     public Page<ReservationDTO> searchReservations(String category, String keyword, Pageable pageable) {
         Page<Reservation> reservations;
 
@@ -360,7 +381,7 @@ public class ReservationService {
         reservationRepository.save(reservation);
     }
 
-    //1분마다 실행되어 1분이 지난 "취소 완료" 예약을 자동 삭제
+    // 1분마다 실행되어 1분이 지난 "취소 완료" 예약을 자동 삭제
     @Scheduled(fixedRate = 60000) // 1분 간격으로 실행 (3600000ms = 1시간)
     public void deleteExpiredReservations() {
         LocalDateTime now = LocalDateTime.now();
@@ -385,7 +406,7 @@ public class ReservationService {
         }
     }
 
-    /* 예약된 날짜 목록 조회 메서드 */
+    // 예약된 날짜 목록 조회 메서드
     public List<Map<String, String>> getBookedDatesByRoom(Integer roomId) {
         List<Reservation> reservations = reservationRepository.findAllByRoom_RoomId(roomId)
                 .stream()
@@ -399,5 +420,4 @@ public class ReservationService {
             return map;
         }).collect(Collectors.toList());
     }
-
 }

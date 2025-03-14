@@ -42,6 +42,15 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
     @Query("SELECT r FROM Room r WHERE r.hotelId.member.memberId = :memberId")
     Page<Room> findByHotel_Member_MemberId(@Param("memberId") Integer memberId, Pageable pageable);
 
+    /* CHIEF 본점의 모든 지점 객실 조회 (페이징처리X) */
+    @Query("SELECT r FROM Room r WHERE r.hotelId.hotelId IN " +
+            "(SELECT h.hotelId FROM Hotel h WHERE h.company.member.memberId = :memberId)")
+    List<Room> findRoomsByChief(@Param("memberId") Integer memberId);
+
+    /* MANAGER 본인이 관리하는 호텔의 객실만 조회 (페이징처리X) */
+    @Query("SELECT r FROM Room r WHERE r.hotelId.member.memberId = :memberId")
+    List<Room> findRoomsByManager(@Param("memberId") Integer memberId);
+
     /* 방 목록을 조회하면서 각 방과 연결된 이미지 리스트를 함께 가져오기 */
     @EntityGraph(attributePaths = {"roomImageList"})
     @Query("SELECT r FROM Room r")
@@ -63,6 +72,7 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
 
     /* 특정 호텔 ID에 속한 방들을 페이징 처리후 조회*/
     Page<Room> findByHotelId_HotelId (Integer hotelId, Pageable pageable);
+
     /* 페이징 없이 전체 데이터 가져오는 방식 2025-03-13 추가 */
     List<Room> findByHotelId_HotelId(Integer hotelId);
 
