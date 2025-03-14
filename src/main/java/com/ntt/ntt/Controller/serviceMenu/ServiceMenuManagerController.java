@@ -28,7 +28,7 @@ import java.util.Map;
 @Log4j2
 @RequiredArgsConstructor
 @RequestMapping("manager/roomService/menu") //url roomService아래에
-@Tag(name = "serviceMenuManagerController", description = "관리자의 룸서비스 메뉴 정보")
+@Tag(name = "ServiceMenuManagerController", description = "관리자의 룸서비스 메뉴 정보")
 public class ServiceMenuManagerController {
     private final ServiceMenuService serviceMenuService;
     private final ServiceCateService serviceCateService;
