@@ -7,6 +7,8 @@ import com.ntt.ntt.Entity.Image;
 import com.ntt.ntt.Repository.BannerRepository;
 import com.ntt.ntt.Repository.ImageRepository;
 import com.ntt.ntt.Service.BannerService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +26,7 @@ import java.util.stream.Collectors;
 @Controller
 //@RequiredArgsConstructor
 @Log
-
+@Tag(name = "BannerController", description = "banner")
 //@RequestMapping("/banner")
 public class BannerController {
 
@@ -49,6 +51,7 @@ public class BannerController {
 //
 //        return "banner/list";
 //    }
+    @Operation(summary = "이동폼", description = "배너 리스트 페이지로 이동한다.")
     @GetMapping("/banner/list")
     public String bannerList(Model model) {
         List<BannerDTO> bannerDTOList = bannerService.list(); // 배너 목록 가져오기
@@ -79,7 +82,7 @@ public class BannerController {
         return "banner/list";
     }
 
-
+    @Operation(summary = "이동폼", description = "배너 등록 페이지로 이동한다.")
     @GetMapping("/banner/register")
     public String registerForm(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         if (userDetails == null) {
@@ -89,6 +92,7 @@ public class BannerController {
         return "/banner/register";
     }
 
+    @Operation(summary = "등록창", description = "배너 이미지 등록 후 배너관리 페이지로 이동한다.")
     @PostMapping("/banner/register")
     public String registerProc(BannerDTO bannerDTO, @RequestParam("multipartFile") List<MultipartFile> multipartFiles,
                                RedirectAttributes redirectAttributes) {
@@ -97,14 +101,7 @@ public class BannerController {
         return "redirect:/banner/list";
     }
 
-    // 배너 상세 페이지
-    @GetMapping("/banner/detail")
-    public String detail(@RequestParam Integer bannerId, Model model) {
-        BannerDTO bannerDTO = bannerService.read(bannerId);
-        model.addAttribute("banner", bannerDTO);
-        return "banner/detail";
 
-    }
 
 
     // 배너 삭제
@@ -114,7 +111,7 @@ public class BannerController {
 //
 //        return "redirect:/banner/list"; // 삭제 후 목록 페이지로 리다이렉트
 //    }
-
+    @Operation(summary = "삭제창", description = "배너 이미지 삭제 후 배너 관리 페이지로 이동한다.")
     @PostMapping("/banner/delete")
     public String deleteBanner(@RequestParam Integer bannerId) {
         bannerService.delete(bannerId);
