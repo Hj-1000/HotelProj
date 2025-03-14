@@ -25,10 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.text.DecimalFormat;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -366,10 +363,8 @@ public class HotelService {
 
     // 추천 호텔 목록 가져오기(별점높은순)
     public List<HotelDTO> listRecommendedHotels() {
-        // hotelRating을 기준으로 내림차순 정렬
-        Pageable pageable = PageRequest.of(0, 4, Sort.by(Sort.Direction.DESC, "hotelRating").and(Sort.by(Sort.Direction.DESC, "hotelId")));
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "hotelRating").and(Sort.by(Sort.Direction.DESC, "hotelId")));
 
-        // hotelRepository에서 페이지를 가져오기
         Page<Hotel> hotelPage = hotelRepository.findAll(pageable);
 
         List<HotelDTO> hotelDTOS = hotelPage.stream()
@@ -385,21 +380,21 @@ public class HotelService {
                             .collect(Collectors.toList());
                     hotelDTO.setHotelImgDTOList(imagesDTOList);
 
-                    // 가장 저렴한 roomPrice 찾기
                     Integer cheapestRoomPrice = hotel.getRooms().stream()
-                            .mapToInt(Room::getRoomPrice)  // roomPrice를 int로 추출
-                            .min()  // 최솟값 찾기
-                            .orElse(0); // 방이 없다면 기본값 0
+                            .mapToInt(Room::getRoomPrice)
+                            .min()
+                            .orElse(0);
 
-                    // 천 단위로 콤마 추가한 문자열로 변환
                     DecimalFormat decimalFormat = new DecimalFormat("#,###");
-                    String formattedPrice = decimalFormat.format(cheapestRoomPrice);
-
-                    // 결과를 hotelDTO에 설정
-                    hotelDTO.setCheapestRoomPrice(formattedPrice); // String으로 된 가격 설정
+                    hotelDTO.setCheapestRoomPrice(decimalFormat.format(cheapestRoomPrice));
 
                     return hotelDTO;
                 })
+                .sorted(Comparator
+                        .comparing(HotelDTO::getRoomReviewCount, Comparator.nullsLast(Comparator.reverseOrder()))
+                        .thenComparing(HotelDTO::getHotelRating, Comparator.nullsLast(Comparator.reverseOrder()))
+                )
+                .limit(4)
                 .collect(Collectors.toList());
 
         return hotelDTOS;
