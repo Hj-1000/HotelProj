@@ -54,7 +54,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
     // 페이징 처리
     Page<Reservation> findAll(Pageable pageable);
 
-    // 취소 예약 검색
+    // 본사의 모든 지점 예약 조회 (CHIEF)
+    @Query("SELECT r FROM Reservation r WHERE r.room.hotelId.company.member.memberId = :memberId AND r.reservationStatus <> '취소 완료'")
+    Page<Reservation> findByCompany_MemberId(@Param("memberId") Integer memberId, Pageable pageable);
+
+    // 특정 지점 예약 조회 (MANAGER)
+    @Query("SELECT r FROM Reservation r WHERE r.room.hotelId.member.memberId = :memberId AND r.reservationStatus <> '취소 완료'")
+    Page<Reservation> findByHotel_MemberId(@Param("memberId") Integer memberId, Pageable pageable);
+
+    // 취소 완료 상태가 아닌 모든 예약 검색
     @Query("SELECT r FROM Reservation r WHERE r.reservationStatus <> '취소 완료'")
     Page<Reservation> findNonCancelledReservations(Pageable pageable);
 

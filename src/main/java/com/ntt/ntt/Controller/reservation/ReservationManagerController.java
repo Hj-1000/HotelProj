@@ -1,5 +1,6 @@
 package com.ntt.ntt.Controller.reservation;
 
+import com.ntt.ntt.Constant.Role;
 import com.ntt.ntt.DTO.ReservationDTO;
 import com.ntt.ntt.DTO.RoomDTO;
 import com.ntt.ntt.Entity.Member;
@@ -81,27 +82,38 @@ public class ReservationManagerController {
 
         log.info("예약 목록 페이지 호출 - 검색 category: {}, keyword: {}", category, keyword);
 
-        // 객실 목록 (페이징 없이 전체 가져오기)
-        List<RoomDTO> allRoomList = roomService.getRoomListWithReservations();
+        if (userDetails == null) {
+            throw new IllegalArgumentException("로그인이 필요합니다.");
+        }
+
+        String email = userDetails.getUsername();
+        Member member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원 정보를 찾을 수 없습니다."));
+        Integer memberId = member.getMemberId();
+        Role role = member.getRole();
+
+        // 상단 객실 목록 (권한별 페이징 처리)
+        List<RoomDTO> allRoomList = roomService.getRoomListWithReservations(memberId, role);
+
+        // 하단 객실 관리 현황의 모든 객실 (권한별 페이징 처리)
+        Page<RoomDTO> roomPage;
+        if ("roomName".equals(category) || "status".equals(category)) {
+            // 검색어가 있으면 검색 결과를 가져옴
+            roomPage = roomService.searchAllRooms(keyword, category, pageable);
+        } else {
+            // 검색어가 없으면 권한별 페이징 처리된 목록을 가져옴
+            roomPage = roomService.getPaginatedRoomsWithReservations(memberId, role, pageable);
+        }
 
         // 예약된 방 검색
         Page<ReservationDTO> reservationPage;
-
         if (roomId != null) {
-            // 특정 객실의 예약만 조회
             List<ReservationDTO> reservations = reservationService.getReservationsByRoomId(roomId);
             reservationPage = new PageImpl<>(reservations, pageable, reservations.size());
         } else if (category != null && keyword != null && !keyword.trim().isEmpty()) {
             reservationPage = reservationService.searchReservations(category, keyword, pageable);
         } else {
-            reservationPage = reservationService.getAllReservations(pageable);
-        }
-
-        if (category != null && keyword != null && !keyword.trim().isEmpty() &&
-                (category.equals("roomName") || category.equals("memberId") || category.equals("memberName"))) {
-            reservationPage = reservationService.searchReservations(category, keyword, pageable);
-        } else {
-            reservationPage = reservationService.getAllReservations(pageable);
+            reservationPage = reservationService.getPaginatedReservationsWithRole(memberId, role, pageable);
         }
 
         List<ReservationDTO> reservations = reservationPage.getContent();
@@ -115,14 +127,6 @@ public class ReservationManagerController {
         model.addAttribute("reservations", reservations);
 
 
-        // 모든 방 검색 (객실 이름 + 상태 검색 가능)
-        Page<RoomDTO> roomPage;
-        if ("roomName".equals(category) || "status".equals(category)) {
-            roomPage = roomService.searchAllRooms(keyword, category, pageable);
-        } else {
-            roomPage = roomService.getPaginatedRooms(pageable);
-        }
-
         // 예약된 방 매핑
         List<ReservationDTO> allReservations = reservationService.getAllReservations(Pageable.unpaged()).getContent();
         Map<Integer, ReservationDTO> reservationMap = new HashMap<>();
@@ -132,10 +136,10 @@ public class ReservationManagerController {
 
         // 로그인한 유저 정보 추가
         if (userDetails != null) {
-            String email = userDetails.getUsername();
-            Member member = memberRepository.findByMemberEmail(email)
+            String userEmail = userDetails.getUsername(); // 변수명 변경
+            Member userMember = memberRepository.findByMemberEmail(userEmail)
                     .orElseThrow(() -> new IllegalArgumentException("해당 회원 정보를 찾을 수 없습니다."));
-            model.addAttribute("memberId", member.getMemberId());
+            model.addAttribute("memberId", userMember.getMemberId());
         }
 
         // 페이지네이션 정보 생성
@@ -166,7 +170,7 @@ public class ReservationManagerController {
     public String readReservationForm(@RequestParam("roomId") Integer roomId, Model model) {
         model.addAttribute("reservation", reservationService.getReservationByRoomId(roomId));
 
-        List<RoomDTO> roomList = roomService.getRoomListWithReservations();
+        List<RoomDTO> roomList = roomService.getAllRoomsWithReservations();
         Page<ReservationDTO> reservationPage = reservationService.getAllReservations(PageRequest.of(0, 10));
 
         Map<Integer, ReservationDTO> reservationMap = new HashMap<>();

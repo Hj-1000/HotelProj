@@ -36,7 +36,7 @@
 
         .room-image {
             width: 100%;
-            height: 100px;
+            height: 90px;
             object-fit: cover;
             border-radius: 5px;
             border: 1px solid #ddd;
@@ -223,7 +223,7 @@
                                 <img th:if="${room.roomImageDTOList != null and !room.roomImageDTOList.isEmpty()}"
                                      th:src="@{'/upload/' + ${room.roomImageDTOList[0].imagePath}}"
                                      alt="Room Image"
-                                     class="roomImage" height="90px">
+                                     class="room-image">
                                 <span th:if="${room.roomImageDTOList == null or room.roomImageDTOList.isEmpty()}">이미지 없음</span>
                             </td>
 
