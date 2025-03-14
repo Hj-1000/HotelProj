@@ -30,7 +30,7 @@
 <div layout:fragment="content">
   <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
   <a href="/notice/list" class="custom-link"><span>공지사항</span></a> /
-  <a th:href="@{/notice/read(noticeId=${noticeDTO.noticeId})}" class="custom-link"><span>공지사항상세보기</span></a>
+  <a th:href="@{/notice/read(noticeId=${noticeDTO.noticeId})}" class="custom-link"><span>공지사항 상세보기</span></a>
 <!--<div th:replace="~{fragments/header::header}"></div>-->
 <div id="container" class="container">
   <div id="row" class="row">
@@ -39,7 +39,7 @@
               <!--디자인-->
         <div class="card">
           <div class="card-header text-center">
-            <h2 >공지사항 상세보기</h2></div>
+            <h2 >공 지 사 항</h2></div>
           <div class="card-body">
             <!--Controller에서 model.addAttribute 명 :board-->
             <!--board.DTO 변수명-->
