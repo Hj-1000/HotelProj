@@ -178,11 +178,13 @@
                                 <a th:if="${#authorization.expression('hasRole(''MANAGER'')')}" th:href="@{/manager/hotel/read(hotelId=${data.hotelId})}" style="text-decoration: none; color: black" th:text="${data.hotelName}" >지사명</a>-->
                             </td>
                             <td th:text="${data.hotelAddress}" class="align-middle text-center">주소</td>
-                            <td th:text="${data.hotelEmail}" class="align-middle text-center">이메일</td>
+                            <td th:if="${data.hotelEmail != null}" th:text="${data.hotelEmail}" class="align-middle text-center">이메일</td>
+                            <td th:unless="${data.hotelEmail != null}" class="align-middle text-center">담당자 미지정</td>
                             <td th:text="${data.hotelPhone}" class="align-middle text-center">전화번호</td>
                             <td class="align-middle text-center">
                                 <span th:text="${data.hotelCheckIn}">체크인</span>:00-<span th:text="${data.hotelCheckOut}">체크아웃</span>:00</td>
-                            <td th:text="${data.hotelRating}" class="align-middle text-center">평점</td>
+                            <td th:if="${data.hotelRating != null}" th:text="${data.hotelRating}" class="align-middle text-center">평점</td>
+                            <td th:unless="${data.hotelRating != null}" class="align-middle text-center">리뷰없음</td>
                             <td class="align-middle text-center">
                                 <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/hotel/read(hotelId=${data.hotelId})}" class="btn btn-info btn-sm"><i class="bi bi-eye"></i></a>
                                 <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/hotel/update(hotelId=${data.hotelId})}"  class="btn btn-warning btn-sm"><i class="bi bi-pen"></i></a>

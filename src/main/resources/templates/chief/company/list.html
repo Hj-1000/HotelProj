@@ -73,8 +73,8 @@
             <div class="location-wrap">
                 <a href="/" class="custom-link"><span><i class="bi bi-house-fill"></i> HOME</span></a> /
                 <a href="#" class="custom-link"><span>호텔관리</span></a> /
-                <a href="/admin/company/list" class="custom-link"><span>호텔본사관리</span></a>
-                <a href="/chief/company/list" class="custom-link"><span>호텔본사관리</span></a>
+                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/admin/company/list" class="custom-link"><span>호텔본사관리</span></a>
+                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="/chief/company/list" class="custom-link"><span>호텔본사관리</span></a>
             </div>
             <h1 class="page-title">본사 관리</h1>
         </div>        <!-- 검색 영역 -->

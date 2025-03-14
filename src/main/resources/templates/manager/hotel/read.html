@@ -256,7 +256,13 @@
                         </tr>
                         <tr class="table-light">
                             <td>담당자</td>
-                            <td><span th:text="${hotelDTO.memberName}">전화번호</span> (<span th:text="${hotelDTO.hotelEmail}">매니저 이메일</span>)</td>
+                            <td>
+                                <span th:if="${hotelDTO.memberName != null}" th:text="${hotelDTO.memberName}">담당자명</span>
+                                <span th:unless="${hotelDTO.memberName != null}">매니저를 등록해주세요.</span>
+                                <span th:if="${hotelDTO.hotelEmail != null}" th:text="'('+${hotelDTO.hotelEmail}+')'">매니저 이메일</span>
+                                <span th:unless="${hotelDTO.hotelEmail != null}"></span>
+                            </td>
+
                             <td>전화번호</td>
                             <td><span th:text="${hotelDTO.hotelPhone}">전화번호</span></td>
                         </tr>
