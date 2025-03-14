@@ -155,6 +155,7 @@
                         <!-- Room Card -->
                         <div class="col-md-4">
                             <a th:href="@{/hotel/read(hotelId=${data.hotelDTO.hotelId})}">
+
                                 <div class="room-card ">
                                     <div class="room-image">
                                         <!--등록한 사진이 있을 때-->
@@ -172,7 +173,7 @@
                                         </th:block>
 
                                         <div class="hover-overlay">
-                                            <a th:href="@{/hotel/read(hotelId=${data.hotelId})}" class="btn btn-hover">자세히 보기</a>
+                                            <a th:href="@{/hotel/read(hotelId=${data.hotelDTO.hotelId})}" class="btn btn-hover">자세히 보기</a>
                                         </div>
                                     </div>
                                     <div class="room-text">
