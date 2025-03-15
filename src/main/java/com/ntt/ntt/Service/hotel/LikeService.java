@@ -12,6 +12,9 @@ import com.ntt.ntt.Repository.hotel.LikeHotelRepository;
 import com.ntt.ntt.Repository.hotel.LikeRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,20 +84,21 @@ public class LikeService {
     }
 
     //목록
-    public List<LikeDTO> likeList(String email) {
+    public Page<LikeDTO> likeList(String email, Pageable pageable) {
         try {
-            List<LikeHotel> likeHotelList = likeHotelRepository.findByLikes_Member_MemberEmail(email);
+            // 좋아요 목록을 페이징하여 조회
+            Page<LikeHotel> likeHotelPage = likeHotelRepository.findByLikes_Member_MemberEmail(email, pageable);
 
-            if (likeHotelList == null || likeHotelList.isEmpty()) {
-                System.out.println("조회된 likeHotelList가 없습니다.");
-                return Collections.emptyList();
+            if (likeHotelPage == null || likeHotelPage.isEmpty()) {
+                System.out.println("조회된 likeHotelPage가 없습니다.");
+                return Page.empty(pageable);  // 빈 페이지 반환
             }
 
-            List<LikeDTO> likeDTOS = likeHotelList.stream().map(likehotel -> {
+            List<LikeDTO> likeDTOS = likeHotelPage.getContent().stream().map(likehotel -> {
                         try {
                             if (likehotel.getHotel() == null) {
                                 System.out.println("likehotel의 getHotel()이 null입니다: " + likehotel);
-                                return null; // null 값 처리 (필요하면 Optional 사용 가능)
+                                return null; // null 값 처리
                             }
 
                             HotelDTO hotelDTO = modelMapper.map(likehotel.getHotel(), HotelDTO.class);
@@ -142,12 +146,13 @@ public class LikeService {
             // regDate 기준 내림차순 정렬
             likeDTOS.sort(Comparator.comparing(LikeDTO::getRegDate).reversed());
 
-            System.out.println("최종 LikeDTO 리스트: " + likeDTOS);
-            return likeDTOS;
+            // 페이징 처리된 결과 반환
+            return new PageImpl<>(likeDTOS, pageable, likeHotelPage.getTotalElements());  // getTotalElements() 사용
+
         } catch (Exception e) {
             System.out.println("likeList() 메서드 실행 중 예외 발생: " + e.getMessage());
             e.printStackTrace();
-            return Collections.emptyList();
+            return Page.empty(pageable); // 예외 발생 시 빈 페이지 반환
         }
     }
 
