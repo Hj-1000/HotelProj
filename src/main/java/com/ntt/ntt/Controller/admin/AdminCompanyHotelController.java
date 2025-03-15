@@ -205,9 +205,13 @@ public class AdminCompanyHotelController {
             }
 
             model.addAttribute("companyDTO", companyDTO);
+
             model.addAttribute("hotelDTOS", hotelDTOS.getContent());  // 현재 페이지의 객실 목록
             model.addAttribute("totalPages", hotelDTOS.getTotalPages());  // 총 페이지 수
             model.addAttribute("currentPage", page);  // 현재 페이지
+            model.addAttribute("lastPage", hotelDTOS.getTotalPages());
+            model.addAttribute("startPage", Math.max(1, page - 2));
+            model.addAttribute("endPage", Math.min(hotelDTOS.getTotalPages(), page + 3));
 
             return "/chief/company/read";
 
