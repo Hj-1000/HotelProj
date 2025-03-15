@@ -205,6 +205,39 @@
 
                 </th:block>
 
+                <!-- 페이지네이션 -->
+                <div class="d-flex justify-content-center">
+                    <ul class="pagination">
+                        <!-- 처음 페이지 -->
+                        <li class="page-item" th:if="${currentPage > 0}">
+                            <a class="page-link" th:href="@{/like/list(page=0)}">처음</a>
+                        </li>
+
+                        <!-- 이전 페이지 -->
+                        <li class="page-item" th:if="${currentPage > 0}">
+                            <a class="page-link" th:href="@{/like/list(page=${currentPage - 1})}">이전</a>
+                        </li>
+
+                        <!-- 페이지 번호 -->
+                        <th:block th:each="page : ${#numbers.sequence(0, totalPages - 1)}">
+                            <li class="page-item" th:classappend="${currentPage == page} ? 'active'">
+                                <a class="page-link" th:href="@{/like/list(page=${page})}" th:text="${page + 1}"></a>
+                            </li>
+                        </th:block>
+
+                        <!-- 다음 페이지 -->
+                        <li class="page-item" th:if="${currentPage < totalPages - 1}">
+                            <a class="page-link" th:href="@{/like/list(page=${currentPage + 1})}">다음</a>
+                        </li>
+
+                        <!-- 마지막 페이지 -->
+                        <li class="page-item" th:if="${currentPage < totalPages - 1}">
+                            <a class="page-link" th:href="@{/like/list(page=${totalPages - 1})}">끝</a>
+                        </li>
+                    </ul>
+                </div>
+
+
             </div>
         </div>
     </section>

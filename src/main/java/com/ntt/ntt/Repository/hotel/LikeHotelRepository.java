@@ -4,6 +4,8 @@ package com.ntt.ntt.Repository.hotel;
 import com.ntt.ntt.Entity.Hotel;
 import com.ntt.ntt.Entity.LikeHotel;
 import com.ntt.ntt.Entity.Likes;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -28,7 +30,7 @@ public interface LikeHotelRepository extends JpaRepository<LikeHotel, Integer> {
 
 //    List<LikeHotel> findByHotel_HotelId(Integer hotelId);
 
-    List<LikeHotel> findByLikes_Member_MemberEmail(String email);
+    Page<LikeHotel> findByLikes_Member_MemberEmail(String email, Pageable pageable);
 
 //    void deleteByLikes_Member_MemberEmail(String email);
 

@@ -16,6 +16,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -47,15 +50,30 @@ public class LikeController {
     //장바구니목록
     @Operation(summary = "사용자 호텔 즐겨찾기 목록", description = "호텔 즐겨찾기 목록 페이지로 이동한다.")
     @GetMapping("/list")
-    public String likeList(Model model, Principal principal, RedirectAttributes redirectAttributes) {
+    public String likeList(Model model, Principal principal,
+                           RedirectAttributes redirectAttributes,
+                           @RequestParam(defaultValue = "0") int page,  // 페이지 번호 (기본값: 0)
+                           @RequestParam(defaultValue = "6") int size)  {
         try {
             String email = principal.getName();
             System.out.println("현재 로그인한 사용자 이메일: " + email); // 로그 추가
 
-            model.addAttribute("likeDTO", likeService.likeList(email));
+            // Pageable 객체 생성 (페이지 번호와 페이지 크기)
+            Pageable pageable = PageRequest.of(page, size);
 
-            System.out.println("likeDTO : " + likeService.likeList(email));
+            // 페이징 처리된 좋아요 목록을 서비스에서 가져오기
+            Page<LikeDTO> likeDTOPage = likeService.likeList(email, pageable);
 
+            System.out.println("likeDTO : " + likeDTOPage);
+
+            // 모델에 페이징 처리된 데이터와 페이지 정보 추가
+            model.addAttribute("likeDTO", likeDTOPage.getContent());
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", likeDTOPage.getTotalPages());
+            model.addAttribute("totalItems", likeDTOPage.getTotalElements());
+            model.addAttribute("pageSize", size);
+
+            // 페이지 렌더링
             return "myPage/like/list";
 
         } catch (Exception e) {
@@ -64,6 +82,8 @@ public class LikeController {
             return "redirect:/hotel/list";
         }
     }
+
+
 
     //즐겨찾기 등록
     @Operation(summary = "사용자 즐겨찾기 등록", description = "원하는 호텔을 즐겨찾기에 등록한다.")
