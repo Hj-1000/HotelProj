@@ -352,11 +352,16 @@ public class RoomReviewService {
         if (name == null || name.trim().isEmpty()) {
             return "익명";
         }
-        if (name.length() == 2) {
-            return name.charAt(0) + "*";
+        if (name.length() == 1) {
+            return name;  // 길이가 1이면 그대로 반환
         }
-        return name.charAt(0) + "*".repeat(name.length() - 2) + name.charAt(name.length() - 1);
+        if (name.length() == 2) {
+            return name.charAt(0) + "*";  // 길이가 2이면 첫 문자 + * 반환
+        }
+        // 길이가 3 이상이면, 첫 문자 + 중간 문자 *로 변환 + 마지막 문자
+        return name.charAt(0) + "*".repeat(Math.max(0, name.length() - 2)) + name.charAt(name.length() - 1);
     }
+
 
     // 로그인한 유저의 memberId를 조회
     private Integer getLoggedInMemberId(Authentication authentication) {

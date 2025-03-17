@@ -443,8 +443,6 @@ public class HotelService {
         return hotelDTO;
     }
 
-
-
     // hotelId에 맞는 방들을 가져오는 메서드
     public Page<RoomDTO> roomListByHotel(Integer hotelId, Pageable page) {
 

@@ -41,6 +41,15 @@
             background-color: #f8f9fa;  /* 필요에 따라 배경색 추가 */
             padding: 10px;
         }
+        .review-text {
+            max-width: 100%; /* 부모 요소 내에서 가로 길이 제한 */
+            min-height: 3em; /* 최소 높이 (1줄 정도) */
+            max-height: 15em; /* 최대 높이 (대략 10줄 정도) */
+            overflow: hidden; /* 넘치는 내용 숨김 */
+            word-wrap: break-word; /* 긴 단어 줄바꿈 */
+            display: block;
+            white-space: normal;
+        }
     </style>
 </head>
 <body>
@@ -180,7 +189,7 @@
                                 </div>
                                 <strong>${review.memberName || "익명"}</strong>
                                 <p class="roomName">${review.roomName}</p>
-                                <p>${review.reviewText}</p>
+                                <p class="review-text">${review.reviewText}</p>
                                 <div>${actionButtons}</div>
                             `;
                             reviewList.appendChild(reviewItem);

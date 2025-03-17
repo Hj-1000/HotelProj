@@ -108,7 +108,6 @@
                 <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="btn btn-dark" th:href="@{/admin/hotel/list(companyId=${companyDTO.companyId})}">지사 관리</a>
                 <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="btn btn-dark" href="/chief/hotel/list">지사 관리</a>
                 <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/admin/hotel/register" class="btn btn-success">지사 등록</a>
-                <a th:if="${#authorization.expression('hasRole(''CHIEF'')')}" href="/chief/hotel/register" class="btn btn-success">지사 등록</a>
                 <button type="button" class="btn btn-success modalBtn">간편 등록</button>
                 <!--수정-->
                 <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="btn btn-warning" th:href="@{/admin/company/update(companyId=${companyDTO.companyId})}">수정</a>
