@@ -60,7 +60,7 @@ public class ChiefHotelController {
     }
     //등록처리
     @Operation(summary = "호텔장 호텔 등록 처리", description = "호텔을 등록 처리 후 목록으로 이동한다.")
-    @PostMapping("/register")
+    @PostMapping("/hotel/register")
     public String registerProc(@ModelAttribute HotelDTO hotelDTO,
                                List<MultipartFile> imageFiles,
                                RedirectAttributes redirectAttributes,
@@ -70,18 +70,16 @@ public class ChiefHotelController {
         // 현재 로그인한 사용자의 이메일 가져오기
         String userEmail = principal.getName();
 
-        // 호텔 등록 서비스 호출 (memberEmail 전달)
+        // 호텔 등록 서비스 호출
         hotelService.register(hotelDTO, imageFiles, userEmail);
 
-        // 등록된 지사의 companyId 가져오기
-        Integer companyId = hotelDTO.getCompanyId();  // hotelDTO에 companyId가 포함되어 있다고 가정
+        log.info("서비스 호출 후 companyId: " + hotelDTO.getCompanyId()); // ✅ 여기서 null이면 DTO 반영 문제!
 
         // 성공 메시지와 함께 companyId도 전달
         redirectAttributes.addFlashAttribute("message", "지사 등록이 완료되었습니다.");
-        redirectAttributes.addFlashAttribute("companyId", companyId); // companyId 전달
+        redirectAttributes.addFlashAttribute("companyId", hotelDTO.getCompanyId());
 
-//        return "redirect:/manager/hotel/list?companyId=" + companyId;  // companyId를 쿼리 파라미터로 전달
-        return "redirect:/chief/hotel/list";  // 목록으로 이동
+        return "redirect:/admin/hotel/list";
     }
 
 

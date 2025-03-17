@@ -258,6 +258,7 @@ public class CompanyService {
 
 
     // companyId에 맞는 방들을 가져오는 메서드
+    @Transactional
     public Page<HotelDTO> hotelListBycompany(Integer companyId, Pageable page) {
 
         // 1. 페이지 정보 재가공
