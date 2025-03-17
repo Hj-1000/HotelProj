@@ -77,6 +77,10 @@ header {
     right: 0;
 }
 
+.check-text {
+    margin: 1.5rem auto;
+}
+
 h5 {
     font-size: 1.25rem;
     margin-bottom: 1rem;
