@@ -219,15 +219,13 @@
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">카테고리 목록</h5>
-
+                <th:block th:if="${serviceCateDTOS==null or serviceCateDTOS.getTotalElements() == 0}">
+                    <div class="col-12">
+                        <p class="alert alert-warning text-center no-data-message">현재 등록된 카테고리가 없습니다.</p>
+                    </div>
+                </th:block>
                 <div class="row row-cols-1 row-cols-md-5 g-4">
-                    <th:block th:if="${#lists.isEmpty(serviceCateDTOS)}">
-                        <div class="col-12">
-                            <div class="alert alert-warning" role="alert">
-                                등록된 서비스 카테고리가 없습니다.
-                            </div>
-                        </div>
-                    </th:block>
+
 
                     <th:block th:unless="${#lists.isEmpty(serviceCateDTOS)}">
                         <th:block th:each="data:${serviceCateDTOS}">
