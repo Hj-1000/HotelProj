@@ -22,7 +22,9 @@
         display: flex;
         justify-content: center;
         align-items: flex-start;
-        min-height: calc(100vh - 279px); /* 100vh = 화면 전체 높이를 차지하도록 (-209px 는 헤더와 푸터의 높이) */
+        min-height: 100vh;
+        background-color: #f8f9fa;
+        padding-top: 30px;
     }
 
     .mypage-card {
@@ -92,118 +94,120 @@
         </li>
     </ul>
 
-    <div class="container mt-5">
-        <h2 class="mb-4">주문 내역</h2>
+    <div class="mypage-container">
+        <div class="container">
+            <h2 class="mb-4 text-center">주문 내역</h2>
 
-        <div layout:fragment="content" class="content">
-            <div th:if="${orders.totalElements == 0}" class="alert alert-warning">
-                주문 내역이 없습니다.
-            </div>
-
-            <div th:each="order, stat : ${orders.content}" class="card mb-3">
-
-                <!-- 취소된 주문 -->
-                <div th:if="${order.serviceOrderStatus.name() == 'CANCELED'}" class="card canceled-order">
-                    <div class="card-header bg-danger text-white">
-                        NO.<span th:text="${(pageInfo.currentPage - 1) * orders.size + stat.index + 1}"></span>
-                        주문번호: <span th:text="${order.serviceOrderId}"></span>
-                        방이름: <span class="badge bg-primary ms-2" th:text="${order.reservationDTO.room.roomName}"></span>
-                        방 예약 날짜 : <span th:text="${#temporals.format(order.reservationDTO.regDate, 'yyyy-MM-dd')}"></span>
-                        주문 날짜 : <span th:text="${#temporals.format(order.regDate, 'yyyy-MM-dd')}"></span>
-                        <span class="badge bg-danger ms-2">취소됨</span>
-                    </div>
-                    <ul class="list-group list-group-flush">
-                        <li th:each="item : ${order.serviceOrderItemDTOList}" class="list-group-item d-flex align-items-center">
-                            <img th:src="@{/upload/} + ${item.imagePath}" alt="메뉴 이미지" class="me-3" style="width: 60px; height: 60px; object-fit: cover;">
-                            <div>
-                                <span th:text="${item.serviceMenuName}"></span>
-                            </div>
-                        </li>
-                    </ul>
-                    <div class="card-footer">
-                        <span class="text-danger">해당 주문은 취소되었습니다.</span>
-                    </div>
+            <div layout:fragment="content" class="content">
+                <div th:if="${orders.totalElements == 0}" class="alert alert-warning text-center">
+                    주문 내역이 없습니다.
                 </div>
 
-                <!-- 대기중 주문 -->
-                <div th:if="${order.serviceOrderStatus.name() == 'PENDING'}" class="card pending-order">
-                    <div class="card-header bg-warning text-dark">
-                        NO.<span th:text="${(pageInfo.currentPage - 1) * orders.size + stat.index + 1}"></span>
-                        주문번호: <span th:text="${order.serviceOrderId}"></span>
-                        방이름: <span class="badge bg-primary ms-2" th:text="${order.reservationDTO.room.roomName}"></span>
-                        방 예약 날짜 : <span th:text="${#temporals.format(order.reservationDTO.regDate, 'yyyy-MM-dd')}"></span>
-                        주문 날짜 : <span th:text="${#temporals.format(order.regDate, 'yyyy-MM-dd')}"></span>
-                        <span class="badge bg-warning ms-2">대기중</span>
+                <div th:each="order, stat : ${orders.content}" class="card mb-3">
+
+                    <!-- 취소된 주문 -->
+                    <div th:if="${order.serviceOrderStatus.name() == 'CANCELED'}" class="card canceled-order">
+                        <div class="card-header bg-danger text-white">
+                            NO.<span th:text="${(pageInfo.currentPage - 1) * orders.size + stat.index + 1}"></span>
+                            주문번호: <span th:text="${order.serviceOrderId}"></span>
+                            방이름: <span class="badge bg-primary ms-2" th:text="${order.reservationDTO.room.roomName}"></span>
+                            방 예약 날짜 : <span th:text="${#temporals.format(order.reservationDTO.regDate, 'yyyy-MM-dd')}"></span>
+                            주문 날짜 : <span th:text="${#temporals.format(order.regDate, 'yyyy-MM-dd')}"></span>
+                            <span class="badge bg-danger ms-2">취소됨</span>
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li th:each="item : ${order.serviceOrderItemDTOList}" class="list-group-item d-flex align-items-center">
+                                <img th:src="@{/upload/} + ${item.imagePath}" alt="메뉴 이미지" class="me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                <div>
+                                    <span th:text="${item.serviceMenuName}"></span>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="card-footer">
+                            <span class="text-danger">해당 주문은 취소되었습니다.</span>
+                        </div>
                     </div>
-                    <ul class="list-group list-group-flush">
-                        <li th:each="item : ${order.serviceOrderItemDTOList}" class="list-group-item d-flex align-items-center">
-                            <img th:src="@{/upload/} + ${item.imagePath}" alt="메뉴 이미지" class="me-3" style="width: 60px; height: 60px; object-fit: cover;">
-                            <div>
-                                <span th:text="${item.serviceMenuName}"></span>
-                                - <span th:text="${item.count} + '개'"></span>
-                                - <span th:text="${item.orderPrice} + '원'"></span>
-                            </div>
-                        </li>
-                    </ul>
-                    <div class="card-footer d-flex justify-content-between">
-                        <span>총 가격: <strong th:text="${#aggregates.sum(order.serviceOrderItemDTOList.![count * orderPrice])} + '원'"></strong></span>
-                        <button class="btn btn-danger btn-sm" th:onclick="|cancelOrder(${order.serviceOrderId})|">주문 취소</button>
+
+                    <!-- 대기중 주문 -->
+                    <div th:if="${order.serviceOrderStatus.name() == 'PENDING'}" class="card pending-order">
+                        <div class="card-header bg-warning text-dark">
+                            NO.<span th:text="${(pageInfo.currentPage - 1) * orders.size + stat.index + 1}"></span>
+                            주문번호: <span th:text="${order.serviceOrderId}"></span>
+                            방이름: <span class="badge bg-primary ms-2" th:text="${order.reservationDTO.room.roomName}"></span>
+                            방 예약 날짜 : <span th:text="${#temporals.format(order.reservationDTO.regDate, 'yyyy-MM-dd')}"></span>
+                            주문 날짜 : <span th:text="${#temporals.format(order.regDate, 'yyyy-MM-dd')}"></span>
+                            <span class="badge bg-warning ms-2">대기중</span>
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li th:each="item : ${order.serviceOrderItemDTOList}" class="list-group-item d-flex align-items-center">
+                                <img th:src="@{/upload/} + ${item.imagePath}" alt="메뉴 이미지" class="me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                <div>
+                                    <span th:text="${item.serviceMenuName}"></span>
+                                    - <span th:text="${item.count} + '개'"></span>
+                                    - <span th:text="${item.orderPrice} + '원'"></span>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="card-footer d-flex justify-content-between">
+                            <span>총 가격: <strong th:text="${#aggregates.sum(order.serviceOrderItemDTOList.![count * orderPrice])} + '원'"></strong></span>
+                            <button class="btn btn-danger btn-sm" th:onclick="|cancelOrder(${order.serviceOrderId})|">주문 취소</button>
+                        </div>
                     </div>
+
+                    <!-- 완료된 주문 -->
+                    <div th:if="${order.serviceOrderStatus.name() == 'COMPLETED'}" class="card completed-order">
+                        <div class="card-header bg-success text-white">
+                            NO.<span th:text="${(pageInfo.currentPage - 1) * orders.size + stat.index + 1}"></span>
+                            주문번호: <span th:text="${order.serviceOrderId}"></span>
+                            방이름: <span class="badge bg-primary ms-2" th:text="${order.reservationDTO.room.roomName}"></span>
+                            방 예약 날짜 : <span th:text="${#temporals.format(order.reservationDTO.regDate, 'yyyy-MM-dd')}"></span>
+                            주문 날짜 : <span th:text="${#temporals.format(order.regDate, 'yyyy-MM-dd')}"></span>
+                            <span class="badge bg-success ms-2">완료됨</span>
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li th:each="item : ${order.serviceOrderItemDTOList}" class="list-group-item d-flex align-items-center">
+                                <img th:src="@{/upload/} + ${item.imagePath}" alt="메뉴 이미지" class="me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                <div>
+                                    <span th:text="${item.serviceMenuName}"></span>
+                                    - <span th:text="${item.count} + '개'"></span>
+                                    - <span th:text="${item.orderPrice} + '원'"></span>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="card-footer">
+                            <span class="text-success">총 가격: <strong th:text="${#aggregates.sum(order.serviceOrderItemDTOList.![count * orderPrice])} + '원'"></strong> 결제 완료 🎉</span>
+                        </div>
+                    </div>
+
                 </div>
 
-                <!-- 완료된 주문 -->
-                <div th:if="${order.serviceOrderStatus.name() == 'COMPLETED'}" class="card completed-order">
-                    <div class="card-header bg-success text-white">
-                        NO.<span th:text="${(pageInfo.currentPage - 1) * orders.size + stat.index + 1}"></span>
-                        주문번호: <span th:text="${order.serviceOrderId}"></span>
-                        방이름: <span class="badge bg-primary ms-2" th:text="${order.reservationDTO.room.roomName}"></span>
-                        방 예약 날짜 : <span th:text="${#temporals.format(order.reservationDTO.regDate, 'yyyy-MM-dd')}"></span>
-                        주문 날짜 : <span th:text="${#temporals.format(order.regDate, 'yyyy-MM-dd')}"></span>
-                        <span class="badge bg-success ms-2">완료됨</span>
-                    </div>
-                    <ul class="list-group list-group-flush">
-                        <li th:each="item : ${order.serviceOrderItemDTOList}" class="list-group-item d-flex align-items-center">
-                            <img th:src="@{/upload/} + ${item.imagePath}" alt="메뉴 이미지" class="me-3" style="width: 60px; height: 60px; object-fit: cover;">
-                            <div>
-                                <span th:text="${item.serviceMenuName}"></span>
-                                - <span th:text="${item.count} + '개'"></span>
-                                - <span th:text="${item.orderPrice} + '원'"></span>
-                            </div>
+
+
+                <!-- 페이지네이션 -->
+                <div class="d-flex justify-content-center" th:if="${orders.totalPages > 1}">
+                    <ul class="pagination">
+                        <li class="page-item" th:classappend="${pageInfo.currentPage == 1} ? 'disabled'">
+                            <a class="page-link" th:href="@{/myPage/order/history(page=1)}">시작</a>
+                        </li>
+                        <li class="page-item" th:unless="${pageInfo.currentPage == 1}">
+                            <a class="page-link" th:href="@{/myPage/order/history(page=${pageInfo.prevPage})}">이전</a>
+                        </li>
+                        <th:block th:each="num : ${#numbers.sequence(pageInfo.startPage, pageInfo.endPage, 1)}">
+                            <li class="page-item" th:unless="${num == pageInfo.currentPage}">
+                                <a class="page-link" th:href="@{/myPage/order/history(page=${num})}" th:text="${num}">1</a>
+                            </li>
+                            <li class="page-item active" th:if="${num == pageInfo.currentPage}">
+                                <a class="page-link" th:href="@{/myPage/order/history(page=${num})}" th:text="${num}">[[${num}]]</a>
+                            </li>
+                        </th:block>
+                        <li class="page-item" th:unless="${pageInfo.currentPage >= pageInfo.lastPage}">
+                            <a class="page-link" th:href="@{/myPage/order/history(page=${pageInfo.nextPage})}">다음</a>
+                        </li>
+                        <li class="page-item" th:classappend="${pageInfo.currentPage == pageInfo.lastPage} ? 'disabled'">
+                            <a class="page-link" th:href="@{/myPage/order/history(page=${pageInfo.lastPage})}">끝</a>
                         </li>
                     </ul>
-                    <div class="card-footer">
-                        <span class="text-success">총 가격: <strong th:text="${#aggregates.sum(order.serviceOrderItemDTOList.![count * orderPrice])} + '원'"></strong> 결제 완료 🎉</span>
-                    </div>
                 </div>
-
-            </div>
-
-
-
-            <!-- 페이지네이션 -->
-            <div class="d-flex justify-content-center" th:if="${orders.totalPages > 1}">
-                <ul class="pagination">
-                    <li class="page-item" th:classappend="${pageInfo.currentPage == 1} ? 'disabled'">
-                        <a class="page-link" th:href="@{/myPage/order/history(page=1)}">시작</a>
-                    </li>
-                    <li class="page-item" th:unless="${pageInfo.currentPage == 1}">
-                        <a class="page-link" th:href="@{/myPage/order/history(page=${pageInfo.prevPage})}">이전</a>
-                    </li>
-                    <th:block th:each="num : ${#numbers.sequence(pageInfo.startPage, pageInfo.endPage, 1)}">
-                        <li class="page-item" th:unless="${num == pageInfo.currentPage}">
-                            <a class="page-link" th:href="@{/myPage/order/history(page=${num})}" th:text="${num}">1</a>
-                        </li>
-                        <li class="page-item active" th:if="${num == pageInfo.currentPage}">
-                            <a class="page-link" th:href="@{/myPage/order/history(page=${num})}" th:text="${num}">[[${num}]]</a>
-                        </li>
-                    </th:block>
-                    <li class="page-item" th:unless="${pageInfo.currentPage >= pageInfo.lastPage}">
-                        <a class="page-link" th:href="@{/myPage/order/history(page=${pageInfo.nextPage})}">다음</a>
-                    </li>
-                    <li class="page-item" th:classappend="${pageInfo.currentPage == pageInfo.lastPage} ? 'disabled'">
-                        <a class="page-link" th:href="@{/myPage/order/history(page=${pageInfo.lastPage})}">끝</a>
-                    </li>
-                </ul>
             </div>
         </div>
     </div>
