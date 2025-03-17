@@ -219,11 +219,14 @@
                         </li>
 
                         <!-- 페이지 번호 -->
-                        <th:block th:each="page : ${#numbers.sequence(0, totalPages - 1)}">
-                            <li class="page-item" th:classappend="${currentPage == page} ? 'active'">
-                                <a class="page-link" th:href="@{/like/list(page=${page})}" th:text="${page + 1}"></a>
-                            </li>
+                        <th:block th:if="${totalPages > 0}">
+                            <th:block th:each="page : ${#numbers.sequence(0, totalPages - 1)}">
+                                <li class="page-item" th:classappend="${currentPage == page} ? 'active'">
+                                    <a class="page-link" th:href="@{/like/list(page=${page})}" th:text="${page + 1}"></a>
+                                </li>
+                            </th:block>
                         </th:block>
+
 
                         <!-- 다음 페이지 -->
                         <li class="page-item" th:if="${currentPage < totalPages - 1}">
