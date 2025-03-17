@@ -263,43 +263,29 @@ public class AdminCompanyHotelController {
 
 
     // ------------------ hotel ---------------------
-    //등록폼
+    //관리자 지사 등록 폼
     @Operation(summary = "관리자용 호텔 등록 폼", description = "호텔 등록 페이지로 이동한다.")
     @GetMapping("/hotel/register")
     public String registerForm(Model model) {
-        //검증처리가 필요하면 빈 companyDTO를 생성해서 전달한다.
         List<CompanyDTO> companyDTOS = hotelService.getAllCompany();
         model.addAttribute("companyDTOS", companyDTOS);
         model.addAttribute("companyDTO", new CompanyDTO());
-
         return "/manager/hotel/register";
     }
 
-    //등록처리
+    //관리자 지사 등록 처리
     @Operation(summary = "관리자용 호텔 등록 처리", description = "호텔을 등록 처리한 후 호텔 목록으로 이동한다.")
     @PostMapping("/hotel/register")
     public String registerProc(@ModelAttribute HotelDTO hotelDTO,
-                               List<MultipartFile> imageFiles,
+                               @RequestParam("imageFiles") List<MultipartFile> imageFiles,
                                RedirectAttributes redirectAttributes,
                                Principal principal) {
-        log.info("본사 등록 진입");
-
-        // 현재 로그인한 사용자의 이메일 가져오기
         String userEmail = principal.getName();
-
-        // 호텔 등록 서비스 호출
         hotelService.register(hotelDTO, imageFiles, userEmail);
 
-        log.info("서비스 호출 후 companyId: " + hotelDTO.getCompanyId()); // ✅ 여기서 null이면 DTO 반영 문제!
-
-        // 성공 메시지와 함께 companyId도 전달
         redirectAttributes.addFlashAttribute("message", "지사 등록이 완료되었습니다.");
-        redirectAttributes.addFlashAttribute("companyId", hotelDTO.getCompanyId());
-
         return "redirect:/admin/hotel/list";
     }
-
-
 
     //관리자 호텔 목록
     @Operation(summary = "관리자용 호텔 목록", description = "전체 호텔 목록 페이지로 이동한다.")
