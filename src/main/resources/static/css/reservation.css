@@ -380,6 +380,17 @@ h2 {
     background-color: #0056b3;
 }
 
+.btn-view {
+    background-color: #cdfde5 !important;
+    border-color: #dffbf2 !important;
+    color: #000000 !important;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
 /* 비로그인 */
 .Non-login {
     text-align: center;

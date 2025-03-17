@@ -1,7 +1,6 @@
 package com.ntt.ntt.DTO;
 
 import com.ntt.ntt.Entity.RoomReview;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
@@ -29,13 +28,15 @@ public class RoomReviewDTO {
 
     private String memberName;
 
+    private String maskedMemberName;
+
     private LocalDateTime reviewDate;
 
     private LocalDateTime regDate;
 
     private LocalDateTime modDate;
 
-    public static RoomReviewDTO fromEntity(RoomReview roomReview) {
+    public static RoomReviewDTO fromEntity(RoomReview roomReview, String maskedName) {
         if (roomReview == null) {
             throw new IllegalArgumentException("roomReview 엔티티가 null입니다.");
         }
@@ -48,6 +49,7 @@ public class RoomReviewDTO {
                 roomReview.getMember() != null ? roomReview.getMember().getMemberId() : null,
                 roomReview.getRoom() != null ? roomReview.getRoom().getRoomName() : "삭제된 객실",
                 roomReview.getMember() != null ? roomReview.getMember().getMemberName() : "탈퇴한 회원",
+                maskedName,
                 roomReview.getReviewDate(),
                 roomReview.getRegDate(),
                 roomReview.getModDate()

@@ -35,6 +35,14 @@
     transition: all 0.3s ease-in-out;
 }
 
+.review-not-exist {
+    padding: 2rem;
+}
+
+.review-not-exist .review-not-exist-text {
+    font-size: 1.5rem;
+}
+
 /* 리뷰 수정 모달창 스타일 */
 .modal-header {
     position: relative;

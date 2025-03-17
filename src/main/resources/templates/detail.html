@@ -182,7 +182,6 @@
             </ul>
         </section>
 
-
         <!-- 리뷰  -->
 
         <!-- 수정 모달 -->
@@ -861,80 +860,96 @@
             return disabledDates;
         }
 
-        /* flatpickr 함수 */
+        /* 유저 중복 예약방지 Flatpickr 함수 */
         document.addEventListener("DOMContentLoaded", function () {
             let reservationInput = document.getElementById("reservationDates");
             let checkInInput = document.getElementById("checkInDate");
             let checkOutInput = document.getElementById("checkOutDate");
             let roomId = document.getElementById("roomId")?.value || null;
-            let reservationPicker = null; // flatpickr 인스턴스 저장 변수
+            let reservationPicker = null;
 
             if (!reservationInput || !checkInInput || !checkOutInput || !roomId) {
                 console.error(" ERROR: 필요한 요소를 찾을 수 없습니다!");
                 return;
             }
+            /* 예약된 날짜 목록 가져와서 비활성화된 날짜 리스트로 변환 */
+            function getDisabledDates(data) {
+                let disabledDates = [];
 
-            function initFlatpickr() {
-                fetch(`/reservation/booked-dates/${roomId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        let disabledDates = [];
-                        data.forEach(reservation => {
-                            let start = new Date(reservation.checkIn);
-                            let end = new Date(reservation.checkOut);
-                            while (start < end) {
-                                disabledDates.push(start.toISOString().split("T")[0]); // YYYY-MM-DD 형식
-                                start.setDate(start.getDate() + 1);
-                            }
-                        });
+                data.forEach(reservation => {
+                    let start = new Date(reservation.checkIn);
+                    let end = new Date(reservation.checkOut);
+                    let checkOutHour = new Date(reservation.checkOut).getHours(); // 체크아웃 시간 가져오기
 
-                        if (reservationPicker) {
-                            reservationPicker.destroy();
+                    // 체크아웃 날짜가 11:00 이후라면, 체크아웃 날짜 자체를 비활성화
+                    if (checkOutHour >= 11) {
+                        let checkOutDate = new Date(reservation.checkOut).toISOString().split("T")[0];
+                        if (!disabledDates.includes(checkOutDate)) {
+                            disabledDates.push(checkOutDate);
                         }
+                    }
 
-                        reservationInput.removeAttribute("readonly");
+                    // 예약된 날짜 범위 전체 비활성화
+                    while (start < end) {
+                        let formattedDate = start.toISOString().split("T")[0]; // YYYY-MM-DD 형식
+                        if (!disabledDates.includes(formattedDate)) {
+                            disabledDates.push(formattedDate);
+                        }
+                        start.setDate(start.getDate() + 1);
+                    }
+                });
 
-                        reservationPicker = flatpickr("#reservationDates", {
-                            mode: "range",
-                            dateFormat: "Y-m-d",
-                            minDate: "today",
-                            disable: disabledDates,
-                            locale: "ko",
-                            onClose: function (selectedDates) {
-                                if (selectedDates.length === 2) {
-                                    let checkInDateFormatted = flatpickr.formatDate(selectedDates[0], "Y-m-d") + "T11:00";
-                                    let checkOutDateFormatted = flatpickr.formatDate(selectedDates[1], "Y-m-d") + "T10:00";
-
-                                    console.log(" 선택된 체크인 날짜:", checkInDateFormatted);
-                                    console.log(" 선택된 체크아웃 날짜:", checkOutDateFormatted);
-
-                                    checkInInput.value = checkInDateFormatted;
-                                    checkOutInput.value = checkOutDateFormatted;
-                                    calculateStayAndPrice();
-                                } else {
-                                    console.warn("️ 날짜 선택이 부족합니다.");
-                                }
-                            }
-                        });
-                    })
-                    .catch(error => console.error(" 예약된 날짜 불러오기 실패:", error));
+                return disabledDates;
             }
 
+            /* Flatpickr 초기화 */
+            function initFlatpickr(disabledDates) {
+                if (reservationPicker) {
+                    reservationPicker.destroy();
+                }
+
+                reservationInput.removeAttribute("readonly");
+
+                reservationPicker = flatpickr("#reservationDates", {
+                    mode: "range",
+                    dateFormat: "Y-m-d",
+                    minDate: "today",
+                    disable: disabledDates, // 예약된 날짜 비활성화 적용
+                    locale: "ko",
+                    onClose: function (selectedDates) {
+                        if (selectedDates.length === 2) {
+                            let checkInDateFormatted = flatpickr.formatDate(selectedDates[0], "Y-m-d") + "T11:00";
+                            let checkOutDateFormatted = flatpickr.formatDate(selectedDates[1], "Y-m-d") + "T10:00";
+
+                            console.log(" 선택된 체크인 날짜:", checkInDateFormatted);
+                            console.log(" 선택된 체크아웃 날짜:", checkOutDateFormatted);
+
+                            checkInInput.value = checkInDateFormatted;
+                            checkOutInput.value = checkOutDateFormatted;
+                            calculateStayAndPrice();
+                        } else {
+                            console.warn(" 날짜 선택이 부족합니다.");
+                        }
+                    }
+                });
+            }
+
+            /*  예약된 날짜 불러오기 */
             function fetchBookedDates() {
                 fetch(`/reservation/booked-dates/${roomId}`)
                     .then(response => response.json())
                     .then(data => {
-                        console.log(" 예약된 날짜 리스트 (API 응답):", data);
+                        console.log(" [예약된 날짜 리스트] API 응답:", data);
 
                         let disabledDates = (Array.isArray(data) && data.length > 0) ? getDisabledDates(data) : [];
 
-                        console.log(" 비활성화할 날짜 리스트:", disabledDates);
+                        console.log(" [비활성화할 날짜 리스트]:", disabledDates);
 
-                        // 예약된 날짜가 없어도 Flatpickr를 실행하도록 설정
+                        // 예약된 날짜가 없어도 Flatpickr 실행
                         initFlatpickr(disabledDates);
                     })
                     .catch(error => {
-                        console.error("️ 예약된 날짜를 불러오는 중 오류 발생:", error);
+                        console.error(" [예약된 날짜를 불러오는 중 오류 발생]:", error);
                         initFlatpickr([]); // 오류 발생 시에도 Flatpickr 실행
                     });
             }
@@ -991,32 +1006,36 @@
                             reviewItem.setAttribute("data-review-id", review.reviewId);
                             reviewItem.setAttribute("data-review-text", review.reviewText);
                             reviewItem.setAttribute("data-review-rating", review.rating);
+
                             // 별점 클래스 추가
                             let ratingClass = `rating-${review.rating}`;
+
+                            //  마스킹된 멤버 이름 사용 (maskedMemberName)
+                            let maskedMemberName = review.maskedMemberName || "익명";
 
                             // 본인 리뷰인 경우 수정/삭제 버튼 추가
                             let actionButtons = "";
                             if (memberId && memberId == review.memberId) {
                                 actionButtons = `
-                                <button class="btn btn-sm btn-outline-primary edit-review-btn"
-                                        data-review-id="${review.reviewId}"
-                                        data-review-text="${review.reviewText}"
-                                        data-review-rating="${review.rating}">수정</button>
-                                <button class="btn btn-sm btn-outline-danger delete-review-btn"
-                                        data-review-id="${review.reviewId}">삭제</button>
-                            `;
+                        <button class="btn btn-sm btn-outline-primary edit-review-btn"
+                                data-review-id="${review.reviewId}"
+                                data-review-text="${review.reviewText}"
+                                data-review-rating="${review.rating}">수정</button>
+                        <button class="btn btn-sm btn-outline-danger delete-review-btn"
+                                data-review-id="${review.reviewId}">삭제</button>
+                    `;
                             }
 
                             reviewItem.innerHTML = `
-                                <div class="review-meta">
-                                    <p><strong>${review.memberName || "익명"}</strong> -
-                                        <span class="star-rating ${ratingClass}">${"★".repeat(review.rating)}${"☆".repeat(5 - review.rating)}</span>
-                                    </p>
-                                    <p class="text-muted small review-date">${new Date(review.reviewDate).toLocaleString()}</p>
-                                </div>
-                                <p>${review.reviewText}</p>
-                                <div>${actionButtons}</div>
-                            `;
+                    <div class="review-meta">
+                        <p><strong>${maskedMemberName}</strong> -
+                            <span class="star-rating ${ratingClass}">${"★".repeat(review.rating)}${"☆".repeat(5 - review.rating)}</span>
+                        </p>
+                        <p class="text-muted small review-date">${new Date(review.reviewDate).toLocaleString()}</p>
+                    </div>
+                    <p>${review.reviewText}</p>
+                    <div>${actionButtons}</div>
+                `;
                             reviewList.appendChild(reviewItem);
                         });
 
@@ -1094,7 +1113,6 @@
             document.getElementById("submitReview").addEventListener("click", function () {
                 const roomId = getRoomIdFromURL();
                 const memberId = document.getElementById("reviewMemberId")?.value || null;
-                const reviewList = document.getElementById("reviewList");
                 const reviewText = document.getElementById("reviewText").value;
                 const rating = document.getElementById("rating").value;
 
@@ -1127,8 +1145,8 @@
                             // 입력 폼 초기화
                             document.getElementById("reviewForm").reset();
 
-                            // 최신 리뷰 추가
-                            addReviewToList(data.reviewId, data.memberName || "익명", reviewText, rating);
+                            // 리뷰 리스트에 마스킹된 이름 적용
+                            addReviewToList(data.reviewId, data.maskedMemberName, reviewText, rating);
 
                             // "등록된 후기가 없습니다." 메시지가 있으면 숨김
                             document.getElementById("noReviewMessage").style.display = "none";
@@ -1140,7 +1158,7 @@
             });
 
             /* 새 리뷰를 추가하는 함수 */
-            function addReviewToList(reviewId, memberName, reviewText, rating) {
+            function addReviewToList(reviewId, maskedMemberName, reviewText, rating) {
                 const reviewList = document.getElementById("reviewList");
 
                 const newReviewItem = document.createElement("div");
@@ -1160,7 +1178,7 @@
 
                 newReviewItem.innerHTML = `
                         <div class="review-meta">
-                            <p><strong>${memberName}</strong> -
+                            <p><strong>${maskedMemberName}</strong> -
                                 <span class="star-rating rating-${rating}">${"★".repeat(rating)}${"☆".repeat(5 - rating)}</span>
                             </p>
                             <p class="text-muted small review-date">${new Date().toLocaleString()}</p>
@@ -1176,6 +1194,12 @@
                 newReviewItem.querySelector(".edit-review-btn").addEventListener("click", openEditReviewModal);
                 newReviewItem.querySelector(".delete-review-btn").addEventListener("click", deleteReview);
 
+            }
+
+            // 마스킹 처리 함수
+            function maskName(name) {
+                if (!name || name.length < 2) return "익명"; // 이름이 너무 짧으면 익명 처리
+                return name[0] + "*".repeat(name.length - 2) + name[name.length - 1]; // 첫 글자와 마지막 글자 유지, 중간 글자는 '*'
             }
 
             /* 리뷰 개수 확인 후 `loadMoreButton` 업데이트 */

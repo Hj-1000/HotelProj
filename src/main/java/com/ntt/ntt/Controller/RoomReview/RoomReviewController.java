@@ -45,7 +45,7 @@ public class RoomReviewController {
                     "reviewId", savedReview.getReviewId(),
                     "roomId", savedReview.getRoomId(),
                     "memberId", savedReview.getMemberId(),
-                    "memberName", savedReview.getMemberName(),
+                    "maskedMemberName", savedReview.getMaskedMemberName(),
                     "rating", savedReview.getRating(),
                     "reviewText", savedReview.getReviewText(),
                     "reviewDate", savedReview.getReviewDate()

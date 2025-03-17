@@ -10,6 +10,12 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css"/>
     <link rel="stylesheet" th:href="@{/css/reservation.css}" type="text/css"/>
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <!-- Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!-- Flatpickr 한국어 로케일 추가 -->
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/ko.js"></script>
 </head>
 <body>
 <div layout:fragment="content" class="wrap mt-4">
@@ -251,10 +257,10 @@
 
                             <!-- 수정 버튼 -->
                             <td>
-                                <!-- 예약된 객실 보기 버튼 -->
+                                <!-- 예약된 객실 조회 버튼 -->
                                 <th:block th:if="${reservation != null}">
                                     <div class="button-container">
-                                        <button class="btn-warning"
+                                        <button class="btn-view"
                                                 th:text="'조회'"
                                                 th:attr="data-room-id=${room.roomId}"
                                                 onclick="viewRoomReservations(this.getAttribute('data-room-id'))">
@@ -395,10 +401,10 @@
                 </select><br>
 
                 <label>체크인 날짜:</label>
-                <input type="datetime-local" id="registerCheckIn" name="checkInDate" required><br>
+                <input type="datetime-local" id="registerCheckIn" name="checkInDate" required>
 
                 <label>체크아웃 날짜:</label>
-                <input type="datetime-local" id="registerCheckOut" name="checkOutDate" required><br>
+                <input type="datetime-local" id="registerCheckOut" name="checkOutDate" required>
 
                 <label>예약마감 날짜:</label>
                 <input type="date" id="registerReservationEnd" name="reservationEnd" readonly disabled><br>
@@ -584,8 +590,6 @@
                 .catch(error => console.error("탭 새로고침 중 오류 발생:", error));
         }
 
-
-
         /* 예약 마감 기한 수정시 Room_Status 자동 업데이트 */
         document.addEventListener("DOMContentLoaded", function () {
             // 수정 모달의 예약 마감 날짜
@@ -697,8 +701,7 @@
         document.addEventListener("DOMContentLoaded", function () {
             document.querySelectorAll(".btn-warning").forEach(button => {
                 button.addEventListener("click", function () {
-                    console.log(" 수정 버튼 클" +
-                        "릭 감지됨!");
+                    console.log(" 수정 버튼 클" + "릭 감지됨!");
 
                     let roomId = this.getAttribute("data-room-id");
                     let reservationId = this.getAttribute("data-reservation-id");
@@ -745,7 +748,6 @@
         }
 
         /* Tab 버튼 클릭시 페이징 , 검색기능 초기화 */
-
         function resetPaginationAndSearch(tab) {
             let url = new URL(window.location.href);
             url.searchParams.set("tab", tab);
@@ -768,7 +770,6 @@
                 })
                 .catch(error => console.error("탭 변경 중 오류 발생:", error));
         }
-
 
         document.addEventListener("DOMContentLoaded", function () {
             let checkInInputs = document.querySelectorAll("#editCheckIn, #registerCheckIn");
@@ -818,7 +819,6 @@
         });
 
         /* 체크인 날짜 변경 시 체크아웃 최소 날짜 설정 */
-
         document.addEventListener("DOMContentLoaded", function () {
             let checkInInputs = document.querySelectorAll("#editCheckIn, #registerCheckIn");
             let checkOutInputs = document.querySelectorAll("#editCheckOut, #registerCheckOut");
@@ -982,8 +982,8 @@
             }
         });
 
-        /* 수정 모달 열기 */
-        function openEditModal(roomId, reservationId, memberId, checkIn, checkOut, reservationEnd, isExpired, count) {
+        /* 수정 모달 Flatpickr 함수  */
+        async function openEditModal(roomId, reservationId, memberId, checkIn, checkOut, reservationEnd, isExpired, count) {
             console.log("모달 열기 함수 실행됨!", { roomId, reservationId, memberId, checkIn, checkOut, reservationEnd, isExpired, count });
 
             let modal = document.getElementById("editModal");
@@ -1053,7 +1053,6 @@
                 editMemberEmail.value = "";
             }
 
-
             // reservationEnd가 undefined라면 roomId를 이용해 가져오기
             if (!reservationEnd) {
                 let roomElement = document.querySelector(`[data-room-id='${roomId}']`);
@@ -1089,26 +1088,14 @@
 
             console.log(`객실 ${roomId}의 숙박 가능 기간: ${stayStart} ~ ${stayEnd}`);
 
+            // 예약된 날짜 가져오기
+            let disabledDates = await fetchBookedDates(roomId);
+
             // 체크인 & 체크아웃 날짜 범위 설정
             editCheckIn.min = stayStart;
             editCheckIn.max = stayEnd;
             editCheckOut.min = stayStart;
             editCheckOut.max = stayEnd;
-
-            // 체크인 날짜 선택 시 체크아웃 최소값 갱신
-            editCheckIn.addEventListener("change", function () {
-                let selectedCheckIn = new Date(this.value);
-                let nextDay = new Date(selectedCheckIn);
-                nextDay.setDate(nextDay.getDate() + 1);
-
-                let formattedNextDay = nextDay.toISOString().split("T")[0];
-                editCheckOut.min = formattedNextDay;
-
-                // 기존 체크아웃 날짜가 유효 범위를 벗어나면 초기화
-                if (editCheckOut.value && new Date(editCheckOut.value) < selectedCheckIn) {
-                    editCheckOut.value = "";
-                }
-            });
 
             // 객실 유형에 따른 최대 인원 설정
             let maxPeople = getMaxPeopleByRoomType(roomType);
@@ -1203,6 +1190,9 @@
                 if (hiddenInput) {
                     hiddenInput.remove();
                 }
+
+                // 만료된 객실이 아닌 경우에만 Flatpickr 실행
+                setupFlatpickr(editCheckIn, editCheckOut, disabledDates, stayStart, stayEnd);
             }
 
             modal.style.display = "block";
@@ -1301,8 +1291,8 @@
                 .catch(error => console.error("예약 정보 불러오기 오류:", error));
         }
 
-        /* 예약 등록 모달 열기 */
-        function openRegisterModal(roomId, memberId = null) {
+        /* 예약 등록 모달 Flatpickr 함수 */
+        async function openRegisterModal(roomId, memberId = null) {
             let modal = document.getElementById("registerModal");
             if (!modal) {
                 console.error("[오류] registerModal이 존재하지 않습니다.");
@@ -1352,6 +1342,9 @@
             }
 
             console.log(`객실 ${roomId}의 숙박 가능 기간: ${stayStart} ~ ${stayEnd}`);
+
+            //  예약된 날짜 가져오기 (비동기 방식)
+            let disabledDates = await fetchBookedDates(roomId);
 
             // 체크인/체크아웃 날짜 범위 설정
             registerCheckIn.min = stayStart;
@@ -1421,8 +1414,139 @@
                 registerMemberEmail.setAttribute("disabled", "true");
             }
 
+            console.log(` 예약 불가 날짜 목록:`, disabledDates);
+            setupFlatpickr(registerCheckIn, registerCheckOut, disabledDates, stayStart, stayEnd);
+
             modal.style.display = "block";
             document.body.style.overflow = "hidden";
+        }
+
+        /*  예약된 날짜 가져오기 */
+        async function fetchBookedDates(roomId) {
+            try {
+                let response = await fetch(`/reservation/booked-dates/${roomId}`);
+                let data = await response.json();
+
+                let disabledDates = [];
+                data.forEach(reservation => {
+                    let start = new Date(reservation.checkIn);
+                    let end = new Date(reservation.checkOut);
+                    while (start < end) {
+                        disabledDates.push(start.toISOString().split("T")[0]); // YYYY-MM-DD 형식
+                        start.setDate(start.getDate() + 1);
+                    }
+                });
+
+                return disabledDates;
+            } catch (error) {
+                console.error(" 예약된 날짜 불러오기 실패:", error);
+                return [];
+            }
+        }
+
+        function setupFlatpickr(checkInInput, checkOutInput, disabledDates, minDate, maxDate, isEditMode = false) {
+            let checkOutPicker;
+
+            // 오늘 날짜를 추가하여 정의
+            let today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // minDate 설정 (등록 모달: today, 수정 모달: stayStart)
+            let finalMinDate = isEditMode ? minDate : today;
+
+            let checkInPicker = flatpickr(checkInInput, {
+                enableTime: false,
+                dateFormat: "Y-m-d\\TH:i",  // 내부 값 (ISO 8601 형식 유지)
+                altInput: true,  // 사용자에게 다른 형식으로 표시
+                altFormat: "Y-m-d 오전 h:i",  //  표시할 형식
+                minDate: finalMinDate,
+                maxDate: maxDate,
+                disable: disabledDates,
+                locale: "ko",
+                defaultDate: checkInInput.value,  //  기존 값이 있으면 적용
+                onReady: function(selectedDates, dateStr, instance) {
+                    //  기존 값이 있으면 사용자가 보는 값으로 변환
+                    if (dateStr) {
+                        let formattedAlt = formatToKoreanTime(dateStr, "T10:00");
+                        instance.altInput.value = formattedAlt;
+                    }
+                },
+                onChange: function (selectedDates, dateStr, instance) {
+                    if (selectedDates.length > 0) {
+                        let selectedCheckIn = selectedDates[0];
+                        let nextDay = new Date(selectedCheckIn);
+                        nextDay.setDate(nextDay.getDate() + 1);
+
+                        //  내부 값 (서버 전송용)
+                        let formattedCheckIn = flatpickr.formatDate(selectedCheckIn, "Y-m-d") + "T10:00";
+                        checkInInput.value = formattedCheckIn;
+
+                        //  사용자에게 보이는 값 변경
+                        instance.altInput.value = formatToKoreanTime(formattedCheckIn, "T10:00");
+
+                        console.log(" 선택된 체크인:", formattedCheckIn);
+
+                        //  체크아웃 최소 날짜 설정 (체크인 다음날)
+                        let formattedCheckOut = flatpickr.formatDate(nextDay, "Y-m-d") + "T11:00";
+                        checkOutInput.value = formattedCheckOut;
+                        checkOutInput._flatpickr.setDate(formattedCheckOut, true);
+
+                        console.log(" 선택된 체크아웃:", formattedCheckOut);
+
+                        if (checkOutPicker) {
+                            checkOutPicker.set("minDate", nextDay);
+                        }
+                    }
+                }
+            });
+
+            checkOutPicker = flatpickr(checkOutInput, {
+                enableTime: false,
+                dateFormat: "Y-m-d\\TH:i",  //  내부 값 (ISO 8601 형식 유지)
+                altInput: true,
+                altFormat: "Y-m-d 오전 h:i",
+                minDate: finalMinDate,
+                maxDate: maxDate,
+                disable: disabledDates,
+                locale: "ko",
+                defaultDate: checkOutInput.value,  //  기존 값 적용
+                onReady: function(selectedDates, dateStr, instance) {
+                    if (dateStr) {
+                        let formattedAlt = formatToKoreanTime(dateStr, "T11:00");
+                        instance.altInput.value = formattedAlt;
+                    }
+                },
+                onChange: function (selectedDates, dateStr, instance) {
+                    if (selectedDates.length > 0) {
+                        let selectedCheckOut = selectedDates[0];
+
+                        // 내부 값 (서버 전송용)
+                        let formattedCheckOut = flatpickr.formatDate(selectedCheckOut, "Y-m-d") + "T11:00";
+                        checkOutInput.value = formattedCheckOut;
+
+                        // 사용자에게 보이는 값 변경
+                        instance.altInput.value = formatToKoreanTime(formattedCheckOut, "T11:00");
+
+                        console.log(" 선택된 체크아웃:", formattedCheckOut);
+                    }
+                }
+            });
+        }
+
+        /*  한국 시간 형식 변환 함수 */
+        function formatToKoreanTime(dateStr, fixedTime) {
+            let [datePart, timePart] = dateStr.split("T");
+            let hour = fixedTime.includes("10:00") ? "오전 10:00" : "오전 11:00";
+            return `${datePart} ${hour}`;
+        }
+
+        /* 예약 등록 모달 닫기 */
+        function closeRegisterModal() {
+            let modal = document.getElementById("registerModal");
+            if (modal) {
+                modal.style.display = "none";
+                document.body.style.overflow = "";
+            }
         }
 
         // 객실 타입별 최대 인원
@@ -1434,15 +1558,6 @@
                 case "Deluxe": return 5;
                 case "Family": return 6;
                 default: return 1;
-            }
-        }
-
-        /* 예약 등록 모달 닫기 */
-        function closeRegisterModal() {
-            let modal = document.getElementById("registerModal");
-            if (modal) {
-                modal.style.display = "none";
-                document.body.style.overflow = ""; // 스크롤 다시 활성화
             }
         }
 

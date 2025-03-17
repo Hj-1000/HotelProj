@@ -49,9 +49,13 @@
         </div>
     </div>
 
+    <!-- 리뷰가 없을 경우 -->
+    <div th:if="${reviews.isEmpty()}" class="review-not-exist alert alert-warning text-center">
+        <p class="review-not-exist-text">현재 등록된 리뷰가 없습니다.</p>
+    </div>
+
     <!-- 리뷰 목록 -->
-    <div class="card">
-        <!-- 테이블 -->
+    <div th:unless="${reviews.isEmpty()}" class="card">
         <div class="table-responsive">
             <table class="table table-bordered table-hover text-center">
                 <thead class="table-dark">
@@ -70,7 +74,7 @@
                 <tbody>
                 <!-- 검색 결과가 없을 경우 -->
                 <tr th:if="${reviews.isEmpty()}">
-                    <td colspan="8" class="text-center text-warning">현재 검색 결과가 없습니다.</td>
+                    <td colspan="12" class="text-center text-warning">현재 검색 결과가 없습니다.</td>
                 </tr>
                 <!-- 검색 결과가 있을 경우 -->
                 <tr th:each="review : ${reviews.content}" th:unless="${reviews.isEmpty()}">
