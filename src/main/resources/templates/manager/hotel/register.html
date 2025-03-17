@@ -70,7 +70,7 @@
                         <select id="companySelect" name="companyId" class="form-select">
                             <th:block th:each="companyDTOS : ${companyDTOS}">
                                 <option th:value="${companyDTOS.companyId}" th:text="${companyDTOS.companyName}"
-                                        th:selected="${#lists.size(companyDTOS) == 1}">뒤에바</option>
+                                        th:selected="${#lists.size(companyDTOS) == 1 or iterStat.index == 0}">뒤에바</option>
                             </th:block>
                         </select>
                     </div>
@@ -225,7 +225,7 @@
                         <select id="companySelect" name="companyId" class="form-select">
                             <th:block th:each="companyDTOS : ${companyDTOS}">
                                 <option th:value="${companyDTOS.companyId}" th:text="${companyDTOS.companyName}"
-                                        th:selected="${#lists.size(companyDTOS) == 1}">뒤에바</option>
+                                        th:selected="${#lists.size(companyDTOS) == 1 or iterStat.index == 0}">뒤에바</option>
                             </th:block>
                         </select>
                     </div>
