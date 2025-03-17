@@ -180,16 +180,17 @@
                     <h5 class="card-title">메뉴 / 카테고리 찾기</h5>
 
                     <!-- 검색 유형 선택 -->
-                    <div class="col-md-12">
-                        <select name="searchType" class="form-select">
+                    <div class="col-md-2">
+                        <select name="searchType" class="form-select form-control-lg">
                             <option value="name" th:selected="${searchType == 'name'}">메뉴명</option>
                             <option value="categoryName" th:selected="${searchType == 'categoryName'}">카테고리명</option>
                         </select>
                     </div>
 
                     <!-- 검색창 -->
-                    <div class="col-md-12">
-                        <input type="text" name="keyword" class="form-control form-control-lg" placeholder="검색어를 입력하세요" aria-label="검색어 입력">
+                    <div class="col-md-10">
+                        <input type="text" name="keyword" class="form-control form-control-lg"
+                               placeholder="검색어를 입력하세요" aria-label="검색어 입력" th:value="${keyword}">
                     </div>
                 </div>
 
@@ -219,6 +220,7 @@
                 </div>
             </form>
         </div>
+
 
         <!-- 목록 영역 -->
         <div class="card">

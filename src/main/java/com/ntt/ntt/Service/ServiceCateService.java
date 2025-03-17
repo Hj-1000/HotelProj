@@ -127,7 +127,7 @@ public class ServiceCateService{
     --------------------------------- */
 
     public Page<ServiceCateDTO> listByAdmin(Pageable page, String keyword, String searchType, Integer hotelId) {
-        int currentPage = page.getPageNumber() - 1; // 0-based index
+        int currentPage = page.getPageNumber() - 1;
         int pageSize = 10;
         Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.ASC, "hotel.hotelId").and(Sort.by(Sort.Direction.ASC, "serviceCateId")));
 
@@ -136,12 +136,13 @@ public class ServiceCateService{
         if (keyword != null && !keyword.isEmpty()) {
             String keywordLike = "%" + keyword + "%";
             if ("name".equals(searchType)) {
-                // 검색어 + hotelId 기준으로 필터링 2024-02-11 추가
-                if (hotelId != null) {
-                    serviceCatePage = serviceCateRepository.findByServiceCateNameLikeAndHotel_HotelId(keywordLike, hotelId, pageable);
-                } else {
-                    serviceCatePage = serviceCateRepository.findByServiceCateNameLike(keywordLike,pageable);
-                }
+                // 기존 카테고리명 검색
+                serviceCatePage = (hotelId != null)
+                        ? serviceCateRepository.findByServiceCateNameLikeAndHotel_HotelId(keywordLike, hotelId, pageable)
+                        : serviceCateRepository.findByServiceCateNameLike(keywordLike, pageable);
+            } else if ("hotelName".equals(searchType)) {
+                // 추가된 지사명 검색
+                serviceCatePage = serviceCateRepository.findByHotel_HotelNameLike(keywordLike, pageable);
             } else {
                 serviceCatePage = (hotelId != null)
                         ? serviceCateRepository.findByHotel_HotelId(hotelId, pageable)
@@ -160,6 +161,7 @@ public class ServiceCateService{
                     .map(Hotel::getHotelName)
                     .orElse("미지정 지사");
             serviceCateDTO.setHotelName(hotelName);
+
             List<ImageDTO> imageDTOList = imageRepository.findByServiceCate_ServiceCateId(serviceCateDTO.getServiceCateId())
                     .stream().map(imagefile -> {
                         imagefile.setImagePath(imagefile.getImagePath().replace("c:/data/", ""));
@@ -235,25 +237,21 @@ public class ServiceCateService{
     설명 : 요청한 페이지번호에 해당하는 데이터를 조회해서 전달
     --------------------------------*/
     public Page<ServiceCateDTO> listByChief(Pageable page, String keyword, String searchType, Integer hotelId, Integer memberId) {
-        int currentPage = page.getPageNumber() - 1; // 0-based index
+        int currentPage = page.getPageNumber() - 1;
         int pageSize = 10;
-
         Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.ASC, "hotel.hotelId").and(Sort.by(Sort.Direction.ASC, "serviceCateId")));
+
         Page<ServiceCate> serviceCatePage;
 
         if (keyword != null && !keyword.isEmpty()) {
             String keywordLike = "%" + keyword + "%";
 
             if ("name".equals(searchType)) {
-                if (hotelId != null) {
-                    // 호텔 ID와 멤버 ID로 검색
-                    serviceCatePage = serviceCateRepository.findByServiceCateNameLikeAndHotel_HotelIdAndHotel_Company_Member_MemberId(
-                            keywordLike, hotelId, memberId, pageable);
-                } else {
-                    // 호텔 ID가 없더라도 memberId로 제한
-                    serviceCatePage = serviceCateRepository.findByServiceCateNameLikeAndHotel_Company_Member_MemberId(
-                            keywordLike, memberId, pageable);
-                }
+                serviceCatePage = (hotelId != null)
+                        ? serviceCateRepository.findByServiceCateNameLikeAndHotel_HotelIdAndHotel_Company_Member_MemberId(keywordLike, hotelId, memberId, pageable)
+                        : serviceCateRepository.findByServiceCateNameLikeAndHotel_Company_Member_MemberId(keywordLike, memberId, pageable);
+            } else if ("hotelName".equals(searchType)) {
+                serviceCatePage = serviceCateRepository.findByHotel_HotelNameLikeAndHotel_Company_Member_MemberId(keywordLike, memberId, pageable);
             } else {
                 serviceCatePage = (hotelId != null)
                         ? serviceCateRepository.findByHotel_HotelIdAndHotel_Company_Member_MemberId(hotelId, memberId, pageable)
@@ -268,7 +266,6 @@ public class ServiceCateService{
         // DTO 변환
         return serviceCatePage.map(entity -> {
             ServiceCateDTO serviceCateDTO = modelMapper.map(entity, ServiceCateDTO.class);
-
             String hotelName = Optional.ofNullable(entity.getHotel())
                     .map(Hotel::getHotelName)
                     .orElse("미지정 지사");
@@ -284,6 +281,7 @@ public class ServiceCateService{
             return serviceCateDTO;
         });
     }
+
 
 
     //존재하는 카테고리 목록 가져오기

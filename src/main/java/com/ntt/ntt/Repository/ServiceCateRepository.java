@@ -5,6 +5,8 @@ import com.ntt.ntt.Entity.ServiceCate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,6 +18,8 @@ public interface ServiceCateRepository extends JpaRepository<ServiceCate, Intege
     Page<ServiceCate> findByServiceCateNameLikeAndHotel_HotelId(String keyword,Integer hotelId, Pageable pageable);
     Page<ServiceCate> findByServiceCateNameLike(String keyword,Pageable pageable);
     Page<ServiceCate> findByHotel_HotelId(Integer hotelId, Pageable pageable);
+    @Query("SELECT s FROM ServiceCate s WHERE s.hotel.hotelName LIKE %:hotelName%")
+    Page<ServiceCate> findByHotel_HotelNameLike(@Param("hotelName") String hotelName, Pageable pageable);
 
     //MANAGER용
     Page<ServiceCate> findByServiceCateNameLikeAndHotel_Member_MemberId(String keyword, Integer memberId,Pageable pageable);
@@ -26,7 +30,8 @@ public interface ServiceCateRepository extends JpaRepository<ServiceCate, Intege
 
     // CHIEF용
     Page<ServiceCate> findByHotel_HotelIdAndHotel_Company_Member_MemberId(Integer hotelId, Integer memberId, Pageable pageable);
-
+    @Query("SELECT s FROM ServiceCate s WHERE s.hotel.hotelName LIKE %:hotelName% AND s.hotel.company.member.memberId = :memberId")
+    Page<ServiceCate> findByHotel_HotelNameLikeAndHotel_Company_Member_MemberId(@Param("hotelName") String hotelName, @Param("memberId") Integer memberId, Pageable pageable);
 
     List<ServiceCate> findByHotel_HotelIdAndHotel_Member_MemberId(Integer hotelId, Integer memberId);
 
