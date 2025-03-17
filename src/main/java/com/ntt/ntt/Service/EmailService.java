@@ -2,6 +2,7 @@ package com.ntt.ntt.Service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -52,9 +53,9 @@ public class EmailService {
 
             helper.setText(htmlContent, true);
 
-            // 이미지를 inline으로 첨부 (cid로 참조)
-            File image = new File("C:\\Users\\woori\\IdeaProjects\\NTT\\src\\main\\resources\\static\\img\\logo.jpg");  // 이미지 파일 경로
-            helper.addInline("resetImage", image);  // cid:resetImage로 참조
+            // classpath에서 이미지 파일 로드
+            ClassPathResource imageResource = new ClassPathResource("static/img/logo.jpg");
+            helper.addInline("resetImage", imageResource);
 
             emailSender.send(message);  // 이메일 전송
 
