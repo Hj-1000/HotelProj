@@ -259,8 +259,8 @@
                             <td>
                                 <span th:if="${hotelDTO.memberName != null}" th:text="${hotelDTO.memberName}">담당자명</span>
                                 <span th:unless="${hotelDTO.memberName != null}">매니저를 등록해주세요.</span>
-                                <span th:if="${hotelDTO.hotelEmail != null}" th:text="'('+${hotelDTO.hotelEmail}+')'">매니저 이메일</span>
-                                <span th:unless="${hotelDTO.hotelEmail != null}"></span>
+                                <span th:if="${hotelDTO.hotelEmail != null && hotelDTO.hotelEmail.length() != 0}" th:text="'('+${hotelDTO.hotelEmail}+')'">매니저 이메일</span>
+                                <span th:unless="${hotelDTO.hotelEmail != null || hotelDTO.hotelEmail.length() != 0}"></span>
                             </td>
 
                             <td>전화번호</td>
