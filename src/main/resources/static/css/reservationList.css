@@ -229,8 +229,10 @@ td:nth-child(5) {
 
 /* 미디어 쿼리 */
 
+
+
 @media (min-width: 1400px) {
     .container, .container-lg, .container-md, .container-sm, .container-xl, .container-xxl {
-        max-width: 1480px !important;
+        max-width: 1560px !important;
     }
 }

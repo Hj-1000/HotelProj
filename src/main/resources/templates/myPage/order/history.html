@@ -22,8 +22,8 @@
         display: flex;
         justify-content: center;
         align-items: flex-start;
-        min-height: 100vh;
         background-color: #f8f9fa;
+        min-height: 100vh;
         padding-top: 30px;
     }
 
@@ -62,7 +62,6 @@
     .wrapper {
         display: flex;
         flex-direction: column;
-        height: 100%;
     }
 
     .content {
@@ -107,7 +106,7 @@
 
                     <!-- 취소된 주문 -->
                     <div th:if="${order.serviceOrderStatus.name() == 'CANCELED'}" class="card canceled-order">
-                        <div class="card-header bg-danger text-white">
+                        <div class="card-header bg-danger text-white text-center">
                             NO.<span th:text="${(pageInfo.currentPage - 1) * orders.size + stat.index + 1}"></span>
                             주문번호: <span th:text="${order.serviceOrderId}"></span>
                             방이름: <span class="badge bg-primary ms-2" th:text="${order.reservationDTO.room.roomName}"></span>
@@ -129,7 +128,7 @@
                     </div>
 
                     <!-- 대기중 주문 -->
-                    <div th:if="${order.serviceOrderStatus.name() == 'PENDING'}" class="card pending-order">
+                    <div th:if="${order.serviceOrderStatus.name() == 'PENDING'}" class="card pending-order text-center">
                         <div class="card-header bg-warning text-dark">
                             NO.<span th:text="${(pageInfo.currentPage - 1) * orders.size + stat.index + 1}"></span>
                             주문번호: <span th:text="${order.serviceOrderId}"></span>
