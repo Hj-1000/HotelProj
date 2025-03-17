@@ -117,6 +117,7 @@ public class HotelService {
 
 
     //등록
+    @Transactional
     public void register(HotelDTO hotelDTO, List<MultipartFile> imageFiles, String memberEmail) {
 
         // modelMapper가 null이 아닌지 확인
@@ -131,7 +132,12 @@ public class HotelService {
         hotelRepository.flush(); // ✅ 즉시 DB 반영
 
         // 2. 저장된 호텔의 companyId 가져와 DTO에 반영
-        hotelDTO.setCompanyId(hotel.getCompany().getCompanyId()); // ✅ companyId 설정
+        if (hotel.getCompany() != null) {
+            hotelDTO.setCompanyId(hotel.getCompany().getCompanyId());
+        } else {
+            // company가 null일 경우 예외 처리하거나 기본값 설정
+            throw new IllegalStateException("Company 정보가 존재하지 않습니다.");
+        }
 
         // 3. imageFiles를 ImageService를 통해 저장
         imageService.registerHotelImage(hotel.getHotelId(), imageFiles);
