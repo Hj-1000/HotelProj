@@ -128,11 +128,13 @@ public class HotelService {
 
         // 1. Hotel 먼저 저장
         hotelRepository.save(hotel);
-
-        // 2. imageFiles를 ImageService를 통해 저장
-        imageService.registerHotelImage(hotel.getHotelId(), imageFiles);
-
         hotelRepository.flush(); // ✅ 즉시 DB 반영
+
+        // 2. 저장된 호텔의 companyId 가져와 DTO에 반영
+        hotelDTO.setCompanyId(hotel.getCompany().getCompanyId()); // ✅ companyId 설정
+
+        // 3. imageFiles를 ImageService를 통해 저장
+        imageService.registerHotelImage(hotel.getHotelId(), imageFiles);
     }
 
 
