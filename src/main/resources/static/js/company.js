@@ -34,8 +34,6 @@ document.querySelector('form').onsubmit = function(e) {
     }
 };
 
-
-
 // 이미지 파일 검사
 function validateImage(event) {
     var files = event.target.files;
@@ -77,6 +75,34 @@ function validateImage(event) {
     // 이미지 검사 후 미리보기 함수 호출
     previewImage(event);
 
+}
+
+// 이미지 미리보기 함수
+function previewImage(event) {
+
+    console.log("수정 진입")
+
+    const previewContainer = document.getElementById('imagePreviewContainer');
+    previewContainer.innerHTML = '';  // 기존 미리보기 이미지 제거
+
+    const files = event.target.files;
+
+    if (files.length > 0) {
+        Array.from(files).forEach(file => {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.alt = 'Image Preview';
+                img.style.maxWidth = '200px';  // 미리보기 이미지 크기 조정
+                img.style.marginTop = '10px';
+                previewContainer.appendChild(img);
+            }
+
+            reader.readAsDataURL(file);  // 이미지 파일을 읽어서 미리보기
+        });
+    }
 }
 
 // 기존 이미지 삭제 처리 함수

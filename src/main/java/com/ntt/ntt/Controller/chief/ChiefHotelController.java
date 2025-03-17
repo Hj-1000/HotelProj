@@ -60,7 +60,7 @@ public class ChiefHotelController {
     }
     //등록처리
     @Operation(summary = "호텔장 호텔 등록 처리", description = "호텔을 등록 처리 후 목록으로 이동한다.")
-    @PostMapping("/hotel/register")
+    @PostMapping("/register")
     public String registerProc(@ModelAttribute HotelDTO hotelDTO,
                                List<MultipartFile> imageFiles,
                                RedirectAttributes redirectAttributes,
@@ -79,7 +79,7 @@ public class ChiefHotelController {
         redirectAttributes.addFlashAttribute("message", "지사 등록이 완료되었습니다.");
         redirectAttributes.addFlashAttribute("companyId", hotelDTO.getCompanyId());
 
-        return "redirect:/admin/hotel/list";
+        return "redirect:/chief/hotel/list";
     }
 
 
