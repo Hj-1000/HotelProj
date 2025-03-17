@@ -69,7 +69,8 @@ public class RoomReviewService {
         hotelRepository.updateHotelRating(hotelId);
         log.info("호텔 평점 업데이트 완료: 호텔 ID = {}", hotelId);
 
-        return RoomReviewDTO.fromEntity(savedReview);
+        String maskedName = maskName(member.getMemberName());
+        return RoomReviewDTO.fromEntity(savedReview, maskedName);
     }
 
     // 특정 리뷰 조회
@@ -85,7 +86,8 @@ public class RoomReviewService {
             return null; // 예외를 던지지 않고 null 반환
         }
 
-        return RoomReviewDTO.fromEntity(roomReview);
+        String maskedName = maskName(roomReview.getMember().getMemberName());
+        return RoomReviewDTO.fromEntity(roomReview, maskedName);
     }
 
     // 특정 객실의 모든 리뷰 조회
@@ -104,7 +106,10 @@ public class RoomReviewService {
             // 결과가 null이면 빈 페이지 반환
             return Optional.ofNullable(reviews)
                     .orElse(Page.empty(pageRequest))
-                    .map(RoomReviewDTO::fromEntity);
+                    .map(roomReview -> {
+                        String maskedName = maskName(roomReview.getMember() != null ? roomReview.getMember().getMemberName() : "탈퇴한 회원");
+                        return RoomReviewDTO.fromEntity(roomReview, maskedName);
+                    });
         } catch (Exception e) {
             log.error(" 리뷰 조회 중 예외 발생 - roomId: {}, message: {}", roomId, e.getMessage());
             return Page.empty();
@@ -125,7 +130,10 @@ public class RoomReviewService {
 
         switch (role) {
             case ADMIN:
-                return roomReviewRepository.findAll(pageable).map(RoomReviewDTO::fromEntity);
+                return roomReviewRepository.findAll(pageable).map(roomReview -> {
+                    String maskedName = maskName(roomReview.getMember() != null ? roomReview.getMember().getMemberName() : "탈퇴한 회원");
+                    return RoomReviewDTO.fromEntity(roomReview, maskedName);
+                });
 
             case CHIEF:
                 //  CHIEF가 본사 소속 호텔을 관리할 때, `Company` 기준으로 hotelId 가져오기
@@ -141,7 +149,10 @@ public class RoomReviewService {
                 }
 
                 return roomReviewRepository.findByHotelIdsOrderByReviewDateDesc(chiefCompanyHotels, pageable)
-                        .map(RoomReviewDTO::fromEntity);
+                        .map(roomReview -> {
+                            String maskedName = maskName(roomReview.getMember() != null ? roomReview.getMember().getMemberName() : "탈퇴한 회원");
+                            return RoomReviewDTO.fromEntity(roomReview, maskedName);
+                        });
 
             case MANAGER:
                 List<Integer> managerHotelIds = hotelRepository.findHotelIdsByMemberId(memberId);
@@ -153,7 +164,10 @@ public class RoomReviewService {
                 }
 
                 return roomReviewRepository.findByHotelIdOrderByReviewDateDesc(managerHotelIds.get(0), pageable)
-                        .map(RoomReviewDTO::fromEntity);
+                        .map(roomReview -> {
+                            String maskedName = maskName(roomReview.getMember() != null ? roomReview.getMember().getMemberName() : "탈퇴한 회원");
+                            return RoomReviewDTO.fromEntity(roomReview, maskedName);
+                        });
 
             default:
                 return Page.empty(pageable);
@@ -165,7 +179,10 @@ public class RoomReviewService {
     public List<RoomReviewDTO> getRecentReviewsByRoomId(Integer roomId) {
         log.info("객실 최근 리뷰 조회: roomId={}", roomId);
         return roomReviewRepository.findTop3ByRoom_RoomIdOrderByReviewDateDesc(roomId)
-                .stream().map(RoomReviewDTO::fromEntity)
+                .stream().map(roomReview -> {
+                    String maskedName = maskName(roomReview.getMember() != null ? roomReview.getMember().getMemberName() : "탈퇴한 회원");
+                    return RoomReviewDTO.fromEntity(roomReview, maskedName);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -174,7 +191,10 @@ public class RoomReviewService {
     public List<RoomReviewDTO> getReviewsByMemberId(Integer memberId) {
         log.info("회원 리뷰 목록 조회: memberId={}", memberId);
         return roomReviewRepository.findAllByMember_MemberId(memberId)
-                .stream().map(RoomReviewDTO::fromEntity)
+                .stream().map(roomReview -> {
+                    String maskedName = maskName(roomReview.getMember() != null ? roomReview.getMember().getMemberName() : "탈퇴한 회원");
+                    return RoomReviewDTO.fromEntity(roomReview, maskedName);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -184,7 +204,10 @@ public class RoomReviewService {
 
         // 검색어가 없으면 전체 조회 반환
         if (category == null || keyword == null || keyword.isEmpty()) {
-            return roomReviewRepository.findAll(pageable).map(RoomReviewDTO::fromEntity);
+            return roomReviewRepository.findAll(pageable).map(roomReview -> {
+                String maskedName = maskName(roomReview.getMember() != null ? roomReview.getMember().getMemberName() : "탈퇴한 회원");
+                return RoomReviewDTO.fromEntity(roomReview, maskedName);
+            });
         }
 
         // 카테고리에 따라 검색
@@ -192,7 +215,10 @@ public class RoomReviewService {
             case "reviewId":
                 try {
                     Integer reviewId = Integer.parseInt(keyword);
-                    return roomReviewRepository.findByReviewId(reviewId, pageable).map(RoomReviewDTO::fromEntity);
+                    return roomReviewRepository.findByReviewId(reviewId, pageable).map(roomReview -> {
+                        String maskedName = maskName(roomReview.getMember() != null ? roomReview.getMember().getMemberName() : "탈퇴한 회원");
+                        return RoomReviewDTO.fromEntity(roomReview, maskedName);
+                    });
                 } catch (NumberFormatException e) {
                     log.warn(" 리뷰 ID 검색 실패 - 숫자 변환 오류: {}", keyword);
                     return Page.empty();
@@ -200,19 +226,28 @@ public class RoomReviewService {
             case "memberId":
                 try {
                     Integer memberId = Integer.parseInt(keyword);
-                    return roomReviewRepository.findByMember_MemberId(memberId, pageable).map(RoomReviewDTO::fromEntity);
+                    return roomReviewRepository.findByMember_MemberId(memberId, pageable).map(roomReview -> {
+                        String maskedName = maskName(roomReview.getMember() != null ? roomReview.getMember().getMemberName() : "탈퇴한 회원");
+                        return RoomReviewDTO.fromEntity(roomReview, maskedName);
+                    });
                 } catch (NumberFormatException e) {
                     log.warn(" 회원 ID 검색 실패 - 숫자 변환 오류: {}", keyword);
                     return Page.empty();
                 }
             case "memberName":
                 return roomReviewRepository.findByMember_MemberNameContainingIgnoreCase(keyword, pageable)
-                        .map(RoomReviewDTO::fromEntity);
+                        .map(roomReview -> {
+                            String maskedName = maskName(roomReview.getMember() != null ? roomReview.getMember().getMemberName() : "탈퇴한 회원");
+                            return RoomReviewDTO.fromEntity(roomReview, maskedName);
+                        });
             case "roomId":
                 try {
                     Integer roomId = Integer.parseInt(keyword);
                     return roomReviewRepository.findByRoom_RoomIdOrderByReviewDateDesc(roomId, pageable)
-                            .map(RoomReviewDTO::fromEntity);
+                            .map(roomReview -> {
+                                String maskedName = maskName(roomReview.getMember() != null ? roomReview.getMember().getMemberName() : "탈퇴한 회원");
+                                return RoomReviewDTO.fromEntity(roomReview, maskedName);
+                            });
                 } catch (NumberFormatException e) {
                     log.warn(" 객실 ID 검색 실패 - 숫자 변환 오류: {}", keyword);
                     return Page.empty();
@@ -249,7 +284,9 @@ public class RoomReviewService {
         RoomReview savedReview = roomReviewRepository.save(updatedReview);
         log.info(" 리뷰 수정 완료: {}", savedReview);
 
-        return RoomReviewDTO.fromEntity(savedReview);
+        String maskedName = maskName(savedReview.getMember() != null ? savedReview.getMember().getMemberName() : "탈퇴한 회원");
+
+        return RoomReviewDTO.fromEntity(savedReview, maskedName);
     }
 
     // 특정 리뷰 삭제
@@ -277,7 +314,10 @@ public class RoomReviewService {
         log.info("객실 최근 리뷰 조회: roomId={}", hotelId);
         Pageable pageable = PageRequest.of(0, 3);
         return roomReviewRepository.findTop3ByHotelIdOrderByReviewDateDesc(hotelId, pageable)
-                .stream().map(RoomReviewDTO::fromEntity)
+                .stream().map(roomReview -> {
+                    String maskedName = maskName(roomReview.getMember() != null ? roomReview.getMember().getMemberName() : "탈퇴한 회원");
+                    return RoomReviewDTO.fromEntity(roomReview, maskedName);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -297,11 +337,25 @@ public class RoomReviewService {
             // 결과가 null이면 빈 페이지 반환
             return Optional.ofNullable(reviews)
                     .orElse(Page.empty(pageRequest))
-                    .map(RoomReviewDTO::fromEntity);
+                    .map(roomReview -> {
+                        String maskedName = maskName(roomReview.getMember() != null ? roomReview.getMember().getMemberName() : "탈퇴한 회원");
+                        return RoomReviewDTO.fromEntity(roomReview, maskedName);
+                    });
         } catch (Exception e) {
             log.error("ERROR: 리뷰 조회 중 예외 발생 - roomId: {}, message: {}", hotelId, e.getMessage());
             return Page.empty();
         }
+    }
+
+    // 이름 마스킹 메서드 (서비스에서 처리)
+    private String maskName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            return "익명";
+        }
+        if (name.length() == 2) {
+            return name.charAt(0) + "*";
+        }
+        return name.charAt(0) + "*".repeat(name.length() - 2) + name.charAt(name.length() - 1);
     }
 
     // 로그인한 유저의 memberId를 조회

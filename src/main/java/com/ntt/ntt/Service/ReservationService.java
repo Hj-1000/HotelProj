@@ -23,10 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -409,14 +406,34 @@ public class ReservationService {
     public List<Map<String, String>> getBookedDatesByRoom(Integer roomId) {
         List<Reservation> reservations = reservationRepository.findAllByRoom_RoomId(roomId)
                 .stream()
-                .filter(reservation -> "예약".equals(reservation.getReservationStatus())) // 예약된 상태만 가져오기
+                .filter(reservation -> "예약".equals(reservation.getReservationStatus())) // 예약된 상태만 필터링
                 .collect(Collectors.toList());
 
-        return reservations.stream().map(reservation -> {
+        log.info("예약된 날짜 조회 Room ID: {}, 예약된 개수: {}", roomId, reservations.size());
+
+        List<Map<String, String>> bookedDates = new ArrayList<>();
+
+        for (Reservation reservation : reservations) {
+            LocalDateTime checkIn = reservation.getCheckInDate().truncatedTo(ChronoUnit.MINUTES);
+            LocalDateTime checkOut = reservation.getCheckOutDate().truncatedTo(ChronoUnit.MINUTES);
+            int checkOutHour = checkOut.getHour(); // 체크아웃 시간 확인
+
+            // 예약된 체크인~체크아웃 날짜 추가
             Map<String, String> map = new HashMap<>();
-            map.put("checkIn", reservation.getCheckInDate().truncatedTo(ChronoUnit.MINUTES).toString());
-            map.put("checkOut", reservation.getCheckOutDate().truncatedTo(ChronoUnit.MINUTES).toString());
-            return map;
-        }).collect(Collectors.toList());
+            map.put("checkIn", checkIn.toString());
+            map.put("checkOut", checkOut.toString());
+            bookedDates.add(map);
+
+            // 체크아웃 시간이 11:00 이후라면 체크아웃 날짜도 비활성화
+            if (checkOutHour >= 11) {
+                Map<String, String> checkOutMap = new HashMap<>();
+                checkOutMap.put("checkIn", checkOut.toLocalDate().toString() + "T00:00");
+                checkOutMap.put("checkOut", checkOut.toLocalDate().toString() + "T23:59");
+                bookedDates.add(checkOutMap);
+            }
+        }
+
+        log.info("예약된 날짜 목록 {}", bookedDates);
+        return bookedDates;
     }
 }
