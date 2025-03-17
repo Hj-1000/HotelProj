@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -109,11 +110,20 @@ public class HotelController {
                 return "redirect:/hotel/list";
             }
 
-            // 최신 리뷰 조회
+            // 최신 리뷰 조회(3개)
             List<RoomReviewDTO> latestReviews = roomReviewService.getLatestReviewsByHotelId(hotelId);
 
             // 호텔 ID에 맞는 방 목록을 페이징 처리하여 가져옵니다.
             List<RoomDTO> roomsForHotel = hotelService.getRoomsByHotel(hotelId);
+
+            // 상태 자동 업데이트: 예약 마감일이 지난 경우 예약 불가 처리
+            LocalDate today = LocalDate.now();
+            roomsForHotel.forEach(room -> {
+                if (room.getReservationEnd() != null) {
+                    LocalDate reservationEndDate = LocalDate.parse(room.getReservationEnd());
+                    room.setRoomStatus(!reservationEndDate.isBefore(today));
+                }
+            });
 
             // 방 목록에 관련된 이미지와 가격 포맷팅 처리
             for (RoomDTO room : roomsForHotel) {
