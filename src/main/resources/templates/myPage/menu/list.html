@@ -16,47 +16,65 @@
     <link rel="stylesheet" th:href="@{/css/user.css}">
     <style>
 
+        .main-text {
+            margin: 2rem auto;
+            font-weight: bold;
+        }
+        /* 카테고리 컨테이너 스타일 */
 
         .category-container {
-            position: fixed;
-            top: 150px; /* 카테고리 위치를 조금 더 위로 조정 */
-            left: 20px;
-            width: 250px; /* 카테고리 너비를 좀 더 넓혀서 보기 좋게 설정 */
-            max-height: 70vh; /* 높이도 조금 더 늘려서 더 많은 카테고리를 보여줄 수 있게 */
-            overflow-y: auto;
-            background-color: #f9f9f9; /* 배경색을 밝은 회색으로 변경 */
-            border-radius: 12px; /* 모서리를 더 둥글게 */
-            padding: 20px; /* 패딩을 늘려서 여백을 추가 */
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* 그림자 추가 */
-        }
-        h5.text-center {
-            margin-bottom: 30px; /* 제목 아래에 여백 추가 */
+            background: linear-gradient(83deg, #7bc0d1, #eff2f3);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-width: 1200px;
+            margin: 20px auto 70px auto;
+            text-align: center;
         }
 
-        /* 카테고리 버튼 기본 스타일 */
+        /* 카테고리 제목 스타일 */
+        .category-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            border: 2px solid transparent;
+            position: relative;
+            transition: all 0.3s ease-in-out;
+            margin-bottom: 1rem;
+        }
+
+        .category-title:hover {
+            border-color: #007bff;
+            box-shadow: 0px 0px 10px rgba(0, 123, 255, 0.4);
+        }
+
+        /* 카테고리 버튼 스타일 */
         .category-btn {
-            margin-bottom: 12px; /* 버튼 간 간격을 늘려서 더 여유롭게 */
-            width: 100%;
-            padding: 12px; /* 버튼에 여백을 추가 */
-            font-size: 1.1rem; /* 글자 크기를 키워서 더 잘 보이도록 */
-            transition: background-color 0.3s ease, color 0.3s ease;
-            border-radius: 6px; /* 버튼에 둥근 모서리 추가 */
+            border: none;
+            background-color: #f5f5f5;
+            color: #333;
+            padding: 12px 18px;
+            font-size: 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px 8px;
         }
 
-        /* 카테고리 버튼이 선택됐을 때 스타일 */
+        /* 선택된 버튼 스타일 */
         .category-btn.selected {
-            background-color: #0069d9; /* 선택된 버튼 배경을 호텔 브랜드 색상으로 설정 */
-            color: white; /* 텍스트 색상을 흰색으로 */
-            font-weight: bold; /* 선택된 버튼은 글씨를 두껍게 */
-            border: 2px solid #0056b3; /* 테두리도 파란색으로 */
+            background-color: #0069d9;
+            color: white;
+            font-weight: bold;
         }
 
-        /* 카테고리 버튼 호버 효과 */
+        /* 버튼 hover 효과 */
         .category-btn:hover {
-            background-color: #0056b3; /* 호버시 배경이 좀 더 어두운 파란색으로 */
+            background-color: #0056b3;
             color: white;
         }
-
 
         /* 메뉴 카드 디자인 개선 */
         .card {
@@ -95,10 +113,8 @@
         }
 
         #menuContainer {
-            margin-left: 380px;
-            margin-right: 220px;
             min-height: 400px;  /* 최소 높이 설정 */
-            height: calc(100vh - 450px);
+            margin-bottom: 2rem;
         }
 
         #menus {
@@ -129,25 +145,50 @@
         }
 
         .slick-prev {
-            left: -20px;
-            transform: rotate(90deg);  /* 각도 돌리기 (45도 예시) */
+            left: -80px;
         }
+
         .slick-next {
-            right: -20px;
-            transform: rotate(-90deg); /* 각도 돌리기 (-45도 예시) */
+            right: -80px;
+        }
+
+        .slick-prev,
+        .slick-next {
+            width: 50px; /* 버튼 크기 */
+            height: 50px;
+            border-radius: 50%; /* 원형 버튼 */
+            background-color: black !important; /* 배경색 검은색 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.3s ease-in-out;
         }
 
         /* 삼각형 모양 버튼 색상 변경 */
         .slick-prev:before,
         .slick-next:before {
-            content: '';
-            display: inline-block;
-            width: 0;
-            height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-top: 15px solid #000;  /* 검은색으로 변경 */
-            border-top-color: #0069d9;
+            content: '\f104'; /* Bootstrap 아이콘 (왼쪽 화살표) */
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            font-size: 1.5rem;
+            opacity: 1;
+            color: white !important;
+        }
+
+        /* 왼쪽 화살표 */
+        .slick-prev:before {
+            content: "\2190"; /* 유니코드 왼쪽 화살표 */
+        }
+
+        /* 오른쪽 화살표 */
+        .slick-next:before {
+            content: "\2192"; /* 유니코드 오른쪽 화살표 */
+        }
+
+        /* 버튼 호버 효과 */
+        .slick-prev:hover,
+        .slick-next:hover {
+            background-color: #333; /* 배경색 조금 더 밝게 */
         }
 
         /* 모바일 대응 */
@@ -209,7 +250,8 @@
 
         /* 장바구니 디자인 수정 */
         #cartContainer {
-            margin-top: 30px;
+            display: none;
+            margin-bottom: 3rem;
             width: 80%; /* 장바구니 크기 넓히기 */
             max-width: 1000px; /* 최대 너비를 더 넓혀서 디자인 향상 */
             margin-left: auto;
@@ -261,16 +303,15 @@
 <body>
 <div th:replace="~{fragments/header::header}"></div>
 <div layout:fragment="content">
+    <h2 class="main-text text-center">프리미엄 다이닝 주문</h2>
     <div class="category-container">
-        <h5>카테고리</h5>
+        <h4 class="category-title">메뉴 선택</h4>
         <div id="categoryButtons">
             <!-- 카테고리 버튼 동적 생성 -->
         </div>
     </div>
 
-    <div id="menuContainer" class="container mt-4">
-        <h5 class="text-center">유저 주문 페이지</h5>
-
+    <div id="menuContainer" class="container">
         <!-- 카테고리 선택 전 보여줄 안내 카드 -->
         <div id="categorySelectionCard" class="row justify-content-center">
             <input type="hidden" id="hotelId" th:value="${hotelId}">
@@ -455,7 +496,10 @@
             })
         })
             .then(response => response.json())
-            .then(data => fetchCart())
+            .then(data => {
+                document.getElementById("cartContainer").style.display = "block"; //  메뉴 추가 시 장바구니 보이게 설정
+                fetchCart();
+            })
             .catch(error => alert('장바구니 추가 중 오류가 발생했습니다.'));
     }
 
@@ -464,6 +508,7 @@
             .then(response => response.json())
             .then(cartData => {
                 const cartItems = Array.isArray(cartData) ? cartData : cartData.items || [];
+                const cartRealContainer = document.getElementById("cartContainer");
                 const cartContainer = document.getElementById("cartItems");
                 const totalCountDisplay = document.getElementById("totalCount");
                 const totalPriceDisplay = document.getElementById("totalPrice"); // 총 가격 표시 요소
@@ -471,6 +516,13 @@
                 cartContainer.innerHTML = "";
                 let totalCount = 0;
                 let totalPrice = 0;
+
+                if (cartItems.length === 0) {
+                    cartRealContainer.style.display = "none";  // 장바구니 비었을 때 숨김
+                } else {
+                    cartRealContainer.style.display = "block"; // 메뉴가 있을 때 나타남
+                }
+
 
                 cartItems.forEach(item => {
                     totalCount += parseInt(item.count);
@@ -505,7 +557,9 @@
     function removeFromCart(serviceCartItemId) {
         fetch(`/api/cartItem/${serviceCartItemId}`, { method: "DELETE" })
             .then(response => response.json())
-            .then(data => fetchCart())
+            .then(data => {
+                fetchCart(); // 장바구니 상태 업데이트
+            })
             .catch(error => alert('장바구니 삭제 중 오류가 발생했습니다.'));
     }
     //주문을 위한 메서드
