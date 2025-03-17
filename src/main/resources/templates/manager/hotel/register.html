@@ -22,20 +22,6 @@
     <link rel="stylesheet" th:href="@{/css/pagination.css}">
     <script th:src="@{/js/setHotelLocation.js}"></script>
     <script th:src="@{/js/hotel.js}"></script>
-
-    <script>
-        // 페이지 로딩 후 실행되는 함수
-        window.addEventListener("DOMContentLoaded", function() {
-            const selectBox = document.getElementById("companySelect");
-
-            // 선택할 수 있는 옵션이 하나일 때
-            if (selectBox.options.length === 2) {
-                // 첫 번째 옵션을 자동으로 선택
-                selectBox.selectedIndex = 1;
-            }
-        });
-    </script>
-
 </head>
 <body>
 <div id="wrapper" layout:fragment="content">
@@ -68,9 +54,9 @@
                     <div class="mb-3 mt-3">
                         <label for="companySelect" class="form-label">본사명:</label>
                         <select id="companySelect" name="companyId" class="form-select">
+                            <option value="" disabled selected>본사를 선택해주세요</option>
                             <th:block th:each="companyDTOS : ${companyDTOS}">
-                                <option th:value="${companyDTOS.companyId}" th:text="${companyDTOS.companyName}"
-                                        th:selected="${#lists.size(companyDTOS) == 1 or iterStat.index == 0}">뒤에바</option>
+                                <option th:value="${companyDTOS.companyId}" th:text="${companyDTOS.companyName}">뒤에바</option>
                             </th:block>
                         </select>
                     </div>
@@ -223,9 +209,9 @@
                     <div class="mb-3 mt-3">
                         <label for="companySelect" class="form-label">본사명:</label>
                         <select id="companySelect" name="companyId" class="form-select">
+                            <option value="" disabled selected>본사를 선택해주세요</option>
                             <th:block th:each="companyDTOS : ${companyDTOS}">
-                                <option th:value="${companyDTOS.companyId}" th:text="${companyDTOS.companyName}"
-                                        th:selected="${#lists.size(companyDTOS) == 1 or iterStat.index == 0}">뒤에바</option>
+                                <option th:value="${companyDTOS.companyId}" th:text="${companyDTOS.companyName}">뒤에바</option>
                             </th:block>
                         </select>
                     </div>
