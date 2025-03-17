@@ -131,7 +131,7 @@
 <div th:replace="~{fragments/header::header}"></div>
 
 <div layout:fragment="content">
-    <!-- 룸 배너 이미지 -->
+    <!-- 배너 이미지 -->
     <section class="banner-container room-bnr ">
         <img src="/img/bg_membership.jpg" alt="Hotel Banner">
     </section>
@@ -139,13 +139,16 @@
     <!-- Room List Section -->
     <section class="py-5">
         <div class="container">
-            <h2 class="text-center mb-5">스크랩한 호텔</h2>
+            <h1 class="text-center mb-5 mt-2">스크랩한 호텔</h1>
             <div id="room-list" class="row">
 
                 <th:block th:if="${likeDTO == null || #lists.isEmpty(likeDTO)}">
-                    <div style="text-align: center">
-                        <img src="/img/empty.png" alt="No likes available" width="400px">
-                        <p>목록이 비어있습니다!</p>
+                    <div class="mb-5 mt-5" style="text-align: center">
+                        <h3>스크랩한 호텔이 없습니다🧐</h3>
+                        <p>관심있는 호텔을 스크랩하여 편하게 모아보세요!</p>
+                        <div class="mb-5">
+                            <a href="/hotel/list" class="btn btn-lg btn-outline-dark">호텔보러가기</a>
+                        </div>
                     </div>
                 </th:block>
 
