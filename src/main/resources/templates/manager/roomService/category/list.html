@@ -157,43 +157,62 @@
 
         <!-- 검색 영역 -->
 
-
         <div th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="card p-4 mb-4">
             <form action="/admin/roomService/category/list" method="get">
                 <input type="hidden" name="hotelId" th:value="${hotelId}">
                 <div class="row g-3 align-items-center">
                     <h5 class="card-title">카테고리 찾기</h5>
+
+                    <!-- 검색 타입 선택 -->
+                    <div class="col-md-2">
+                        <select name="searchType" class="form-select form-control-lg">
+                            <option value="name" th:selected="${searchType == 'name'}">카테고리명</option>
+                            <option value="hotelName" th:selected="${searchType == 'hotelName'}">지사명</option>
+                        </select>
+                    </div>
+
                     <!-- 검색창 -->
-                    <div class="col-md-12">
-                        <input type="text" name="keyword" class="form-control form-control-lg" placeholder="카테고리명을 입력하세요" aria-label="검색어 입력">
+                    <div class="col-md-10">
+                        <input type="text" name="keyword" class="form-control form-control-lg"
+                               placeholder="검색어를 입력하세요" aria-label="검색어 입력" th:value="${keyword}">
                     </div>
                 </div>
+
                 <!-- 조회 버튼 -->
                 <div class="text-center mt-4">
                     <button type="submit" class="btn btn-primary w-25" style="background-color: black">조회</button>
                 </div>
-                <!-- searchType 숨겨진 필드 -->
-                <input type="hidden" name="searchType" value="name">
             </form>
         </div>
+
         <div th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="card p-4 mb-4">
             <form action="/chief/roomService/category/list" method="get">
                 <input type="hidden" name="hotelId" th:value="${hotelId}">
                 <div class="row g-3 align-items-center">
                     <h5 class="card-title">카테고리 찾기</h5>
+
+                    <!-- 검색 타입 선택 -->
+                    <div class="col-md-2">
+                        <select name="searchType" class="form-select form-control-lg">
+                            <option value="name" th:selected="${searchType == 'name'}">카테고리명</option>
+                            <option value="hotelName" th:selected="${searchType == 'hotelName'}">지사명</option>
+                        </select>
+                    </div>
+
                     <!-- 검색창 -->
-                    <div class="col-md-12">
-                        <input type="text" name="keyword" class="form-control form-control-lg" placeholder="카테고리명을 입력하세요" aria-label="검색어 입력">
+                    <div class="col-md-10">
+                        <input type="text" name="keyword" class="form-control form-control-lg"
+                               placeholder="검색어를 입력하세요" aria-label="검색어 입력" th:value="${keyword}">
                     </div>
                 </div>
+
                 <!-- 조회 버튼 -->
                 <div class="text-center mt-4">
                     <button type="submit" class="btn btn-primary w-25" style="background-color: black">조회</button>
                 </div>
-                <!-- searchType 숨겨진 필드 -->
-                <input type="hidden" name="searchType" value="name">
             </form>
         </div>
+
 
         <div th:if="${#authorization.expression('hasRole(''MANAGER'')')}" class="card p-4 mb-4">
             <form action="/manager/roomService/category/list" method="get">
