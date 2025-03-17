@@ -230,9 +230,9 @@
                             </div>
 
                             <!-- 상태 버튼 -->
-                            <h4 th:text="${hotel.hotelName}" class="card-title mb-1" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></h4>
+                            <h4 th:text="${hotel.hotelName}" class="card-title  mb-1" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1rem;"></h4>
 
-                            <p th:text="'체크인-체크아웃: ' + ${hotel.hotelCheckIn} + '시 ~ ' + ${hotel.hotelCheckOut} + '시'" class="card-text"></p>
+                            <p th:text="'체크인-체크아웃: ' + ${hotel.hotelCheckIn} + '시 ~ ' + ${hotel.hotelCheckOut} + '시'" class="check-text card-text"></p>
                             <input type="hidden" class="hotelId" th:value="${hotel.hotelId}">
                             <div class="room-actions" style="margin-top: -10px">
 
@@ -268,7 +268,9 @@
     <!-- 지도 섹션 -->
     <section class="text-center py-5 bg-light">
 
-        <h2>가까운 호텔 찾기</h2>
+        <div class="mb-5">
+            <h2>가까운 호텔 찾기</h2>
+        </div>
 
         <div class="container">
             <div class="bg-secondary text-white d-flex justify-content-center" style="height: 500px;">
