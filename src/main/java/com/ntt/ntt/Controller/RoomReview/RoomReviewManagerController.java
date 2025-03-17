@@ -98,6 +98,11 @@ public class RoomReviewManagerController {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", "리뷰 ID가 누락되었습니다."));
         }
 
+        // 리뷰 텍스트 예외수정
+        if (reviewDTO.getReviewText() != null && reviewDTO.getReviewText().length() > 255) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "리뷰는 최대 255자까지만 입력 가능합니다."));
+        }
+
         try {
             RoomReviewDTO updatedReview = roomReviewService.updateReview(reviewId, reviewDTO);
             log.info(" 리뷰 수정 성공: {}", updatedReview);

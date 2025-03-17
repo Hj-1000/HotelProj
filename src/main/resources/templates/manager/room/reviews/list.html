@@ -35,7 +35,7 @@
                     <input type="hidden" id="editReviewId">
                     <div class="form-group">
                         <label for="editReviewText">리뷰 내용</label>
-                        <textarea id="editReviewText" class="form-control"></textarea>
+                        <textarea id="editReviewText" class="form-control"  maxlength="255"></textarea>
                     </div>
                     <div class="form-group">
                         <label for="editRating">평점</label>
@@ -145,6 +145,7 @@
         </div>
     </div>
     <script>
+
         /* 리뷰 텍스트 함수 */
         document.addEventListener("DOMContentLoaded", function () {
             document.querySelectorAll(".review-text").forEach(item => {
@@ -169,6 +170,16 @@
                     this.style.textOverflow = "ellipsis";
                 });
             });
+        });
+
+        $("#editReviewText").on("input", function () {
+            const maxLength = 255;
+            let text = $(this).val();
+
+            if (text.length > maxLength) {
+                alert("리뷰는 255자 이하로 입력해주세요.");
+                $(this).val(text.substring(0, maxLength)); // 255자까지만 유지
+            }
         });
 
         $(document).ready(function () {
