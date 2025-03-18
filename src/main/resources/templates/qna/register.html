@@ -43,17 +43,15 @@
         }
 
         label {
-            font-weight: bold;
-            margin-bottom: 10px;
+            font-family: 'Pretendard', sans-serif; /* 원하는 폰트로 변경 */
+            font-weight: 600; /* 글씨 굵기 */
+            font-size: 1.1rem; /* 크기 조정 */
+            color: #333; /* 색상 변경 */
         }
 
-        input,
-        textarea {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ced4da;
-            border-radius: 5px;
+        input, textarea {
+            font-family: 'Pretendard', sans-serif;
+            font-size: 1rem;
         }
 
         input:focus,
@@ -92,6 +90,7 @@
     </style>
 </head>
 <body>
+
 <!-- 헤더 -->
 <div th:replace="~{fragments/header::header}"></div>
 
