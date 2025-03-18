@@ -564,9 +564,11 @@
                                 <h4 class="mb-3">객실 선택</h4>
 
                                 <th:block th:if="${rooms == null || #lists.isEmpty(rooms)}">
-                                    <div style="text-align: center">
-                                        <img src="/img/empty.png" alt="No likes available" width="400px">
-                                        <p>목록이 비어있습니다!</p>
+                                    <div style="margin-top: 100px">
+                                        <!--<img src="/img/empty.png" alt="No likes available" width="400px">-->
+                                        <div style="width: 400px; height: 100px; margin: auto; text-align: center;">
+                                            <p class="text-muted">등록 된 객실이 없습니다!</p>
+                                        </div>
                                     </div>
                                 </th:block>
 
