@@ -509,7 +509,6 @@
     animation: clickHintBlink .8s infinite alternate;
 }
 
-
 /* 별점 별도 색상 적용 */
 .rating-5 { color: gold !important;}
 .rating-4 { color: green !important;}
@@ -523,6 +522,106 @@
 
 .submit-btn-wrap {
     text-align: center;
+}
+
+.btn-12 {
+    background: hsl(var(--hue), 98%, 80%);
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    color: black;
+    font: 600 1.05rem/1 "Nunito", sans-serif;
+    letter-spacing: .05em;
+    overflow: hidden;
+    padding: 1.15em 3.5em;
+    min-height: 3.3em;
+    position: relative;
+    text-transform: lowercase;
+}
+
+.btn-12--yellow { --hue: 46; }
+.btn-12--green { --hue: 163; }
+.btn-12--purple { --hue: 244; }
+.btn-12--red { --hue: 0; }
+.btn-12--blue { --hue: 210; }
+
+.btn-12:active,
+.btn-12:focus {
+    outline: 3px solid hsl(calc(var(--hue) + 90), 98%, 80%);
+}
+
+.btn-12__txt {
+    position: relative;
+    z-index: 2;
+}
+
+.btn-12__bg {
+    background: hsl(var(--hueBg), 98%, 80%);
+    border-radius: 50%;
+    display: block;
+    height: 0;
+    left: 50%;
+    margin: -50% 0 0 -50%;
+    padding-top: 100%;
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    transform: scale(0);
+    transform-origin: 50% 50%;
+    transition: transform 0.175s cubic-bezier(0.5, 1, 0.89, 1);
+    z-index: 1;
+}
+
+.btn-12__bg:nth-of-type(1) {
+    --hueBg: calc(var(--hue) - 90);
+    transition-delay: 0.115s;
+}
+
+.btn-12__bg:nth-of-type(2) {
+    --hueBg: calc(var(--hue) - 180);
+    transition-delay: 0.0575s;
+}
+
+.btn-12__bg:nth-of-type(3) {
+    --hueBg: calc(var(--hue) - 270);
+    transition-delay: 0.02875s;
+}
+
+.btn-12__bg:nth-of-type(4) {
+    --hueBg: calc(var(--hue) - 360);
+    transition-delay: 0s;
+}
+
+/* hover, focus, active 상태 */
+.btn-12:hover .btn-12__bg,
+.btn-12:focus .btn-12__bg,
+.btn-12:active .btn-12__bg {
+    transform: scale(1.5);
+    transition: transform 0.35s cubic-bezier(0.11, 0, 0.5, 0);
+}
+
+.btn-12:hover .btn-12__bg:nth-of-type(1),
+.btn-12:focus .btn-12__bg:nth-of-type(1),
+.btn-12:active .btn-12__bg:nth-of-type(1) {
+    transition-delay: 0.115s;
+}
+
+.btn-12:hover .btn-12__bg:nth-of-type(2),
+.btn-12:focus .btn-12__bg:nth-of-type(2),
+.btn-12:active .btn-12__bg:nth-of-type(2) {
+    transition-delay: 0.23s;
+}
+
+.btn-12:hover .btn-12__bg:nth-of-type(3),
+.btn-12:focus .btn-12__bg:nth-of-type(3),
+.btn-12:active .btn-12__bg:nth-of-type(3) {
+    transition-delay: 0.345s;
+}
+
+.btn-12:hover .btn-12__bg:nth-of-type(4),
+.btn-12:focus .btn-12__bg:nth-of-type(4),
+.btn-12:active .btn-12__bg:nth-of-type(4) {
+    transition-delay: 0.46s;
 }
 
 .custom-btn {
@@ -551,10 +650,6 @@
     color: #fff;
     overflow: hidden;
 }
-.btn-11:hover {
-    text-decoration: none;
-    color: #fff;
-}
 .btn-11:before {
     position: absolute;
     content: '';
@@ -566,14 +661,16 @@
     background-color: #fff;
     animation: shiny-btn1 3s ease-in-out infinite;
 }
-.btn-11:hover{
-    opacity: .7;
-}
 .btn-11:active{
     box-shadow:  4px 4px 6px 0 rgba(255,255,255,.3),
     -4px -4px 6px 0 rgba(116, 125, 136, .2),
     inset -4px -4px 6px 0 rgba(255,255,255,.2),
     inset 4px 4px 6px 0 rgba(0, 0, 0, .2);
+}
+
+.btn-11:hover {
+    color: #fff;
+    text-decoration: none;
 }
 
 /* More 버튼 */
