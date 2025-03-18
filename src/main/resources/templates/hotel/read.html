@@ -368,7 +368,7 @@
                     </div>
 
                     <script type="text/javascript"
-                            src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=0cb0450151c2b892da76c0d5dcd6535a&libraries=services"></script>
+                            src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=0cb0450151c2b892da76c0d5dcd6535a&libraries=services,geometry"></script>
 
                     <script>
                         var map; // 전역 변수로 선언
@@ -661,6 +661,7 @@
     // OpenAI 답변 처리
     var markers = [];      // 마커 배열
     var infowindows = [];  // 인포윈도우 배열
+    var markerPositions = []; // 마커 좌표 배열
 
     function sendQuery(modifiedQuery) {
         $('#generalResponse').html(`<hr><br>
@@ -688,7 +689,6 @@
 
                     $('#generalResponse').html('<hr><br><h4>답변 <i class="bi bi-stars"></i></h4><p><br>' + formattedMessage + '<br><br></p>');
 
-                    // 기존 마커 & 인포윈도우 제거한 후 새로운 마커 추가
                     removeAllMarkers();
                     extractLocationsAndMarkOnMap(resultMessage);
                 } else {
@@ -702,7 +702,6 @@
     }
 
     function extractLocationsAndMarkOnMap(responseText) {
-        // 기존 마커 & 인포윈도우 제거
         removeAllMarkers();
 
         var locationPattern = /\*\*(.*?)\*\*/g;
@@ -716,15 +715,21 @@
         console.log("추출된 지역명:", locations);
 
         if (locations.length > 0) {
+            let searchCount = 0;
             locations.forEach(location => {
-                searchLocationOnMap(location);
+                searchLocationOnMap(location, () => {
+                    searchCount++;
+                    if (searchCount === locations.length) {
+                        fitMapToMarkers(); // 모든 마커 표시 후 지도 조정
+                    }
+                });
             });
         } else {
             console.error("추출된 지역이 없습니다.");
         }
     }
 
-    function searchLocationOnMap(locationName) {
+    function searchLocationOnMap(locationName, callback) {
         var geocoder = new kakao.maps.services.Geocoder();
         var places = new kakao.maps.services.Places();
 
@@ -732,6 +737,7 @@
             if (status === kakao.maps.services.Status.OK) {
                 var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
                 addMarkerAndInfo(coords, locationName);
+                if (callback) callback();
             } else {
                 console.warn("주소 검색 실패:", locationName, "키워드 검색 시도");
 
@@ -742,6 +748,7 @@
                     } else {
                         console.error("키워드 검색 실패:", locationName);
                     }
+                    if (callback) callback();
                 });
             }
         });
@@ -759,20 +766,30 @@
         });
 
         infowindow.open(map, marker);
-        map.setCenter(coords);
 
-        // 배열에 추가하여 나중에 삭제 가능하게 함
+        // 배열에 추가하여 지도 범위 조정에 사용
         markers.push(marker);
         infowindows.push(infowindow);
+        markerPositions.push(coords);
+    }
+
+    // 모든 마커를 포함하는 범위로 지도를 조정
+    function fitMapToMarkers() {
+        if (markerPositions.length === 0) return;
+
+        var bounds = new kakao.maps.LatLngBounds();
+        markerPositions.forEach(position => bounds.extend(position));
+        map.setBounds(bounds);
     }
 
     // 기존에 추가된 모든 마커 & 인포윈도우 제거
     function removeAllMarkers() {
-        markers.forEach(marker => marker.setMap(null));  // 지도에서 마커 제거
-        infowindows.forEach(infowindow => infowindow.close()); // 인포윈도우 닫기
+        markers.forEach(marker => marker.setMap(null));
+        infowindows.forEach(infowindow => infowindow.close());
 
-        markers = [];     // 마커 배열 초기화
-        infowindows = []; // 인포윈도우 배열 초기화
+        markers = [];
+        infowindows = [];
+        markerPositions = [];
     }
 
     // 사용자가 직접 입력한 질문을 제출할 때
@@ -781,7 +798,7 @@
 
         var query = $('#generalQuery').val(); // 사용자가 입력한 질문
         var hotelAddress = $('#hotelAddress').val(); // 주소 값
-        var modifiedQuery = extractRegionFromAddress(hotelAddress) + " " + query + "그리고 대답할때 강조표시는 정확한 건물명이나 가게명, 장소명인 경우에만 해줘"; // 주소에서 지역명만 추출 후 질문 추가
+        var modifiedQuery = extractRegionFromAddress(hotelAddress) + " " + query + " 그리고 대답할때 강조표시는 정확한 건물명이나 가게명, 장소명인 경우에만 해줘";
 
         sendQuery(modifiedQuery);
     });
@@ -790,23 +807,16 @@
     $('.queryButton').on('click', function() {
         var hotelAddress = $('#hotelAddress').val(); // 주소 값
         var queryType = $(this).data('query'); // 버튼에 설정된 query 값 (관광지 or 맛집)
-        var modifiedQuery = extractRegionFromAddress(hotelAddress) + " " + queryType + "그리고 대답할때 강조표시는 정확한 건물명이나 가게명, 장소명인 경우에만 해줘"; // 주소에서 지역명만 추출 후 선택한 질문 추가
+        var modifiedQuery = extractRegionFromAddress(hotelAddress) + " " + queryType + " 그리고 대답할때 강조표시는 정확한 건물명이나 가게명, 장소명인 경우에만 해줘";
 
         sendQuery(modifiedQuery);
     });
 
     // 주소에서 지역명만 추출하는 함수
     function extractRegionFromAddress(address) {
-        var regionPattern = /^[^\d]+/; // 주소에서 숫자를 제외한 부분만 추출 (지역명)
+        var regionPattern = /^[^\d]+/;
         var region = address.match(regionPattern) ? address.match(regionPattern)[0].trim() : '';
         return region;
-    }
-
-    function goToRoomDetail(button) {
-        let roomId = button.getAttribute("data-room-id");
-        if (roomId) {
-            window.location.href = `/room/${roomId}`;
-        }
     }
 
     function goToRoomDetail(button) {
