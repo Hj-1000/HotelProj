@@ -50,10 +50,10 @@
 - 상대 : N + State
 
 
-<a href="https://www.notion.so/17548799325c804b8284c4686e395148">
+<a target="https://www.notion.so/17548799325c804b8284c4686e395148">
   <h3>📃notion 바로가기</h3>
 </a>
 
-<a href="https://docs.google.com/spreadsheets/d/1r3FvPDK-OPlXQAsxBs167bzD5p96dRwbL9wv-OHvfYE/edit?gid=1115838130#gid=1115838130">
+<a target="https://docs.google.com/spreadsheets/d/1r3FvPDK-OPlXQAsxBs167bzD5p96dRwbL9wv-OHvfYE/edit?gid=1115838130#gid=1115838130">
   <h3>📆프로젝트 플래너 바로가기</h3>
 </a>
