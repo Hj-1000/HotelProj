@@ -504,10 +504,12 @@
                             <h4 style="margin-bottom: -24px; margin-left: 13px">&ensp;객실 리뷰</h4>
                             <span>
                             &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;(<span th:text="${hotelDTO.roomReviewCount}" class="roomReview">2,298</span>)&ensp;
-                            <i class="bi bi-star-fill" th:classappend="'rating-' + ${#numbers.formatDecimal(hotelDTO.hotelRating, 0, 0)}"></i>
-                            <span th:if="${hotelDTO.hotelRating != null and hotelDTO.hotelRating != ''}" th:text="${hotelDTO.hotelRating}+'점'" class="hotelRating">평점</span>
-                            <span th:if="${hotelDTO.hotelRating == null and hotelDTO.hotelRating == ''}" class="hotelRating">작성된 리뷰가 없습니다!</span>
-                        </span>
+                                <span th:if="${hotelDTO.hotelRating != null and hotelDTO.hotelRating != ''}" >
+                                    <i class="bi bi-star-fill" th:classappend="'rating-' + ${#numbers.formatDecimal(hotelDTO.hotelRating, 0, 0)}"></i>
+                                    <span th:text="${hotelDTO.hotelRating}+'점'" class="hotelRating">평점</span>
+                                </span>
+                                <span th:if="${hotelDTO.hotelRating == null and hotelDTO.hotelRating == ''}" class="hotelRating">작성된 리뷰가 없습니다!</span>
+                            </span>
                         </div>
                         <div style="text-align: right; margin-bottom: 15px; margin-top: -10px; margin-right: 15px; font-size: small">
                             <a th:href="@{/hotel/reviewAll(hotelId=${hotelDTO.hotelId})}" style="text-decoration: none; color: black;">

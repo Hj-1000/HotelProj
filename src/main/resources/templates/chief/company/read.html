@@ -194,68 +194,68 @@
 
                 <!-- 페이지네이션 -->
                 <!-- 관리자용 -->
-                <div th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="d-flex justify-content-center mt-4">
-                    <ul class="pagination">
-                        <!-- 처음 페이지 -->
-                        <li class="page-item" th:if="${currentPage > 0}">
-                            <a class="page-link" th:href="@{/admin/company/read(companyId=${companyDTO.companyId}, page=0)}">처음</a>
-                        </li>
+<!--                <div th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="d-flex justify-content-center mt-4">-->
+<!--                    <ul class="pagination">-->
+<!--                        &lt;!&ndash; 처음 페이지 &ndash;&gt;-->
+<!--                        <li class="page-item" th:if="${currentPage > 0}">-->
+<!--                            <a class="page-link" th:href="@{/admin/company/read(companyId=${companyDTO.companyId}, page=0)}">처음</a>-->
+<!--                        </li>-->
 
-                        <!-- 이전 페이지 -->
-                        <li class="page-item" th:if="${currentPage > 0}">
-                            <a class="page-link" th:href="@{/admin/company/read(companyId=${companyDTO.companyId}, page=${currentPage - 1})}">이전</a>
-                        </li>
+<!--                        &lt;!&ndash; 이전 페이지 &ndash;&gt;-->
+<!--                        <li class="page-item" th:if="${currentPage > 0}">-->
+<!--                            <a class="page-link" th:href="@{/admin/company/read(companyId=${companyDTO.companyId}, page=${currentPage - 1})}">이전</a>-->
+<!--                        </li>-->
 
-                        <!-- 페이지 번호 -->
-                        <th:block th:each="page : ${#numbers.sequence(startPage, endPage)}">
-                            <li class="page-item" th:classappend="${currentPage == page - 1} ? 'active'">
-                                <a class="page-link" th:href="@{/admin/company/read(companyId=${companyDTO.companyId}, page=${page - 1})}" th:text="${page}"></a>
-                            </li>
-                        </th:block>
+<!--                        &lt;!&ndash; 페이지 번호 &ndash;&gt;-->
+<!--                        <th:block th:each="page : ${#numbers.sequence(startPage, endPage)}">-->
+<!--                            <li class="page-item" th:classappend="${currentPage == page - 1} ? 'active'">-->
+<!--                                <a class="page-link" th:href="@{/admin/company/read(companyId=${companyDTO.companyId}, page=${page - 1})}" th:text="${page}"></a>-->
+<!--                            </li>-->
+<!--                        </th:block>-->
 
-                        <!-- 다음 페이지 -->
-                        <li class="page-item" th:if="${currentPage < lastPage - 1}">
-                            <a class="page-link" th:href="@{/admin/company/read(companyId=${companyDTO.companyId}, page=${currentPage + 1})}">다음</a>
-                        </li>
+<!--                        &lt;!&ndash; 다음 페이지 &ndash;&gt;-->
+<!--                        <li class="page-item" th:if="${currentPage < lastPage - 1}">-->
+<!--                            <a class="page-link" th:href="@{/admin/company/read(companyId=${companyDTO.companyId}, page=${currentPage + 1})}">다음</a>-->
+<!--                        </li>-->
 
-                        <!-- 마지막 페이지 -->
-                        <li class="page-item" th:if="${currentPage < lastPage - 1}">
-                            <a class="page-link" th:href="@{/admin/company/read(companyId=${companyDTO.companyId}, page=${lastPage - 1})}">마지막</a>
-                        </li>
-                    </ul>
-                </div>
+<!--                        &lt;!&ndash; 마지막 페이지 &ndash;&gt;-->
+<!--                        <li class="page-item" th:if="${currentPage < lastPage - 1}">-->
+<!--                            <a class="page-link" th:href="@{/admin/company/read(companyId=${companyDTO.companyId}, page=${lastPage - 1})}">마지막</a>-->
+<!--                        </li>-->
+<!--                    </ul>-->
+<!--                </div>-->
 
-                <!-- 호텔장용 -->
-                <div th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="d-flex justify-content-center mt-4">
-                    <ul class="pagination">
-                        <!-- 처음 페이지 -->
-                        <li class="page-item" th:if="${currentPage > 0}">
-                            <a class="page-link" th:href="@{/chief/company/read(companyId=${companyDTO.companyId}, page=0)}">처음</a>
-                        </li>
+<!--                &lt;!&ndash; 호텔장용 &ndash;&gt;-->
+<!--                <div th:if="${#authorization.expression('hasRole(''CHIEF'')')}" class="d-flex justify-content-center mt-4">-->
+<!--                    <ul class="pagination">-->
+<!--                        &lt;!&ndash; 처음 페이지 &ndash;&gt;-->
+<!--                        <li class="page-item" th:if="${currentPage > 0}">-->
+<!--                            <a class="page-link" th:href="@{/chief/company/read(companyId=${companyDTO.companyId}, page=0)}">처음</a>-->
+<!--                        </li>-->
 
-                        <!-- 이전 페이지 -->
-                        <li class="page-item" th:if="${currentPage > 0}">
-                            <a class="page-link" th:href="@{/chief/company/read(companyId=${companyDTO.companyId}, page=${currentPage - 1})}">이전</a>
-                        </li>
+<!--                        &lt;!&ndash; 이전 페이지 &ndash;&gt;-->
+<!--                        <li class="page-item" th:if="${currentPage > 0}">-->
+<!--                            <a class="page-link" th:href="@{/chief/company/read(companyId=${companyDTO.companyId}, page=${currentPage - 1})}">이전</a>-->
+<!--                        </li>-->
 
-                        <!-- 페이지 번호 -->
-                        <th:block th:each="page : ${#numbers.sequence(startPage, endPage)}">
-                            <li class="page-item" th:classappend="${currentPage == page - 1} ? 'active'">
-                                <a class="page-link" th:href="@{/chief/company/read(companyId=${companyDTO.companyId}, page=${page - 1})}" th:text="${page}"></a>
-                            </li>
-                        </th:block>
+<!--                        &lt;!&ndash; 페이지 번호 &ndash;&gt;-->
+<!--                        <th:block th:each="page : ${#numbers.sequence(startPage, endPage)}">-->
+<!--                            <li class="page-item" th:classappend="${currentPage == page - 1} ? 'active'">-->
+<!--                                <a class="page-link" th:href="@{/chief/company/read(companyId=${companyDTO.companyId}, page=${page - 1})}" th:text="${page}"></a>-->
+<!--                            </li>-->
+<!--                        </th:block>-->
 
-                        <!-- 다음 페이지 -->
-                        <li class="page-item" th:if="${currentPage < lastPage - 1}">
-                            <a class="page-link" th:href="@{/chief/company/read(companyId=${companyDTO.companyId}, page=${currentPage + 1})}">다음</a>
-                        </li>
+<!--                        &lt;!&ndash; 다음 페이지 &ndash;&gt;-->
+<!--                        <li class="page-item" th:if="${currentPage < lastPage - 1}">-->
+<!--                            <a class="page-link" th:href="@{/chief/company/read(companyId=${companyDTO.companyId}, page=${currentPage + 1})}">다음</a>-->
+<!--                        </li>-->
 
-                        <!-- 마지막 페이지 -->
-                        <li class="page-item" th:if="${currentPage < lastPage - 1}">
-                            <a class="page-link" th:href="@{/chief/company/read(companyId=${companyDTO.companyId}, page=${lastPage - 1})}">마지막</a>
-                        </li>
-                    </ul>
-                </div>
+<!--                        &lt;!&ndash; 마지막 페이지 &ndash;&gt;-->
+<!--                        <li class="page-item" th:if="${currentPage < lastPage - 1}">-->
+<!--                            <a class="page-link" th:href="@{/chief/company/read(companyId=${companyDTO.companyId}, page=${lastPage - 1})}">마지막</a>-->
+<!--                        </li>-->
+<!--                    </ul>-->
+<!--                </div>-->
 
 
             </div>
@@ -275,6 +275,7 @@
 
                 <div class="modal-body">
 
+<!--
                     <div th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
                         <form action="/admin/hotel/register" method="post" enctype="multipart/form-data">
 
@@ -285,7 +286,7 @@
                                 <input type="text" class="form-control" id="hotelName" name="hotelName" required>
                             </div>
                             <div class="mb-3">
-                                <!--<label for="hotelLocation" class="form-label">호텔지역:</label>-->
+                                &lt;!&ndash;<label for="hotelLocation" class="form-label">호텔지역:</label>&ndash;&gt;
                                 <input type="hidden" class="form-control" id="hotelLocation" name="hotelLocation" required>
                             </div>
                             <div class="mb-3 mt-3">
@@ -361,16 +362,16 @@
                                     <option value="23">23:00</option>
                                 </select>
                             </div>
-                            <!-- 새 이미지 업로드 및 미리보기 -->
+                            &lt;!&ndash; 새 이미지 업로드 및 미리보기 &ndash;&gt;
                             <div>
                                 <label for="newImageFiles">본사이미지:</label>
                                 <input type="file" id="newImageFiles" name="imageFiles" multiple accept="image/*" onchange="validateImage(event)" required>
                                 <small>PNG, JPG, GIF, BMP, JFIF, WEBP만 업로드 가능합니다. 최대 5장까지 선택할 수 있습니다.</small>
                             </div>
 
-                            <!-- 미리보기 이미지 표시 -->
+                            &lt;!&ndash; 미리보기 이미지 표시 &ndash;&gt;
                             <div id="imagePreviewContainer">
-                                <!-- 미리보기가 여기 나타날 것입니다 -->
+                                &lt;!&ndash; 미리보기가 여기 나타날 것입니다 &ndash;&gt;
                             </div>
 
                             <div style="text-align: right">
@@ -379,6 +380,7 @@
 
                         </form>
                     </div>
+-->
 
                     <div th:if="${#authorization.expression('hasRole(''CHIEF'')')}">
                         <form action="/chief/hotel/register" method="post" enctype="multipart/form-data">
