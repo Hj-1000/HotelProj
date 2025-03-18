@@ -15,7 +15,14 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <!-- Flatpickr 한국어 로케일 추가 -->
     <script src="https://npmcdn.com/flatpickr/dist/l10n/ko.js"></script>
+    <!-- kakao api -->
     <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
+
+    <!-- Google Fonts 불러오기 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400&family=Noto+Sans+KR:wght@400&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" th:href="@{/css/user.css}">
     <link rel="stylesheet" th:href="@{/css/detail.css}">
@@ -101,6 +108,9 @@
             <img th:if="${room.bannerImage != null && !room.bannerImage.isEmpty()}"
                  th:src="@{'/upload/' + ${room.bannerImage}}"
                  alt="객실 배너 이미지" class="room-banner-image">
+        </div>
+        <div class="banner-text">
+            <p th:text="${room.roomInfo} ?: '객실 정보가 없습니다.'"></p>
         </div>
     </section>
     <!-- 예약 정보 및 버튼 -->
@@ -287,6 +297,22 @@
     </button>
 
     <script>
+
+        /* 타이핑 함수 */
+        document.addEventListener("DOMContentLoaded", function () {
+            const textElement = document.querySelector(".room-banner .banner-text p");
+
+            if (!textElement) return;
+
+            // 텍스트의 길이만큼 steps() 계산
+            const textLength = textElement.textContent.length;
+            textElement.style.animation = `typing 2s steps(${textLength}, end) forwards, blink-caret 0.75s step-end infinite`;
+
+            // 타이핑 애니메이션이 끝난 후 커서 제거
+            setTimeout(() => {
+                textElement.classList.add("typed");
+            }, 2000);
+        });
 
         /* 리뷰 텍스트 최대글자 제한 함수*/
         document.addEventListener("DOMContentLoaded", function () {
