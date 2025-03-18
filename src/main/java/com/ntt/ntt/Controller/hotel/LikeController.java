@@ -47,41 +47,40 @@ public class LikeController {
     private final LikeRepository likeRepository;
     private final LikeHotelRepository likeHotelRepository;
 
-    //장바구니목록
+    //즐겨찾기 목록
     @Operation(summary = "사용자 호텔 즐겨찾기 목록", description = "호텔 즐겨찾기 목록 페이지로 이동한다.")
     @GetMapping("/list")
     public String likeList(Model model, Principal principal,
                            RedirectAttributes redirectAttributes,
-                           @RequestParam(defaultValue = "0") int page,  // 페이지 번호 (기본값: 0)
+                           @RequestParam(defaultValue = "0") int page,
                            @RequestParam(defaultValue = "6") int size)  {
         try {
             String email = principal.getName();
-            System.out.println("현재 로그인한 사용자 이메일: " + email); // 로그 추가
-
-            // Pageable 객체 생성 (페이지 번호와 페이지 크기)
             Pageable pageable = PageRequest.of(page, size);
 
-            // 페이징 처리된 좋아요 목록을 서비스에서 가져오기
             Page<LikeDTO> likeDTOPage = likeService.likeList(email, pageable);
+            int totalPages = likeDTOPage.getTotalPages();
 
-            System.out.println("likeDTO : " + likeDTOPage);
+            // 현재 요청한 페이지가 존재하지 않는다면 첫 페이지로 리다이렉트
+            if (page > 0 && page >= totalPages) {  // ❗️ 페이지가 없는 경우에만 리다이렉트
+                return "redirect:/like/list?page=" + (totalPages - 1);
+            }
 
-            // 모델에 페이징 처리된 데이터와 페이지 정보 추가
             model.addAttribute("likeDTO", likeDTOPage.getContent());
             model.addAttribute("currentPage", page);
-            model.addAttribute("totalPages", likeDTOPage.getTotalPages());
+            model.addAttribute("totalPages", totalPages);
             model.addAttribute("totalItems", likeDTOPage.getTotalElements());
             model.addAttribute("pageSize", size);
 
-            // 페이지 렌더링
-            return "myPage/like/list";
+            return "/myPage/like/list";
 
         } catch (Exception e) {
-            e.printStackTrace(); // 예외 출력 (서버 로그에서 확인 가능)
+            e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "좋아요 목록을 불러오는 중 오류가 발생했습니다. 다시 시도해주세요.");
-            return "redirect:/hotel/list";
+            return "redirect:/like/list";
         }
     }
+
 
 
 

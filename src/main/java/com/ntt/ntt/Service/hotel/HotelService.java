@@ -54,89 +54,60 @@ public class HotelService {
     private final HotelRepository hotelRepository;
 
 
-    //회원목록 불러오는
+    // 회원 목록 불러오기
     public List<MemberDTO> getAllManagers() {
-        // 1. 모든 manager 역할을 가진 회원 목록 조회
         List<Member> members = memberRepository.findByRole(Role.MANAGER);
-
-        // 2. 이미 hotel 테이블에 등록된 memberId 목록 가져오기
         List<Integer> hotelMembers = hotelRepository.findAll().stream()
-                .filter(hotel -> hotel.getMember() != null) // hotel에 member가 null이 아닌 경우만 처리
-                .map(hotel -> hotel.getMember().getMemberId()) // hotel에 해당하는 memberId 추출
+                .map(hotel -> hotel.getMember().getMemberId())
                 .collect(Collectors.toList());
 
-        // 3. hotel에 등록되지 않은 회원만 필터링
-        List<MemberDTO> memberDTOS = members.stream()
-                .filter(member -> !hotelMembers.contains(member.getMemberId())) // hotel에 없는 memberId만 필터링
+        return members.stream()
+                .filter(member -> !hotelMembers.contains(member.getMemberId()))
                 .map(a -> new MemberDTO(a.getMemberId(), a.getMemberEmail(), a.getMemberName()))
                 .collect(Collectors.toList());
-
-        return memberDTOS;
     }
 
-
-    //호텔 본사 전부(관리자용)
+    // 모든 회사 목록 불러오기
     public List<CompanyDTO> getAllCompany() {
-
-        // company 조회
-        List<Company> companies = companyRepository.findAll();
-
-        // Company -> CompanyDTO 변환
-        List<CompanyDTO> companyDTOS = companies.stream()
-                .map(a -> new CompanyDTO(a.getCompanyId(), a.getCompanyName()))
+        return companyRepository.findAll().stream()
+                .map(company -> new CompanyDTO(company.getCompanyId(), company.getCompanyName()))
                 .collect(Collectors.toList());
-
-        return companyDTOS;
     }
 
-    //자신것만 호텔 본사(호텔장)
+    // 현재 사용자가 소속된 회사 목록 불러오기
     public List<CompanyDTO> getMyCompany() {
-        // 현재 로그인한 회원의 memberEmail을 가져오기
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String memberEmail = authentication.getName(); // 현재 로그인한 회원의 이메일
+        String memberEmail = authentication.getName();
 
-        // 해당 이메일로 회원 정보 가져오기
-        Optional<Member> member = memberRepository.findByMemberEmail(memberEmail);
-        if (member == null) {
-            throw new RuntimeException("회원 정보를 찾을 수 없습니다.");
-        }
+        Member member = memberRepository.findByMemberEmail(memberEmail)
+                .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다."));
 
-        // 해당 회원의 memberId를 가져오기
-        Integer memberId = member.get().getMemberId();
-
-        // 해당 memberId와 일치하는 company만 조회
-        List<Company> companies = companyRepository.findByMember_MemberId(memberId);
-
-        // Company -> CompanyDTO 변환
-        List<CompanyDTO> companyDTOS = companies.stream()
-                .map(a -> new CompanyDTO(a.getCompanyId(), a.getCompanyName()))
+        return companyRepository.findByMember_MemberId(member.getMemberId()).stream()
+                .map(company -> new CompanyDTO(company.getCompanyId(), company.getCompanyName()))
                 .collect(Collectors.toList());
-
-        return companyDTOS;
     }
 
-
-    //등록
+    // 호텔 등록
+    @Transactional
     public void register(HotelDTO hotelDTO, List<MultipartFile> imageFiles, String memberEmail) {
-
-        // modelMapper가 null이 아닌지 확인
         if (modelMapper == null) {
             throw new IllegalStateException("ModelMapper가 초기화되지 않았습니다.");
         }
 
         Hotel hotel = modelMapper.map(hotelDTO, Hotel.class);
+        if (hotelDTO.getCompanyId() != null) {
+            Company company = companyRepository.findById(hotelDTO.getCompanyId())
+                    .orElseThrow(() -> new IllegalStateException("유효하지 않은 Company ID입니다."));
+            hotel.setCompany(company);
+        } else {
+            throw new IllegalStateException("Company 정보가 제공되지 않았습니다.");
+        }
 
-        // 1. Hotel 먼저 저장
         hotelRepository.save(hotel);
-        hotelRepository.flush(); // ✅ 즉시 DB 반영
+        hotelRepository.flush();
 
-        // 2. 저장된 호텔의 companyId 가져와 DTO에 반영
-        hotelDTO.setCompanyId(hotel.getCompany().getCompanyId()); // ✅ companyId 설정
-
-        // 3. imageFiles를 ImageService를 통해 저장
         imageService.registerHotelImage(hotel.getHotelId(), imageFiles);
     }
-
 
 
     //관리자용 호텔목록
