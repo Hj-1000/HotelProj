@@ -8,9 +8,11 @@
 
 /* 벨 아이콘 스타일 */
 #notification-replybell {
-    position: relative;
+    position: absolute;
     cursor: pointer;
     margin-right: 8px;
+    top: -7px;
+    right: -13px;
 }
 
 #notification-reply-count {
