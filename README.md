@@ -75,7 +75,7 @@
 ## 예약내역 페이지
 ![image](https://github.com/user-attachments/assets/ce151e23-9d70-4d9e-8f4b-1d1bff79c681)
 ## 메뉴주문 페이지
-![image](https://github.com/user-attachments/assets/a37baf9b-7443-4f7f-9f7e-6cf14c71affa)
+![image](https://github.com/user-attachments/assets/bee46cce-2b59-4f5c-87ee-99db28573796)
 ![image](https://github.com/user-attachments/assets/61f39258-b863-4093-8b42-1c0034275e34)
 ## 주문내역 페이지
 ![image](https://github.com/user-attachments/assets/73f2f3bd-a288-43fa-83d3-15fa6bceba4e)
