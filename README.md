@@ -47,7 +47,7 @@
 - 수정일 : modDate
 - 삭제유무 : DeleteYn
 - 상대 : N + State
-
+![Image](https://github.com/user-attachments/assets/0be425a3-6951-457e-a383-430f992385a8)
 
 <a target="https://www.notion.so/17548799325c804b8284c4686e395148">
   <h3>📃notion 바로가기</h3>
