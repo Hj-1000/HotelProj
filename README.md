@@ -56,8 +56,19 @@
 
 ---
 
-## 📸 주요 화면 캡처
+## 📃 Use Case
+![image](https://github.com/user-attachments/assets/a38d3c82-d047-490e-8c1a-fedb1709bdc3)
 
+---
+
+## 📊 ERD (Entity-Relationship Diagram)
+
+호텔 예약 시스템의 데이터 흐름과 관계를 시각적으로 보여주는 ERD입니다.
+![image](https://github.com/user-attachments/assets/da6e738e-3fc8-4f40-956b-bed051a610a2)
+
+---
+
+## 📸 주요 화면 캡처
 
 ## 관리자 페이지
 ![메인 페이지](https://github.com/user-attachments/assets/0be425a3-6951-457e-a383-430f992385a8)
