@@ -57,7 +57,7 @@
 ---
 
 ## 📃 Use Case
-![image](https://github.com/user-attachments/assets/a38d3c82-d047-490e-8c1a-fedb1709bdc3)
+![image](https://github.com/user-attachments/assets/c6997a07-f6f7-4296-b6ec-5ae5019cc4dc)
 
 ---
 
