@@ -59,10 +59,27 @@
 
 ## 📸 주요 화면 캡처
 
-### 메인 페이지
 
 ### 관리자 페이지
 ![메인 페이지](https://github.com/user-attachments/assets/0be425a3-6951-457e-a383-430f992385a8)
+## 관리자 카테고리 페이지
+![Image](https://github.com/user-attachments/assets/322e6d65-2c1c-4db9-b89e-f6a88259b9b7)
+## 관리자 메뉴 페이지
+![Image](https://github.com/user-attachments/assets/47c41946-3578-4645-885b-85abb2d4c518)
+## 관리자 주문관리 페이지
+![image](https://github.com/user-attachments/assets/d79a3f6f-8bc5-4ac8-95d9-fce017b2e9de)
+
+
+---
+### 메인 페이지
+![Image](https://github.com/user-attachments/assets/ab17daef-538d-4821-943a-a8039210ead7)
+## 예약내역 페이지
+![Image](https://github.com/user-attachments/assets/882b6206-f063-4d2d-b7a7-c4e44cfb9f0d)
+## 메뉴주문 페이지
+![Image](https://github.com/user-attachments/assets/84532fab-4947-4843-a2fb-d1de50df9017)
+![Image](https://github.com/user-attachments/assets/493e2141-36aa-4a71-a3bf-f247ddfc565b)
+
+## 주문내역 페이지
 
 
 
