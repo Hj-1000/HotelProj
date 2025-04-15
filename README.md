@@ -63,11 +63,10 @@
 ### 관리자 페이지
 ![메인 페이지](https://github.com/user-attachments/assets/0be425a3-6951-457e-a383-430f992385a8)
 ## 관리자 카테고리 페이지
-![Image](https://github.com/user-attachments/assets/322e6d65-2c1c-4db9-b89e-f6a88259b9b7)
+
 ## 관리자 메뉴 페이지
-![Image](https://github.com/user-attachments/assets/47c41946-3578-4645-885b-85abb2d4c518)
+
 ## 관리자 주문관리 페이지
-![image](https://github.com/user-attachments/assets/d79a3f6f-8bc5-4ac8-95d9-fce017b2e9de)
 
 
 ---
