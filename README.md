@@ -63,24 +63,22 @@
 ### 관리자 페이지
 ![메인 페이지](https://github.com/user-attachments/assets/0be425a3-6951-457e-a383-430f992385a8)
 ## 관리자 카테고리 페이지
-
+![image](https://github.com/user-attachments/assets/d1e63184-924c-4650-99a2-e05f312dc15a)
 ## 관리자 메뉴 페이지
-
+![image](https://github.com/user-attachments/assets/a0d49569-f287-424a-a92b-9eeca5db1c4d)
 ## 관리자 주문관리 페이지
-
+![image](https://github.com/user-attachments/assets/243aa5ff-769e-41a4-8c1f-f07466cbe039)
 
 ---
 ### 메인 페이지
 ![Image](https://github.com/user-attachments/assets/ab17daef-538d-4821-943a-a8039210ead7)
 ## 예약내역 페이지
-![Image](https://github.com/user-attachments/assets/882b6206-f063-4d2d-b7a7-c4e44cfb9f0d)
+![image](https://github.com/user-attachments/assets/ce151e23-9d70-4d9e-8f4b-1d1bff79c681)
 ## 메뉴주문 페이지
-![Image](https://github.com/user-attachments/assets/84532fab-4947-4843-a2fb-d1de50df9017)
-![Image](https://github.com/user-attachments/assets/493e2141-36aa-4a71-a3bf-f247ddfc565b)
-
+![image](https://github.com/user-attachments/assets/a37baf9b-7443-4f7f-9f7e-6cf14c71affa)
+![image](https://github.com/user-attachments/assets/61f39258-b863-4093-8b42-1c0034275e34)
 ## 주문내역 페이지
-
-
+![image](https://github.com/user-attachments/assets/73f2f3bd-a288-43fa-83d3-15fa6bceba4e)
 
 ---
 
