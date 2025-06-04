@@ -97,7 +97,7 @@
 
 - 📃 [Notion 문서 바로가기](https://www.notion.so/17548799325c804b8284c4686e395148)
 - 📆 [Google 스프레드시트 플래너](https://docs.google.com/spreadsheets/d/1r3FvPDK-OPlXQAsxBs167bzD5p96dRwbL9wv-OHvfYE/edit?gid=1115838130#gid=1115838130)
-- 📚 [Google 프로젝트 PPT](https://docs.google.com/presentation/d/1zFS6IlYforI7kEE0o22-nPSm9FEz_reO1tdZld-p-uc/edit?slide=id.p128#slide=id.p128)
+- 📚 [Google 프로젝트 PPT](https://docs.google.com/presentation/d/1UdS_9pI1XQidO8xsEqadEh59IppYh32zw6we36LVYSI/edit?slide=id.p3#slide=id.p3)
 
 ---
 
